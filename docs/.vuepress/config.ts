@@ -27,7 +27,7 @@ export default defineUserConfig<DefaultThemeOptions>({
 
   themeConfig: {
     docsDir: 'docs',
-    repo: 'https://github.com/wenhongjie/fe-dk',
+    repo: 'https://github.com/cabinet-fe/fe-dk',
     logo: '/images/logo.png',
     search: true,
     // algolia: {},
