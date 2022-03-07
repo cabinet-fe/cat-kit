@@ -152,6 +152,25 @@ last([1, 2, 3])
 // return 3
 ```
 
+### union
+合并多个数组，并去重（简单类型）
+
+```ts
+union([1, 2], [2, 3], [3, 4])
+//return [1, 2, 3, 4]
+```
+
+### unionBy
+合并多个数组，并按照指定字段进行去重
+
+```ts
+unionBy('name',
+        [{ name: '张三', score: 78 },{ name: '李四', score: 65 }],
+        [{ name: '王五', score: 82 },{ name: '李四', score: 65 }]
+      )
+//return [{ name: '张三', score: 78 },{ name: '李四', score: 65 },{ name: '王五', score: 82 }]
+```
+
 ## object操作
 提供常用的对象操作
 
