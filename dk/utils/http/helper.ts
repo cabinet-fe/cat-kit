@@ -1,3 +1,5 @@
+import { oneOf } from '../data/common'
+import { getDataType, isObj } from '../data/data-type'
 import { HTTPCodeNumber } from './shared'
 
 let errMsgsMap: Record<number, any> = {
@@ -90,4 +92,42 @@ export function getUrl(api: string, params: Record<string, string | number> | st
     return api + '&' + paramString
   }
   return api + '?' + paramString
+}
+
+/**
+ * 转化data
+ * @param data
+ * @param headers
+ * @returns
+ */
+export function transformData(data: any, headers: Record<string, any>) {
+  if (data === undefined || data === null) {
+    return data
+  }
+
+  if (ArrayBuffer.isView(data)) {
+    return data.buffer
+  }
+  if (isObj(data)) {
+    if (!headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json;charset=utf-8'
+    }
+    return JSON.stringify(data)
+  }
+  if (data instanceof URLSearchParams) {
+    if (!headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json;charset=utf-8'
+    }
+    return data.toString()
+  }
+  // 如果是FormData让浏览器决定其Content-Type
+  // TODO 这里的流判断实现后面放到data-type中去实现
+  if (
+    oneOf(getDataType(data), ['blob', 'formdata', 'file', 'arraybuffer']) ||
+    data.pipe instanceof Function
+  ) {
+    delete headers['Content-Type']
+    return data
+  }
+  return data
 }

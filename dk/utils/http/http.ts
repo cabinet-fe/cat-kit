@@ -1,5 +1,5 @@
-import {  isFormData, isObj, isUndef, path } from '../..'
-import { getResponse, getUrl, HttpResponse } from './helper'
+import { isFormData, isUndef, path } from '../..'
+import { getResponse, getUrl, HttpResponse, transformData } from './helper'
 
 import {
   RequestConfig,
@@ -154,6 +154,7 @@ export default class Http {
       this.xhrSet.add(xhr)
 
       let config = this.mergeConfig(requestConf)
+      // 这里的data已经被被转换
       if (this.before) {
         config = await this.before(config as Required<RequestConfig>, xhr)
       }
@@ -161,7 +162,9 @@ export default class Http {
       this.setXHRProps(xhr, config)
       this.setXHRHandlers(xhr, resolve, reject)
 
-      const { method, url, params, headers, data, baseUrl } = config
+      const { method, url, params, headers, baseUrl } = config
+
+      const data = transformData(config.data, headers)
 
       xhr.open(method, url.startsWith('http') ? url : getUrl(path.join(baseUrl, url), params), true)
 
@@ -283,31 +286,11 @@ export default class Http {
       ...options.headers
     }
 
-    let data = options.data
-
-    // 如果是FormData让浏览器决定其Content-Type
-    if (isFormData(data)) {
-      delete headers['Content-Type']
-    }
-    if (ArrayBuffer.isView(data)) {
-      data = data.buffer
-    } else if (isObj(data)) {
-      data = JSON.stringify(data)
-      if (!headers['Content-Type']) {
-        headers['Content-Type'] = 'application/json;charset=utf-8'
-      }
-    } else if (data instanceof URLSearchParams) {
-      data = data.toString()
-      if (!headers['Content-Type']) {
-        headers['Content-Type'] = 'application/json;charset=utf-8'
-      }
-    }
-
     return {
       url: options.url,
       method: options.method || 'GET',
       baseUrl: options.baseUrl || _config.baseUrl,
-      data,
+      data: options.data,
       headers,
       withCredentials: options.withCredentials ?? _config.withCredentials,
       params: options.params ?? '',

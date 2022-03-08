@@ -13,6 +13,7 @@ type DataType =
   | 'symbol'
   | 'promise'
   | 'null'
+  | 'arraybuffer'
 
 /**
  * 获取值对应的类型字符串
