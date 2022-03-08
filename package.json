@@ -1,6 +1,6 @@
 {
   "name": "fe-dk",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "前端开发工具包",
   "scripts": {
     "test": "jest",
