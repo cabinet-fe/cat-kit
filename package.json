@@ -16,7 +16,6 @@
     "type": "git",
     "url": "git+https://github.com/cabinet-fe/fe-dk.git"
   },
-  "type": "module",
   "types": "./types/fe-dk.d.ts",
   "keywords": [
     "前端开发工具包",
