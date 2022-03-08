@@ -1,4 +1,4 @@
-declare type DataType = 'object' | 'array' | 'string' | 'number' | 'blob' | 'date' | 'undefined' | 'function' | 'boolean' | 'file' | 'formdata' | 'symbol' | 'promise' | 'null';
+declare type DataType = 'object' | 'array' | 'string' | 'number' | 'blob' | 'date' | 'undefined' | 'function' | 'boolean' | 'file' | 'formdata' | 'symbol' | 'promise' | 'null' | 'arraybuffer';
 /**
  * 获取值对应的类型字符串
  * @param value 值
@@ -304,9 +304,7 @@ interface RequestConfig {
 }
 declare type HTTPBeforeHandler = (
 /** 请求的配置 */
-conf: Required<RequestConfig>, 
-/** 请求实例 */
-xhr: XMLHttpRequest) => Required<RequestConfig> | Promise<Required<RequestConfig>>;
+conf: Required<RequestConfig>) => Required<RequestConfig> | false | Promise<Required<RequestConfig> | false>;
 declare type HTTPAfterHandler = (
 /** 响应值 */
 response: HttpResponse, 
@@ -404,6 +402,17 @@ declare const _default: {
  * @param arr 数组
  */
 declare function last<T>(arr: T[]): T;
+/**
+ * 合并多个数组并去重
+ * @param arrs 任意多个数组
+*/
+declare function union<T>(...arrs: T[][]): T[];
+/**
+ * 合并多个对象数组，并指定去重字段
+ * @param key 按照这个字段进行去重
+ * @param arrs 任意多个数组
+*/
+declare function unionBy<T>(key: string, ...arrs: T[]): T[];
 
 /**
  * 返回一个值的空状态
@@ -572,4 +581,4 @@ declare const n: N;
  */
 declare function compressImageFile(file: File, max: number): Promise<File>;
 
-export { CacheKey, ExtractCacheKey, Http, WebCache, cacheKey, compressImageFile, date, deepCopy, equal, getChainValue, getDataType, isArray, isArrayBuffer, isBlob, isBol, isDate, isEmpty, isFile, isFormData, isFunction, isInt16Array, isInt32Array, isInt8Array, isNull, isNumber, isObj, isPromise, isString, isSymbol, isUint16Array, isUint32Array, isUint8Array, isUndef, last, merge, n, objEach, objMap, omit, oneOf, _default as path, pick };
+export { CacheKey, ExtractCacheKey, Http, WebCache, cacheKey, compressImageFile, date, deepCopy, equal, getChainValue, getDataType, isArray, isArrayBuffer, isBlob, isBol, isDate, isEmpty, isFile, isFormData, isFunction, isInt16Array, isInt32Array, isInt8Array, isNull, isNumber, isObj, isPromise, isString, isSymbol, isUint16Array, isUint32Array, isUint8Array, isUndef, last, merge, n, objEach, objMap, omit, oneOf, _default as path, pick, union, unionBy };

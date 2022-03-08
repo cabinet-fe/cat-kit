@@ -1,13 +1,13 @@
 {
   "name": "fe-dk",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "前端开发工具包",
   "scripts": {
     "commit-lint": "node scripts/verifyCommit.js",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "dk:build": "rollup -c",
-    "release": "jest && npm publish --registry https://registry.npmjs.org",
+    "release": "jest && pnpm dk:build && npm publish --registry https://registry.npmjs.org",
     "prepare": "husky install",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git commit -m ''"
   },
