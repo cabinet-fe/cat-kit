@@ -1,4 +1,4 @@
-import { HttpResponse } from "./helper"
+import { HttpResponse } from './helper'
 
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD'
 
@@ -19,10 +19,8 @@ export interface RequestConfig {
 
 export type HTTPBeforeHandler = (
   /** 请求的配置 */
-  conf: Required<RequestConfig> ,
-  /** 请求实例 */
-  xhr: XMLHttpRequest
-) => Required<RequestConfig> | Promise<Required<RequestConfig>>
+  conf: Required<RequestConfig>
+) => Required<RequestConfig> | false | Promise<Required<RequestConfig> | false>
 
 export type HTTPAfterHandler = (
   /** 响应值 */
@@ -31,10 +29,9 @@ export type HTTPAfterHandler = (
   reject: () => void
 ) => HttpResponse
 
-
 export interface HttpOptions {
   baseUrl?: string
-  withCredentials?:  boolean
+  withCredentials?: boolean
   timeout?: number
   headers?: Record<string, string>
   before?: HTTPBeforeHandler

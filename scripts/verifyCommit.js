@@ -1,5 +1,4 @@
 const chalk = require('chalk')
-const { spawn } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 
@@ -13,12 +12,4 @@ const commitRE =
 if (!commitRE.test(msg)) {
   console.error(chalk.red('Git提交格式错误'))
   process.exit(1)
-}
-
-const testRE = /\[ci\]/i
-
-if (testRE.test(msg)) {
-  spawn('pnpm', ['test'], {
-    stdio: 'inherit'
-  })
 }

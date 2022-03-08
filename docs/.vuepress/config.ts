@@ -25,6 +25,8 @@ export default defineUserConfig<DefaultThemeOptions>({
 
   plugins: [['@vuepress/plugin-search', {}]],
 
+  port: 2333,
+
   themeConfig: {
     docsDir: 'docs',
     repo: 'https://github.com/cabinet-fe/fe-dk',

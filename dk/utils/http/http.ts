@@ -1,7 +1,7 @@
-import { isFormData, isUndef, path } from '../..'
+import { isUndef, path } from '../..'
 import { getResponse, getUrl, HttpResponse, transformData } from './helper'
 
-import {
+import type {
   RequestConfig,
   HttpOptions,
   HTTPBeforeHandler,
@@ -9,6 +9,8 @@ import {
   XHRProps,
   HTTPAfterHandler
 } from './type'
+
+export * from './type'
 
 export default class Http {
   private _config = {
@@ -150,20 +152,20 @@ export default class Http {
    */
   request<T = any>(requestConf: RequestConfig) {
     return new Promise<HttpResponse<T>>(async (resolve, reject) => {
-      const xhr = new XMLHttpRequest()
-      this.xhrSet.add(xhr)
-
       let config = this.mergeConfig(requestConf)
       // 这里的data已经被被转换
       if (this.before) {
-        config = await this.before(config as Required<RequestConfig>, xhr)
+        let ret = await this.before(config as Required<RequestConfig>)
+        if (!ret) return
+        config = ret
       }
 
+      const xhr = new XMLHttpRequest()
+      this.xhrSet.add(xhr)
       this.setXHRProps(xhr, config)
       this.setXHRHandlers(xhr, resolve, reject)
 
       const { method, url, params, headers, baseUrl } = config
-
       const data = transformData(config.data, headers)
 
       xhr.open(method, url.startsWith('http') ? url : getUrl(path.join(baseUrl, url), params), true)
@@ -176,6 +178,7 @@ export default class Http {
           xhr.setRequestHeader(key, headers[key])
         }
       }
+
       xhr.send(data)
     })
   }
