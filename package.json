@@ -1,6 +1,6 @@
 {
   "name": "fe-dk",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "前端开发工具包",
   "scripts": {
     "commit-lint": "node scripts/verifyCommit.js",

@@ -172,8 +172,8 @@ export default class Http {
 
       // 发送请求头
       for (const key in headers) {
-        if (data === undefined) {
-          key.toLowerCase() === 'content-type' && delete headers[key]
+        if (data === undefined && key.toLowerCase() === 'content-type') {
+          delete headers[key]
         } else {
           xhr.setRequestHeader(key, headers[key])
         }
