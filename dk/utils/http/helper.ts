@@ -1,5 +1,5 @@
 import { oneOf } from '../data/common'
-import { getDataType, isObj } from '../data/data-type'
+import { getDataType, isArray, isObj } from '../data/data-type'
 import { HTTPCodeNumber } from './shared'
 
 let errMsgsMap: Record<number, any> = {
@@ -108,7 +108,7 @@ export function transformData(data: any, headers: Record<string, any>) {
   if (ArrayBuffer.isView(data)) {
     return data.buffer
   }
-  if (isObj(data)) {
+  if (isObj(data) || isArray(data)) {
     if (!headers['Content-Type']) {
       headers['Content-Type'] = 'application/json;charset=utf-8'
     }
