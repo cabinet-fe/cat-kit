@@ -38,6 +38,10 @@ const navbar = [
       {
         text: '数据库',
         link: '/learn/db/'
+      },
+      {
+        text: 'TypeScript',
+        link: '/learn/typescript/'
       }
     ]
   }

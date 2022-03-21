@@ -51,6 +51,10 @@ const sidebar = {
     '/learn/term/basic.md',
     '/learn/term/oauth2.md',
     '/learn/term/workflow.md'
+  ],
+  '/learn/typescript/': [
+    '/learn/typescript/declare.md',
+    '/learn/typescript/config.md',
   ]
 }
 
