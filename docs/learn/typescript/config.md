@@ -49,3 +49,51 @@ tsconfig.base.json
   "files": ["src/main.ts"]
 }
 ```
+
+### 编译选项 compilerOptions
+
+```json
+{
+  // 指定输出的js的版本
+  "target": "es6",
+  // 指定输出文件的模块标准, 常用的就是UMD, CommonJs, ESxxx
+  "module": "ESNext",
+  // 是否允许导入js文件
+  "allowJs": false,
+  // 是否允许合并成默认导入, 例如
+  // import * as Space from 'xx' -> import Space from 'xx'
+  "allowSyntheticDefaultImports": false,
+  // 指定基础路径
+  "baseUrl": ".",
+  // 指定路径的别名, 比如指定@作为src目录的别名
+  "paths": {
+    "foo":  ["node_modules/foo"]
+  },
+  // 严格模式
+  "strict": true,
+  // 严格模式之bind调用, call调用. apply调用
+  "strictBindCallApply": true,
+  // 严格模式之不能有隐式的this, 即强制声明this
+  "noImplicitThis": true,
+  // 严格模式之不能有隐式的any, 即强制为any类型声明注解
+  "noImplicitAny": false,
+  // 使用的类型库, 指定你需要使用的类型库
+  "lib": [],
+  // 编译报错时是否继续输出, 建议false因为很多迁移项目会有问题
+  "noEmitOnError": false,
+
+  // 模块解析 默认为classic, 一般指定为node的解析方式 支持node, nodenext, classic
+  "moduleResolution": "node",
+  // 指定编译后的输出目录, 不指定则在源文件同目录下输出
+  "outDir": "",
+  "lib": [],
+  // 是否删除文件中的注释
+  "removeComments": false,
+  // 是否始终以严格模式检查每个模块，并且在编译后的结果中加入"use strict"
+  "alwaysStrict": false,
+  // 是否生成声明文件, 如果当前项目是个类库或者模块建议指定为true
+  "declaration": false,
+  // 指定额外的类型
+  "types": ["vite"]
+}
+```
