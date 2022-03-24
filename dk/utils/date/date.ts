@@ -1,4 +1,4 @@
-import { isDate } from '../..'
+import { isDate } from "../data/data-type"
 
 type DateKey = 'timestamp' | 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'
 

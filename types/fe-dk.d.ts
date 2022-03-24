@@ -281,7 +281,8 @@ declare class HttpResponse<T = any> {
     data: T;
     message: string;
     headers: Record<string, any>;
-    constructor(code: HTTPCodeNumber, data: any, message: string, headers?: Record<string, any>);
+    response: any;
+    constructor(code: HTTPCodeNumber, data: any, message: string, headers?: Record<string, any>, response?: any);
     /** 是否为某个状态码 */
     is(code: HTTPCodeNumber): boolean;
     getHeaders(): Record<string, any>;

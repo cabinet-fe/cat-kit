@@ -9,7 +9,8 @@ export default [
     input,
     output: {
       file: 'dist/fe-dk.js',
-      format: 'es'
+      format: 'es',
+      sourcemap: true
     },
     plugins: [
       esBuild({ minify: true })
@@ -19,7 +20,8 @@ export default [
     input,
     output: {
       file: 'dist/fe-dk.common.js',
-      format: 'commonjs'
+      format: 'commonjs',
+      sourcemap: true
     },
     plugins: [
       esBuild({ minify: true })

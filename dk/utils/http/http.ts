@@ -1,4 +1,5 @@
-import { isUndef, path } from '../..'
+import { isUndef } from '../data/data-type'
+import path from '../path/path'
 import { getResponse, getUrl, HttpResponse, transformData } from './helper'
 
 import type {
@@ -75,7 +76,11 @@ export default class Http {
         response = this.after(response, doReject) || response
       }
 
-      if ((response.code >= 400 && response.code <= 600) || responseMethod === 'reject') {
+      if (response.code >= 400 && response.code <= 600) {
+        doReject()
+      }
+
+      if (responseMethod === 'reject') {
         reject(response)
       } else {
         resolve(response)
