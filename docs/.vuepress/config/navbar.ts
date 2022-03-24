@@ -19,29 +19,30 @@ const navbar = [
         text: '设计模式',
         link: '/lab/pattern/'
       },
-      {
-        text: '其他',
-        link: '/lab/others/'
-      }
+
     ]
   },
 
   {
-    text: '学习',
-    link: '/learn/',
+    text: '分享',
+    link: '/shared/',
     children: [
       {
         text: '术语',
-        link: '/learn/term/'
+        link: '/shared/term/'
 
       },
       {
         text: '数据库',
-        link: '/learn/db/'
+        link: '/shared/db/'
       },
       {
         text: 'TypeScript',
-        link: '/learn/typescript/'
+        link: '/shared/typescript/'
+      },
+      {
+        text: '其他',
+        link: '/shared/others/'
       }
     ]
   }

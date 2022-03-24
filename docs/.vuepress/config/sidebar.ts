@@ -17,9 +17,7 @@ const sidebar = {
     '/lab/algorithm/search.md'
   ],
 
-  '/lab/others/': [
-    '/lab/others/README.md'
-  ],
+
   '/utils/': [
     {
       text: '工具',
@@ -39,23 +37,26 @@ const sidebar = {
       ]
     }
   ],
-  '/learn/db/': [
-    '/learn/db/README.md',
-    '/learn/db/mysql.md',
-    '/learn/db/mongodb.md',
-    '/learn/db/redis.md',
-    '/learn/db/sqlite.md'
+  '/shared/db/': [
+    '/shared/db/README.md',
+    '/shared/db/mysql.md',
+    '/shared/db/mongodb.md',
+    '/shared/db/redis.md',
+    '/shared/db/sqlite.md'
   ],
-  '/learn/term/': [
-    '/learn/term/README.md',
-    '/learn/term/basic.md',
-    '/learn/term/oauth2.md',
-    '/learn/term/workflow.md'
+  '/shared/term/': [
+    '/shared/term/README.md',
+    '/shared/term/basic.md',
+    '/shared/term/oauth2.md',
+    '/shared/term/workflow.md'
   ],
-  '/learn/typescript/': [
-    '/learn/typescript/declare.md',
-    '/learn/typescript/config.md',
-  ]
+  '/shared/typescript/': [
+    '/shared/typescript/declare.md',
+    '/shared/typescript/config.md',
+  ],
+  '/shared/others/': [
+    '/shared/others/README.md'
+  ],
 }
 
 export default sidebar
