@@ -27,20 +27,19 @@ export class HttpResponse<T = any> {
 
   headers: Record<string, any> = {}
 
-  response: any = null
+  response: any
 
   constructor(
     code: HTTPCodeNumber,
     data: any,
     message: string,
-    headers?: Record<string, any>,
-    response?: any
+    headers?: Record<string, any>
   ) {
     this.code = code
     this.data = data?.data || data
     this.message = message
     this.headers = headers || {}
-    this.response = response || null
+    this.response = data
   }
 
   /** 是否为某个状态码 */
@@ -79,7 +78,7 @@ export function getResponse(xhr: XMLHttpRequest | ResponseConf) {
     let message = data.message || errMsgsMap[code] || statusText
 
     let headers = parseResponseHeaders(xhr.getAllResponseHeaders())
-    return new HttpResponse(code, data, message, headers, xhr.response)
+    return new HttpResponse(code, data, message, headers)
   }
   const { code, data, message, headers } = xhr
   return new HttpResponse(code, data, message, headers)
