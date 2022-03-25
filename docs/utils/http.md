@@ -111,15 +111,21 @@ const http = new Http({
 
 ### after
 
-after 在请求完成后调用, 该函数有两个参数, 第一个参数是响应对象, 第二个参数指定是否以报错的形式抛出响应值, 看以下的例子
+after 在请求完成后调用, 该函数有两个参数, 第一个参数是响应对象, 第二个参数指定以何种形式抛出响应值, 看以下的例子
+默认地, 以Http标准将400到600之间的状态码作为错误抛出
 
 ```ts
+const customErrorCode = new Set<number>()
+
 export const authHttp = new Http({
-  after(res, rejectIt) {
-    if (res.code >= 400 && res.code < 600) {
-      // 以报错的形式返回
-      rejectIt()
+  after(res, returnBy) {
+    if (customErrorCode.has(res.code)) {
+      returnBy('error')
+      message.error(res.message)
+    } else {
+      returnBy('normal')
     }
+
     if (res.is(401)) {
       router.replace('/login')
     }

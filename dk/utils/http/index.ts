@@ -8,7 +8,8 @@ import type {
   HTTPBeforeHandler,
   AliasRequestConfig,
   XHRProps,
-  HTTPAfterHandler
+  HTTPAfterHandler,
+  ResponseReturnType
 } from './type'
 
 export * from './type'
@@ -64,9 +65,9 @@ export class Http {
     if (!xhr) return
 
     // 响应状态
-    let responseMethod = 'resolve' as 'resolve' | 'reject'
-    let doReject = () => {
-      responseMethod = 'reject'
+    let returnType: ResponseReturnType = 'normal'
+    let returnBy = (type: ResponseReturnType) => {
+      returnType = type
     }
 
     let onloadend = () => {
@@ -74,18 +75,18 @@ export class Http {
 
       let response = getResponse(xhr)
 
-      if (this.after) {
-        response = this.after(response, doReject) || response
-      }
-
       if (response.code >= 400 && response.code <= 600) {
-        doReject()
+        returnBy('error')
       }
 
-      if (responseMethod === 'reject') {
-        reject(response)
-      } else {
+      if (this.after) {
+        response = this.after(response, returnBy, returnType) || response
+      }
+
+      if (returnType === 'normal') {
         resolve(response)
+      } else {
+        reject(response)
       }
 
       xhr = null

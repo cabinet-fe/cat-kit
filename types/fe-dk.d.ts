@@ -305,11 +305,14 @@ interface RequestConfig {
 declare type HTTPBeforeHandler = (
 /** 请求的配置 */
 conf: Required<RequestConfig>) => Required<RequestConfig> | false | Promise<Required<RequestConfig> | false>;
+declare type ResponseReturnType = 'normal' | 'error';
 declare type HTTPAfterHandler = (
 /** 响应值 */
 response: HttpResponse, 
-/** 指定值以reject形式抛出 */
-reject: () => void) => HttpResponse;
+/** 指定值以何种形式返回, 'normal' | 'error' */
+returnBy: (type: ResponseReturnType) => void, 
+/** 当前返回值抛出的类型 */
+returnType: ResponseReturnType) => HttpResponse;
 interface HttpOptions {
     baseUrl?: string;
     withCredentials?: boolean;
@@ -586,4 +589,4 @@ declare const n: N;
  */
 declare function compressImageFile(file: File, max: number): Promise<File>;
 
-export { AliasRequestConfig, CacheKey, Dater, ExtractCacheKey, HTTPAfterHandler, HTTPBeforeHandler, HTTPMethod, Http, HttpOptions, HttpResponse, RequestConfig, WebCache, XHRProps, cacheKey, compressImageFile, date, deepCopy, equal, getChainValue, getDataType, isArray, isArrayBuffer, isBlob, isBol, isDate, isEmpty, isFile, isFormData, isFunction, isInt16Array, isInt32Array, isInt8Array, isNull, isNumber, isObj, isPromise, isString, isSymbol, isUint16Array, isUint32Array, isUint8Array, isUndef, last, merge, n, objEach, objMap, omit, oneOf, _default as path, pick, union, unionBy };
+export { AliasRequestConfig, CacheKey, Dater, ExtractCacheKey, HTTPAfterHandler, HTTPBeforeHandler, HTTPMethod, Http, HttpOptions, HttpResponse, RequestConfig, ResponseReturnType, WebCache, XHRProps, cacheKey, compressImageFile, date, deepCopy, equal, getChainValue, getDataType, isArray, isArrayBuffer, isBlob, isBol, isDate, isEmpty, isFile, isFormData, isFunction, isInt16Array, isInt32Array, isInt8Array, isNull, isNumber, isObj, isPromise, isString, isSymbol, isUint16Array, isUint32Array, isUint8Array, isUndef, last, merge, n, objEach, objMap, omit, oneOf, _default as path, pick, union, unionBy };

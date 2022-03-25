@@ -22,11 +22,15 @@ export type HTTPBeforeHandler = (
   conf: Required<RequestConfig>
 ) => Required<RequestConfig> | false | Promise<Required<RequestConfig> | false>
 
+export type ResponseReturnType = 'normal' | 'error'
+
 export type HTTPAfterHandler = (
   /** 响应值 */
   response: HttpResponse,
-  /** 指定值以reject形式抛出 */
-  reject: () => void
+  /** 指定值以何种形式返回, 'normal' | 'error' */
+  returnBy: (type: ResponseReturnType) => void,
+  /** 当前返回值抛出的类型 */
+  returnType: ResponseReturnType
 ) => HttpResponse
 
 export interface HttpOptions {
