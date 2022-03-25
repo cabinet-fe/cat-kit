@@ -281,7 +281,6 @@ declare class HttpResponse<T = any> {
     data: T;
     message: string;
     headers: Record<string, any>;
-    response: any;
     constructor(code: HTTPCodeNumber, data: any, message: string, headers?: Record<string, any>);
     /** 是否为某个状态码 */
     is(code: HTTPCodeNumber): boolean;
@@ -320,6 +319,11 @@ interface HttpOptions {
     after?: HTTPAfterHandler;
 }
 declare type AliasRequestConfig = Omit<RequestConfig, 'url' | 'method' | 'data'>;
+declare type XHRProps = {
+    responseType?: XMLHttpRequestResponseType;
+    timeout: number;
+    withCredentials: boolean;
+};
 
 declare class Http {
     private _config;
@@ -582,4 +586,4 @@ declare const n: N;
  */
 declare function compressImageFile(file: File, max: number): Promise<File>;
 
-export { CacheKey, ExtractCacheKey, Http, WebCache, cacheKey, compressImageFile, date, deepCopy, equal, getChainValue, getDataType, isArray, isArrayBuffer, isBlob, isBol, isDate, isEmpty, isFile, isFormData, isFunction, isInt16Array, isInt32Array, isInt8Array, isNull, isNumber, isObj, isPromise, isString, isSymbol, isUint16Array, isUint32Array, isUint8Array, isUndef, last, merge, n, objEach, objMap, omit, oneOf, _default as path, pick, union, unionBy };
+export { AliasRequestConfig, CacheKey, Dater, ExtractCacheKey, HTTPAfterHandler, HTTPBeforeHandler, HTTPMethod, Http, HttpOptions, HttpResponse, RequestConfig, WebCache, XHRProps, cacheKey, compressImageFile, date, deepCopy, equal, getChainValue, getDataType, isArray, isArrayBuffer, isBlob, isBol, isDate, isEmpty, isFile, isFormData, isFunction, isInt16Array, isInt32Array, isInt8Array, isNull, isNumber, isObj, isPromise, isString, isSymbol, isUint16Array, isUint32Array, isUint8Array, isUndef, last, merge, n, objEach, objMap, omit, oneOf, _default as path, pick, union, unionBy };

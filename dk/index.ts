@@ -1,8 +1,8 @@
 export * from './utils/data/data-type'
 
-export * from './utils/cache/cache'
+export * from './utils/cache'
 
-export { default as Http } from './utils/http/http'
+export * from './utils/http'
 
 export { default as path } from './utils/path/path'
 

@@ -12,9 +12,7 @@ export default [
       format: 'es',
       sourcemap: true
     },
-    plugins: [
-      esBuild({ minify: true })
-    ]
+    plugins: [esBuild({ minify: true })]
   }),
   defineConfig({
     input,
@@ -23,9 +21,7 @@ export default [
       format: 'commonjs',
       sourcemap: true
     },
-    plugins: [
-      esBuild({ minify: true })
-    ]
+    plugins: [esBuild({ minify: true })]
   }),
   defineConfig({
     input: 'dk/index.ts',

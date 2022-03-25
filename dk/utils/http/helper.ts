@@ -27,8 +27,6 @@ export class HttpResponse<T = any> {
 
   headers: Record<string, any> = {}
 
-  response: any
-
   constructor(
     code: HTTPCodeNumber,
     data: any,
@@ -36,10 +34,9 @@ export class HttpResponse<T = any> {
     headers?: Record<string, any>
   ) {
     this.code = code
-    this.data = data?.data || data
+    this.data = data
     this.message = message
     this.headers = headers || {}
-    this.response = data
   }
 
   /** 是否为某个状态码 */

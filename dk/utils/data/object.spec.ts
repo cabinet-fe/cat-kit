@@ -19,7 +19,7 @@ describe('对象操作方法测试', () => {
       }
     })
 
-    expect(originObject.school === obj.school).toBeFalsy()
+    expect(originObject.school === obj.school).toBe(true)
   })
 
   it('omit方法', () => {
@@ -30,7 +30,7 @@ describe('对象操作方法测试', () => {
         address: '北京市'
       }
     })
-    expect(originObject.school === obj.school).toBeFalsy()
+    expect(originObject.school === obj.school).toBe(true)
   })
 
   it('objEach方法', () => {

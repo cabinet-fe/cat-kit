@@ -1,4 +1,4 @@
-import Http from './http'
+import { Http } from './index'
 
 describe('http测试', () => {
   const http = new Http({

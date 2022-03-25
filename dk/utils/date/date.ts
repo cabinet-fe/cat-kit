@@ -179,3 +179,5 @@ date.use = Dater.use
 date.getMatchers = Dater.getMatchers
 
 date.setMatcher = Dater.setMatcher
+
+export type { Dater }

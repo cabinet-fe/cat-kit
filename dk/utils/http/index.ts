@@ -13,7 +13,9 @@ import type {
 
 export * from './type'
 
-export default class Http {
+export { type HttpResponse } from './helper'
+
+export class Http {
   private _config = {
     headers: {} as Record<string, string>,
     baseUrl: '',
