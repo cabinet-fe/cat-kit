@@ -1,6 +1,6 @@
 import { isUndef } from '../data/data-type'
 import path from '../path/path'
-import { getResponse, getUrl, HttpResponse, transformData } from './helper'
+import { getResponse, getUrl, type HttpResponse, transformData } from './helper'
 
 import type {
   RequestConfig,
@@ -28,7 +28,8 @@ export class Http {
   private after: null | HTTPAfterHandler = null
 
   constructor(options: HttpOptions) {
-    const { before, after, timeout, baseUrl, headers, withCredentials } = options
+    const { before, after, timeout, baseUrl, headers, withCredentials } =
+      options
     if (before) {
       this.before = before
     }
@@ -59,6 +60,7 @@ export class Http {
 
   private setXHRHandlers(
     xhr: XMLHttpRequest | null,
+    config: RequestConfig,
     resolve: (value: any) => void,
     reject: (value: any) => void
   ) {
@@ -70,24 +72,24 @@ export class Http {
       returnType = type
     }
 
-    let onloadend = () => {
-      if (!xhr) return
-
-      let response = getResponse(xhr)
-
+    let handleResponse = (response: HttpResponse) => {
       if (response.code >= 400 && response.code <= 600) {
         returnBy('error')
       }
-
       if (this.after) {
         response = this.after(response, returnBy, returnType) || response
       }
-
       if (returnType === 'normal') {
         resolve(response)
       } else {
         reject(response)
       }
+    }
+
+    let onloadend = () => {
+      if (!xhr) return
+
+      handleResponse(getResponse(xhr))
 
       xhr = null
     }
@@ -107,7 +109,7 @@ export class Http {
     xhr.onabort = () => {
       if (!xhr) return
 
-      reject(
+      handleResponse(
         getResponse({
           code: 400,
           data: null,
@@ -117,23 +119,29 @@ export class Http {
 
       xhr = null
     }
-    xhr.onerror = err => {
+
+    xhr.onerror = (err) => {
       if (!xhr) return
 
-      reject(getResponse(xhr))
+      handleResponse(getResponse(xhr))
 
       xhr = null
     }
     xhr.onload = () => {}
 
     // 上传下载进度事件
-    xhr.onprogress = e => {}
-    xhr.upload.onprogress = e => {}
+    xhr.onprogress = (e) => {
+      config.onProgress?.(e)
+    }
+    // 上传进度
+    xhr.upload.onprogress = (e) => {
+      config.onUploadProgress?.(e)
+    }
 
-    xhr.ontimeout = err => {
+    xhr.ontimeout = (err) => {
       if (!xhr) return
 
-      reject(
+      handleResponse(
         getResponse({
           code: 408,
           data: null,
@@ -164,19 +172,23 @@ export class Http {
       // 这里的data已经被被转换
       if (this.before) {
         let ret = await this.before(config as Required<RequestConfig>)
-        if (!ret) return
+        if (ret === false) return
         config = ret
       }
 
       const xhr = new XMLHttpRequest()
       this.xhrSet.add(xhr)
       this.setXHRProps(xhr, config)
-      this.setXHRHandlers(xhr, resolve, reject)
+      this.setXHRHandlers(xhr, config, resolve, reject)
 
       const { method, url, params, headers, baseUrl } = config
       const data = transformData(config.data, headers)
 
-      xhr.open(method, url.startsWith('http') ? url : getUrl(path.join(baseUrl, url), params), true)
+      xhr.open(
+        method,
+        url.startsWith('http') ? url : getUrl(path.join(baseUrl, url), params),
+        true
+      )
 
       // 发送请求头
       for (const key in headers) {
@@ -280,7 +292,7 @@ export class Http {
    * 一旦调用此方法当前所有的正在请求的实例都会被终止
    */
   abort() {
-    this.xhrSet.forEach(xhr => xhr.abort())
+    this.xhrSet.forEach((xhr) => xhr.abort())
     this.xhrSet.clear()
   }
 
@@ -306,7 +318,8 @@ export class Http {
       withCredentials: options.withCredentials ?? _config.withCredentials,
       params: options.params ?? '',
       timeout: options.timeout ?? _config.timeout,
-      onProgress: options.onProgress ?? null,
+      onProgress: options.onProgress ?? undefined,
+      onUploadProgress: options.onUploadProgress ?? undefined,
       responseType: options.responseType ?? undefined
     }
   }
