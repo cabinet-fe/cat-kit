@@ -404,7 +404,7 @@ declare class Http {
 }
 
 declare const _default: {
-    join(...args: string[]): string;
+    join(firstPath: string, ...args: string[]): string;
 };
 
 /**
