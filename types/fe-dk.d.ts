@@ -299,8 +299,10 @@ interface RequestConfig {
     responseType?: XMLHttpRequestResponseType;
     /** 是否携带cookie */
     withCredentials?: boolean;
-    /** 请求过程 */
-    onProgress?: null | ((e: ProgressEvent<XMLHttpRequestEventTarget>) => void);
+    /** 下载进度 */
+    onProgress?: (e: ProgressEvent<EventTarget>) => void;
+    /** 上传进度 */
+    onUploadProgress?: (e: ProgressEvent<EventTarget>) => void;
 }
 declare type HTTPBeforeHandler = (
 /** 请求的配置 */

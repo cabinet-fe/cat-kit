@@ -81,7 +81,12 @@ export function getResponse(xhr: XMLHttpRequest | ResponseConf) {
   return new HttpResponse(code, data, message, headers)
 }
 
-/** 获取请求地址 */
+/**
+ * 获取请求地址
+ * @param api api
+ * @param params 参数
+ * @returns 
+ */
 export function getUrl(api: string, params: Record<string, string | number> | string) {
   let paramString =
     typeof params === 'string'
