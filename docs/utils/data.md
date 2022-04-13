@@ -227,6 +227,9 @@ import { n } from 'fe-dk'
 n(1234.5678).format('money')
 //return 1,234.5678
 
+n(1234.5678).format('money', 5)
+//return 1,234.56780
+
 n(1234.5678).format('cn-money')
 //return 壹仟贰佰叁拾肆元伍角陆分柒毫捌厘
 ```
