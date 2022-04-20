@@ -207,6 +207,27 @@ objEach({ a: 1, b: 2 }, (v, k) => console.log(`${k}: ${v}`))
 // log b: 2
 ```
 
+### extend
+对象继承
+
+```ts
+extend({ name: '张三', age: 10 }, { name: '李四', age: 21 }, { name: '王五' })
+// return { name: '王五', age: 21 }
+```
+
+### 包装器
+对象包装器，使用会更加地符合直觉, 所有的对象操作，
+在对象包装器中都有对应的实现。
+
+```ts
+import { obj } from 'fe-dk'
+
+obj({ name: '张三', age: 10 }).pick(['name'])
+// return { name: '张三' }
+obj({ name: '李四', age: 20 }).omit(['name'])
+// return { age: 20 }
+```
+
 ## 数字操作
 数字操作通常用来恢复精度, 转化不同的使用方式(比如货币, 使用货币时会被转化为字符串, 并用分隔符分割千分位)
 
