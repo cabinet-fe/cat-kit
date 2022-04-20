@@ -59,19 +59,17 @@ export function extend<S extends Record<string, any>>(
   source: S,
   ...targets: Record<string, any>[]
 ) {
-  let ret = { ...source }
-
   for (const key in source) {
     let i = targets.length
     while (--i >= 0) {
       let v = targets[i][key]
       if (v !== undefined && v !== null) {
-        ret[key] = v
+        source[key] = v
         break
       }
     }
   }
-  return ret
+  return source
 }
 
 /**
@@ -132,7 +130,8 @@ class Obj<O extends Record<string, any>, K extends keyof O> {
    * @returns
    */
   extend(...targets: Record<string, any>[]) {
-    return extend(this._source, ...targets)
+    extend(this._source, ...targets)
+    return this
   }
 }
 
