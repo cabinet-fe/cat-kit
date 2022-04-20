@@ -523,7 +523,7 @@ declare class Obj<O extends Record<string, any>, K extends keyof O> {
      * @param targets 被继承的目标对象
      * @returns
      */
-    extend(...targets: Record<string, any>[]): O;
+    extend(...targets: Record<string, any>[]): this;
 }
 declare function obj<O extends Record<string, any>>(o: O): Obj<O, keyof O>;
 
