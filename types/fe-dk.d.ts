@@ -479,12 +479,53 @@ declare function pick<T extends Record<string, any>, K extends keyof T>(target: 
  */
 declare function objMap<O, K extends keyof O, R>(obj: O, mapper: (val: O[K], key: K) => R): Record<K, R>;
 /**
+ * 对象继承
+ * @param source 源对象
+ * @param targets 被继承的目标对象
+ */
+declare function extend<S extends Record<string, any>>(source: S, ...targets: Record<string, any>[]): S;
+/**
  * 对象循环
  * @param obj 目标对象
  * @param fn 循环中调用的函数
  * @returns
  */
 declare function objEach<O, K extends keyof O>(obj: O, fn: (val: O[K], key: K) => void): void;
+declare class Obj<O extends Record<string, any>, K extends keyof O> {
+    private _source;
+    constructor(_source: O);
+    /**
+     * 获取某些属性的值
+     * @param pickKeys 选择的对象的键的数组
+     * @returns
+     */
+    pick(pickKeys: K[]): Pick<O, K>;
+    /**
+     * 循环
+     * @param fn 循环中调用的函数
+     * @returns
+     */
+    each(fn: (val: O[K], key: K) => void): this;
+    /**
+     * 排除一个对象的某些键和值
+     * @param omitKeys 排除的对象的键的数组
+     * @returns
+     */
+    omit(omitKeys: K[]): Omit<O, K>;
+    /**
+     * 对象映射
+     * @param mapper 映射函数
+     * @returns
+     */
+    map<R>(mapper: (val: O[K], key: K) => R): Record<K, R>;
+    /**
+     * 对象继承
+     * @param targets 被继承的目标对象
+     * @returns
+     */
+    extend(...targets: Record<string, any>[]): this;
+}
+declare function obj<O extends Record<string, any>>(o: O): Obj<O, keyof O>;
 
 declare class Dater {
     constructor(date: number | string | Date | Dater);
@@ -563,8 +604,9 @@ declare class Num {
     /**
      * 将数字格式化
      * @param type 格式化类型
+     * @param decimal 小数位数
      */
-    format(type: FormatType): string;
+    format(type: FormatType, decimal?: number): string;
     /**
      * 指定数字最大保留几位小数点
      * @param n 位数
@@ -591,4 +633,4 @@ declare const n: N;
  */
 declare function compressImageFile(file: File, max: number): Promise<File>;
 
-export { AliasRequestConfig, CacheKey, Dater, ExtractCacheKey, HTTPAfterHandler, HTTPBeforeHandler, HTTPMethod, Http, HttpOptions, HttpResponse, RequestConfig, ResponseReturnType, WebCache, XHRProps, cacheKey, compressImageFile, date, deepCopy, equal, getChainValue, getDataType, isArray, isArrayBuffer, isBlob, isBol, isDate, isEmpty, isFile, isFormData, isFunction, isInt16Array, isInt32Array, isInt8Array, isNull, isNumber, isObj, isPromise, isString, isSymbol, isUint16Array, isUint32Array, isUint8Array, isUndef, last, merge, n, objEach, objMap, omit, oneOf, _default as path, pick, union, unionBy };
+export { AliasRequestConfig, CacheKey, Dater, ExtractCacheKey, HTTPAfterHandler, HTTPBeforeHandler, HTTPMethod, Http, HttpOptions, HttpResponse, RequestConfig, ResponseReturnType, WebCache, XHRProps, cacheKey, compressImageFile, date, deepCopy, equal, extend, getChainValue, getDataType, isArray, isArrayBuffer, isBlob, isBol, isDate, isEmpty, isFile, isFormData, isFunction, isInt16Array, isInt32Array, isInt8Array, isNull, isNumber, isObj, isPromise, isString, isSymbol, isUint16Array, isUint32Array, isUint8Array, isUndef, last, merge, n, obj, objEach, objMap, omit, oneOf, _default as path, pick, union, unionBy };

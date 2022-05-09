@@ -7,9 +7,9 @@ class Num {
     maximumFractionDigits: 2
   })
 
-  private money(money: number) {
+  private money(money: number, decimal?: number) {
     if (!money) return '0'
-    const [intPart, decPart] = String(money).split('.')
+    let [intPart, decPart = ''] = String(money).split('.')
     const len = intPart.length - 1
     let arr: string[] = []
     intPart
@@ -22,7 +22,12 @@ class Num {
         }
       })
     let result = arr.reverse().join('')
-    if (decPart) result = `${result}.${decPart}`
+    if(decimal) {
+      decPart = decPart?.substring(0, decimal)
+      result = `${result}.${decPart.padEnd(decimal, '0')}`
+    }else {
+      decPart ? result = `${result}.${decPart}` : void 0
+    }
     return result
   }
 
@@ -77,9 +82,10 @@ class Num {
   /**
    * 将数字格式化
    * @param type 格式化类型
+   * @param decimal 小数位数
    */
-  format(type: FormatType) {
-    return this[type](this.v)
+  format(type: FormatType, decimal?: number) {
+    return this[type](this.v, decimal)
   }
 
   /**
