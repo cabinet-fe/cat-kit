@@ -262,12 +262,14 @@ export class Http {
   /**
    * 用于对资源进行删除
    * @param url 请求url
+   * @param data 请求数据
    * @param options 请求选项
    */
-  delete<T>(url: string, options?: AliasRequestConfig) {
+  delete<T>(url: string, data: any, options?: AliasRequestConfig) {
     return this.request<T>({
       url,
       method: 'DELETE',
+      data,
       ...options
     })
   }
