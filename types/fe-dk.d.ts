@@ -375,7 +375,7 @@ declare class Http {
      * @param data 请求数据
      * @param options 请求选项
      */
-    delete<T>(url: string, data: any, options?: AliasRequestConfig): Promise<HttpResponse<T>>;
+    delete<T>(url: string, data?: any, options?: AliasRequestConfig): Promise<HttpResponse<T>>;
     /**
      * 用于对资源进行部分修改
      * @param url 请求url
