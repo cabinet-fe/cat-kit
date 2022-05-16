@@ -265,7 +265,7 @@ export class Http {
    * @param data 请求数据
    * @param options 请求选项
    */
-  delete<T>(url: string, data: any, options?: AliasRequestConfig) {
+  delete<T>(url: string, data?: any, options?: AliasRequestConfig) {
     return this.request<T>({
       url,
       method: 'DELETE',
