@@ -335,7 +335,8 @@ declare class Http {
     private before;
     private after;
     constructor(options: HttpOptions);
-    private xhrSet;
+    private xhrMap;
+    private deleteXhr;
     private setXHRHandlers;
     private setXHRProps;
     /**
@@ -387,7 +388,7 @@ declare class Http {
      * 终止请求
      * 一旦调用此方法当前所有的正在请求的实例都会被终止
      */
-    abort(): void;
+    abort(matcher?: (config: RequestConfig) => boolean): void;
     /**
      * 融合请求参数和默认参数
      * @param options 请求参数
@@ -402,6 +403,11 @@ declare class Http {
         timeout: number;
         withCredentials: boolean;
     };
+    /** 获取当前正在上传的xhr请求 */
+    getRequestList(): {
+        conf: RequestConfig;
+        xhr: XMLHttpRequest;
+    }[];
 }
 
 declare const _default: {

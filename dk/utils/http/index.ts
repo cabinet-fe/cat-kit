@@ -28,8 +28,7 @@ export class Http {
   private after: null | HTTPAfterHandler = null
 
   constructor(options: HttpOptions) {
-    const { before, after, timeout, baseUrl, headers, withCredentials } =
-      options
+    const { before, after, timeout, baseUrl, headers, withCredentials } = options
     if (before) {
       this.before = before
     }
@@ -56,7 +55,11 @@ export class Http {
     }
   }
 
-  private xhrSet: Set<XMLHttpRequest> = new Set()
+  private xhrMap: Map<RequestConfig, XMLHttpRequest> = new Map()
+
+  private deleteXhr(config: RequestConfig) {
+    this.xhrMap.delete(config)
+  }
 
   private setXHRHandlers(
     xhr: XMLHttpRequest | null,
@@ -84,11 +87,11 @@ export class Http {
       } else {
         reject(response)
       }
+      this.deleteXhr(config)
     }
 
     let onloadend = () => {
       if (!xhr) return
-
       handleResponse(getResponse(xhr))
 
       xhr = null
@@ -120,25 +123,24 @@ export class Http {
       xhr = null
     }
 
-    xhr.onerror = (err) => {
+    xhr.onerror = err => {
       if (!xhr) return
 
       handleResponse(getResponse(xhr))
-
       xhr = null
     }
     xhr.onload = () => {}
 
     // 上传下载进度事件
-    xhr.onprogress = (e) => {
+    xhr.onprogress = e => {
       config.onProgress?.(e)
     }
     // 上传进度
-    xhr.upload.onprogress = (e) => {
+    xhr.upload.onprogress = e => {
       config.onUploadProgress?.(e)
     }
 
-    xhr.ontimeout = (err) => {
+    xhr.ontimeout = err => {
       if (!xhr) return
 
       handleResponse(
@@ -148,7 +150,6 @@ export class Http {
           message: '请求超时'
         })
       )
-
       xhr = null
     }
   }
@@ -177,18 +178,15 @@ export class Http {
       }
 
       const xhr = new XMLHttpRequest()
-      this.xhrSet.add(xhr)
+      this.xhrMap.set(config, xhr)
+
       this.setXHRProps(xhr, config)
       this.setXHRHandlers(xhr, config, resolve, reject)
 
       const { method, url, params, headers, baseUrl } = config
       const data = transformData(config.data, headers)
 
-      xhr.open(
-        method,
-        url.startsWith('http') ? url : getUrl(path.join(baseUrl, url), params),
-        true
-      )
+      xhr.open(method, url.startsWith('http') ? url : getUrl(path.join(baseUrl, url), params), true)
 
       // 发送请求头
       for (const key in headers) {
@@ -290,12 +288,19 @@ export class Http {
   }
 
   /**
-   * 终止请求
-   * 一旦调用此方法当前所有的正在请求的实例都会被终止
+   * 终止请求, 你可以传入终止条件来过滤哪些请求应该被终止
+   * @param matcher 终止当前请求的条件
+   * @returns
    */
-  abort() {
-    this.xhrSet.forEach((xhr) => xhr.abort())
-    this.xhrSet.clear()
+  abort(matcher?: (config: RequestConfig) => boolean) {
+    if (!matcher) {
+      return this.xhrMap.forEach(xhr => xhr.abort())
+    }
+    this.xhrMap.forEach((xhr, conf) => {
+      if (matcher(conf)) {
+        xhr.abort()
+      }
+    })
   }
 
   /**
@@ -331,5 +336,22 @@ export class Http {
    */
   getDefaultConfig() {
     return this._config
+  }
+
+  /** 获取当前正在上传的xhr请求 */
+  getRequestList() {
+    let ret: Array<{
+      conf: RequestConfig
+      xhr: XMLHttpRequest
+    }> = []
+
+    this.xhrMap.forEach((xhr, conf) => {
+      ret.push({
+        conf,
+        xhr
+      })
+    })
+
+    return ret
   }
 }
