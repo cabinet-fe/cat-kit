@@ -303,6 +303,8 @@ interface RequestConfig {
     onProgress?: (e: ProgressEvent<EventTarget>) => void;
     /** 上传进度 */
     onUploadProgress?: (e: ProgressEvent<EventTarget>) => void;
+    /** 上传后 */
+    after?: HTTPAfterHandler;
 }
 declare type HTTPBeforeHandler = (
 /** 请求的配置 */
@@ -385,8 +387,9 @@ declare class Http {
      */
     patch<T>(url: string, data?: any, options?: AliasRequestConfig): Promise<HttpResponse<T>>;
     /**
-     * 终止请求
-     * 一旦调用此方法当前所有的正在请求的实例都会被终止
+     * 终止请求, 你可以传入终止条件来过滤哪些请求应该被终止
+     * @param matcher 终止当前请求的条件
+     * @returns
      */
     abort(matcher?: (config: RequestConfig) => boolean): void;
     /**

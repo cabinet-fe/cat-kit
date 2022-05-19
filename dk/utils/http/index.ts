@@ -79,7 +79,10 @@ export class Http {
       if (response.code >= 400 && response.code <= 600) {
         returnBy('error')
       }
-      if (this.after) {
+      // 请求经来的
+      if (config.after) {
+        response = config.after(response, returnBy, returnType) || response
+      } else if (this.after) {
         response = this.after(response, returnBy, returnType) || response
       }
       if (returnType === 'normal') {
@@ -327,7 +330,7 @@ export class Http {
       timeout: options.timeout ?? _config.timeout,
       onProgress: options.onProgress ?? undefined,
       onUploadProgress: options.onUploadProgress ?? undefined,
-      responseType: options.responseType ?? undefined
+      responseType: options.responseType ?? undefined,
     }
   }
 

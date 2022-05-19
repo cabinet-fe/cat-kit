@@ -17,6 +17,8 @@ export interface RequestConfig {
   onProgress?: (e: ProgressEvent<EventTarget>) => void
   /** 上传进度 */
   onUploadProgress?: (e: ProgressEvent<EventTarget>) => void
+  /** 上传后 */
+  after?: HTTPAfterHandler
 }
 
 export type HTTPBeforeHandler = (
