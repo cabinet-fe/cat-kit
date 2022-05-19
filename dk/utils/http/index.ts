@@ -331,6 +331,7 @@ export class Http {
       onProgress: options.onProgress ?? undefined,
       onUploadProgress: options.onUploadProgress ?? undefined,
       responseType: options.responseType ?? undefined,
+      after: options.after
     }
   }
 
