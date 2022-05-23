@@ -48,6 +48,7 @@ const sidebar = {
     '/shared/term/README.md',
     '/shared/term/basic.md',
     '/shared/term/oauth2.md',
+    '/shared/term/restful.md',
     '/shared/term/workflow.md'
   ],
   '/shared/typescript/': [

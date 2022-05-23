@@ -40,6 +40,7 @@ const navbar = [
         text: 'TypeScript',
         link: '/shared/typescript/'
       },
+
       {
         text: '其他',
         link: '/shared/others/'

@@ -4,7 +4,12 @@ title: REST API
 
 # REST API
 
-## 让URL描述对资源的读写
-> GET /sources/:id
-> POST /sources
-> PUT /sources/:id
+
+## 示例
+
+> 获取某个资源
+> GET /resource/:id
+
+> 新增一个资源
+> POST /resource
+> body JSON
