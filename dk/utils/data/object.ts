@@ -111,7 +111,7 @@ class Obj<O extends Record<string, any>, K extends keyof O> {
    * @param omitKeys 排除的对象的键的数组
    * @returns
    */
-  omit(omitKeys: K[]): Omit<O, K> {
+  omit<T extends K[]>(omitKeys: T): Omit<O, T[number]> {
     return omit(this._source, omitKeys)
   }
 
@@ -138,3 +138,4 @@ class Obj<O extends Record<string, any>, K extends keyof O> {
 export function obj<O extends Record<string, any>>(o: O) {
   return new Obj(o)
 }
+

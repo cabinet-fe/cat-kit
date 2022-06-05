@@ -521,7 +521,7 @@ declare class Obj<O extends Record<string, any>, K extends keyof O> {
      * @param omitKeys 排除的对象的键的数组
      * @returns
      */
-    omit(omitKeys: K[]): Omit<O, K>;
+    omit<T extends K[]>(omitKeys: T): Omit<O, T[number]>;
     /**
      * 对象映射
      * @param mapper 映射函数
