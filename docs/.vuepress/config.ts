@@ -1,14 +1,15 @@
-import { defineUserConfig, DefaultThemeOptions } from 'vuepress'
+import { viteBundler, defaultTheme } from 'vuepress'
+import { searchPlugin } from '@vuepress/plugin-search'
 import navbar from './config/navbar'
 import sidebar from './config/sidebar'
 import { version } from '../../package.json'
 
-export default defineUserConfig<DefaultThemeOptions>({
+export default {
   lang: 'zh-CN',
   title: `fe-dk v${version}`,
   description: '前端开发工具包',
 
-  bundler: '@vuepress/vite',
+  bundler: viteBundler(),
 
   base: '/fe-dk/',
   head: [
@@ -23,15 +24,16 @@ export default defineUserConfig<DefaultThemeOptions>({
     ]
   ],
 
-  plugins: [['@vuepress/plugin-search', {}]],
+  plugins: [searchPlugin({})],
 
   port: 2333,
 
-  themeConfig: {
+  themeConfig: defaultTheme({
     docsDir: 'docs',
     repo: 'https://github.com/cabinet-fe/fe-dk',
     logo: '/images/logo.png',
-    search: true,
+    // search: true,
+
     // algolia: {},
 
     notFound: [
@@ -48,5 +50,5 @@ export default defineUserConfig<DefaultThemeOptions>({
     toggleSidebar: '切换侧边栏',
     navbar,
     sidebar
-  }
-})
+  })
+}
