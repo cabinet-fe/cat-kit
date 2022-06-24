@@ -1,6 +1,6 @@
 const sidebar = {
   '/lab/data-structure/': [
-    '/lab/data-structure/README.md',
+    '/lab/data-structure/index.md',
     '/lab/data-structure/array.md',
     '/lab/data-structure/queue.md',
     '/lab/data-structure/stack.md',
@@ -12,7 +12,7 @@ const sidebar = {
   ],
 
   '/lab/algorithm/': [
-    '/lab/algorithm/README.md',
+    '/lab/algorithm/index.md',
     '/lab/algorithm/sort.md',
     '/lab/algorithm/search.md'
   ],
@@ -38,14 +38,14 @@ const sidebar = {
     }
   ],
   '/shared/db/': [
-    '/shared/db/README.md',
+    '/shared/db/index.md',
     '/shared/db/mysql.md',
     '/shared/db/mongodb.md',
     '/shared/db/redis.md',
     '/shared/db/sqlite.md'
   ],
   '/shared/term/': [
-    '/shared/term/README.md',
+    '/shared/term/index.md',
     '/shared/term/basic.md',
     '/shared/term/oauth2.md',
     '/shared/term/restful.md',
@@ -56,7 +56,7 @@ const sidebar = {
     '/shared/typescript/config.md',
   ],
   '/shared/others/': [
-    '/shared/others/README.md'
+    '/shared/others/index.md'
   ],
 }
 

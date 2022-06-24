@@ -28,13 +28,10 @@ export default {
 
   port: 2333,
 
-  themeConfig: defaultTheme({
+  theme: defaultTheme({
     docsDir: 'docs',
     repo: 'https://github.com/cabinet-fe/fe-dk',
     logo: '/images/logo.png',
-    // search: true,
-
-    // algolia: {},
 
     notFound: [
       '这里什么都没有',
