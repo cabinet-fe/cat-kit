@@ -44,7 +44,7 @@ export default defineUserConfig<DefaultThemeOptions>({
     lastUpdatedText: '上次更新于',
     contributorsText: '贡献者',
     editLink: false,
-    toggleDarkMode: '切换深色模式',
+    toggleColorMode: '切换颜色模式',
     toggleSidebar: '切换侧边栏',
     navbar,
     sidebar
