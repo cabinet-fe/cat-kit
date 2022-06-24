@@ -643,4 +643,20 @@ declare const n: N;
  */
 declare function compressImageFile(file: File, max: number): Promise<File>;
 
-export { AliasRequestConfig, CacheKey, Dater, ExtractCacheKey, HTTPAfterHandler, HTTPBeforeHandler, HTTPMethod, Http, HttpOptions, HttpResponse, RequestConfig, ResponseReturnType, WebCache, XHRProps, cacheKey, compressImageFile, date, deepCopy, equal, extend, getChainValue, getDataType, isArray, isArrayBuffer, isBlob, isBol, isDate, isEmpty, isFile, isFormData, isFunction, isInt16Array, isInt32Array, isInt8Array, isNull, isNumber, isObj, isPromise, isString, isSymbol, isUint16Array, isUint32Array, isUint8Array, isUndef, last, merge, n, obj, objEach, objMap, omit, oneOf, _default as path, pick, union, unionBy };
+/**
+ * 防抖
+ * @param fn 要调用的目标函数
+ * @param delay 延迟时间
+ * @param immediate 是否立即调用一次
+ * @returns
+ */
+declare function debounce<T extends any[]>(fn: (...args: T) => void, delay?: number, immediate?: boolean): (this: any, ...args: T) => void;
+/**
+ * 节流
+ * @param fn 要调用的目标函数
+ * @param delay 间隔时间
+ * @returns
+ */
+declare function throttle<T extends any[]>(fn: (...args: T) => void, delay?: number): (this: any, ...args: T) => void;
+
+export { AliasRequestConfig, CacheKey, Dater, ExtractCacheKey, HTTPAfterHandler, HTTPBeforeHandler, HTTPMethod, Http, HttpOptions, HttpResponse, RequestConfig, ResponseReturnType, WebCache, XHRProps, cacheKey, compressImageFile, date, debounce, deepCopy, equal, extend, getChainValue, getDataType, isArray, isArrayBuffer, isBlob, isBol, isDate, isEmpty, isFile, isFormData, isFunction, isInt16Array, isInt32Array, isInt8Array, isNull, isNumber, isObj, isPromise, isString, isSymbol, isUint16Array, isUint32Array, isUint8Array, isUndef, last, merge, n, obj, objEach, objMap, omit, oneOf, _default as path, pick, throttle, union, unionBy };

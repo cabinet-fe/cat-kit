@@ -85,13 +85,13 @@ export function getResponse(xhr: XMLHttpRequest | ResponseConf) {
  * 获取请求地址
  * @param api api
  * @param params 参数
- * @returns 
+ * @returns
  */
 export function getUrl(api: string, params: Record<string, string | number> | string) {
   let paramString =
     typeof params === 'string'
       ? params
-      : Object.keys(params)
+      : Object.keys(params).filter(key => params[key] || params[key] === 0)
           .map(key => `${key}=${params[key]}`)
           .join('&')
 

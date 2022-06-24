@@ -17,3 +17,5 @@ export * from './utils/date/date'
 export * from './utils/data/number'
 
 export * from './utils/image/image'
+
+export * from './utils/optimize'
