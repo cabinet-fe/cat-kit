@@ -36,11 +36,11 @@ isEmpty(true)
 // return true
 ```
 
-### getChangeValue
+### getChainValue
 通过一个字符串属性链来获取一个嵌套的对象的值
 
 ```ts
-getChangeValue({ person: { name: '张三' } }, 'person.name')
+getChainValue({ person: { name: '张三' } }, 'person.name')
 // return 张三
 ```
 
