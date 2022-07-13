@@ -70,9 +70,9 @@ export function getResponse(xhr: XMLHttpRequest | ResponseConf) {
       } catch (e) {}
     }
 
-    let code = data.code || (status as HTTPCodeNumber)
+    let code = data?.code || (status as HTTPCodeNumber)
 
-    let message = data.message || errMsgsMap[code] || statusText
+    let message = data?.message || errMsgsMap[code] || statusText
 
     let headers = parseResponseHeaders(xhr.getAllResponseHeaders())
     return new HttpResponse(code, data, message, headers)
