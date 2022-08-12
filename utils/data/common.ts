@@ -60,9 +60,9 @@ export function oneOf<K extends string | number>(value: K, values: K[]) {
  * 得到一个值的深拷贝版本
  * @param target 值
  */
-export function deepCopy<T extends any>(this: any, target: T): T {
+export function deepCopy<T extends any>(this: any, target: T): any {
   if (isArray(target)) {
-    return (target as any).map(deepCopy)
+    return target.map(deepCopy)
   }
   if (isObj(target)) {
     return objMap(target, deepCopy)
@@ -71,6 +71,7 @@ export function deepCopy<T extends any>(this: any, target: T): T {
     return new Function('return ' + target.toString()).call(this)
   }
   if (isDate(target)) {
+
     return new Date(target.valueOf()) as any
   }
   return target

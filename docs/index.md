@@ -1,13 +1,21 @@
 ---
-home: true
-heroImage: /images/logo.png
+layout: home
+title: fe-dk
 
-actions:
-  - text: 浏览工具
-    link: /utils/
-  - text: 前端实验室
-    link: /lab/
-    type: secondary
+hero:
+  name: fe-dk
+  text: 基于Typescript的前端工具包
+  tagline: 精简, 强大, 易用.
+  image:
+    src: /fe-dk/images/logo.png
+    alt: fe-dk
+  actions:
+    - text: 浏览工具
+      link: /utils/
+      theme: brand
+    - text: 前端实验室
+      link: /lab/
+      theme: alt
 
 features:
   - title: 统一
@@ -25,3 +33,8 @@ features:
 
 footer: MIT Licensed | © 2022-PRESENT 元和前端
 ---
+
+<!-- <script setup>
+</script>
+
+<div>aaaa</div> -->

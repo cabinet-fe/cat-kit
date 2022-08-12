@@ -1,3 +1,11 @@
 import { buildUtils } from './build-utils'
+import { clean } from './clean'
+import { copy } from './copy'
 
-buildUtils()
+async function build() {
+  await clean()
+  await buildUtils()
+  copy()
+}
+
+build()
