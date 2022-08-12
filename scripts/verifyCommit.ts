@@ -1,6 +1,6 @@
-const chalk = require('chalk')
-const fs = require('fs')
-const path = require('path')
+import chalk from 'chalk'
+import fs from 'fs'
+import path from 'path'
 
 const msgPath = path.resolve(__dirname, '../.git/COMMIT_EDITMSG')
 

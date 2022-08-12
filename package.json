@@ -8,7 +8,8 @@
     "docs:build": "vitepress build docs",
     "dk:build": "tsx build/index.ts",
     "test": "vitest run",
-    "release": "vitest run && pnpm dk:build && cd dist && npm publish --registry https://registry.npmjs.org"
+    "commit-lint": "tsx scripts/verifyCommit.ts",
+    "release": "test && pnpm dk:build && cd dist && npm publish --registry https://registry.npmjs.org"
   },
   "repository": {
     "type": "git",
@@ -51,6 +52,7 @@
     "vite": "^3.0.6",
     "vitepress": "1.0.0-draft.8",
     "vitest": "^0.21.1",
-    "vue": "^3.2.37"
+    "vue": "^3.2.37",
+    "chalk": "^4.1.2"
   }
 }
