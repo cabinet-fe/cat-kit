@@ -16,7 +16,7 @@ export default defineConfig({
         rel: 'icon',
         type: 'image/png',
         sizes: '32x32',
-        href: `/images/logo.png`
+        href: `/fe-dk/images/logo.png`
       }
     ]
   ],
