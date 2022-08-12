@@ -11,10 +11,10 @@ hero:
     alt: fe-dk
   actions:
     - text: 浏览工具
-      link: /utils/
+      link: /utils/cache
       theme: brand
     - text: 前端实验室
-      link: /lab/
+      link: /lab/data-structure/
       theme: alt
 
 features:
