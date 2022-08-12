@@ -33,8 +33,3 @@ features:
 
 footer: MIT Licensed | © 2022-PRESENT 元和前端
 ---
-
-<!-- <script setup>
-</script>
-
-<div>aaaa</div> -->
