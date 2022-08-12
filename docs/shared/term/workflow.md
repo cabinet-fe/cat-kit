@@ -34,7 +34,7 @@ Camunda 的[中文文档](http://camunda-cn.shaochenfeng.com/)
 BPMN 全称, 业务流程模型注解 Business Process Modeling Notation. 实际上就是用来描述流程各个节点和分支的一系列图形(Shape)的**标准**, 注意是一套标准而不是具体的实现.
 一个拥有从开始到结束完整流程的图形集合被称作**流程模型**. 设计流程模型的过程被叫做**建模**. 每个模型由开始节点用户发起, 发起后立即产生一个**流程实例**, 流程结束之前流程实例都属于激活状态.
 
-### 开始事件和结束事件 Start Event and End Event <Badge text="重要" />
+### 开始事件和结束事件 Start Event and End Event
 
 开始事件和结束事件分别表示流程的开始与结束, 用一个圆形表示. 通常一个流程只包含一个开始时间.
 
@@ -42,7 +42,7 @@ BPMN 全称, 业务流程模型注解 Business Process Modeling Notation. 实际
 
 空开始事件顾名思义他无需任何外接触发方式来触发, 由该事件上指定的发起人发起
 
-### 结束事件 Enn Event <Badge text="重要" />
+### 结束事件 Enn Event
 
 表示流程或分支的自然结束，什么都不做。流程所有的结束事件都到达后, 整个流程实例被标记为结束或者完成.
 
@@ -60,13 +60,13 @@ BPMN 全称, 业务流程模型注解 Business Process Modeling Notation. 实际
 | 捕获信号事件 |      |
 | 捕获消息事件 |      |
 
-### 顺序流 Sequence Flow <Badge text="重要" />
+### 顺序流 Sequence Flow
 
 顺序流是流程中两个元素间的连接器。在流程执行过程中，一个元素被访问后，会沿着其所有出口顺序流继续执行。
 这意味着 BPMN 2.0 的默认是并行执行的, 两个出口顺序流就会创建两个独立的、并行的执行路径。
 顺序流上可以添加流转条件(如果顺序流从排他网关或包容网关或复杂网关上流转出来).
 
-### 任务 Task <Badge text="重要" />
+### 任务 Task
 
 任务是业务流程中的最基本单元, 一个工作流就是由各个任务组成, 任务被分为以下几种:
 
@@ -78,7 +78,7 @@ BPMN 全称, 业务流程模型注解 Business Process Modeling Notation. 实际
 | 接收任务 Receive Task | 等待外部流程参与者发送消息的任务。                                                             |
 | 脚本任务 Script Task  | 用于执行定义好的脚本程序，流程执行到这个结点自动执行脚本。                                     |
 
-### 网关 Gateway <Badge text="重要" />
+### 网关 Gateway
 
 网关用来控制顺序流的交互. 网关被分为以下几种:
 

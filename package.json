@@ -9,7 +9,7 @@
     "dk:build": "tsx build/index.ts",
     "test": "vitest run",
     "commit-lint": "tsx scripts/verifyCommit.ts",
-    "release": "test && pnpm dk:build && cd dist && npm publish --registry https://registry.npmjs.org"
+    "release": "pnpm test && pnpm dk:build && cd dist && npm publish --registry https://registry.npmjs.org"
   },
   "repository": {
     "type": "git",

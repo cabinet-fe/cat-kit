@@ -23,11 +23,10 @@ export default defineConfig({
   lastUpdated: true,
 
   markdown: {
-    lineNumbers: true,
+    lineNumbers: true
   },
 
   themeConfig: {
-
     footer: {
       message: 'MIT Licensed',
       copyright: '© 2022-PRESENT 元和前端'
@@ -52,7 +51,6 @@ export default defineConfig({
     },
     json: {
       stringify: true
-    },
-
+    }
   }
 })
