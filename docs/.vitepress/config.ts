@@ -31,11 +31,10 @@ export default defineConfig({
       message: 'MIT Licensed',
       copyright: '© 2022-PRESENT 元和前端'
     },
-
     socialLinks: [
       { icon: 'github', link: 'https://github.com/cabinet-fe/fe-dk' }
     ],
-    logo: '/images/logo.png',
+    logo: '/fe-dk/images/logo.png',
     nav,
     sidebar
   },
