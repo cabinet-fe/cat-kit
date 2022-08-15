@@ -1,0 +1,10 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "示例",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite dev"
+  },
+  "author": "YH FE"
+}

@@ -38,6 +38,7 @@
     "url": "https://github.com/cabinet-fe/fe-dk/issues"
   },
   "devDependencies": {
+    "utils": "workspace:*",
     "@types/fs-extra": "^9.0.13",
     "@types/node": "^18.7.2",
     "fast-glob": "^3.2.11",

@@ -19,3 +19,5 @@ export * from './data/number'
 export * from './image/image'
 
 export * from './optimize'
+
+export * from './db/db'

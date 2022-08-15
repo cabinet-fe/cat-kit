@@ -1,0 +1,7 @@
+{
+  "name": "utils",
+  "version": "1.0.0",
+  "description": "工具源码",
+  "main": "index.ts",
+  "author": "YH FE"
+}
