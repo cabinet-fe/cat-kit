@@ -8,7 +8,9 @@ class Num {
   })
 
   private money(money: number, decimal?: number) {
-    // if (!money) return '0'
+    if (!money) {
+      money = 0
+    }
     let [intPart, decPart = ''] = String(money).split('.')
     const len = intPart.length - 1
     let arr: string[] = []
