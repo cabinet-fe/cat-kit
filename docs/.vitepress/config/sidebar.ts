@@ -1,9 +1,38 @@
 import { DefaultTheme } from 'vitepress'
+import fs from 'fs-extra'
+import path from 'path'
+
+const docsDir = path.resolve(__dirname, '../..')
+
+// 跳过检测的目录
+const skippedFiles = new Set(['.vitepress', 'node_modules', 'public'])
+
+// 获取存放md文件的目录
+const dirs = fs
+  .readdirSync(docsDir, {
+    withFileTypes: true
+  })
+  .filter(dirent => dirent.isDirectory() && !skippedFiles.has(dirent.name))
+  .map(dirent => dirent.name)
+
+const bars = dirs.reduce((acc, cur) => {
+  const dirs = fs.readdirSync(path.resolve(docsDir + `/${cur}`), {
+    withFileTypes: true
+  })
+  // 是否是嵌套
+  const isNest = dirs.some(dir => dir.isDirectory())
+  if (isNest) {
+
+  }
+  acc[`/${cur}/`] = []
+  return acc
+}, {} as DefaultTheme.Sidebar)
 
 const sidebar: DefaultTheme.Sidebar = {
-  '/lab/data-structure/': [
+  '/lab/': [
     {
       text: '数据结构',
+      collapsible: true,
       items: [
         { text: '数组', link: '/lab/data-structure/array' },
         { text: '队列', link: '/lab/data-structure/queue' },
@@ -14,17 +43,20 @@ const sidebar: DefaultTheme.Sidebar = {
         { text: '散列表', link: '/lab/data-structure/hash' },
         { text: '图', link: '/lab/data-structure/graph' }
       ]
-    }
-  ],
-  '/lab/algorithm/': [
+    },
     {
       text: '算法',
       items: [
         { text: '查找', link: '/lab/algorithm/search' },
         { text: '排序', link: '/lab/algorithm/sort' }
       ]
+    },
+    {
+      text: '设计模式',
+      items: []
     }
   ],
+
   '/utils/': [
     {
       text: '工具',
@@ -46,16 +78,6 @@ const sidebar: DefaultTheme.Sidebar = {
 
   '/shared/': [
     {
-      text: '数据库',
-      items: [
-        { text: '概要', link: '/shared/db/' },
-        { text: 'mysql', link: '/shared/db/mysql' },
-        { text: 'mongodb', link: '/shared/db/mongodb' },
-        { text: 'redis', link: '/shared/db/redis' },
-        { text: 'sqlite', link: '/shared/db/sqlite' }
-      ]
-    },
-    {
       text: '术语',
       items: [
         { text: '概要', link: '/shared/term/' },
@@ -67,11 +89,26 @@ const sidebar: DefaultTheme.Sidebar = {
       ]
     },
     {
+      text: '数据库',
+      items: [
+        { text: '概要', link: '/shared/db/' },
+        { text: 'mysql', link: '/shared/db/mysql' },
+        { text: 'mongodb', link: '/shared/db/mongodb' },
+        { text: 'redis', link: '/shared/db/redis' },
+        { text: 'sqlite', link: '/shared/db/sqlite' }
+      ]
+    },
+
+    {
       text: 'Typescript',
       items: [
         { text: '声明', link: '/shared/typescript/declare' },
         { text: '配置', link: '/shared/typescript/config' }
       ]
+    },
+    {
+      text: '玩转GitHub',
+      items: []
     },
     {
       text: '其他',

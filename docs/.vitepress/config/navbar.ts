@@ -26,7 +26,10 @@ const navbar: DefaultTheme.NavItem[] = [
         text: 'Typescript',
         link: '/shared/typescript/'
       },
-
+      {
+        text: '玩转GitHub',
+        link: '/shared/github/'
+      },
       {
         text: '其他',
         link: '/shared/others/'

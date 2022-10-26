@@ -4,11 +4,13 @@ title: fe-dk
 
 hero:
   name: fe-dk
-  text: 基于Typescript的前端工具包
+  text: 基于Typescript的前端工具包以及知识库
   tagline: 精简, 强大, 易用.
+
   image:
-    src: /fe-dk/images/logo.png
+    src: /images/logo.png
     alt: fe-dk
+
   actions:
     - text: 浏览工具
       link: /utils/cache
@@ -24,12 +26,12 @@ features:
     details: 新人融入无所适从? 上手慢? 这里提供了工具库的完备中文文档!
   - title: 高效
     details: 所有的工具使用模块导出, 可以完全利用构建工具的tree-shaking机制。
-  - title: 进阶
+  - title: 分享
     details: 在实验室中发现别人的分享, 你也可以畅所欲言, 分享你的见解。
   - title: 广泛
-    details: 众所周知, 不会后端的前端不是好设计师, 所以我们的内容很广泛。
+    details: 众所周知, 不会后端的前端不是好设计师, 所以我们涉及的内容很广泛，而不仅仅是前端。
   - title: 积累
-    details: 这是所有团队成员的积累, 我们的内容会不断的完善，沉淀, 以此提升我们应对问题的能力和效率。
+    details: 这是一个积累的过程, 我们的内容会不断的完善，沉淀, 以此提升我们应对问题的能力和效率。
 
 footer: MIT Licensed | © 2022-PRESENT 元和前端
 ---

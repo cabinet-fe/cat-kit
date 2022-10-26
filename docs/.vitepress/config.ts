@@ -1,12 +1,11 @@
 import { defineConfig } from 'vitepress'
-import { version } from '../../package.json'
 import nav from './config/navbar'
 import sidebar from './config/sidebar'
 
 export default defineConfig({
   lang: 'zh-CN',
-  title: `fe-dk v${version}`,
-  description: '前端开发工具包',
+  title: `fe-dk`,
+  description: '前端开发工具包和知识分享',
   base: '/fe-dk/',
 
   head: [
@@ -34,9 +33,15 @@ export default defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/cabinet-fe/fe-dk' }
     ],
-    logo: '/fe-dk/images/logo.png',
+    logo: '/images/logo.png',
     nav,
-    sidebar
+    sidebar,
+    lastUpdatedText: '最后更新于',
+
+    docFooter: {
+      prev: '上一页',
+      next: '下一页'
+    }
   },
 
   vite: {
