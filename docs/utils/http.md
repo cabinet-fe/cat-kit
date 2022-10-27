@@ -111,13 +111,20 @@ const http = new Http({
 
 ### after
 
-after 在请求完成后调用, 该函数有两个参数, 第一个参数是响应对象, 第二个参数指定以何种形式抛出响应值, 看以下的例子
+after 在请求完成后调用, 该函数有两个参数, 第一个参数是响应对象, 第二个参数指定以何种形式抛出响应值(当以error抛出时,
+一个异步函数中的代码将不会执行), 看以下的例子:
 默认地, 以Http标准将400到600之间的状态码作为错误抛出
 
 ```ts
-const customErrorCode = new Set<number>()
+// 指定以下状态吗都是报错的状态码
+const customErrorCode = new Set<number>([
+  1001,
+  1002,
+  1003
+])
 
 export const authHttp = new Http({
+  baseUrl: 'http://localhost',
   after(res, returnBy) {
     if (customErrorCode.has(res.code)) {
       returnBy('error')
@@ -132,4 +139,23 @@ export const authHttp = new Http({
     return res
   }
 })
+
+
+// 假设后端返回的状态码是1001(错误状态吗)
+const postTo = async () => {
+  await authHttp.post('/path/of/api')
+
+  // 以下不会执行, 因为authHttp将自定义错误码以错误抛出
+  // 换句话说以下代码是属于Promise<any>.then中回调函数执行的代码,
+  // 以错误抛出则只执行Promise<any>.catch中的回调函数
+  // 这种模式能够让你少写状态码判断的相关代码
+  alert('成功')
+}
+
+// 不够优雅的例子
+const badPostTo = async () => {
+  const { code } = await authHttp.post('/path/of/api')
+  if (code !== 200) return // 这段代码不必要增加了很多判断
+  alert('成功')
+}
 ```

@@ -2,5 +2,8 @@
   "name": "docs",
   "version": "1.0.0",
   "description": "文档",
-  "main": "index.js"
+  "main": "index.ts",
+  "devDependencies": {
+    "node-utils": "workspace:*"
+  }
 }

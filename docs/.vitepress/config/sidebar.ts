@@ -1,13 +1,14 @@
 import { DefaultTheme } from 'vitepress'
 import fs from 'fs-extra'
 import path from 'path'
+import { readFileLine } from 'node-utils'
 
 const docsDir = path.resolve(__dirname, '../..')
 
 // 跳过检测的目录
 const skippedFiles = new Set(['.vitepress', 'node_modules', 'public'])
 
-// 获取存放md文件的目录
+// 获取存放md文件的目录 docs/*
 const dirs = fs
   .readdirSync(docsDir, {
     withFileTypes: true
@@ -16,15 +17,32 @@ const dirs = fs
   .map(dirent => dirent.name)
 
 const bars = dirs.reduce((acc, cur) => {
+  // 一级目录 docs/*/*
   const dirs = fs.readdirSync(path.resolve(docsDir + `/${cur}`), {
     withFileTypes: true
   })
-  // 是否是嵌套
-  const isNest = dirs.some(dir => dir.isDirectory())
-  if (isNest) {
 
+  const isNest = dirs.some(dir => dir.isDirectory())
+
+  // 有二级目录再读取二级目录
+  if (isNest) {
+    acc[`/${cur}/`] = dirs.map(dir => {
+      // fs.readFileSync()
+    })
+  } else {
+    readFileLine(path.resolve(docsDir, cur, 'index.md'), (lineIndex, str) => {
+      return lineIndex < 5
+    }).then(v => {
+      console.log(v)
+    })
+    const indexFileContent = fs.readFileSync(
+      path.resolve(docsDir, cur, 'index.md'),
+      'utf-8'
+    )
+    // const title =
+    acc[`/${cur}/`] = []
   }
-  acc[`/${cur}/`] = []
+
   return acc
 }, {} as DefaultTheme.Sidebar)
 
@@ -61,6 +79,7 @@ const sidebar: DefaultTheme.Sidebar = {
     {
       text: '工具',
       items: [
+        { text: '概要', link: '/utils/index' },
         { text: '缓存', link: '/utils/cache' },
         { text: '数据类型', link: '/utils/data-type' },
         { text: '数据处理', link: '/utils/data' },

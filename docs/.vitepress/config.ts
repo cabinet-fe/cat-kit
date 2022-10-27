@@ -30,17 +30,27 @@ export default defineConfig({
       message: 'MIT Licensed',
       copyright: '© 2022-PRESENT 元和前端'
     },
+
+    editLink: {
+      pattern: 'https://github.com/cabinet-fe/fe-dk/tree/main/docs/:path',
+      text: '在GitHub中编辑此页'
+    },
+
     socialLinks: [
       { icon: 'github', link: 'https://github.com/cabinet-fe/fe-dk' }
     ],
+
     logo: '/images/logo.png',
+
     nav,
+
     sidebar,
+
     lastUpdatedText: '最后更新于',
 
     docFooter: {
-      prev: '上一页',
-      next: '下一页'
+      prev: '上一节',
+      next: '下一节'
     }
   },
 

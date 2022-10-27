@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "lib": ["ESNext", "DOM"],
+    "jsx": "preserve"
+  },
+  "include": [
+    "packages/utils", "docs"
+  ]
+}

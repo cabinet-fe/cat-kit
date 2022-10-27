@@ -1,8 +1,8 @@
 export * from './data/data-type'
 
-export * from './cache'
+export * from './cache/cache'
 
-export * from './http'
+export * from './http/index'
 
 export { default as path } from './path/path'
 

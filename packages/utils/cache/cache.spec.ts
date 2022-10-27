@@ -1,4 +1,4 @@
-import { cacheKey, WebCache } from './index'
+import { cacheKey, WebCache } from './cache'
 
 const session = WebCache.create('session')
 

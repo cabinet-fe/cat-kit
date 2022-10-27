@@ -68,11 +68,11 @@ export function deepCopy<T extends any>(this: any, target: T): any {
     return objMap(target, deepCopy)
   }
   if (isFunction(target)) {
-    return new Function('return ' + target.toString()).call(this)
+    return new Function('return ' + (target as Function).toString()).call(this)
   }
   if (isDate(target)) {
 
-    return new Date(target.valueOf()) as any
+    return new Date((target as Date).valueOf()) as any
   }
   return target
 }

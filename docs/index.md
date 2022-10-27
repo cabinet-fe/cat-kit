@@ -4,7 +4,7 @@ title: fe-dk
 
 hero:
   name: fe-dk
-  text: 基于Typescript的前端工具包以及知识库
+  text: 类型完全的前端工具包以及不止于前端的知识库
   tagline: 精简, 强大, 易用.
 
   image:

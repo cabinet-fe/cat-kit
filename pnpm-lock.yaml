@@ -36,7 +36,7 @@ importers:
       terser: registry.npmmirror.com/terser/5.15.1
       tsx: 3.10.1
       typescript: registry.npmmirror.com/typescript/4.8.4
-      utils: link:utils
+      utils: link:packages/utils
       vite: 3.1.8_terser@5.15.1
       vitepress: 1.0.0-alpha.25_7bzztktfx4ksi72cjsd4rjugn4
       vitest: registry.npmmirror.com/vitest/0.22.1_jsdom@20.0.1+terser@5.15.1
@@ -46,12 +46,18 @@ importers:
     specifiers: {}
 
   docs:
-    specifiers: {}
+    specifiers:
+      node-utils: workspace:*
+    devDependencies:
+      node-utils: link:../packages/node-utils
 
   example:
     specifiers: {}
 
-  utils:
+  packages/node-utils:
+    specifiers: {}
+
+  packages/utils:
     specifiers: {}
 
 packages:
