@@ -1,1 +1,3 @@
-export * from './readline/readline'
+import { readFileLine } from './readline/readline'
+
+export { readFileLine }

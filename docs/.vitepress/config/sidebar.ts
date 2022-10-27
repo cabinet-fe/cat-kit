@@ -1,50 +1,4 @@
 import { DefaultTheme } from 'vitepress'
-import fs from 'fs-extra'
-import path from 'path'
-import { readFileLine } from 'node-utils'
-
-const docsDir = path.resolve(__dirname, '../..')
-
-// 跳过检测的目录
-const skippedFiles = new Set(['.vitepress', 'node_modules', 'public'])
-
-// 获取存放md文件的目录 docs/*
-const dirs = fs
-  .readdirSync(docsDir, {
-    withFileTypes: true
-  })
-  .filter(dirent => dirent.isDirectory() && !skippedFiles.has(dirent.name))
-  .map(dirent => dirent.name)
-
-const bars = dirs.reduce((acc, cur) => {
-  // 一级目录 docs/*/*
-  const dirs = fs.readdirSync(path.resolve(docsDir + `/${cur}`), {
-    withFileTypes: true
-  })
-
-  const isNest = dirs.some(dir => dir.isDirectory())
-
-  // 有二级目录再读取二级目录
-  if (isNest) {
-    acc[`/${cur}/`] = dirs.map(dir => {
-      // fs.readFileSync()
-    })
-  } else {
-    readFileLine(path.resolve(docsDir, cur, 'index.md'), (lineIndex, str) => {
-      return lineIndex < 5
-    }).then(v => {
-      console.log(v)
-    })
-    const indexFileContent = fs.readFileSync(
-      path.resolve(docsDir, cur, 'index.md'),
-      'utf-8'
-    )
-    // const title =
-    acc[`/${cur}/`] = []
-  }
-
-  return acc
-}, {} as DefaultTheme.Sidebar)
 
 const sidebar: DefaultTheme.Sidebar = {
   '/lab/': [
@@ -52,6 +6,7 @@ const sidebar: DefaultTheme.Sidebar = {
       text: '数据结构',
       collapsible: true,
       items: [
+        { text: '概要', link: '/lab/data-structure/' },
         { text: '数组', link: '/lab/data-structure/array' },
         { text: '队列', link: '/lab/data-structure/queue' },
         { text: '栈', link: '/lab/data-structure/stack' },
@@ -79,7 +34,7 @@ const sidebar: DefaultTheme.Sidebar = {
     {
       text: '工具',
       items: [
-        { text: '概要', link: '/utils/index' },
+        { text: '概要', link: '/utils/' },
         { text: '缓存', link: '/utils/cache' },
         { text: '数据类型', link: '/utils/data-type' },
         { text: '数据处理', link: '/utils/data' },
@@ -127,7 +82,9 @@ const sidebar: DefaultTheme.Sidebar = {
     },
     {
       text: '玩转GitHub',
-      items: []
+      items: [
+        { text: '概要', link: '/shared/github/' }
+      ]
     },
     {
       text: '其他',

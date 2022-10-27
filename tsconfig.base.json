@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
     "strict": true,
-    "allowJs": true,
-    "noImplicitAny": true,
     "target": "ESNext",
     "module": "ESNext",
     "resolveJsonModule": true,
@@ -12,9 +10,11 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "outDir": "dist",
-    "rootDir": ".",
+    // "rootDir": ".",
     "skipLibCheck": true,
     "declaration": true,
+    "noUnusedLocals": true,
+    "importsNotUsedAsValues": "error",
     "types": ["vitest/globals"]
   }
 }

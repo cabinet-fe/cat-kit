@@ -7,7 +7,6 @@ export default defineConfig({
   title: `fe-dk`,
   description: '前端开发工具包和知识分享',
   base: '/fe-dk/',
-
   head: [
     [
       'link',
