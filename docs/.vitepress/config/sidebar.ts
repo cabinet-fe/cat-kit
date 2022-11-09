@@ -83,7 +83,8 @@ const sidebar: DefaultTheme.Sidebar = {
     {
       text: '玩转GitHub',
       items: [
-        { text: '概要', link: '/shared/github/' }
+        { text: '概要', link: '/shared/github/' },
+        { text: '首页', link: '/shared/github/home' }
       ]
     },
     {

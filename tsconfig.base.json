@@ -6,6 +6,7 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "baseUrl": ".",
+    "allowJs": true,
     // "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "sourceMap": true,
