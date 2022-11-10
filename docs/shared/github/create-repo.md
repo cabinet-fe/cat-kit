@@ -2,7 +2,13 @@
 title: 创建代码仓库
 ---
 
-# 一切的开始
+# 创建仓库
+
+## 一切的开始
+
+:::tip
+如果你创建过一个仓库, 请跳过本节内容
+:::
 
 鲁迅说过, 宇宙的真理从新建一个代码仓库开始去认知...
 
@@ -15,4 +21,5 @@ github, ok你们一拍即合, 开始了没羞没臊的第一步, 给你们的小
 2. 随便写不写description, 但是建议你写一下, 对他的描述, 尤其是你想你的仓库更容易被人搜到.
 3. 不要选择Private, 不然不建议你玩github.
 4. 随便你添加不添加readme文件以及gitignore文件
-5. 务必注意一下license, 开源协议, 如果你不懂开源协议, 建议你看一下这篇[文章]()
+5. 务必注意一下license, 开源协议, 如果你不懂开源协议, 可以看一下这篇[文章](https://www.ruanyifeng.com/blog/2011/05/how_to_choose_free_software_licenses.html)
+6. 点击create repository按钮, 这样一个仓库就创建完成了

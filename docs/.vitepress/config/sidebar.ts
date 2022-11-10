@@ -84,7 +84,10 @@ const sidebar: DefaultTheme.Sidebar = {
       text: '玩转GitHub',
       items: [
         { text: '概要', link: '/shared/github/' },
-        { text: '首页', link: '/shared/github/home' }
+        { text: '首页', link: '/shared/github/home' },
+        { text: '创建仓库', link: '/shared/github/create-repo' },
+        { text: 'issue', link: '/shared/github/issue' },
+        { text: 'pull request', link: '/shared/github/pr' },
       ]
     },
     {
