@@ -13,7 +13,7 @@ hero:
 
   actions:
     - text: 浏览工具
-      link: /utils/cache
+      link: /utils/
       theme: brand
 
     - text: 前端实验室
