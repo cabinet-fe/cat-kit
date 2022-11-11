@@ -1,6 +1,6 @@
 ---
 layout: home
-title: cat-kit
+title: 喵喵工具箱
 
 hero:
   name: cat-kit

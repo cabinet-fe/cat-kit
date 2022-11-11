@@ -4,7 +4,7 @@ import sidebar from './config/sidebar'
 
 export default defineConfig({
   lang: 'zh-CN',
-  title: `cat-kit`,
+  title: 'cat-kit',
   description: '前端开发工具包和知识分享',
   base: '/cat-kit/',
   head: [
