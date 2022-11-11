@@ -6,5 +6,8 @@
   "scripts": {
     "dev": "vite dev"
   },
-  "author": "YH FE"
+  "author": "YH FE",
+  "dependencies": {
+    "cat-kit": "workspace:*"
+  }
 }

@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs-extra'
 import path from 'path'
+import prettier from 'prettier'
 import { OUTPUT, PKG } from './constants'
 
 export const copy = () => {
@@ -10,5 +11,8 @@ export const copy = () => {
     delete obj[key]
   })
 
-  writeFileSync(path.resolve(OUTPUT, 'package.json'), JSON.stringify(obj))
+  writeFileSync(
+    path.resolve(OUTPUT, 'package.json'),
+    prettier.format(JSON.stringify(obj), { parser: 'json' })
+  )
 }

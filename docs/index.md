@@ -1,15 +1,15 @@
 ---
 layout: home
-title: fe-dk
+title: cat-kit
 
 hero:
-  name: fe-dk
+  name: cat-kit
   text: 类型完全的前端工具包以及不止于前端的知识库
   tagline: 精简, 强大, 易用.
 
   image:
     src: /images/logo.png
-    alt: fe-dk
+    alt: cat-kit
 
   actions:
     - text: 浏览工具

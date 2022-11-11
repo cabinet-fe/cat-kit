@@ -1,5 +1,4 @@
-import { isString } from '../utils/data-type'
-
+import { isString } from '../data/data-type'
 export default class MD5 {
   private static FF = (
     a: number,

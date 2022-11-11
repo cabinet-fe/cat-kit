@@ -3,10 +3,10 @@
   "compilerOptions": {
     "composite": true,
     "lib": ["ESNext", "DOM"],
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "paths": {
+      "@cat-kit/common": ["packages/common"]
+    }
   },
-  "include": [
-    "packages/fe/**/*",
-    "packages/common/**/*"
-  ]
+  "include": ["packages/fe/**/*", "packages/common/**/*"]
 }

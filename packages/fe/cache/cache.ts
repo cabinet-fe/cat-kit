@@ -1,4 +1,4 @@
-import { getDataType } from '../../common/data/data-type'
+import { getDataType } from "@cat-kit/common"
 
 type Callback<T = any> = (key: CacheKey<T>, value?: T, temp?: { value: T; exp: number }) => void
 

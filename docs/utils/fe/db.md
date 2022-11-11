@@ -31,13 +31,13 @@
 
 ## API操作
 
-fe-dk中的数据库操作
+cat-kit中的数据库操作
 
 
 ### 连接数据库
 
 ```ts
-import { openDB } from 'fe-dk'
+import { openDB } from 'cat-kit'
 
 const db = openDB()
 

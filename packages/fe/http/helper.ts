@@ -1,6 +1,5 @@
-import { oneOf } from '../data/common'
-import { getDataType, isArray, isObj } from '../data/data-type'
-import { HTTPCodeNumber } from './shared'
+import { getDataType, isArray, isObj, oneOf } from '@cat-kit/common'
+import type { HTTPCodeNumber } from './shared'
 
 let errMsgsMap: Record<number, any> = {
   408: '请求超时',
@@ -62,7 +61,8 @@ export function getResponse(xhr: XMLHttpRequest | ResponseConf) {
   if (xhr instanceof XMLHttpRequest) {
     const { status, responseType, statusText } = xhr
 
-    let data = !responseType || responseType === 'text' ? xhr.responseText : xhr.response
+    let data =
+      !responseType || responseType === 'text' ? xhr.responseText : xhr.response
 
     if (typeof data === 'string') {
       try {
@@ -87,11 +87,15 @@ export function getResponse(xhr: XMLHttpRequest | ResponseConf) {
  * @param params 参数
  * @returns
  */
-export function getUrl(api: string, params: Record<string, string | number> | string) {
+export function getUrl(
+  api: string,
+  params: Record<string, string | number> | string
+) {
   let paramString =
     typeof params === 'string'
       ? params
-      : Object.keys(params).filter(key => params[key] || params[key] === 0)
+      : Object.keys(params)
+          .filter(key => params[key] || params[key] === 0)
           .map(key => `${key}=${params[key]}`)
           .join('&')
 

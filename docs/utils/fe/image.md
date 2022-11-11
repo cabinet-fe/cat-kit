@@ -2,7 +2,7 @@
 
 ## 快速使用
 ```ts
-import { compressImage } from 'fe-dk'
+import { compressImage } from 'cat-kit'
 ```
 
 ## api
@@ -11,7 +11,7 @@ import { compressImage } from 'fe-dk'
 压缩图片
 
 ```ts
-import { compressImage } from 'fe-dk'
+import { compressImage } from 'cat-kit'
 
 // 第一个参数是图片的文
 // 第二个参数是压缩的目标大小

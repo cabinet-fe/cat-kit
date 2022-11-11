@@ -1,4 +1,4 @@
-import { isUndef } from 'packages/common'
+import { isUndef } from '@cat-kit/common'
 import path from '../path/path'
 import { getResponse, getUrl, type HttpResponse, transformData } from './helper'
 

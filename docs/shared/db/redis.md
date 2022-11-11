@@ -12,7 +12,7 @@ redis被广泛应用在缓存当中, 通过缓存来释放服务器的压力. �
 因此使用redis就是因为它快(redis作者开发redis的原因就是嫌弃别的数据库太慢).
 
 ## 配置文件
-[查看](/fe-dk/learn/redis.conf)Redis6.2版本的配置文件
+[查看](/cat-kit/learn/redis.conf)Redis6.2版本的配置文件
 
 
 ## 概念

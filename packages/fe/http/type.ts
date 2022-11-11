@@ -1,4 +1,4 @@
-import { HttpResponse } from './helper'
+import type { HttpResponse } from './helper'
 
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD'
 

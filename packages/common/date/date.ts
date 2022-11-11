@@ -1,7 +1,7 @@
 import { isDate } from "../data/data-type"
 
 type DateKey = 'timestamp' | 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'
-
+'dev-dog'
 type PrivateDateKey = `_${DateKey}`
 
 class Dater {

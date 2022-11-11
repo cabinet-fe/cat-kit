@@ -4,9 +4,9 @@ import sidebar from './config/sidebar'
 
 export default defineConfig({
   lang: 'zh-CN',
-  title: `fe-dk`,
+  title: `cat-kit`,
   description: '前端开发工具包和知识分享',
-  base: '/fe-dk/',
+  base: '/cat-kit/',
   head: [
     [
       'link',
@@ -14,7 +14,7 @@ export default defineConfig({
         rel: 'icon',
         type: 'image/png',
         sizes: '32x32',
-        href: `/fe-dk/images/logo.png`
+        href: `/cat-kit/images/logo.png`
       }
     ]
   ],
@@ -31,12 +31,12 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/cabinet-fe/fe-dk/tree/main/docs/:path',
+      pattern: 'https://github.com/cabinet-fe/cat-kit/tree/main/docs/:path',
       text: '在GitHub中编辑此页'
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/cabinet-fe/fe-dk' }
+      { icon: 'github', link: 'https://github.com/cabinet-fe/cat-kit' }
     ],
 
     logo: '/images/logo.png',

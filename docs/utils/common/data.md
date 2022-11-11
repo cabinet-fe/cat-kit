@@ -3,7 +3,7 @@
 ## 快速使用
 
 ```ts
-import { omit } from 'fe-dk'
+import { omit } from 'cat-kit'
 const data = omit({ id: 1, name: '张三', age: 20 }, ['id'])
 // data: { name: '张三', age: 20 }
 ```
@@ -243,7 +243,7 @@ extend({ name: '张三', age: 10 }, { name: '李四', age: 21 }, { name: '王五
 在对象包装器中都有对应的实现。
 
 ```ts
-import { obj } from 'fe-dk'
+import { obj } from 'cat-kit'
 
 obj({ name: '张三', age: 10 }).pick(['name'])
 // return { name: '张三' }
@@ -271,7 +271,7 @@ n(1.296).fixed(2)
 数字金额格式化
 
 ```ts
-import { n } from 'fe-dk'
+import { n } from 'cat-kit'
 
 n(1234.5678).format('money')
 //return 1,234.5678
