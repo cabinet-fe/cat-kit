@@ -36,3 +36,9 @@ title: 其他分享
 [fastify](https://www.fastify.cn/)最快的web框架之一
 
 [nest.js](https://docs.nestjs.cn/)和javaspring非常像的node框架
+
+## Postgres 教程
+[Pgsql演练场](https://www.crunchydata.com/developers/tutorials)
+
+## 开源图标库
+[icongo](https://icongo.github.io)
