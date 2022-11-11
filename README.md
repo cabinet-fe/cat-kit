@@ -1,4 +1,4 @@
-# fe-sdk 前端开发工具包
+# dev-lib 前后端开发一体库
 
 [文档地址](https://cabinet-fe.github.io/fe-dk/)
 

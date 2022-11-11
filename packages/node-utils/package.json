@@ -1,7 +1,0 @@
-{
-  "name": "node-utils",
-  "version": "1.0.0",
-  "description": "node工具",
-  "main": "index.ts",
-  "author": "YH FE"
-}

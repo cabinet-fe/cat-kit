@@ -1,7 +1,7 @@
 {
-  "name": "fe-dk",
-  "version": "1.0.15",
-  "description": "前端开发工具包",
+  "name": "dev-lib",
+  "version": "2.0.0",
+  "description": "前后端一体开发工具包",
   "scripts": {
     "prepare": "husky install",
     "docs:dev": "vitepress dev docs",
@@ -9,7 +9,8 @@
     "dk:build": "tsx build/index.ts",
     "test": "vitest run",
     "commit-lint": "tsx scripts/verifyCommit.ts",
-    "release": "pnpm test && pnpm dk:build && cd dist && npm publish --registry https://registry.npmjs.org"
+    "release": "pnpm test && pnpm dk:build && cd dist && npm publish --registry https://registry.npmjs.org",
+    "upgrade": "tsx scripts/upgrade.ts"
   },
   "repository": {
     "type": "git",
@@ -28,9 +29,9 @@
   "homepage": "https://github.com/cabinet-fe/fe-dk#readme",
   "types": "es/index.d.ts",
   "keywords": [
-    "前端开发工具包",
+    "ts开发工具包",
     "fe-dk",
-    "前端文档"
+    "技术文档"
   ],
   "author": "Yuan He Team FE",
   "license": "MIT",
@@ -38,7 +39,6 @@
     "url": "https://github.com/cabinet-fe/fe-dk/issues"
   },
   "devDependencies": {
-    "utils": "workspace:*",
     "@types/fs-extra": "^9.0.13",
     "@types/node": "^18.11.9",
     "fast-glob": "^3.2.12",
@@ -55,6 +55,8 @@
     "vitest": "^0.22.1",
     "vue": "^3.2.41",
     "chalk": "^4.1.2",
-    "terser": "5.15.1"
+    "terser": "5.15.1",
+    "prettier": "2.7.1",
+    "@types/prettier": "^2.7.1"
   }
 }

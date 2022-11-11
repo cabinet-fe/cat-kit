@@ -1,6 +1,35 @@
 import { DefaultTheme } from 'vitepress'
 
 const sidebar: DefaultTheme.Sidebar = {
+  '/utils/': [
+    {
+      text: '前端工具',
+      items: [
+        { text: '概要', link: '/utils/' },
+        { text: '缓存', link: '/utils/fe/cache' },
+        { text: 'HTTP', link: '/utils/fe/http' },
+        { text: '路径', link: '/utils/fe/path' },
+        { text: '数据库', link: '/utils/fe/db.md' },
+        { text: '图片', link: '/utils/fe/image' }
+      ]
+    },
+    {
+      text: '后端工具',
+      items: []
+    },
+    {
+      text: '通用工具',
+      items: [
+        { text: '数据处理', link: '/utils/common/data' },
+        { text: '数据类型', link: '/utils/common/data-type' },
+        { text: '日期', link: '/utils/common/date' },
+        { text: '加密', link: '/utils/common/crypto' },
+        { text: '哈希', link: '/utils/common/hash' },
+        { text: '编解码', link: '/utils/common/codec' }
+      ]
+    }
+  ],
+
   '/lab/': [
     {
       text: '数据结构',
@@ -27,26 +56,6 @@ const sidebar: DefaultTheme.Sidebar = {
     {
       text: '设计模式',
       items: []
-    }
-  ],
-
-  '/utils/': [
-    {
-      text: '工具',
-      items: [
-        { text: '概要', link: '/utils/' },
-        { text: '缓存', link: '/utils/cache' },
-        { text: '数据类型', link: '/utils/data-type' },
-        { text: '数据处理', link: '/utils/data' },
-        { text: 'HTTP', link: '/utils/http' },
-        { text: '路径', link: '/utils/path' },
-        { text: '日期', link: '/utils/date' },
-        { text: '加密', link: '/utils/crypto' },
-        { text: '哈希', link: '/utils/hash' },
-        { text: '数据库', link: '/utils/db.md' },
-        { text: '编解码', link: '/utils/codec' },
-        { text: '图片', link: '/utils/image' }
-      ]
     }
   ],
 
@@ -87,7 +96,7 @@ const sidebar: DefaultTheme.Sidebar = {
         { text: '首页', link: '/shared/github/home' },
         { text: '创建仓库', link: '/shared/github/create-repo' },
         { text: 'issue', link: '/shared/github/issue' },
-        { text: 'pull request', link: '/shared/github/pr' },
+        { text: 'pull request', link: '/shared/github/pr' }
       ]
     },
     {

@@ -4,6 +4,6 @@
   "description": "文档",
   "main": "index.ts",
   "devDependencies": {
-    "node-utils": "workspace:*"
+    "@dev-lib/be": "workspace:*"
   }
 }

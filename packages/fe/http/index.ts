@@ -1,4 +1,4 @@
-import { isUndef } from '../data/data-type'
+import { isUndef } from 'packages/common'
 import path from '../path/path'
 import { getResponse, getUrl, type HttpResponse, transformData } from './helper'
 

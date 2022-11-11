@@ -6,18 +6,19 @@ importers:
     specifiers:
       '@types/fs-extra': ^9.0.13
       '@types/node': ^18.11.9
+      '@types/prettier': ^2.7.1
       chalk: ^4.1.2
       fast-glob: ^3.2.12
       fs-extra: ^10.1.0
       husky: ^8.0.2
       jsdom: ^20.0.1
+      prettier: 2.7.1
       rollup: ^3.2.5
       rollup-plugin-dts: ^5.0.0
       rollup-plugin-esbuild: ^5.0.0
       terser: 5.15.1
       tsx: ^3.11.0
       typescript: ^4.8.4
-      utils: workspace:*
       vite: ^3.2.3
       vitepress: 1.0.0-alpha.28
       vitest: ^0.22.1
@@ -25,18 +26,19 @@ importers:
     devDependencies:
       '@types/fs-extra': registry.npmmirror.com/@types/fs-extra/9.0.13
       '@types/node': 18.11.9
+      '@types/prettier': 2.7.1
       chalk: registry.npmmirror.com/chalk/4.1.2
       fast-glob: 3.2.12
       fs-extra: registry.npmmirror.com/fs-extra/10.1.0
       husky: 8.0.2
       jsdom: 20.0.1
+      prettier: 2.7.1
       rollup: 3.2.5
       rollup-plugin-dts: 5.0.0_oa2candk7eitu7usnsurwiyuuu
       rollup-plugin-esbuild: 5.0.0_uryg4ebyaisbhea6b3fehy6f5e
       terser: registry.npmmirror.com/terser/5.15.1
       tsx: 3.11.0
       typescript: 4.8.4
-      utils: link:packages/utils
       vite: 3.2.3_vt5mbdnyaskrzqlb5l6kjsnhi4
       vitepress: 1.0.0-alpha.28_clopb6qvppnoaph5y57mzzwkgu
       vitest: registry.npmmirror.com/vitest/0.22.1_jsdom@20.0.1+terser@5.15.1
@@ -47,17 +49,20 @@ importers:
 
   docs:
     specifiers:
-      node-utils: workspace:*
+      '@dev-lib/be': workspace:*
     devDependencies:
-      node-utils: link:../packages/node-utils
+      '@dev-lib/be': link:../packages/be
 
   example:
     specifiers: {}
 
-  packages/node-utils:
+  packages/be:
     specifiers: {}
 
-  packages/utils:
+  packages/common:
+    specifiers: {}
+
+  packages/fe:
     specifiers: {}
 
 packages:
@@ -343,6 +348,10 @@ packages:
 
   /@types/node/18.11.9:
     resolution: {integrity: sha512-CRpX21/kGdzjOpFsZSkcrXMGIBWMGNIHXXBVFSH+ggkftxg+XYP20TESbh+zFvFj3EQOl5byk0HTRn1IL6hbqg==}
+    dev: true
+
+  /@types/prettier/2.7.1:
+    resolution: {integrity: sha512-ri0UmynRRvZiiUJdiz38MmIblKK+oH30MztdBVR95dv/Ubw6neWSb8u1XpRb72L4qsZOhz+L+z9JD40SJmfWow==}
     dev: true
 
   /@types/web-bluetooth/0.0.16:
@@ -1205,6 +1214,12 @@ packages:
   /prelude-ls/1.1.2:
     resolution: {integrity: sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w==}
     engines: {node: '>= 0.8.0'}
+    dev: true
+
+  /prettier/2.7.1:
+    resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
     dev: true
 
   /psl/1.9.0:
