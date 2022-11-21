@@ -62,7 +62,7 @@ const handleClick = () => {
 
 当一个人无聊时, 就想找乐子.
 
-<span style="text-decoration: line-through">当一个人不吃法时, 就会饿...</span> :joy:
+<span style="text-decoration: line-through">当一个人不吃饭时, 就会饿...</span> :joy:
 
 上面的三个例子都可以用程序来描述.
 
@@ -170,8 +170,7 @@ you.shot(someOneB)
 
 ## 实现要点
 
-观察者模式的要点就是可被观测, 联想现实世界中的案例: 判断学生的学习成绩好坏, 就需要通过考试, 得出得分, 通过得分来评级.
-
+比如我们在家里安装了监控来看看家里的宠物有没有偷吃.
 
 ```ts
 
