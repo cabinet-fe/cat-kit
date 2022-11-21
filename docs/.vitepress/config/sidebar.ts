@@ -55,7 +55,10 @@ const sidebar: DefaultTheme.Sidebar = {
     },
     {
       text: '设计模式',
-      items: []
+      items: [
+        { text: '概要', link: '/lab/pattern/' },
+        { text: '观察者', link: '/lab/pattern/watcher' }
+      ]
     }
   ],
 
