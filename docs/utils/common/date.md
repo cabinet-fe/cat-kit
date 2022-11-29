@@ -89,6 +89,9 @@ date('2022-02-14').calc(10, 'days').format()
 date('2022-02-14').calc(-10, 'days').format()
 // 2022-02-04
 
+date('2022-02-14').calc(1, 'months').format()
+// 2022-03-14
+
 date('2022-02-14').calc(1, 'weeks').format()
 // 2022-02-21
 ```
@@ -101,6 +104,28 @@ date('2022-02-14').calc(1, 'weeks').format()
 date('2022-02-14').compare('2022-03-14')
 // 28
 ```
+
+## 跳转至月末
+
+有时候你想要获取某个月一共有多少天, 你可以进行月份跳转
+
+做万年历的时候挺有用的
+
+```ts
+date('2022-10').toEndOfMonth().month
+date('2022-10-15').toEndOfMonth().month
+// 31
+
+date().toEndOfMonth().month
+// 当月的最后一天
+
+date().toEndOfMonth(10).month
+// 10个月后的最后一天
+
+date().toEndOfMonth(-2).month
+// 2个月之前的最后一天
+```
+
 
 ## 获取年月日时分秒
 

@@ -1,8 +1,4 @@
-import { isDate } from "../data/data-type"
-
-type DateKey = 'timestamp' | 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'
-'dev-dog'
-type PrivateDateKey = `_${DateKey}`
+import { isDate } from '../data/data-type'
 
 class Dater {
   constructor(date: number | string | Date | Dater) {
@@ -17,89 +13,70 @@ class Dater {
 
   private date!: Date
 
-  private static matchers: Record<string, (date: Date, len: number) => string> = {
-    yyyy: (date: Date) => date.getFullYear() + '',
-    'M+': (date: Date, len: number) => {
-      let month = `${date.getMonth() + 1}`
-      return len === 1 ? month : `0${month}`.slice(-2)
-    },
-    'd+': (date: Date, len: number) => {
-      let day = date.getDate() + ''
-      return len === 1 ? day : `0${day}`.slice(-2)
-    },
-    'h+': (date: Date, len: number) => {
-      let hour = date.getHours()
-      let strHour = (hour > 12 ? hour - 12 : hour) + ''
-      return len === 1 ? strHour : `0${strHour}`.slice(-2)
-    },
-    'H+': (date: Date, len: number) => {
-      let Hour = `${date.getHours()}`
-      return len === 1 ? Hour : `0${Hour}`.slice(-2)
-    },
-    'm+': (date: Date, len: number) => {
-      let mih = `${date.getMinutes()}`
-      return len === 1 ? mih : `0${mih}`.slice(-2)
-    },
-    's+': (date: Date, len: number) => {
-      let sec = `${date.getSeconds()}`
-      return len === 1 ? sec : `0${sec}`.slice(-2)
+  private static matchers: Record<string, (date: Date, len: number) => string> =
+    {
+      yyyy: (date: Date) => date.getFullYear() + '',
+      YYYY: (date: Date) => date.getFullYear() + '',
+      'M+': (date: Date, len: number) => {
+        let month = `${date.getMonth() + 1}`
+        return len === 1 ? month : `0${month}`.slice(-2)
+      },
+      'd+': (date: Date, len: number) => {
+        let day = date.getDate() + ''
+        return len === 1 ? day : `0${day}`.slice(-2)
+      },
+      'h+': (date: Date, len: number) => {
+        let hour = date.getHours()
+        let strHour = (hour > 12 ? hour - 12 : hour) + ''
+        return len === 1 ? strHour : `0${strHour}`.slice(-2)
+      },
+      'H+': (date: Date, len: number) => {
+        let Hour = `${date.getHours()}`
+        return len === 1 ? Hour : `0${Hour}`.slice(-2)
+      },
+      'm+': (date: Date, len: number) => {
+        let mih = `${date.getMinutes()}`
+        return len === 1 ? mih : `0${mih}`.slice(-2)
+      },
+      's+': (date: Date, len: number) => {
+        let sec = `${date.getSeconds()}`
+        return len === 1 ? sec : `0${sec}`.slice(-2)
+      }
     }
-  }
-
-  /**
-   * 返回私有属性
-   * @param key 私有属性
-   * @param value 默认值
-   * @returns
-   */
-  private _get(key: PrivateDateKey, value: number) {
-    let v = this[key]
-    if (v) return v
-    this[key] = value
-    return value
-  }
-
-  private _timestamp?: number
 
   /** 时间戳 */
   get timestamp() {
-    return this._get('_timestamp', this.date.getTime())
+    return this.date.getTime()
   }
 
-  private _year?: number
   /** 年 */
   get year() {
-    return this._get('_year', this.date.getFullYear())
+    return this.date.getFullYear()
   }
 
-  private _month?: number
   /** 月 */
   get month() {
-    return this._get('_month', this.date.getMonth() + 1)
+    return this.date.getMonth() + 1
   }
 
-  private _day?: number
   /** 日 */
   get day() {
-    return this._get('_day', this.date.getDate())
+    return this.date.getDate()
   }
 
-  private _hour?: number
   /** 时 */
   get hour() {
-    return this._get('_hour', this.date.getHours())
+    return this.date.getHours()
   }
 
-  private _minute?: number
   /** 分 */
   get minute() {
-    return this._get('_minute', this.date.getMinutes())
+    return this.date.getMinutes()
   }
 
-  private _second?: number
   /** 秒 */
   get second() {
-    return this._get('_second', this.date.getSeconds())
+    return this.date.getSeconds()
   }
 
   static setMatcher(reg: string, matcher: (date: Date, len: number) => string) {
@@ -149,7 +126,17 @@ class Dater {
    * 比较日期获取日期差
    */
   compare(date: string | Date | number | Dater) {
-    return Math.ceil(Math.abs(this.timestamp - new Dater(date).timestamp) / 86400000)
+    return Math.ceil(
+      Math.abs(this.timestamp - new Dater(date).timestamp) / 86400000
+    )
+  }
+
+  /** 跳转至月尾 */
+  toEndOfMonth(month?: number) {
+    this.date.setMonth(this.month + (month || 0))
+    this.date.setDate(0)
+
+    return this
   }
 }
 
@@ -167,7 +154,10 @@ interface DateFactory {
    * @param reg 匹配器名称
    * @param matcher 匹配器
    */
-  setMatcher: (reg: string, matcher: (date: Date, len: number) => string) => void
+  setMatcher: (
+    reg: string,
+    matcher: (date: Date, len: number) => string
+  ) => void
 }
 
 export const date = <DateFactory>function (date) {

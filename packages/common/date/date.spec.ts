@@ -54,5 +54,8 @@ describe('日期测试', () => {
     expect(d.second).toBe(3)
   })
 
+  it('跳转到月末', () => {
+    expect(date('2022-10-05').toEndOfMonth().day).toBe(31)
+  })
 
 })
