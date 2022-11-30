@@ -14,6 +14,10 @@ import { date } from 'cat-kit'
 date().format()
 ```
 
+::: demo
+  render(common/date/basic)
+:::
+
 ## 格式化 format
 
 前端关于日期格式化最常用的 api
