@@ -36,6 +36,10 @@ jobs:
       - name: install
         run: pnpm install
 
+      # 打包依赖
+      - name: Build Deps
+        run: pnpm dk:build
+
       # 运行构建脚本
       - name: Build
         run: pnpm docs:build
