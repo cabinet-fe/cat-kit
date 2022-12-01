@@ -8,5 +8,5 @@
       "@cat-kit/common": ["packages/common"]
     }
   },
-  "include": ["packages/fe/**/*", "packages/common/**/*"]
+  "include": ["packages/fe/**/*", "packages/common/**/*", "docs/**/*"]
 }

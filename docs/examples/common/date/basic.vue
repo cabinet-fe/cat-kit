@@ -1,7 +1,8 @@
 <template>
- <div>{{ msg }}</div>
+ <!-- 对此刻的日期默认使用yyyy-MM-dd格式化 -->
+ <div>{{ date().format() }}</div>
 </template>
 
 <script lang="ts" setup>
- const msg = 'hello'
+import { date } from 'cat-kit'
 </script>

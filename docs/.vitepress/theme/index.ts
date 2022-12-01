@@ -1,7 +1,7 @@
 import { Theme } from 'vitepress'
 import defaultTheme from 'vitepress/dist/client/theme-default/index'
 import components from '../components'
-import 'prismjs/themes/prism-tomorrow.min.css'
+import 'highlight.js/styles/atom-one-dark.css'
 
 const theme: Theme = {
   ...(defaultTheme as Theme),

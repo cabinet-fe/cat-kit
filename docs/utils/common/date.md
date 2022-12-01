@@ -7,13 +7,6 @@
 
 ## 快速使用
 
-```ts
-import { date } from 'cat-kit'
-
-// 对此刻的日期默认使用yyyy-MM-dd格式化
-date().format()
-```
-
 ::: demo
   render(common/date/basic)
 :::
@@ -22,22 +15,9 @@ date().format()
 
 前端关于日期格式化最常用的 api
 
-```ts
-import { date } from 'cat-kit'
-
-// 对此刻的日期默认使用yyyy-MM-dd格式化
-date().format()
-
-// 可以传入一个日期， 日期对象， 时间戳或者由date()生成的对象
-date('2022-02-14').format('yyyy/MM/dd')
-// 2022/02/14
-
-date(1644796800000).format('yyyy/MM/dd')
-// 2022/02/14
-
-date(1644796800000).format('yyyy-MM-dd hh:mm:ss')
-// 2022-02-14 08:00:00
-```
+::: demo
+render(common/date/format)
+:::
 
 ## 格式化匹配器
 
@@ -57,79 +37,46 @@ matchers 是 date 所返回的构造函数上的一个静态属性，数据是�
 
 你也可以自己添加格式化匹配器。
 
-```ts
-// 这是一个增加了周几替换的匹配器
-date.setMatcher('w+', (date: Date, len: number) => {
-  if (len === 1) {
-    return '' + date.getDay()
-  } else {
-    return '0' + date.getDay()
-  }
-})
+::: demo
+render(common/date/matcher)
+:::
 
-date('2022-02-14').format('w')
-// return 1
-date('2022-02-14').format('ww')
-// return 01
-```
 
 ## 获取时间戳
 
 时间戳是一个属性，在你第一次访问它时用原生 date 的 getTime()方法获取，后续的获取方式则直接是从缓存中获取。
 
-```ts
-// 时间戳（毫秒）
-date().timestamp
-```
+::: demo
+render(common/date/timestamp)
+:::
+
 
 ## 日期计算
 
 有时候，你需要计算相对某个时间的相对天数或者月数的日期，你可以使用 calc api.
 
-```ts
-date('2022-02-14').calc(10, 'days').format()
-// 2022-02-24
-
-date('2022-02-14').calc(-10, 'days').format()
-// 2022-02-04
-
-date('2022-02-14').calc(1, 'months').format()
-// 2022-03-14
-
-date('2022-02-14').calc(1, 'weeks').format()
-// 2022-02-21
-```
+::: demo
+render(common/date/calc)
+:::
 
 ## 日期比较
 
 如果你想知道两个日期之间差了多少天， 你可以使用 compare api
 
-```ts
-date('2022-02-14').compare('2022-03-14')
-// 28
-```
+::: demo
+render(common/date/compare)
+:::
 
 ## 跳转至月末
 
 有时候你想要获取某个月一共有多少天, 你可以进行月份跳转
 
-做万年历的时候挺有用的
+也许做万年历的时候挺有用的
 
-```ts
-date('2022-10').toEndOfMonth().month
-date('2022-10-15').toEndOfMonth().month
-// 31
 
-date().toEndOfMonth().month
-// 当月的最后一天
-
-date().toEndOfMonth(10).month
-// 10个月后的最后一天
-
-date().toEndOfMonth(-2).month
-// 2个月之前的最后一天
-```
-
+::: demo
+render(common/date/month-end)
+:::
 
 ## 获取年月日时分秒
 
@@ -137,40 +84,16 @@ date().toEndOfMonth(-2).month
 
 处理了月份从 0 开始的问题
 
-```ts
-let d = date('2022-02-14 01:02:03')
-d.year
-// 2022
-
-d.month
-// 2
-
-d.day
-// 14
-
-d.hour
-// 1
-
-d.minute
-// 2
-
-d.second
-// 3
-```
+::: demo
+render(common/date/quick-prop)
+:::
 
 ## 插件
 
 一个插件就是一个函数， 该函数接受一个 Date 上下文参数, 可以用来设置匹配器等等
 虽然可以直接操作 Dater 的 api，但可以使用插件机制来更好的组织你的代码
 
-```ts
-date.use(ctx => {
-  ctx.setMatcher('w+', (date: Date, len: number) => {
-    if (len === 1) {
-      return '' + date.getDay()
-    } else {
-      return '0' + date.getDay()
-    }
-  })
-})
-```
+::: demo
+render(common/date/plugins)
+:::
+

@@ -1,11 +1,31 @@
 <template>
-  <ClientOnly v-if="visibleExample">
-    <component v-if="demos" :is="_demos[path]" v-bind="$attrs" />
+  <ul class="menus">
+    <li
+      class="menu-item"
+      :class="{
+        'menu-item--active': visibleType === key
+      }"
+      v-for="(menu, key) of menus"
+      :key="key"
+      @click="handleClick(key)"
+    >
+      {{ menu }}
+    </li>
+  </ul>
+
+  <!-- 显示示例 -->
+  <ClientOnly v-if="visibleType === 'example'">
+    <div class="demo-box">
+      <component v-if="demos" :is="_demos[path]" v-bind="$attrs" />
+    </div>
   </ClientOnly>
 
-  <div v-else v-html="decodedCode"></div>
-
-  <button @click="visibleExample = !visibleExample">点击</button>
+  <!-- 源代码 -->
+  <div
+    v-else-if="visibleType === 'code'"
+    class="language-html"
+    v-html="decodedCode"
+  ></div>
 </template>
 
 <script lang="ts" setup>
@@ -27,10 +47,20 @@ const props = defineProps({
   }
 })
 
-const visibleExample = shallowRef(true)
+const menus = {
+  code: '代码',
+  example: '查看示例'
+}
+
+type VisibleType = keyof typeof menus
+
+const visibleType = shallowRef<VisibleType>('code')
+
+const handleClick = (type: VisibleType) => {
+  visibleType.value = type
+}
 
 const decodedCode = computed(() => {
-  console.log(props.source)
   return decodeURIComponent(props.source || '')
 })
 
@@ -50,3 +80,38 @@ export default {
   name: 'VDemo'
 }
 </script>
+
+<style scoped>
+.demo-box {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.menus {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: flex-start;
+
+  align-items: center;
+  border-radius: 8px;
+  margin-bottom: -12px;
+}
+
+.menu-item {
+  list-style: none;
+  display: inline;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  padding: 6px 0;
+  margin-right: 12px;
+  color: var(--vp-c-text-2);
+}
+
+.menu-item--active {
+  color: var(--vp-c-brand);
+}
+</style>
