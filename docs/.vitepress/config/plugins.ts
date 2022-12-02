@@ -5,7 +5,9 @@ import path from 'path'
 import fs from 'fs'
 import hljs from 'highlight.js/lib/core'
 import html from 'highlight.js/lib/languages/xml'
+import ts from 'highlight.js/lib/languages/typescript'
 hljs.registerLanguage('html', html)
+hljs.registerLanguage('ts', ts)
 
 const getPath = (tokens: Token[], idx: number, info: 'demo') => {
   while (idx++) {
@@ -20,6 +22,11 @@ const getPath = (tokens: Token[], idx: number, info: 'demo') => {
   }
 }
 
+/**
+ * 渲染成为v-demo组件
+ * @param name 名称
+ * @returns
+ */
 export function demoContainer(name: string): [typeof container, string, { render: RenderRule }] {
   return [container, name, {
     render(tokens, idx) {
@@ -44,9 +51,21 @@ export function demoContainer(name: string): [typeof container, string, { render
 
           const source = fs.readFileSync(sourceAbsolutePath, 'utf-8')
 
+          const html = source.match(/<template>[\s\S\r]*<\/template>/)?.[0] ?? source
+          const scripts = source.match(/(<script[\s\S]*>)([\s\S\r]*)(<\/script>)/)
+          const whiteSpace = source.match(/<\/template>([\s\s\r]*)<script/)?.[1] ?? '\n'
+
+          let scriptBlock = ''
+          if (scripts) {
+            scriptBlock += hljs.highlight(scripts[1], { language: 'html' }).value
+            scriptBlock += hljs.highlight(scripts[2], { language: 'ts' }).value
+            scriptBlock += hljs.highlight(scripts[3], { language: 'html' }).value
+          }
+
           const sourceHTML =
             '<pre v-pre><code>' +
-            hljs.highlight(source, { language: 'html' }).value +
+            hljs.highlight(html, { language: 'html' }).value + whiteSpace +
+            scriptBlock
             '</code></pre>'
 
           return `

@@ -108,17 +108,19 @@ class Dater {
    * @param type 时间步长类别, 默认以天为单位
    */
   calc(timeStep: number, type?: 'days' | 'weeks' | 'months' | 'years') {
-    const { date } = this
+    let { date } = this
     if (type === 'days') {
       return new Dater(this.timestamp + timeStep * 86400000)
     } else if (type === 'weeks') {
       return new Dater(this.timestamp + timeStep * 604800000)
     } else if (type === 'months') {
+      date = new Date(date.getTime())
       date.setMonth(timeStep + date.getMonth())
-      return new Dater(date.getTime())
+      return new Dater(date)
     } else {
+      date = new Date(date.getTime())
       date.setFullYear(timeStep + date.getFullYear())
-      return new Dater(date.getTime())
+      return new Dater(date)
     }
   }
 

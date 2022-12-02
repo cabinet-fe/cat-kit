@@ -5,6 +5,9 @@ import { defineConfig } from 'vite'
 export default defineConfig(({ mode }) => {
   return {
     plugins: [
+      // 改插件的作用是往md文件中插入一个vue的script标签脚本
+      // vitepress检测到这个脚本时会将其作为每一个vue模板的script来用
+      // 详细查看此文档: https://vitepress.vuejs.org/guide/using-vue#script-style-hoisting
       {
         name: 'md-transform',
         enforce: 'pre',
