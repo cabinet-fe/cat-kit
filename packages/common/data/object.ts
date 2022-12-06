@@ -36,12 +36,28 @@ export function pick<T extends Record<string, any>, K extends keyof T>(
 }
 
 /**
+ * 将对象的key设为数组
+ * @param obj 对象
+ * @returns
+ */
+export function objKeys<T extends Record<string, any>>(obj: T) {
+  let keys: Array<keyof T> = []
+  for (const key in obj) {
+    keys.push(key)
+  }
+  return keys
+}
+
+/**
  * 对象映射
  * @param obj 目标对象
  * @param mapper 映射函数
  * @returns
  */
-export function objMap<O, K extends keyof O, R>(obj: O, mapper: (val: O[K], key: K) => R) {
+export function objMap<O extends Record<string, any>, K extends keyof O, R>(
+  obj: O,
+  mapper: (val: O[K], key: K) => R
+) {
   const ret: any = {}
 
   Object.keys(obj).forEach(key => {
@@ -78,7 +94,10 @@ export function extend<S extends Record<string, any>>(
  * @param fn 循环中调用的函数
  * @returns
  */
-export function objEach<O, K extends keyof O>(obj: O, fn: (val: O[K], key: K) => void) {
+export function objEach<O extends Record<string, any>, K extends keyof O>(
+  obj: O,
+  fn: (val: O[K], key: K) => void
+) {
   Object.keys(obj).forEach(key => {
     fn(obj[key as K], key as K)
   })
@@ -86,6 +105,14 @@ export function objEach<O, K extends keyof O>(obj: O, fn: (val: O[K], key: K) =>
 
 class Obj<O extends Record<string, any>, K extends keyof O> {
   constructor(private _source: O) {}
+
+  /**
+   * 获取对象的key
+   * @returns
+   */
+  keys() {
+    return objKeys(this._source)
+  }
 
   /**
    * 获取某些属性的值
@@ -138,4 +165,3 @@ class Obj<O extends Record<string, any>, K extends keyof O> {
 export function obj<O extends Record<string, any>>(o: O) {
   return new Obj(o)
 }
-
