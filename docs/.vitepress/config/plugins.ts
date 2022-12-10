@@ -3,11 +3,10 @@ import type { RenderRule } from 'markdown-it/lib/renderer'
 import type Token from 'markdown-it/lib/token'
 import path from 'path'
 import fs from 'fs'
-import hljs from 'highlight.js/lib/core'
-import html from 'highlight.js/lib/languages/xml'
-import ts from 'highlight.js/lib/languages/typescript'
-hljs.registerLanguage('html', html)
-hljs.registerLanguage('ts', ts)
+import prism from 'prismjs'
+import loadLanguages from 'prismjs/components/index'
+loadLanguages(['typescript'])
+
 
 const getPath = (tokens: Token[], idx: number, info: 'demo') => {
   while (idx++) {
@@ -27,58 +26,79 @@ const getPath = (tokens: Token[], idx: number, info: 'demo') => {
  * @param name 名称
  * @returns
  */
-export function demoContainer(name: string): [typeof container, string, { render: RenderRule }] {
-  return [container, name, {
-    render(tokens, idx) {
-      const token = tokens[idx]
+export function demoContainer(
+  name: string
+): [typeof container, string, { render: RenderRule }] {
+  return [
+    container,
+    name,
+    {
+      render(tokens, idx) {
+        const token = tokens[idx]
 
-      // 开始标签
-      if (token.nesting === 1) {
-        const sourceFilePath = getPath(tokens, idx, 'demo')
+        // 开始标签
+        if (token.nesting === 1) {
+          const sourceFilePath = getPath(tokens, idx, 'demo')
 
-        if (sourceFilePath) {
-          const sourceAbsolutePath = path.resolve(
-            __dirname,
-            '../../examples',
-            `${sourceFilePath}.vue`
-          )
-          const fileExist = fs.existsSync(sourceAbsolutePath)
-
-          if (!fileExist)
-            throw new Error(
-              `<div>要渲染的文件不存在, path: ${sourceAbsolutePath}`
+          if (sourceFilePath) {
+            const sourceAbsolutePath = path.resolve(
+              __dirname,
+              '../../examples',
+              `${sourceFilePath}.vue`
             )
+            const fileExist = fs.existsSync(sourceAbsolutePath)
 
-          const source = fs.readFileSync(sourceAbsolutePath, 'utf-8')
+            if (!fileExist)
+              throw new Error(
+                `<div>要渲染的文件不存在, path: ${sourceAbsolutePath}`
+              )
 
-          const html = source.match(/<template>[\s\S\r]*<\/template>/)?.[0] ?? source
-          const scripts = source.match(/(<script[\s\S]*>)([\s\S\r]*)(<\/script>)/)
-          const whiteSpace = source.match(/<\/template>([\s\s\r]*)<script/)?.[1] ?? '\n'
+            const source = fs.readFileSync(sourceAbsolutePath, 'utf-8')
 
-          let scriptBlock = ''
-          if (scripts) {
-            scriptBlock += hljs.highlight(scripts[1], { language: 'html' }).value
-            scriptBlock += hljs.highlight(scripts[2], { language: 'ts' }).value
-            scriptBlock += hljs.highlight(scripts[3], { language: 'html' }).value
-          }
+            const html =
+              source.match(/<template>[\s\S\r]*<\/template>/)?.[0] ?? source
+            const scripts = source.match(
+              /(<script[\s\S]*>)([\s\S\r]*)(<\/script>)/
+            )
+            const whiteSpace =
+              source.match(/<\/template>([\s\s\r]*)<script/)?.[1] ?? '\n'
 
-          const sourceHTML =
-            '<pre v-pre><code>' +
-            hljs.highlight(html, { language: 'html' }).value + whiteSpace +
-            scriptBlock
-            '</code></pre>'
+            let scriptBlock = ''
+            if (scripts) {
+              scriptBlock += prism.highlight(
+                scripts[1],
+                prism.languages.html,
+                'html'
+              )
+              scriptBlock += prism.highlight(
+                scripts[2],
+                prism.languages.typescript,
+                'typescript'
+              )
+              scriptBlock += prism.highlight(
+                scripts[3],
+                prism.languages.html,
+                'html'
+              )
+            }
 
-          return `
+            const sourceHTML =
+              prism.highlight(html, prism.languages.html, 'html') +
+              whiteSpace +
+              scriptBlock
+
+            return `
             <v-demo :demos="demos" source="${encodeURIComponent(
               sourceHTML
             )}" path="${sourceFilePath}">
           `
-        }
+          }
 
-        return ''
-      } else {
-        return '</v-demo>'
+          return ''
+        } else {
+          return '</v-demo>'
+        }
       }
     }
-  }]
+  ]
 }

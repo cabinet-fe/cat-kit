@@ -10,6 +10,7 @@
     "markdown-it-container": "^3.0.0",
     "@types/markdown-it-container": "^2.0.5",
     "markdown-it": "^13.0.1",
-    "highlight.js": "^11.7.0"
+    "prismjs": "^1.29.0",
+    "@types/prismjs": "^1.26.0"
   }
 }

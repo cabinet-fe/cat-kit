@@ -21,11 +21,9 @@
   </ClientOnly>
 
   <!-- 源代码 -->
-  <div
-    v-else-if="visibleType === 'code'"
-    class="language-html"
-    v-html="decodedCode"
-  ></div>
+  <div v-else-if="visibleType === 'code'">
+    <pre class="language-vue line-numbers"><code v-html="decodedCode"></code></pre>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -113,5 +111,9 @@ export default {
 
 .menu-item--active {
   color: var(--vp-c-brand);
+}
+
+.language-vue {
+  border-radius: 8px;
 }
 </style>
