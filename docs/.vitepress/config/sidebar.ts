@@ -71,7 +71,8 @@ const sidebar: DefaultTheme.Sidebar = {
         { text: 'oauth2', link: '/shared/term/oauth2' },
         { text: 'restful', link: '/shared/term/restful' },
         { text: '工作流', link: '/shared/term/workflow' },
-        { text: '元编程', link: '/shared/term/meta-program' }
+        { text: '元编程', link: '/shared/term/meta-program' },
+        { text: '开源协议', link: '/shared/term/license' }
       ]
     },
     {
