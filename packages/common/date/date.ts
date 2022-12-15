@@ -1,5 +1,7 @@
 import { isDate } from '../data/data-type'
 
+type DateCompareReducer<R> = (year: number, month: number, day: number) => R
+
 class Dater {
   constructor(date: number | string | Date | Dater) {
     if (date instanceof Dater) {
@@ -125,12 +127,28 @@ class Dater {
   }
 
   /**
-   * 比较日期获取日期差
+   *
+   * @param date 日期
+   * @param reducer 处理器
+   * @returns
    */
-  compare(date: string | Date | number | Dater) {
-    return Math.ceil(
-      Math.abs(this.timestamp - new Dater(date).timestamp) / 86400000
-    )
+  compare(date: string | Date | number | Dater): number
+  compare<R>(date: string | Date | number | Dater, reducer: DateCompareReducer<R>): R
+  compare(
+    date: string | Date | number | Dater,
+    reducer?: DateCompareReducer<any>
+  ) {
+    let dater = new Dater(date)
+
+    if (!reducer) {
+      return Math.ceil(Math.abs(this.timestamp - dater.timestamp) / 86400000)
+    }
+
+    const year = Math.abs(this.year - dater.year)
+    const month = Math.abs(this.month - dater.month)
+    const day = Math.abs(this.day - dater.day)
+
+    return reducer(year, month, day)
   }
 
   /** 跳转至月尾 */

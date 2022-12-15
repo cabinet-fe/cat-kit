@@ -10,7 +10,8 @@ const sidebar: DefaultTheme.Sidebar = {
         { text: 'HTTP', link: '/utils/fe/http' },
         { text: '路径', link: '/utils/fe/path' },
         { text: '数据库', link: '/utils/fe/db.md' },
-        { text: '图片', link: '/utils/fe/image' }
+        { text: '图片', link: '/utils/fe/image' },
+        { text: '工作线程', link: '/utils/fe/worker' }
       ]
     },
     {

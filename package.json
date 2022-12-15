@@ -1,6 +1,6 @@
 {
   "name": "cat-kit",
-  "version": "2.0.2",
+  "version": "2.0.4",
   "description": "前后端一体开发工具包",
   "scripts": {
     "prepare": "husky install",

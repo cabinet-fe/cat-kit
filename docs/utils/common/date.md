@@ -63,6 +63,9 @@ render(common/date/calc)
 
 如果你想知道两个日期之间差了多少天， 你可以使用 compare api
 
+默认情况下compare函数传一个参数即另外一个日期时返回的是天数,
+你也可以传入第二个参数, 该参数是一个函数, 改函数有三个参数year, month, day分别代表年月日
+
 ::: demo
 render(common/date/compare)
 :::

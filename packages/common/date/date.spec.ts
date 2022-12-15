@@ -1,5 +1,4 @@
-import { date } from "./date"
-
+import { date } from './date'
 
 describe('日期测试', () => {
   let today = new Date()
@@ -14,7 +13,9 @@ describe('日期测试', () => {
     expect(date().format()).toBe(ymd)
     expect(date().format('yyyy/MM/dd')).toBe(ymd2)
     expect(date('2020-01-01').format('yyyy/MM/dd')).toBe('2020/01/01')
-    expect(date('2020-01-01').format('yyyy-M-d hh:m:ss')).toBe('2020-1-1 08:0:00')
+    expect(date('2020-01-01').format('yyyy-M-d hh:m:ss')).toBe(
+      '2020-1-1 08:0:00'
+    )
   })
 
   it('计算相对此刻日期', () => {
@@ -35,13 +36,18 @@ describe('日期测试', () => {
     })
     expect(date('2022-02-14').format('w')).toBe('1')
     expect(date('2022-02-14').format('ww')).toBe('01')
-
   })
 
   it('日期差', () => {
     expect(date('2022-02-14').compare('2022-02-14 01:00:00')).toBe(1)
     expect(date('2022-02-14').compare('2022-02-15 01:00:00')).toBe(1)
     expect(date('2022-02-14').compare('2022-02-16 23:59:59')).toBe(3)
+
+    expect(
+      date('2022-02-14').compare('2021-01-13', (y, m, d) => {
+        return `${y}年${m}个月${d}天`
+      })
+    ).toBe('1年1个月1天')
   })
 
   it('日期单位', () => {
@@ -57,5 +63,6 @@ describe('日期测试', () => {
   it('跳转到月末', () => {
     expect(date('2022-10-05').toEndOfMonth().day).toBe(31)
   })
+
 
 })
