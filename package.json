@@ -3,7 +3,6 @@
   "version": "2.0.4",
   "description": "前后端一体开发工具包",
   "scripts": {
-    "prepare": "husky install",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "dk:build": "tsx build/index.ts",
@@ -48,7 +47,6 @@
     "@types/node": "^18.11.11",
     "fast-glob": "^3.2.12",
     "fs-extra": "^11.1.0",
-    "husky": "^8.0.2",
     "jsdom": "^20.0.3",
     "rollup": "^3.7.1",
     "rollup-plugin-dts": "^5.0.0",

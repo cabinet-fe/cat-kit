@@ -2,15 +2,16 @@
   <div>单次</div>
   <div>[1, 2, 3, 4]之和为: {{resultOnce}}, 用时{{usedTimeOnce}}ms</div>
 
-
   <hr/>
+
   <div>多次:</div>
   <div><input style="width: 100px; border: 1px solid #eee; padding: 0 4px" v-model="count" /> 个随机数的和为: {{ result }}, 用时{{usedTime}}ms</div>
   <button @click="handleSum" style="color: var(--vp-c-brand)">重新计算</button>
 </template>
 
 <script lang="ts" setup>
-import { runWorkerOnce, runWorker } from 'cat-kit'
+// 可以使用 import { runWorkerOnce, runWorker } from 'cat-kit'
+import { runWorkerOnce, runWorker } from 'cat-kit/fe'
 import { shallowRef } from 'vue'
 
 const url = new URL('./sum.js', import.meta.url)
