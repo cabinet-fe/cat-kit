@@ -25,7 +25,7 @@ const sidebar: DefaultTheme.Sidebar = {
         { text: '数据类型', link: '/utils/common/data-type' },
         { text: '日期', link: '/utils/common/date' },
         { text: '加密', link: '/utils/common/crypto' },
-        { text: '哈希', link: '/utils/common/hash' },
+        { text: '信息摘要', link: '/utils/common/hash' },
         { text: '编解码', link: '/utils/common/codec' }
       ]
     }

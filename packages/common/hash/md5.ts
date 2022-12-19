@@ -49,6 +49,8 @@ export default class MD5 {
     return ((n << s) | (n >>> (32 - s))) + b
   }
 
+
+  // 循环
   private static _md5cycle(x: Int32Array | Uint32Array, k: Int32Array | Uint32Array) {
     let a = x[0]
     let b = x[1]
