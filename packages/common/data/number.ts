@@ -24,11 +24,11 @@ class Num {
         }
       })
     let result = arr.reverse().join('')
-    if(decimal) {
+    if (decimal) {
       decPart = decPart?.substring(0, decimal)
       result = `${result}.${decPart.padEnd(decimal, '0')}`
-    }else {
-      decPart ? result = `${result}.${decPart}` : void 0
+    } else {
+      decPart ? (result = `${result}.${decPart}`) : void 0
     }
     return result
   }
@@ -101,10 +101,10 @@ class Num {
 
   /**
    * 遍历数字
-  */
-   each(fn: (n: number) => void) {
+   */
+  each(fn: (n: number) => void) {
     const { v } = this
-    for(let i = 1; i <= v; i++) {
+    for (let i = 1; i <= v; i++) {
       fn(i)
     }
   }
@@ -118,6 +118,46 @@ interface N {
  * 包裹一个数字以方便
  * @param n 数字
  */
-export const n = <N>function n(n: number) {
+const n = function n(n: number) {
   return new Num(n)
 }
+
+/**
+ * 精确计算
+ * @param expression 计算表达式
+ */
+n.calc = function(expression: string) {
+  const units: Array<{
+    value: string;
+    type: 'number' | 'operator' | 'brackets'
+  }> = []
+
+  const len = expression.length
+  let i = -1
+  let acc = ''
+  while(++i < len) {
+    let char = expression[i]
+
+    if (!isNaN(+char)) {
+      acc += char
+      continue
+    }
+
+    units.push({
+
+    })
+  }
+
+
+  const numbers = expression.split(/[\+-\*\/]/).map(item => item.trim())
+
+  const dotLen = Math.max(...numbers.map(n => {
+    let dotIndex = n.lastIndexOf('.')
+    return dotIndex === -1 ? 0 : n.length - dotIndex - 1
+  }))
+
+  let factor = 10 ** dotLen
+  // 将所有的运算符放大成整数
+}
+
+

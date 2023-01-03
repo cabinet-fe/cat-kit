@@ -11,3 +11,5 @@ export * from './image/image'
 export * from './db/db'
 
 export * from './worker/worker'
+
+export * from './web-api'
