@@ -127,37 +127,35 @@ const n = function n(n: number) {
  * @param expression 计算表达式
  */
 n.calc = function(expression: string) {
-  const units: Array<{
-    value: string;
-    type: 'number' | 'operator' | 'brackets'
-  }> = []
+  // const units: Array<{
+  //   value: string;
+  //   type: 'number' | 'operator' | 'brackets'
+  // }> = []
 
-  const len = expression.length
-  let i = -1
-  let acc = ''
-  while(++i < len) {
-    let char = expression[i]
+  // const len = expression.length
+  // let i = -1
+  // let acc = ''
+  // while(++i < len) {
+  //   let char = expression[i]
 
-    if (!isNaN(+char)) {
-      acc += char
-      continue
-    }
-
-    units.push({
-
-    })
-  }
+  //   if (!isNaN(+char)) {
+  //     acc += char
+  //     continue
+  //   }
 
 
-  const numbers = expression.split(/[\+-\*\/]/).map(item => item.trim())
+  // }
 
-  const dotLen = Math.max(...numbers.map(n => {
-    let dotIndex = n.lastIndexOf('.')
-    return dotIndex === -1 ? 0 : n.length - dotIndex - 1
-  }))
 
-  let factor = 10 ** dotLen
-  // 将所有的运算符放大成整数
+  // const numbers = expression.split(/[\+-\*\/]/).map(item => item.trim())
+
+  // const dotLen = Math.max(...numbers.map(n => {
+  //   let dotIndex = n.lastIndexOf('.')
+  //   return dotIndex === -1 ? 0 : n.length - dotIndex - 1
+  // }))
+
+  // let factor = 10 ** dotLen
+  // // 将所有的运算符放大成整数
 }
 
-
+export { n }
