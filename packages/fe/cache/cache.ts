@@ -56,7 +56,7 @@ class WebStorage {
 
   // 获取对应的字段
   get<T>(key: CacheKey<T>): T | null
-  get<T>(key: CacheKey<T>, defaultValue: Partial<T>): Partial<T>
+  get<T>(key: CacheKey<T>, defaultValue: T): T
   get<T extends [...any[]]>(keys: [...T]): { [I in keyof T]: ExtractCacheKey<T[I]> }
   get(key: any, defaultValue: any = null) {
     let type = getDataType(key)
@@ -175,3 +175,7 @@ export class WebCache {
     return _cache
   }
 }
+
+
+let cache = WebCache.create('session')
+let r = cache.get(cacheKey<string[]>('aa'))
