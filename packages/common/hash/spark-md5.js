@@ -1,4 +1,4 @@
-'use strict'
+
 
   /*
    * Fastest md5 implementation around (JKM md5).

@@ -2,7 +2,7 @@
  * @Author: whj
  * @Date: 2022-08-12 13:44:02
  * @LastEditors: whj
- * @LastEditTime: 2023-01-19 16:22:46
+ * @LastEditTime: 2023-01-29 17:08:37
  * @FilePath: /cat-kit/docs/utils/common/codec.md
  *
 -->
@@ -37,6 +37,9 @@ Base64 是基于 64 个字符来表示**二进制**数据的编码方法.
 
 3. 将每组的二进制转化为10进制并从字符表中映射出来, 每组长度不足4的补=号补到4: [['24', '22', '9', '35'], ['25', '6', '20']] -> [['Y', 'W', 'J', 'j'], ['Z', 'G', 'U', '=']]
 
+解码原理:
+解码是编码的逆过程
 
-
-##
+::: demo
+render(utils/common/codec/base64)
+:::

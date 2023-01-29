@@ -9,7 +9,7 @@
 先看一下以下的基础示例
 
 :::demo
-render(fe/worker/basic)
+render(utils/fe/worker/basic)
 :::
 
 可以看到启动工作线程是有代价的, 在以上的示例中, 他甚至比计算本身的耗时还要多得多, 这意味着你如果

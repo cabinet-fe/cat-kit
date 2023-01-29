@@ -36,3 +36,22 @@ features:
 
 footer: MIT Licensed | © 2022-PRESENT 元和前端
 ---
+
+<script setup>
+import { VPTeamMembers } from 'vitepress/theme'
+
+const members = [
+  {
+    avatar: 'https://www.github.com/cabinet-fe.png',
+    name: '前端小分队',
+    title: '开发成员',
+    links: [
+      { icon: 'github', link: 'https://github.com/cabinet-fe' }
+    ]
+  }
+]
+</script>
+
+<br>
+
+<VPTeamMembers size="small" :members="members" />

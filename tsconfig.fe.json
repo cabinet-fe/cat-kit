@@ -8,5 +8,10 @@
       "@cat-kit/common": ["packages/common"]
     }
   },
-  "include": ["packages/fe/**/*", "packages/common/**/*", "docs/**/*"]
+  "include": [
+    "packages/fe/**/*",
+    "packages/common/**/*",
+    "docs/**/*",
+    "docs/.vitepress/plugins/*.ts"
+  ]
 }

@@ -8,7 +8,7 @@
 ## 快速使用
 
 ::: demo
-  render(common/date/basic)
+  render(utils/common/date/basic)
 :::
 
 ## 格式化 format
@@ -16,7 +16,7 @@
 前端关于日期格式化最常用的 api
 
 ::: demo
-render(common/date/format)
+render(utils/common/date/format)
 :::
 
 ## 格式化匹配器
@@ -38,7 +38,7 @@ matchers 是 date 所返回的构造函数上的一个静态属性，数据是�
 你也可以自己添加格式化匹配器。
 
 ::: demo
-render(common/date/matcher)
+render(utils/common/date/matcher)
 :::
 
 
@@ -47,7 +47,7 @@ render(common/date/matcher)
 时间戳是一个属性，在你第一次访问它时用原生 date 的 getTime()方法获取，后续的获取方式则直接是从缓存中获取。
 
 ::: demo
-render(common/date/timestamp)
+render(utils/common/date/timestamp)
 :::
 
 
@@ -56,7 +56,7 @@ render(common/date/timestamp)
 有时候，你需要计算相对某个时间的相对天数或者月数的日期，你可以使用 calc api.
 
 ::: demo
-render(common/date/calc)
+render(utils/common/date/calc)
 :::
 
 ## 日期比较
@@ -67,7 +67,7 @@ render(common/date/calc)
 你也可以传入第二个参数, 该参数是一个函数, 改函数有三个参数year, month, day分别代表年月日
 
 ::: demo
-render(common/date/compare)
+render(utils/common/date/compare)
 :::
 
 ## 跳转至月末
@@ -78,7 +78,7 @@ render(common/date/compare)
 
 
 ::: demo
-render(common/date/month-end)
+render(utils/common/date/month-end)
 :::
 
 ## 获取年月日时分秒
@@ -88,7 +88,7 @@ render(common/date/month-end)
 处理了月份从 0 开始的问题
 
 ::: demo
-render(common/date/quick-prop)
+render(utils/common/date/quick-prop)
 :::
 
 ## 插件
@@ -97,6 +97,6 @@ render(common/date/quick-prop)
 虽然可以直接操作 Dater 的 api，但可以使用插件机制来更好的组织你的代码
 
 ::: demo
-render(common/date/plugins)
+render(utils/common/date/plugins)
 :::
 

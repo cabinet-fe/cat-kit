@@ -22,7 +22,9 @@
 
   <!-- 源代码 -->
   <div v-else-if="visibleType === 'code'">
-    <pre class="language-vue line-numbers"><code v-html="decodedCode"></code></pre>
+    <pre
+      class="language-vue line-numbers"
+    ><code v-html="decodedCode"></code></pre>
   </div>
 </template>
 
@@ -46,13 +48,13 @@ const props = defineProps({
 })
 
 const menus = {
-  code: '代码',
-  example: '查看示例'
+  example: '示例',
+  code: '查看代码'
 }
 
 type VisibleType = keyof typeof menus
 
-const visibleType = shallowRef<VisibleType>('code')
+const visibleType = shallowRef<VisibleType>('example')
 
 const handleClick = (type: VisibleType) => {
   visibleType.value = type

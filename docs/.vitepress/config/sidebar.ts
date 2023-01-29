@@ -61,6 +61,13 @@ const sidebar: DefaultTheme.Sidebar = {
         { text: '概要', link: '/lab/pattern/' },
         { text: '观察者', link: '/lab/pattern/watcher' }
       ]
+    },
+    {
+      text: 'JS进阶',
+      items: [
+        { text: '概要', link: '/lab/advance/' },
+        { text: '位运算', link: '/lab/advance/bit-opt' }
+      ]
     }
   ],
 
