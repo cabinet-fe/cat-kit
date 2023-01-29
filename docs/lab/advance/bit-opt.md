@@ -18,6 +18,8 @@
 | >>>    | 零填充向右移位 |                             |
 
 
+<!-- https://cloud.tencent.com/developer/article/2109601#:~:text=%E5%B8%B8%E7%94%A8%E5%9C%BA%E6%99%AF%EF%BC%9A%20%E6%8C%89%E4%BD%8D%E4%B8%8E%E8%BF%90%E7%AE%97%E9%80%9A%E5%B8%B8%E7%94%A8%E6%9D%A5%E5%AF%B9%E6%9F%90%E4%BA%9B%E4%BD%8D%E6%B8%85%200%EF%BC%8C%E6%88%96%E8%80%85%E4%BF%9D%E7%95%99%E6%9F%90%E4%BA%9B%E4%BD%8D%E3%80%82%20%E4%BE%8B%E5%A6%82%E8%A6%81%E6%8A%8A%20n%20%E7%9A%84%E9%AB%98%2016%20%E4%BD%8D%E6%B8%85,0000%200000%20%E2%80%93%201111%201111%20%E2%80%93%201111%201111%EF%BC%89%E3%80%82 -->
+<!-- https://www.zhihu.com/question/38206659 -->
 
 ::: demo
 render(lab/advance/bit-opt/basic)
