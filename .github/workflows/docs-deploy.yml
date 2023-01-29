@@ -38,7 +38,7 @@ jobs:
 
       # 打包依赖
       - name: Build Deps
-        run: pnpm dk:build
+        run: pnpm kit:build
 
       # 运行构建脚本
       - name: Build
