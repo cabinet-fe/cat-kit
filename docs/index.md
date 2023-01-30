@@ -37,7 +37,7 @@ features:
 footer: MIT Licensed | © 2022-PRESENT 元和前端
 ---
 
-<script setup>
+<!-- <script setup>
 import { VPTeamMembers } from 'vitepress/theme'
 
 const members = [
@@ -54,4 +54,4 @@ const members = [
 
 <br>
 
-<VPTeamMembers size="small" :members="members" />
+<VPTeamMembers size="small" :members="members" /> -->

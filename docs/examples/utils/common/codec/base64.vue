@@ -1,11 +1,3 @@
-<!--
- * @Author: whj
- * @Date: 2023-01-29 10:14:01
- * @LastEditors: whj
- * @LastEditTime: 2023-01-29 11:17:37
- * @FilePath: /cat-kit/docs/examples/common/codec/base64.vue
- *
--->
 <template>
   <div>
 

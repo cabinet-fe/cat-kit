@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-import { date } from 'cat-kit'
+import { date } from '@cat-kit/fe'
 
 const d = date('2022-02-14')
 </script>

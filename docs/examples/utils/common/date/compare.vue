@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import { date } from 'cat-kit'
+import { date } from '@cat-kit/fe'
 
 // 可以使用第二个参数来达到更加个性化的需求
 const dis = date('2022-02-14').compare('2025-03-10', (y, m, d) => {

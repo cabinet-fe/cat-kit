@@ -2,7 +2,7 @@
  * @Author: whj
  * @Date: 2022-11-30 15:13:29
  * @LastEditors: whj
- * @LastEditTime: 2023-01-29 17:31:05
+ * @LastEditTime: 2023-01-30 10:08:19
  * @FilePath: /cat-kit/docs/vite.config.ts
  *
  */
@@ -15,13 +15,13 @@ export default defineConfig(({ mode }) => {
     plugins: [
       DemoPlugin(),
 
-      SearchPlugin({
-        previewLength: 62,
-        buttonLabel: '查询',
-        placeholder: '查询文档',
-        cache: true,
-        optimize: true
-      })
+      // SearchPlugin({
+      //   previewLength: 62,
+      //   buttonLabel: '查询',
+      //   placeholder: '查询文档',
+      //   cache: true,
+      //   optimize: true
+      // })
     ]
   }
 })

@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { readFile, ReadType, n } from 'cat-kit/fe'
+import { readFile, ReadType, n } from '@cat-kit/fe'
 import { computed, shallowRef, watch } from 'vue'
 
 const readType = shallowRef<ReadType>('text')

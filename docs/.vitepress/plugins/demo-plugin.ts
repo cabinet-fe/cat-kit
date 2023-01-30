@@ -2,7 +2,7 @@
  * @Author: whj
  * @Date: 2023-01-29 16:31:57
  * @LastEditors: whj
- * @LastEditTime: 2023-01-29 17:36:30
+ * @LastEditTime: 2023-01-30 10:23:57
  * @FilePath: /cat-kit/docs/.vitepress/plugins/demo-plugin.ts
  *
  */
@@ -31,12 +31,9 @@ export function DemoPlugin(): PluginOption {
       // 是否存在目标demo文件
       const hasDemos = fs.existsSync(path.resolve(examplesPath, modulePath))
       if (!hasDemos) return
-
       // 导入模块下的所有vue文件
       const script = `<script setup>
-        console.log('/examples/${modulePath}/*.vue')
         const demos = import.meta.glob('/examples/${modulePath}/*.vue', { eager: true })
-
         </script>\n`
 
       // 返回一个相对该md文件的相对路径的

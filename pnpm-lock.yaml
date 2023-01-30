@@ -6,12 +6,12 @@ importers:
     specifiers:
       '@rollup/plugin-node-resolve': ^15.0.1
       '@types/fs-extra': ^11.0.1
-      '@types/node': ^18.11.11
+      '@types/node': ^18.11.18
       '@types/prettier': ^2.7.2
       chalk: ^4.1.2
       fast-glob: ^3.2.12
       fs-extra: ^11.1.0
-      jsdom: ^20.0.3
+      jsdom: ^21.1.0
       prettier: 2.8.3
       rollup: ^3.12.0
       rollup-plugin-dts: ^5.1.1
@@ -26,12 +26,12 @@ importers:
     devDependencies:
       '@rollup/plugin-node-resolve': 15.0.1_rollup@3.12.0
       '@types/fs-extra': 11.0.1
-      '@types/node': 18.11.11
+      '@types/node': 18.11.18
       '@types/prettier': 2.7.2
       chalk: registry.npmmirror.com/chalk/4.1.2
       fast-glob: 3.2.12
       fs-extra: 11.1.0
-      jsdom: 20.0.3
+      jsdom: 21.1.0
       prettier: 2.8.3
       rollup: 3.12.0
       rollup-plugin-dts: 5.1.1_tkwgik6422u3whqaozmypsnvni
@@ -39,13 +39,10 @@ importers:
       terser: 5.16.1
       tsx: 3.12.2
       typescript: 4.9.4
-      vite: 4.0.4_eca2p37uyqn4knxdvmruaqjjjq
-      vitepress: 1.0.0-alpha.43_yqm2op5csovzthde2ftrxfgsdq
-      vitest: 0.28.3_jsdom@20.0.3+terser@5.16.1
+      vite: 4.0.4_qfz55zahqkp66vn23sxaaw3yfe
+      vitepress: 1.0.0-alpha.43_dcb2jsuuzfvnl6zl5yfmyynvru
+      vitest: 0.28.3_jsdom@21.1.0+terser@5.16.1
       vue: 3.2.45
-
-  dist:
-    specifiers: {}
 
   docs:
     specifiers:
@@ -58,20 +55,20 @@ importers:
       markdown-it: ^13.0.1
       markdown-it-container: ^3.0.0
       prismjs: ^1.29.0
-      sass: ^1.56.1
-      vitepress-plugin-search: ^1.0.4-alpha.18
+      sass: ^1.57.1
+      vitepress-plugin-search: ^1.0.4-alpha.19
     devDependencies:
       '@cat-kit/be': link:../packages/be
       '@cat-kit/fe': link:../packages/fe
       '@types/markdown-it-container': 2.0.5
       '@types/prismjs': 1.26.0
-      cat-kit: link:../dist
+      cat-kit: link:..
       flexsearch: 0.7.31
       markdown-it: 13.0.1
       markdown-it-container: 3.0.0
       prismjs: 1.29.0
-      sass: 1.56.1
-      vitepress-plugin-search: 1.0.4-alpha.18_6aov2y7qhklkhrlvdjo6ylwiyu
+      sass: 1.57.1
+      vitepress-plugin-search: 1.0.4-alpha.19_7w32iytl4tm7op5nr2j4xxv7cu
 
   packages/be:
     specifiers:
@@ -640,13 +637,13 @@ packages:
     resolution: {integrity: sha512-MxObHvNl4A69ofaTRU8DFqvgzzv8s9yRtaPPm5gud9HDNvpB3GPQFvNuTWAI59B9huVGV5jXYJwbCsmBsOGYWA==}
     dependencies:
       '@types/jsonfile': 6.1.1
-      '@types/node': 18.11.11
+      '@types/node': 18.11.18
     dev: true
 
   /@types/jsonfile/6.1.1:
     resolution: {integrity: sha512-GSgiRCVeapDN+3pqA35IkQwasaCh/0YFH5dEF6S88iDvEn901DjOeH3/QPY+XYP1DFzDZPvIvfeEgk+7br5png==}
     dependencies:
-      '@types/node': 18.11.11
+      '@types/node': 18.11.18
     dev: true
 
   /@types/linkify-it/3.0.2:
@@ -670,8 +667,8 @@ packages:
     resolution: {integrity: sha512-eC4U9MlIcu2q0KQmXszyn5Akca/0jrQmwDRgpAMJai7qBWq4amIQhZyNau4VYGtCeALvW1/NtjzJJ567aZxfKA==}
     dev: true
 
-  /@types/node/18.11.11:
-    resolution: {integrity: sha512-KJ021B1nlQUBLopzZmPBVuGU9un7WJd/W4ya7Ih02B4Uwky5Nja0yGYav2EfYIk0RR2Q9oVhf60S2XR1BCWJ2g==}
+  /@types/node/18.11.18:
+    resolution: {integrity: sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==}
     dev: true
 
   /@types/prettier/2.7.2:
@@ -697,7 +694,7 @@ packages:
       vite: ^4.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 4.0.4_sass@1.56.1
+      vite: 4.0.4_sass@1.57.1
       vue: 3.2.45
     dev: true
 
@@ -1618,8 +1615,8 @@ packages:
     dev: true
     optional: true
 
-  /jsdom/20.0.3:
-    resolution: {integrity: sha512-SYhBvTh89tTfCD/CRdSOm13mOBa42iTaTyfyEWBdKcGdPxPtLFBXuHR8XHb33YNYaP+lLbmSvBTsnoesCNJEsQ==}
+  /jsdom/21.1.0:
+    resolution: {integrity: sha512-m0lzlP7qOtthD918nenK3hdItSd2I+V3W9IrBcB36sqDwG+KnUs66IF5GY7laGWUnlM9vTsD0W1QwSEBYWWcJg==}
     engines: {node: '>=14'}
     peerDependencies:
       canvas: ^2.5.0
@@ -1984,8 +1981,8 @@ packages:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
     dev: true
 
-  /sass/1.56.1:
-    resolution: {integrity: sha512-VpEyKpyBPCxE7qGDtOcdJ6fFbcpOM+Emu7uZLxVrkX8KVU/Dp5UF7WLvzqRuUhB6mqqQt1xffLoG+AndxTZrCQ==}
+  /sass/1.57.1:
+    resolution: {integrity: sha512-O2+LwLS79op7GI0xZ8fqzF7X2m/m8WFfI02dHOdsK5R2ECeS5F62zrwg/relM1rjSLy7Vd/DiMNIvPrQGsA0jw==}
     engines: {node: '>=12.0.0'}
     hasBin: true
     dependencies:
@@ -2197,7 +2194,7 @@ packages:
       requires-port: 1.0.0
     dev: true
 
-  /vite-node/0.28.3_eca2p37uyqn4knxdvmruaqjjjq:
+  /vite-node/0.28.3_qfz55zahqkp66vn23sxaaw3yfe:
     resolution: {integrity: sha512-uJJAOkgVwdfCX8PUQhqLyDOpkBS5+j+FdbsXoPVPDlvVjRkb/W/mLYQPSL6J+t8R0UV8tJSe8c9VyxVQNsDSyg==}
     engines: {node: '>=v14.16.0'}
     hasBin: true
@@ -2209,7 +2206,7 @@ packages:
       picocolors: 1.0.0
       source-map: 0.6.1
       source-map-support: 0.5.21
-      vite: 4.0.4_eca2p37uyqn4knxdvmruaqjjjq
+      vite: 4.0.4_qfz55zahqkp66vn23sxaaw3yfe
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -2220,7 +2217,7 @@ packages:
       - terser
     dev: true
 
-  /vite/4.0.4_eca2p37uyqn4knxdvmruaqjjjq:
+  /vite/4.0.4_qfz55zahqkp66vn23sxaaw3yfe:
     resolution: {integrity: sha512-xevPU7M8FU0i/80DMR+YhgrzR5KS2ORy1B4xcX/cXLsvnUWvfHuqMmVU6N0YiJ4JWGRJJsLCgjEzKjG9/GKoSw==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -2245,7 +2242,7 @@ packages:
       terser:
         optional: true
     dependencies:
-      '@types/node': 18.11.11
+      '@types/node': 18.11.18
       esbuild: 0.16.17
       postcss: 8.4.21
       resolve: 1.22.1
@@ -2255,7 +2252,7 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /vite/4.0.4_sass@1.56.1:
+  /vite/4.0.4_sass@1.57.1:
     resolution: {integrity: sha512-xevPU7M8FU0i/80DMR+YhgrzR5KS2ORy1B4xcX/cXLsvnUWvfHuqMmVU6N0YiJ4JWGRJJsLCgjEzKjG9/GKoSw==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -2284,17 +2281,16 @@ packages:
       postcss: 8.4.21
       resolve: 1.22.1
       rollup: 3.12.0
-      sass: 1.56.1
+      sass: 1.57.1
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
 
-  /vitepress-plugin-search/1.0.4-alpha.18_6aov2y7qhklkhrlvdjo6ylwiyu:
-    resolution: {integrity: sha512-OEWPUL8Wpq7c7Tm5XYdNqUGDiNub33s8S/krOeXufvdLCZsGE0ursaaSoccDXNu4ftE3cQkgSSJwWFVLpjjGLw==}
+  /vitepress-plugin-search/1.0.4-alpha.19_7w32iytl4tm7op5nr2j4xxv7cu:
+    resolution: {integrity: sha512-WFOPn5dStyMINd+rVjNxbEmGa7U+qGHLxLnda56EG+ATil1i0yOauGhJEh5LPMvuCUVIA9tInJnFXklOBb39dA==}
     engines: {node: ^14.13.1 || ^16.7.0 || >=18}
     peerDependencies:
       flexsearch: ^0.7.31
-      vite: 2 || 3 || 4
       vitepress: ^1.0.0-alpha.13
       vue: '3'
     dependencies:
@@ -2302,12 +2298,11 @@ packages:
       '@types/markdown-it': 12.2.3
       flexsearch: 0.7.31
       markdown-it: 13.0.1
-      vite: 4.0.4_sass@1.56.1
-      vitepress: 1.0.0-alpha.43_ywl2mhc3pxwv4zt3sq26gbqum4
+      vitepress: 1.0.0-alpha.43_myo6jkbvm6qeaxh2nvpq4ayobi
       vue: 3.2.45
     dev: true
 
-  /vitepress/1.0.0-alpha.43_yqm2op5csovzthde2ftrxfgsdq:
+  /vitepress/1.0.0-alpha.43_dcb2jsuuzfvnl6zl5yfmyynvru:
     resolution: {integrity: sha512-bguPWYojF371vIfTY8jGmKeFroRe6UVGmDp3+PjTnVq57wTlz9x88OKm6KKF4l/1D7GugkHex5X9wNcOdCmCiQ==}
     hasBin: true
     dependencies:
@@ -2318,7 +2313,7 @@ packages:
       '@vueuse/core': 9.11.1_vue@3.2.45
       body-scroll-lock: 4.0.0-beta.0
       shiki: 0.13.0
-      vite: 4.0.4_eca2p37uyqn4knxdvmruaqjjjq
+      vite: 4.0.4_qfz55zahqkp66vn23sxaaw3yfe
       vue: 3.2.45
     transitivePeerDependencies:
       - '@algolia/client-search'
@@ -2334,7 +2329,7 @@ packages:
       - terser
     dev: true
 
-  /vitepress/1.0.0-alpha.43_ywl2mhc3pxwv4zt3sq26gbqum4:
+  /vitepress/1.0.0-alpha.43_myo6jkbvm6qeaxh2nvpq4ayobi:
     resolution: {integrity: sha512-bguPWYojF371vIfTY8jGmKeFroRe6UVGmDp3+PjTnVq57wTlz9x88OKm6KKF4l/1D7GugkHex5X9wNcOdCmCiQ==}
     hasBin: true
     dependencies:
@@ -2345,7 +2340,7 @@ packages:
       '@vueuse/core': 9.11.1_vue@3.2.45
       body-scroll-lock: 4.0.0-beta.0
       shiki: 0.13.0
-      vite: 4.0.4_sass@1.56.1
+      vite: 4.0.4_sass@1.57.1
       vue: 3.2.45
     transitivePeerDependencies:
       - '@algolia/client-search'
@@ -2361,7 +2356,7 @@ packages:
       - terser
     dev: true
 
-  /vitest/0.28.3_jsdom@20.0.3+terser@5.16.1:
+  /vitest/0.28.3_jsdom@21.1.0+terser@5.16.1:
     resolution: {integrity: sha512-N41VPNf3VGJlWQizGvl1P5MGyv3ZZA2Zvh+2V8L6tYBAAuqqDK4zExunT1Cdb6dGfZ4gr+IMrnG8d4Z6j9ctPw==}
     engines: {node: '>=v14.16.0'}
     hasBin: true
@@ -2385,7 +2380,7 @@ packages:
     dependencies:
       '@types/chai': 4.3.4
       '@types/chai-subset': 1.3.3
-      '@types/node': 18.11.11
+      '@types/node': 18.11.18
       '@vitest/expect': 0.28.3
       '@vitest/runner': 0.28.3
       '@vitest/spy': 0.28.3
@@ -2395,7 +2390,7 @@ packages:
       cac: 6.7.14
       chai: 4.3.7
       debug: 4.3.4
-      jsdom: 20.0.3
+      jsdom: 21.1.0
       local-pkg: 0.4.2
       pathe: 1.1.0
       picocolors: 1.0.0
@@ -2405,8 +2400,8 @@ packages:
       tinybench: 2.3.1
       tinypool: 0.3.1
       tinyspy: 1.0.2
-      vite: 4.0.4_eca2p37uyqn4knxdvmruaqjjjq
-      vite-node: 0.28.3_eca2p37uyqn4knxdvmruaqjjjq
+      vite: 4.0.4_qfz55zahqkp66vn23sxaaw3yfe
+      vite-node: 0.28.3_qfz55zahqkp66vn23sxaaw3yfe
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less

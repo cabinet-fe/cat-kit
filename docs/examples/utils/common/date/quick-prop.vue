@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts" setup>
-import { date } from 'cat-kit'
+import { date } from '@cat-kit/fe'
 import { onBeforeUnmount, shallowRef } from 'vue'
 
 let d = shallowRef(date())

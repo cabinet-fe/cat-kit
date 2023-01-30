@@ -4,7 +4,7 @@
 </template>
 
 <script lang="ts" setup>
-import { date } from 'cat-kit'
+import { date } from '@cat-kit/fe'
 
 // 这是一个增加了周几替换的匹配器
 date.setMatcher('w+', (date: Date, len: number) => {

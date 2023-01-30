@@ -1,12 +1,3 @@
-<!--
- * @Author: whj
- * @Date: 2022-08-12 13:44:02
- * @LastEditors: whj
- * @LastEditTime: 2023-01-29 17:08:37
- * @FilePath: /cat-kit/docs/utils/common/codec.md
- *
--->
-
 # 编解码
 
 编解码在计算机中用于不同信息间的相互转化.

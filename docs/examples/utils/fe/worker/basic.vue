@@ -11,7 +11,7 @@
 
 <script lang="ts" setup>
 // 可以使用 import { runWorkerOnce, runWorker } from 'cat-kit'
-import { runWorkerOnce, runWorker } from 'cat-kit/fe'
+import { runWorkerOnce, runWorker } from '@cat-kit/fe'
 import { shallowRef } from 'vue'
 
 const url = new URL('./sum.js', import.meta.url)

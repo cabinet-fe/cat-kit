@@ -4,8 +4,9 @@
 
 ## 快速使用
 
+
 ```ts
-import { WebCache, cacheKey } from 'cat-kit'
+import { WebCache, cacheKey } from '@cat-kit/fe'
 
 const session = WebCache.create('session')
 const local = WebCache.create('local')

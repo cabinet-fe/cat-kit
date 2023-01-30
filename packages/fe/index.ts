@@ -1,6 +1,6 @@
 export * from '@cat-kit/common'
 
-export * from './cache/cache'
+// export * from './cache/cache'
 
 export * from './http/index'
 

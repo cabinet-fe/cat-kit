@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts" setup>
-import { clipboard } from 'cat-kit/fe'
+import { clipboard } from '@cat-kit/fe'
 import { shallowRef } from 'vue'
 
 const text = shallowRef('')

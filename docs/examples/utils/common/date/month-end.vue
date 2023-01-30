@@ -10,5 +10,5 @@
 </template>
 
 <script lang="ts" setup>
-import { date } from 'cat-kit'
+import { date } from '@cat-kit/fe'
 </script>

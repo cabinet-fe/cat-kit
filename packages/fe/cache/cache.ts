@@ -175,7 +175,3 @@ export class WebCache {
     return _cache
   }
 }
-
-
-let cache = WebCache.create('session')
-let r = cache.get(cacheKey<string[]>('aa'))

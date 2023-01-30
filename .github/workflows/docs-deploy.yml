@@ -33,12 +33,9 @@ jobs:
         with:
           version: latest
 
+      # 安装依赖
       - name: install
         run: pnpm install
-
-      # 打包依赖
-      - name: Build Deps
-        run: pnpm kit:build
 
       # 运行构建脚本
       - name: Build

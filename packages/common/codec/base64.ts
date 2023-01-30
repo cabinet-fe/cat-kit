@@ -1,11 +1,3 @@
-/*
- * @Author: whj
- * @Date: 2022-08-12 14:36:31
- * @LastEditors: whj
- * @LastEditTime: 2023-01-29 11:29:06
- * @FilePath: /cat-kit/packages/common/codec/base64.ts
- *
- */
 import { getDataType } from '../data/data-type'
 
 /** 字符映射表 */
