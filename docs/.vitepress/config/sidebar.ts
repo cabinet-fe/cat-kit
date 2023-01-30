@@ -66,7 +66,8 @@ const sidebar: DefaultTheme.Sidebar = {
       text: 'JS进阶',
       items: [
         { text: '概要', link: '/lab/advance/' },
-        { text: '位运算', link: '/lab/advance/bit-opt' }
+        { text: '位运算', link: '/lab/advance/bit-opt' },
+        { text: '类型化数组', link: '/lab/advance/typed-array' }
       ]
     }
   ],
