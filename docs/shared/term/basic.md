@@ -30,8 +30,52 @@
 而十进制则是逢十进一, 每位数最高能达到 9.
 
 ### 机器数
-值转化后的二进制数, 根据对二进制数的不同解析方式(视图)可以得出不同的值.
-比如1000 0001既可以表示-1(Int8)也可以表示129(Uint8)
+存在计算机中的数据的二进制数字(0和1), 根据对二进制数的不同解析方式(视图)可以得出不同的值.
+
+上面的解释通俗点讲就是: [00000001, 00000001]两个连续的单字节(8位), 如果按照1个字节去转化成10进制数字就是[1, 1],
+如果按照2个字节去转化成10进制数就是[257]
+
+
+### 真值
+顾名思义,真值指机器数所表示的真正值.
+
+如果学过一门强类型语言, 会发现他们的数字类型中会有Uint和Int之分, 实际上Uint表示无符号整形, Int表示有符号整形, 这里的符号就是正(+)和负(-),
+用最高位来表示.
+
+C语言示例:
+```c
+#include <stdio.h>
+int main()
+{
+  char a = -5;
+  printf("%d\n", a);
+  // 输出-5
+
+  unsigned char b = -66;
+  printf("%d\n", b);
+  // 期望输出-66, 实际输出190
+}
+```
+Go语言示例:
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+  // 有符号整形范围-128 ~ 127
+	var n1 int8 = 128
+  // 有符号整形范围0 ~ 255
+	var n2 uint8 = -1
+	fmt.Println(n1)
+	fmt.Println(n2)
+}
+
+// 编译器报以下错误
+// ./go.go:6:16: cannot use 128 (untyped int constant) as int8 value in variable declaration (overflows)
+// ./go.go:7:17: cannot use -1 (untyped int constant) as uint8 value in variable declaration (overflows)
+```
 
 ### 原码
 

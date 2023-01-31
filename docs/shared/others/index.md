@@ -47,3 +47,9 @@ title: 其他分享
 
 ## PDF
 [xournalpp](https://github.com/xournalpp/xournalpp/), 可以标注PDF手绘等等
+
+## SemVer 语义化版本控制
+[SemVer 2.0](https://semver.org/lang/zh-CN/)
+
+## E2E 端到端测试
+[Playwright](https://playwright.dev/)
