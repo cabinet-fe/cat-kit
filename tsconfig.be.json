@@ -3,5 +3,8 @@
   "compilerOptions": {
     "composite": true
   },
-  "include": ["packages/be/**/*"]
+  "include": [
+    "packages/be/**/*",
+    "docs/vite.config.ts"
+  ]
 }
