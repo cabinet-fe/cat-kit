@@ -1,6 +1,10 @@
-import { getDataType } from "@cat-kit/common"
+import { getDataType } from '@cat-kit/common'
 
-type Callback<T = any> = (key: CacheKey<T>, value?: T, temp?: { value: T; exp: number }) => void
+type Callback<T = any> = (
+  key: CacheKey<T>,
+  value?: T,
+  temp?: { value: T; exp: number }
+) => void
 
 export interface CacheKey<T = any> extends String {}
 
@@ -10,20 +14,23 @@ export function cacheKey<T>(str: string) {
 
 export type ExtractCacheKey<T> = T extends CacheKey<infer K> ? K : never
 class WebStorage {
-  private store!: Storage
+  #store: Storage
 
-  static enabledType: Set<string> = new Set(['string', 'number', 'object', 'boolean', 'bigint'])
+  static enabledType: Set<string> = new Set([
+    'string',
+    'number',
+    'object',
+    'boolean',
+    'bigint'
+  ])
 
   callbacks: { [key: string]: Callback[] } = {}
 
   constructor(storageType: 'local' | 'session') {
     if (storageType === 'local') {
-      this.store = localStorage
-      return
-    }
-    if (storageType === 'session') {
-      this.store = sessionStorage
-      return
+      this.#store = localStorage
+    } else {
+      this.#store = sessionStorage
     }
   }
 
@@ -50,18 +57,20 @@ class WebStorage {
     if (this.callbacks[key as string]) {
       this.callbacks[key as string].forEach(fn => fn(key, value, temp))
     }
-    this.store.setItem(key as string, JSON.stringify(temp))
+    this.#store.setItem(key as string, JSON.stringify(temp))
     return this
   }
 
   // 获取对应的字段
   get<T>(key: CacheKey<T>): T | null
   get<T>(key: CacheKey<T>, defaultValue: T): T
-  get<T extends [...any[]]>(keys: [...T]): { [I in keyof T]: ExtractCacheKey<T[I]> }
+  get<T extends [...any[]]>(
+    keys: [...T]
+  ): { [I in keyof T]: ExtractCacheKey<T[I]> }
   get(key: any, defaultValue: any = null) {
     let type = getDataType(key)
     if (type === 'string') {
-      let stringTmp = this.store.getItem(key as string)
+      let stringTmp = this.#store.getItem(key as string)
 
       // 如果未查到此项
       if (stringTmp === null) return defaultValue
@@ -80,7 +89,9 @@ class WebStorage {
       return key.map((v: string) => this.get(v))
     }
 
-    throw Error(`get第一个参数的类型应该是string或者array, 但传入的值是${type}类型`)
+    throw Error(
+      `get第一个参数的类型应该是string或者array, 但传入的值是${type}类型`
+    )
   }
 
   /**
@@ -88,7 +99,7 @@ class WebStorage {
    * @param key 字段名
    */
   getExpire<T>(key: CacheKey<T>): number {
-    let stringTmp = this.store.getItem(key as string)
+    let stringTmp = this.#store.getItem(key as string)
     // 如果未查到此项
     if (stringTmp === null) return 0
     try {
@@ -114,9 +125,9 @@ class WebStorage {
   remove(): WebStorage
   remove(item?: any) {
     if (item === undefined) {
-      this.store.clear()
+      this.#store.clear()
     } else if (typeof item === 'string') {
-      this.store.removeItem(item)
+      this.#store.removeItem(item)
     } else if (Array.isArray(item)) {
       item.forEach(key => this.remove(key))
     }
@@ -162,16 +173,26 @@ class WebStorage {
 }
 
 export class WebCache {
-  private static session: any = null
-  private static local: any = null
+  static #local: WebStorage | null = null
+  static #session: WebStorage | null = null
+
+  static get session() {
+    if (WebCache.#session) {
+      return WebCache.#session
+    }
+    WebCache.#session = new WebStorage('session')
+    return WebCache.#session
+  }
+
+  static get local() {
+    if (WebCache.#local) {
+      return WebCache.#local
+    }
+    WebCache.#local = new WebStorage('local')
+    return WebCache.#local
+  }
 
   static create(type: 'session' | 'local') {
-    let cache = WebCache[type]
-    if (cache !== null) {
-      return cache as WebStorage
-    }
-    let _cache = new WebStorage(type)
-    WebCache[type] = _cache
-    return _cache
+    return WebCache[type]
   }
 }
