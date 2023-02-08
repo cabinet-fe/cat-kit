@@ -2,7 +2,7 @@
  * @Author: whj
  * @Date: 2022-11-11 10:26:12
  * @LastEditors: whj
- * @LastEditTime: 2023-01-29 10:15:04
+ * @LastEditTime: 2023-02-08 16:31:12
  * @FilePath: /cat-kit/packages/common/index.ts
  *
  */
@@ -14,9 +14,11 @@ export * from './data/common'
 
 export * from './data/object'
 
-export * from './date/date'
+export * from './data/string'
 
 export * from './data/number'
+
+export * from './date/date'
 
 export * from './optimize'
 

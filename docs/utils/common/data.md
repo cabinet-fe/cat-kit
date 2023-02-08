@@ -255,7 +255,7 @@ obj({ name: '李四', age: 20 }).omit(['name'])
 
 数字操作通常用来恢复精度, 转化不同的使用方式(比如货币, 使用货币时会被转化为字符串, 并用分隔符分割千分位)
 
-fe-sdk 中提供了一个包装函数**n**来包裹数字.
+cat-kit 中提供了一个包装函数**n**来包裹数字.
 
 ### n(num).fixed(n)
 
@@ -292,6 +292,33 @@ n(3).each(v => {
   console.log(v)
 })
 //log 1,2,3
+```
+
+## 字符串操作
+
+
+### kebabCase 大小驼峰转kebab-case
+
+```ts
+import { kebabCase } from 'cat-kit'
+
+kebabCase('aaBbCc')
+// 返回aa-bb-cc
+kebabCase('AaBbCc')
+// 返回aa-bb-cc
+```
+
+### camelCase kebab-case转大小驼峰
+
+```ts
+import { camelCase } from 'cat-kit'
+
+camelCase('aa-bb-cc')
+// 返回aaBbCc
+camelCase('aa-bb-cc', 'lower')
+// 返回aaBbCc
+camelCase('aa-bb-cc', 'upper')
+// 返回AaBbCc
 ```
 
 ## 静态资源
