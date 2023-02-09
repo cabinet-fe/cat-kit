@@ -10,7 +10,6 @@ export const copy = () => {
   ~['scripts', 'devDependencies'].forEach(key => {
     delete obj[key]
   })
-  obj.type = 'module'
 
   writeFileSync(
     path.resolve(OUTPUT, 'package.json'),
