@@ -6,10 +6,10 @@ type Callback<T = any> = (
   temp?: { value: T; exp: number }
 ) => void
 
-export interface CacheKey<T = any> extends String {}
+export interface CacheKey<T> extends String {}
 
-export function cacheKey<T>(str: string) {
-  return str as CacheKey<T>
+export function cacheKey<T>(str: string): CacheKey<T> {
+  return str
 }
 
 export type ExtractCacheKey<T> = T extends CacheKey<infer K> ? K : never
@@ -54,10 +54,11 @@ class WebStorage {
     temp.exp = exp ? Date.now() + exp * 1000 : 0
 
     // 如果有绑定回调则此处出发回调
-    if (this.callbacks[key as string]) {
-      this.callbacks[key as string].forEach(fn => fn(key, value, temp))
-    }
+    const cb = this.callbacks[key as string]
+    cb?.forEach(fn => fn(key, value, temp))
+
     this.#store.setItem(key as string, JSON.stringify(temp))
+
     return this
   }
 
@@ -98,7 +99,7 @@ class WebStorage {
    * 获取字段过期时间
    * @param key 字段名
    */
-  getExpire<T>(key: CacheKey<T>): number {
+  getExpire(key: CacheKey<any>): number {
     let stringTmp = this.#store.getItem(key as string)
     // 如果未查到此项
     if (stringTmp === null) return 0
@@ -113,12 +114,12 @@ class WebStorage {
    * 移除一个缓存值
    * @param key 需要移除的值的键
    */
-  remove(key: CacheKey): WebStorage
+  remove<T>(key: CacheKey<any>): WebStorage
   /**
    * 移除多个缓存值
    * @param keys 需要移除的值的键的数组
    */
-  remove(keys: CacheKey[]): WebStorage
+  remove(keys: CacheKey<any>[]): WebStorage
   /**
    * 清空缓存
    */
@@ -140,8 +141,10 @@ class WebStorage {
    * @param callback 回调函数
    */
   on(key: string, callback: Callback): void {
-    if (this.callbacks[key]) {
-      this.callbacks[key].push(callback)
+    const cbs = this.callbacks[key]
+
+    if (cbs) {
+      cbs.push(callback)
     } else {
       this.callbacks[key] = [callback]
     }

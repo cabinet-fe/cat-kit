@@ -3,15 +3,13 @@
   "compilerOptions": {
     "composite": true,
     "lib": ["ESNext", "DOM"],
-    "jsx": "preserve",
-    "paths": {
-      "@cat-kit/common": ["packages/common"]
-    }
+    "target": "ES2018",
+    "baseUrl": "."
   },
   "include": [
-    "packages/fe/**/*",
-    "packages/common/**/*",
-    "docs/**/*",
+    "packages/fe/",
+    "packages/common/",
+    "docs/",
     "docs/.vitepress/plugins/*.ts"
   ]
 }

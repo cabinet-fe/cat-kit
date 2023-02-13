@@ -1,6 +1,6 @@
 {
   "name": "cat-kit",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "前后端一体开发工具包",
   "scripts": {
     "docs:dev": "vitepress dev docs",
@@ -43,6 +43,7 @@
   "license": "MIT",
   "bugs": { "url": "https://github.com/cabinet-fe/cat-kit/issues" },
   "devDependencies": {
+    "ts-conf-base": "^1.0.4",
     "@types/fs-extra": "^11.0.1",
     "@types/node": "^18.11.18",
     "fast-glob": "^3.2.12",

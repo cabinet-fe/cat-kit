@@ -4,16 +4,21 @@ const session = WebCache.create('session')
 
 describe('会话缓存', () => {
   let NAME = cacheKey<string>('name')
-  let INFO = cacheKey<{ name: string; age: number }>('INFO')
+  let INFO = cacheKey<{ name: string; age: number; sex: 'male' | 'female' }>(
+    'INFO'
+  )
 
   it('set, get方法', () => {
     session.set(NAME, '张三')
     let name = session.get(NAME)
 
     session.set(INFO, {
+      sex: 'male',
       name: '李四',
       age: 24
     })
+
+
 
     let values = session.get([NAME, INFO])
 
@@ -22,7 +27,8 @@ describe('会话缓存', () => {
       '张三',
       {
         name: '李四',
-        age: 24
+        age: 24,
+        sex: 'male'
       }
     ])
   })

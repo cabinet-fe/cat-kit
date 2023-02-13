@@ -17,6 +17,7 @@ importers:
       rollup-plugin-dts: ^5.1.1
       rollup-plugin-esbuild: ^5.0.0
       terser: 5.16.3
+      ts-conf-base: ^1.0.4
       tsx: ^3.12.2
       typescript: ^4.9.5
       vite: ^4.0.4
@@ -37,6 +38,7 @@ importers:
       rollup-plugin-dts: 5.1.1_2za6rqstu4xegr2hrsgsskkobi
       rollup-plugin-esbuild: 5.0.0_oeuguqy4kv5cjizlgay6saanki
       terser: 5.16.3
+      ts-conf-base: 1.0.4_@types+node@18.11.19
       tsx: 3.12.2
       typescript: 4.9.5
       vite: 4.1.1_akxt3mlquupvdn2keewb3g4hra
@@ -2395,6 +2397,14 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       punycode: 2.3.0
+    dev: true
+
+  /ts-conf-base/1.0.4_@types+node@18.11.19:
+    resolution: {integrity: sha512-05BOMdJj53a1aY2y3zw+RASISHLZA4mXPBvk1x5pNQwkLN3+ISudzlRN/0oe1zno0Nc+p2RSQzoRwmXoX2qlbw==}
+    peerDependencies:
+      '@types/node': '*'
+    dependencies:
+      '@types/node': 18.11.19
     dev: true
 
   /tsx/3.12.2:
