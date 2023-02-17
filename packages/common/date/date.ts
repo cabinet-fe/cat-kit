@@ -98,7 +98,7 @@ class Dater {
   format(formatter = 'yyyy-MM-dd') {
     Object.keys(Dater.matchers).forEach(reg => {
       formatter = formatter.replace(new RegExp(`(${reg})`), str => {
-        return Dater.matchers[reg](this.date, str.length)
+        return Dater.matchers[reg]!(this.date, str.length)
       })
     })
     return formatter

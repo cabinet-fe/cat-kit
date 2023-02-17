@@ -146,6 +146,32 @@ merge({ name: '张三' }, { name: '李四', age: 20 })
 //  return { name: '李四', age: 20 }
 ```
 
+### serialize 对象序列化
+
+对象序列化将对象转化为可传输的字符串
+
+```ts
+serialize({ a: 1 })
+// 'a=1'
+
+serialize({ a: '1' })
+// 'a="1"'
+
+```
+
+### deserialize 反序列化为对象
+
+将字符串转化为对象
+
+```ts
+deserialize('a=1')
+// { a: 1 }
+
+serialize('a="1"')
+// { a: '1' }
+
+```
+
 ## array 操作
 
 提供常用的数组操作

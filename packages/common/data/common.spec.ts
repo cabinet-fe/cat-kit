@@ -1,4 +1,4 @@
-import { isEmpty, getChainValue, oneOf, deepCopy, merge, equal } from './common'
+import { isEmpty, getChainValue, oneOf, deepCopy, merge, equal, serialize, deserialize } from './common'
 
 describe('通用数据操作测试', () => {
   it('isEmpty', () => {
@@ -69,5 +69,16 @@ describe('通用数据操作测试', () => {
       plugins: [{ name: '插件B' }, { name: '插件C' }, { name: '插件A' }],
       mode: 'dev'
     })
+  })
+
+
+  it('serialize', () => {
+    expect(serialize({ a: 1 })).toBe('a=1')
+  })
+
+  it('deserialize', () => {
+    expect(deserialize('a=1')).toEqual({ a: 1 })
+    expect(deserialize('a={"a":1}')).toEqual({ a: { a: 1 } })
+    expect(deserialize('a={"a":"1"}')).toEqual({ a: { a: "1" } })
   })
 })

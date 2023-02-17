@@ -71,7 +71,6 @@ export function deepCopy<T extends any>(this: any, target: T): any {
     return new Function('return ' + (target as Function).toString()).call(this)
   }
   if (isDate(target)) {
-
     return new Date((target as Date).valueOf()) as any
   }
   return target
@@ -132,4 +131,44 @@ export function merge(...args: Record<any, any>[]) {
     mergeTwo(acc, cur)
     return acc
   }, {} as Record<any, any>)
+}
+
+/**
+ * 序列化一个对象至 'key=value&key1=value1' 的形式
+ * @param obj 被序列化的对象
+ */
+export function serialize(obj: Record<string, any>): string {
+  let ret = ''
+  try {
+    Object.keys(obj).forEach((key: string) => {
+      // 如果值为undefined或者null则在字符串中的表现形式就是空串
+      if ([undefined, null].includes(obj[key])) {
+        ret += `${key}=&`
+        return
+      }
+      ret += `${key}=${encodeURIComponent(JSON.stringify(obj[key]))}&`
+    })
+    return ret.slice(0, -1)
+  } catch {
+    console.warn(
+      `期望传入一个object格式数据, 此处传入了一个${getDataType(obj)}格式的数据`
+    )
+    return ''
+  }
+}
+
+/**
+ * 反序列化一个 'key=value&key1=value1' 形式的字符串
+ * 需要用 decodeURIComponent 解码
+ * 需要过滤所有的非正常字段
+ * @param str 被序列化的对象
+ */
+export function deserialize<T extends Record<string, any>>(str: string): T {
+  return decodeURIComponent(str)
+    .split('&')
+    .reduce((acc, cur) => {
+      let [key, val] = cur.split('=')
+      acc[key!] = val ? JSON.parse(val) : val
+      return acc
+    }, {} as Record<string, any>) as T
 }
