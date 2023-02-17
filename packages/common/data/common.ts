@@ -168,7 +168,15 @@ export function deserialize<T extends Record<string, any>>(str: string): T {
     .split('&')
     .reduce((acc, cur) => {
       let [key, val] = cur.split('=')
-      acc[key!] = val ? JSON.parse(val) : val
+      if (val) {
+        try {
+          acc[key!] = JSON.parse(val)
+        } catch {
+          acc[key!] = val
+        }
+      } else {
+        acc[key!] = val
+      }
       return acc
     }, {} as Record<string, any>) as T
 }

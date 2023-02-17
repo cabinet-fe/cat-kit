@@ -77,7 +77,9 @@ describe('通用数据操作测试', () => {
   })
 
   it('deserialize', () => {
+
     expect(deserialize('a=1')).toEqual({ a: 1 })
+    expect(deserialize('a=abc123')).toEqual({ a: 'abc123' })
     expect(deserialize('a={"a":1}')).toEqual({ a: { a: 1 } })
     expect(deserialize('a={"a":"1"}')).toEqual({ a: { a: "1" } })
   })
