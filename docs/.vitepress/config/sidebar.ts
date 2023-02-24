@@ -35,7 +35,6 @@ const sidebar: DefaultTheme.Sidebar = {
   '/lab/': [
     {
       text: '数据结构',
-      collapsible: true,
       items: [
         { text: '概要', link: '/lab/data-structure/' },
         { text: '数组', link: '/lab/data-structure/array' },

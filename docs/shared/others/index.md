@@ -53,3 +53,7 @@ title: 其他分享
 
 ## E2E 端到端测试
 [Playwright](https://playwright.dev/)
+
+## 终端模拟器
+
+tabby[https://tabby.sh/], 一个可以让你在windows上也能用者舒服的模拟器

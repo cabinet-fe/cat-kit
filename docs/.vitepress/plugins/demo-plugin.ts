@@ -2,7 +2,7 @@
  * @Author: whj
  * @Date: 2023-01-29 16:31:57
  * @LastEditors: whj
- * @LastEditTime: 2023-01-30 10:23:57
+ * @LastEditTime: 2023-02-24 09:26:56
  * @FilePath: /cat-kit/docs/.vitepress/plugins/demo-plugin.ts
  *
  */
@@ -26,7 +26,7 @@ export function DemoPlugin(): PluginOption {
       const examplesPath = path.resolve(docsPath, 'examples')
 
       // 当前md文件相对于docs目录的路径
-      const modulePath = id.split('docs/')[1]?.replace(/\.md/, '')
+      const modulePath = id.split('docs/')[1]!.replace(/\.md/, '')
 
       // 是否存在目标demo文件
       const hasDemos = fs.existsSync(path.resolve(examplesPath, modulePath))

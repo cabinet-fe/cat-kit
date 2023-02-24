@@ -8,7 +8,8 @@ const navbar: DefaultTheme.NavItem[] = [
       { text: '数据结构', link: '/lab/data-structure/' },
       { text: '算法', link: '/lab/algorithm/' },
       { text: '设计模式', link: '/lab/pattern/' },
-      { text: '前端进阶', link: '/lab/advance/' }
+      { text: '前端进阶', link: '/lab/advance/' },
+      { text: 'bun', link: '/lab/bun/' }
     ]
   },
 
