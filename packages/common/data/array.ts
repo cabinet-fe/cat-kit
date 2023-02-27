@@ -39,3 +39,16 @@ export function unionBy<T>(key: string, ...arrs: T[]): T[] {
     }
   })
 }
+
+/**
+ * 数组从右到左的回调
+ * @param arr 数组
+ * @param cb 回调
+ */
+export function eachRight<T>(arr: T[], cb: (v: T, i: number, arr: T[]) => void) {
+  let len = arr.length
+
+  while(--len > -1) {
+    cb(arr[len]!, len, arr)
+  }
+}

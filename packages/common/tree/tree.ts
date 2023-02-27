@@ -59,10 +59,8 @@ class Tree<D> {
     }
   }
 
-
-
 }
 
-const tree = new Tree({})
+
 
 export default Tree
