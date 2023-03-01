@@ -78,7 +78,7 @@ export function extend<S extends Record<string, any>>(
   for (const key in source) {
     let i = targets.length
     while (--i >= 0) {
-      let v = targets[i][key]
+      let v = targets[i]![key]
       if (v !== undefined && v !== null) {
         source[key] = v
         break
@@ -103,7 +103,7 @@ export function objEach<O extends Record<string, any>, K extends keyof O>(
   })
 }
 
-class Obj<O extends Record<string, any>, K extends keyof O> {
+class Obj<O extends Record<string, any>, K extends keyof O = keyof O> {
   constructor(private _source: O) {}
 
   /**
@@ -119,7 +119,7 @@ class Obj<O extends Record<string, any>, K extends keyof O> {
    * @param pickKeys 选择的对象的键的数组
    * @returns
    */
-  pick(pickKeys: K[]): Pick<O, K> {
+  pick<KK extends K>(pickKeys: KK[]): Pick<O, KK> {
     return pick(this._source, pickKeys)
   }
 
@@ -138,7 +138,7 @@ class Obj<O extends Record<string, any>, K extends keyof O> {
    * @param omitKeys 排除的对象的键的数组
    * @returns
    */
-  omit<T extends K[]>(omitKeys: T): Omit<O, T[number]> {
+  omit<KK extends K>(omitKeys: KK[]): Omit<O, KK> {
     return omit(this._source, omitKeys)
   }
 
