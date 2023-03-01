@@ -1,7 +1,7 @@
 {
   "name": "@cat-kit/common",
   "private": true,
-  "version": "2.0.14",
+  "version": "2.0.16",
   "description": "前后端开发一体包通用分包",
   "main": "index.ts",
   "author": "YH FE"

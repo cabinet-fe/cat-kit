@@ -40,19 +40,21 @@ export function debounce<T extends any[]>(
  * 节流
  * @param fn 要调用的目标函数
  * @param delay 间隔时间
+ * @param cb 结果回调
  * @returns
  */
-export function throttle<T extends any[]>(
-  fn: (...args: T) => void,
-  delay = 300
+export function throttle<T extends any[], R>(
+  fn: (...args: T) => R,
+  delay = 300,
+  cb?: (v: R) => void
 ) {
   let start = Date.now()
   return function (this: any, ...args: T) {
     let current = Date.now()
     if (current - start >= delay) {
       start = current
-      fn.call(this, ...args)
+      const result = fn.call(this, ...args)
+      cb?.(result)
     }
   }
 }
-
