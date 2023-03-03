@@ -1,7 +1,7 @@
-
 onmessage = function(e) {
-  postMessage(e.data.reduce((acc, cur) => acc + cur))
+
+  postMessage({
+    event: 'end',
+    data: e.data.reduce((acc, cur) => acc + cur)
+  })
 }
-
-
-

@@ -30,7 +30,7 @@ let t2 = 0
 const count = shallowRef(10)
 const worker = runWorker<number>(url, {
   onMessage(data) {
-    result.value = data
+    result.value = data.data
     usedTime.value = Date.now() - t2
   },
   onError(err) {
