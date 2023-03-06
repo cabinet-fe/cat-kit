@@ -2,7 +2,8 @@
   "extends": "ts-conf-base/tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "lib": ["ESNext", "DOM"]
+    "lib": ["ESNext", "DOM"],
+    "types": ["vite/client"]
   },
   "include": ["."]
 }

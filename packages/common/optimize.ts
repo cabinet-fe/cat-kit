@@ -2,7 +2,7 @@
  * 防抖
  * @param fn 要调用的目标函数
  * @param delay 延迟时间
- * @param immediate 是否立即调用一次
+ * @param immediate 是否立即调用一次, 默认true
  * @returns
  */
 export function debounce<T extends any[]>(
@@ -59,6 +59,13 @@ export function throttle<T extends any[], R>(
   }
 }
 
+export type ConcurrentOptions = {
+  /** 最大并发数量 */
+  max?: number
+  /** 指定可重试的项 */
+  retry?: (err: any) => boolean | void
+}
+
 /**
  * 并发控制
  * @param list 并发列表
@@ -68,9 +75,41 @@ export function throttle<T extends any[], R>(
 export function concurrent<T, R>(
   list: T[],
   action: (item: T) => Promise<R>,
-  max: number
+  max?: number
+): Promise<R[]>
+/**
+ * 并发控制
+ * @param list 并发列表
+ * @param action 并发操作
+ * @param options 并发选项
+ */
+export function concurrent<T, R>(
+  list: T[],
+  action: (item: T) => Promise<R>,
+  options?: ConcurrentOptions
+): Promise<R[]>
+export function concurrent<T, R>(
+  list: T[],
+  action: (item: T) => Promise<R>,
+  options?: number | ConcurrentOptions
 ) {
-  return new Promise((rs, rj) => {
+  return new Promise<R[]>((rs, rj) => {
+    const result: R[] = []
+
+    let max: number
+
+    let retry: ConcurrentOptions['retry'] | undefined
+    if (typeof options === 'number') {
+      max = options
+    } else if (options instanceof Object) {
+      max = options.max ?? 1
+      retry = options.retry
+    } else if (!options) {
+      max = 1
+    } else {
+      return rj('传入的参数错误')
+    }
+
     // 判断最大并发数量的合法性
     if (max < 1 || !Number.isInteger(max)) {
       return rj('max参数应该是一个正整数')
@@ -78,7 +117,7 @@ export function concurrent<T, R>(
 
     // 无并发操作直接完成
     if (!list.length) {
-      return rs(true)
+      return rs(result)
     }
 
     let point = 0
@@ -88,7 +127,7 @@ export function concurrent<T, R>(
     const tryFinish = () => {
       // 并发池空并且point已经走完则表示并发任务完成
       if (!pool.size && point > list.length - 1) {
-        rs(true)
+        rs(result)
       }
     }
 
@@ -109,13 +148,19 @@ export function concurrent<T, R>(
       if (promise instanceof Promise) {
         pool.add(promise)
         promise
-          .then(() => {
+          .then(ret => {
+            result.push(ret)
             pool.delete(promise)
             push()
           })
-          .catch(() => {
+          .catch(err => {
             pool.delete(promise)
-            tryOnce(item)
+
+            if (retry) {
+              retry(err) === true && tryOnce(item)
+            } else {
+              tryOnce(item)
+            }
           })
       } else {
         push()
@@ -129,7 +174,8 @@ export function concurrent<T, R>(
       const promise = action(item)
       pool.add(promise)
       promise
-        .then(() => {
+        .then(ret => {
+          result.push(ret)
           pool.delete(promise)
           tryFinish()
         })
