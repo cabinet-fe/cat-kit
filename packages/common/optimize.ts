@@ -63,51 +63,87 @@ export function throttle<T extends any[], R>(
  * 并发控制
  * @param list 并发列表
  * @param action 并发操作
- * @param max 最大并发数
- * @returns
+ * @param max 最大并发数量
  */
-// export function concurrent<T, R>(
-//   list: T[],
-//   action: (item: T) => Promise<R>,
-//   max: number
-// ) {
-//   return new Promise((rs, rj) => {
-//     const s = new Set<Promise<R>>()
+export function concurrent<T, R>(
+  list: T[],
+  action: (item: T) => Promise<R>,
+  max: number
+) {
+  return new Promise((rs, rj) => {
+    // 判断最大并发数量的合法性
+    if (max < 1 || !Number.isInteger(max)) {
+      return rj('max参数应该是一个正整数')
+    }
 
-//     /** 指针 */
-//     let point = 0
+    // 无并发操作直接完成
+    if (!list.length) {
+      return rs(true)
+    }
 
-//     /** 添加任务 */
-//     const addAction = (_item?: T) => {
-//       // 超出最大并发数量或数组被执行完毕 且 没有传入项退出
-//       if ((s.size >= max || point > list.length - 1) && !_item) return
+    let point = 0
+    /** 并发池 */
+    const pool = new Set<Promise<R>>()
 
-//       let item: T
-//       if (_item) {
-//         item = _item
-//       } else {
-//         item = list[point]!
-//         point++
-//       }
+    const tryFinish = () => {
+      // 并发池空并且point已经走完则表示并发任务完成
+      if (!pool.size && point > list.length - 1) {
+        rs(true)
+      }
+    }
 
-//       const promise = action(item)
+    /**
+     * 添加任务
+     */
+    const push = () => {
+      // list空退出
+      if (point > list.length - 1) {
+        return tryFinish()
+      }
 
-//       s.add(promise)
+      let item: T = list[point]!
+      point++
 
-//       promise.then(() => {
-//         s.delete(promise)
-//         addAction()
-//       }).catch(() => {
-//         // 重新尝试
-//         s.delete(promise)
-//         addAction(item)
-//       })
-//     }
+      const promise = action(item)
 
-//     let i = -1
-//     const len = Math.max(list.length, max)
-//     while (--i < len) {
-//       addAction()
-//     }
-//   })
-// }
+      if (promise instanceof Promise) {
+        pool.add(promise)
+        promise
+          .then(() => {
+            pool.delete(promise)
+            push()
+          })
+          .catch(() => {
+            pool.delete(promise)
+            tryOnce(item)
+          })
+      } else {
+        push()
+      }
+    }
+    /**
+     * 重试一次
+     * @param item 项
+     */
+    const tryOnce = (item: T) => {
+      const promise = action(item)
+      pool.add(promise)
+      promise
+        .then(() => {
+          pool.delete(promise)
+          tryFinish()
+        })
+        .catch(() => {
+          pool.delete(promise)
+          rj('错误')
+        })
+    }
+
+    // 初始化
+    let i = -1
+    const len = Math.min(list.length, max)
+    while (++i < len) {
+      push()
+    }
+  })
+}

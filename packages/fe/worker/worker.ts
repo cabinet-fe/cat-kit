@@ -23,11 +23,13 @@ export function runWorkerOnce<T = any>(
         data: T
       }>
     ) {
-      if (e.data.event === 'end') {
-        rs(e.data.data)
+      const { event, data } = e.data
+
+      if (event === 'end') {
+        rs(data)
         worker.terminate()
       } else {
-        cb?.(e.data.data)
+        cb?.(data)
       }
     }
 
@@ -37,10 +39,7 @@ export function runWorkerOnce<T = any>(
 
 interface WorkerRunnerOptions<T> {
   onError?: (err: any) => void
-  onMessage: (data: {
-    event: 'end' | 'send';
-    data: T
-  }) => void
+  onMessage: (data: { event: 'end' | 'send'; data: T }) => void
 }
 
 class WorkerRunner<T> {
@@ -88,31 +87,4 @@ export function runWorker<T = any>(
   options: WorkerRunnerOptions<T>
 ) {
   return new WorkerRunner(filePath, options)
-}
-
-type IWorker = {
-  send: <D>(data: D) => void
-  end: <D>(data: D) => void
-}
-
-type WorkerFn<T = any> = (accept: T, worker: IWorker) => any
-
-export function createWorker<T>(fn: WorkerFn<T>) {
-  const worker: IWorker = {
-    send(data) {
-      window.postMessage({
-        type: 'data',
-        data
-      })
-    },
-    end(data) {
-      window.postMessage({
-        event: 'end',
-        data
-      })
-    }
-  }
-  window.onmessage = function (e: MessageEvent<T>) {
-    fn(e.data, worker)
-  }
 }
