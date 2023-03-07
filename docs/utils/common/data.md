@@ -156,7 +156,6 @@ serialize({ a: 1 })
 
 serialize({ a: '1' })
 // 'a="1"'
-
 ```
 
 ### deserialize 反序列化为对象
@@ -169,7 +168,6 @@ deserialize('a=1')
 
 serialize('a="1"')
 // { a: '1' }
-
 ```
 
 ## array 操作
@@ -211,6 +209,18 @@ unionBy(
   ]
 )
 //return [{ name: '张三', score: 78 },{ name: '李四', score: 65 },{ name: '王五', score: 82 }]
+```
+
+### omitArr
+
+丢弃指定索引的数组
+
+```ts
+omitArr([1, 2, 3], 1)
+// return [1, 3]
+
+omit([1, 2, 3], [0, 2])
+// return [2]
 ```
 
 ## object 操作
@@ -322,8 +332,7 @@ n(3).each(v => {
 
 ## 字符串操作
 
-
-### kebabCase 大小驼峰转kebab-case
+### kebabCase 大小驼峰转 kebab-case
 
 ```ts
 import { kebabCase } from 'cat-kit'
@@ -334,7 +343,7 @@ kebabCase('AaBbCc')
 // 返回aa-bb-cc
 ```
 
-### camelCase kebab-case转大小驼峰
+### camelCase kebab-case 转大小驼峰
 
 ```ts
 import { camelCase } from 'cat-kit'
