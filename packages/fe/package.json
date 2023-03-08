@@ -4,5 +4,8 @@
   "description": "前后端开发一体包前端分包",
   "main": "index.ts",
   "author": "YH FE",
-  "dependencies": { "@cat-kit/common": "workspace:*" }
+  "dependencies": {
+    "@cat-kit/common": "workspace:*",
+    "jsqr": "^1.4.0"
+  }
 }

@@ -1,6 +1,4 @@
----
-title: 数组
----
+
 
 # 数组 Array
 数组即一组数，是指在一段连续的内存中存储相同类型元素(保证元素长度系统一致)的一种集合。
@@ -33,3 +31,9 @@ const arr2 = new Uint16Array()
 - 作为栈使用
 - 作为队列使用
 - 作为列表使用
+
+## JS中 数组的方法
+
+::: demo
+render(lab/data-structure/array/methods)
+:::

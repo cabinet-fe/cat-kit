@@ -6,7 +6,7 @@ export * from './http/index'
 
 export { default as path } from './path/path'
 
-export * from './image/image'
+export * from './image'
 
 export * from './db/db'
 

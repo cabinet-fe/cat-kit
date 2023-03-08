@@ -85,8 +85,10 @@ importers:
   packages/fe:
     specifiers:
       '@cat-kit/common': workspace:*
+      jsqr: ^1.4.0
     dependencies:
       '@cat-kit/common': link:../common
+      jsqr: 1.4.0
 
 packages:
 
@@ -1932,6 +1934,10 @@ packages:
     optionalDependencies:
       graceful-fs: 4.2.10
     dev: true
+
+  /jsqr/1.4.0:
+    resolution: {integrity: sha512-dxLob7q65Xg2DvstYkRpkYtmKm2sPJ9oFhrhmudT1dZvNFFTlroai3AWSpLey/w5vMcLBXRgOJsbXpdN9HzU/A==}
+    dev: false
 
   /levn/0.3.0:
     resolution: {integrity: sha512-0OO4y2iOHix2W6ujICbKIaEQXvFQHue65vUG3pb5EUomzPI90z9hsA1VsO/dbIIpC53J8gxM9Q4Oho0jrCM/yA==}

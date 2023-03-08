@@ -7,7 +7,7 @@ import { compressImage } from 'cat-kit'
 
 ## api
 
-### compressImage
+### 压缩图片 compressImage
 压缩图片
 
 ```ts
@@ -20,3 +20,6 @@ compressImage(file, 2  * 1024 * 1024).then(result => {
   console.log(result.size)
 })
 ```
+
+### 二维码 QRCode
+

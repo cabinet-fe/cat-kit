@@ -6,4 +6,6 @@ import VBinNumber from './BinNumber.vue'
 
 import VButton from './Button.vue'
 
-export default [VBadge, VDemo, VBinNumber, VButton]
+import VRunCode from './RunCode.vue'
+
+export default [VBadge, VDemo, VBinNumber, VButton, VRunCode]
