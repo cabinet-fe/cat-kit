@@ -16,7 +16,15 @@
 
 
 ## 并发控制
+在一些大量并发, 例如文件分片上传时很有用
 
 ::: demo
   render(utils/common/optimize/concurrent)
+:::
+
+
+## 安全执行
+
+::: demo
+  render(utils/common/optimize/safe-run)
 :::

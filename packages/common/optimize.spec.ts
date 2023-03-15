@@ -1,4 +1,4 @@
-import { concurrent } from './optimize'
+import { concurrent, safeRun } from './optimize'
 
 describe('优化', () => {
   test('并发控制', async () => {
@@ -20,5 +20,11 @@ describe('优化', () => {
     )
 
     expect(queue.length).toBe(17)
+  })
+
+  test('安全运行', () => {
+    const origin = '{]'
+    expect(safeRun(() => JSON.parse(origin))).toBe(undefined)
+    expect(safeRun(() => JSON.parse(origin), origin)).toBe(origin)
   })
 })
