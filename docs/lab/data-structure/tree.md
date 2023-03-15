@@ -21,7 +21,6 @@ class Tree<T> {
     this.isLeaf = false
 
     const child = new Tree(data)
-
     if (this.children) {
       this.children.push(child)
     } else {
@@ -35,8 +34,9 @@ class Tree<T> {
 const tree = new Tree(1)
 
 const child1 = tree.insert(2)
+child1.insert(3)
 
-tree.insert(3)
+tree.insert(4)
 ```
 
 ## 特征
@@ -46,7 +46,17 @@ tree.insert(3)
 - 没有子节点的节点被称为叶子节点
 - 树的深度为根节点到所有子节点中的最长路径
 
-### 二叉树
-顾名思义, 二叉树就是最多有两个分叉的树
+## 二叉树
+顾名思义, 二叉树就是最多有两个分叉的树.
+
+二叉树的最典型应用就是用于搜索(二叉搜索树), 其机制类似于二分查找, 如果我们规定二叉树的数据满足左节点的数据一定小于
+右节点和父节点, 且右节点的数据大于父节点和左节点.
+
+```
+```
+
+
 
 ## trie 前缀树
+
+前缀树最常用的情景在于服务端url的命中,
