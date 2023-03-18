@@ -4,11 +4,18 @@ import { getDataType } from '../data/data-type'
 const table =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 
+/** 字符逆查表 */
+const inverseMap = (() => {
+  let map: Record<string, number> = {}
+  let i = -1
+  while(++i < 64) {
+    map[table[i]!] = i
+  }
+  return map
+})()
+
 const textEncoder = new TextEncoder()
 const textDecoder = new TextDecoder()
-
-const textEncode = (input: string) => textEncoder.encode(input)
-const textDecode = (input: BufferSource) => textDecoder.decode(input)
 
 function stringGroup(s: string, itemLen: number): string[] {
   let i = 0,
@@ -69,7 +76,7 @@ function encodeArray(arr: Uint8Array) {
 }
 
 function encodeString(msg: string) {
-  return encodeArray(textEncode(msg))
+  return encodeArray(textEncoder.encode(msg))
 }
 
 /**
