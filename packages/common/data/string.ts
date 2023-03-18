@@ -9,7 +9,7 @@ export function camelCase(
   type: 'lower' | 'upper' = 'lower'
 ): string {
   if (str.length === 0) return str
-  let firstChar = str[0]
+  let firstChar = str[0]!
   if (type === 'upper') {
     firstChar = firstChar.toUpperCase()
   }
