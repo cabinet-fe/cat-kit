@@ -19,7 +19,7 @@ importers:
       terser: 5.16.3
       ts-conf-base: ^1.0.4
       tsx: ^3.12.5
-      typescript: ^4.9.5
+      typescript: ^5.0.2
       vite: ^4.1.4
       vitepress: 1.0.0-alpha.54
       vitest: ^0.28.4
@@ -35,12 +35,12 @@ importers:
       jsdom: 21.1.0
       prettier: 2.8.4
       rollup: 3.19.1
-      rollup-plugin-dts: 5.2.0_h4kaxwm6ctjivrsm4cpxaz7nqu
+      rollup-plugin-dts: 5.2.0_7iejawhbqmte5pthjozf4tfuqy
       rollup-plugin-esbuild: 5.0.0_liqswxdha3ghzdhg75g6wvubqu
       terser: 5.16.3
       ts-conf-base: 1.0.4_@types+node@18.11.19
       tsx: 3.12.5
-      typescript: 4.9.5
+      typescript: 5.0.2
       vite: 4.1.4_akxt3mlquupvdn2keewb3g4hra
       vitepress: 1.0.0-alpha.54_74ytolwf26s45lvgm6k3qcebzm
       vitest: 0.28.4_jsdom@21.1.0+terser@5.16.3
@@ -2187,7 +2187,7 @@ packages:
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
     dev: true
 
-  /rollup-plugin-dts/5.2.0_h4kaxwm6ctjivrsm4cpxaz7nqu:
+  /rollup-plugin-dts/5.2.0_7iejawhbqmte5pthjozf4tfuqy:
     resolution: {integrity: sha512-B68T/haEu2MKcz4kNUhXB8/h5sq4gpplHAJIYNHbh8cp4ZkvzDvNca/11KQdFrB9ZeKucegQIotzo5T0JUtM8w==}
     engines: {node: '>=v14'}
     peerDependencies:
@@ -2196,7 +2196,7 @@ packages:
     dependencies:
       magic-string: 0.29.0
       rollup: 3.19.1
-      typescript: 4.9.5
+      typescript: 5.0.2
     optionalDependencies:
       '@babel/code-frame': 7.18.6
     dev: true
@@ -2436,9 +2436,9 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /typescript/4.9.5:
-    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
-    engines: {node: '>=4.2.0'}
+  /typescript/5.0.2:
+    resolution: {integrity: sha512-wVORMBGO/FAs/++blGNeAVdbNKtIh1rbBL2EyQ1+J9lClJ93KiiKe8PmFIVdXhHcyv44SL9oglmfeSsndo0jRw==}
+    engines: {node: '>=12.20'}
     hasBin: true
     dev: true
 
