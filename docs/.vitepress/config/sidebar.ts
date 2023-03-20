@@ -74,6 +74,12 @@ const sidebar: DefaultTheme.Sidebar = {
 
   '/shared/': [
     {
+      text: 'AI专题',
+      items: [
+        { text: 'chat-gpt', link: '/shared/ai/gpt' }
+      ]
+    },
+    {
       text: '术语',
       items: [
         { text: '概要', link: '/shared/term/' },
@@ -89,6 +95,7 @@ const sidebar: DefaultTheme.Sidebar = {
       text: '数据库',
       items: [
         { text: '概要', link: '/shared/db/' },
+        { text: '下一代ORM', link: '/shared/db/orm' },
         { text: 'mysql', link: '/shared/db/mysql' },
         { text: 'mongodb', link: '/shared/db/mongodb' },
         { text: 'redis', link: '/shared/db/redis' },

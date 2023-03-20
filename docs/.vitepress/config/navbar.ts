@@ -16,6 +16,7 @@ const navbar: DefaultTheme.NavItem[] = [
   {
     text: '分享',
     items: [
+      { text: 'AI专题', link: '/shared/ai/gpt' },
       {
         text: '术语',
         link: '/shared/term/'
