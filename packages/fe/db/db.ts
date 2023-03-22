@@ -14,19 +14,13 @@ interface DBOptions {
  * @param options 选项
  * @returns
  */
-export function openDB(
-  name: string,
-  version?: number,
-  options?: DBOptions
-) {
+export function openDB(name: string, version?: number, options?: DBOptions) {
   return new Promise<IDBDatabase['createObjectStore']>((rs, rj) => {
     const request = indexedDB.open(name, version)
 
-    request.addEventListener('success', () => {
+    request.addEventListener('success', () => {})
 
-    })
-
-    request.addEventListener('error', (err) => {
+    request.addEventListener('error', err => {
       rj(err)
       options?.onError?.(err)
     })
@@ -34,7 +28,10 @@ export function openDB(
     request.addEventListener('upgradeneeded', () => {
       let db = request.result
       console.log(Object.values(db.objectStoreNames))
-      function createObjectStore(name: string, options?: IDBObjectStoreParameters) {
+      function createObjectStore(
+        name: string,
+        options?: IDBObjectStoreParameters
+      ) {
         if (!db.objectStoreNames.contains(name)) {
           return db.createObjectStore(name, options)
         } else {
@@ -45,7 +42,6 @@ export function openDB(
       }
 
       rs(createObjectStore)
-
 
       if (options?.onVersionchange) {
         db.onversionchange = options?.onVersionchange
@@ -59,7 +55,106 @@ export function openDB(
 /**
  * 数据
  */
-export function deleteDB() {
+export function deleteDB() {}
 
+class EasyDB {
+  private dbName: string
+  private dbVersion: number
+  private db: IDBDatabase | null = null
+
+  constructor(dbName: string, dbVersion: number) {
+    this.dbName = dbName
+    this.dbVersion = dbVersion
+  }
+
+  public async open(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const request = window.indexedDB.open(this.dbName, this.dbVersion)
+
+      request.onerror = () => {
+        reject(request.error)
+      }
+
+      request.onsuccess = () => {
+        this.db = request.result
+        resolve()
+      }
+
+      request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
+        const db = event.target.result
+        const objectStore = db.createObjectStore('data', { keyPath: 'id' })
+        objectStore.createIndex('name', 'name', { unique: false })
+      }
+    })
+  }
+
+  public async close(): Promise<void> {
+    if (this.db) {
+      this.db.close()
+      this.db = null
+    }
+  }
+
+  public async put<T>(data: T): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not open'))
+        return
+      }
+
+      const transaction = this.db.transaction('data', 'readwrite')
+      const objectStore = transaction.objectStore('data')
+      const request = objectStore.put(data)
+
+      request.onerror = () => {
+        reject(request.error)
+      }
+
+      request.onsuccess = () => {
+        resolve()
+      }
+    })
+  }
+
+  public async get<T>(id: string): Promise<T | undefined> {
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not open'))
+        return
+      }
+
+      const transaction = this.db.transaction('data', 'readonly')
+      const objectStore = transaction.objectStore('data')
+      const request = objectStore.get(id)
+
+      request.onerror = () => {
+        reject(request.error)
+      }
+
+      request.onsuccess = () => {
+        resolve(request.result)
+      }
+    })
+  }
+
+  public async getAll<T>(): Promise<T[]> {
+    return new Promise((resolve, reject) => {
+      if (!this.db) {
+        reject(new Error('Database not open'))
+        return
+      }
+
+      const transaction = this.db.transaction('data', 'readonly')
+      const objectStore = transaction.objectStore('data')
+      const request = objectStore.getAll()
+
+      request.onerror = () => {
+        reject(request.error)
+      }
+
+      request.onsuccess = () => {
+        resolve(request.result)
+      }
+    })
+  }
 }
-
