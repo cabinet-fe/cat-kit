@@ -1,0 +1,18 @@
+{
+  "name": "docs",
+  "version": "1.0.0",
+  "description": "文档",
+  "main": "index.ts",
+  "devDependencies": {
+    "@cat-kit/be": "workspace:*",
+    "@cat-kit/fe": "workspace:*",
+    "sass": "^1.57.1",
+    "markdown-it-container": "^3.0.0",
+    "@types/markdown-it-container": "^2.0.5",
+    "markdown-it": "^13.0.1",
+    "prismjs": "^1.29.0",
+    "@types/prismjs": "^1.26.0",
+    "vitepress-plugin-search": "^1.0.4-alpha.19",
+    "flexsearch": "^0.7.31"
+  }
+}

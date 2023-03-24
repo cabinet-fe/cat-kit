@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true
+  },
+  "include": [
+    "packages/be/**/*",
+    "docs/vite.config.ts"
+  ]
+}

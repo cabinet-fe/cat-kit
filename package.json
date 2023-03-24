@@ -1,0 +1,67 @@
+{
+  "name": "cat-kit",
+  "version": "2.0.20",
+  "description": "前后端一体开发工具包",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "kit:build": "tsx build/index.ts",
+    "test": "vitest run",
+    "commit-lint": "tsx scripts/verifyCommit.ts",
+    "release": "pnpm test && pnpm kit:build && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
+    "upgrade": "tsx scripts/version.ts upgrade",
+    "downgrade": "tsx scripts/version.ts downgrade"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cabinet-fe/cat-kit.git"
+  },
+  "exports": {
+    ".": {
+      "import": { "node": "./be/es/index.js", "default": "./fe/es/index.js" },
+      "require": {
+        "node": "./be/cjs/index.js",
+        "default": "./fe/cjs/index.js"
+      },
+      "types": { "node": "./be/index.d.ts", "default": "./fe/index.d.ts" }
+    },
+    "./fe": {
+      "import": "./fe/es/index.js",
+      "require": "./fe/cjs/index.js",
+      "types": "./fe/index.d.ts"
+    },
+    "./be": {
+      "import": "./be/es/index.js",
+      "require": "./be/cjs/index.js",
+      "types": "./be/index.d.ts"
+    }
+  },
+  "types": "fe/index.d.ts",
+  "homepage": "https://github.com/cabinet-fe/cat-kit#readme",
+  "keywords": ["ts开发工具包", "cat-kit", "技术文档"],
+  "author": "Yuan He Team FE",
+  "license": "MIT",
+  "bugs": { "url": "https://github.com/cabinet-fe/cat-kit/issues" },
+  "devDependencies": {
+    "ts-conf-base": "^1.0.4",
+    "@types/fs-extra": "^11.0.1",
+    "@types/node": "^18.11.18",
+    "fast-glob": "^3.2.12",
+    "fs-extra": "^11.1.0",
+    "jsdom": "^21.1.0",
+    "rollup": "^3.20.0",
+    "rollup-plugin-dts": "^5.2.0",
+    "rollup-plugin-esbuild": "^5.0.0",
+    "tsx": "^3.12.5",
+    "typescript": "^5.0.2",
+    "vite": "^4.2.1",
+    "vitepress": "1.0.0-alpha.61",
+    "vitest": "^0.29.7",
+    "vue": "^3.2.47",
+    "chalk": "^4.1.2",
+    "terser": "5.16.6",
+    "prettier": "2.8.6",
+    "@types/prettier": "^2.7.2",
+    "@rollup/plugin-node-resolve": "^15.0.1"
+  }
+}
