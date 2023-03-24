@@ -52,109 +52,94 @@ export function openDB(name: string, version?: number, options?: DBOptions) {
   })
 }
 
+openDB('aa', 1).then((createObjectStore) => {
+  createObjectStore('key')
+})
+
 /**
  * 数据
  */
 export function deleteDB() {}
 
-class EasyDB {
-  private dbName: string
-  private dbVersion: number
-  private db: IDBDatabase | null = null
 
-  constructor(dbName: string, dbVersion: number) {
-    this.dbName = dbName
-    this.dbVersion = dbVersion
+// 封装一个基于IndexedDB的api
+interface DatabaseOptions {
+  databaseName: string;
+  storeName: string;
+  keyPath: string;
+}
+
+class IndexedDBApi<T> {
+  private readonly options: DatabaseOptions;
+
+  constructor(options: DatabaseOptions) {
+    this.options = options;
   }
 
-  public async open(): Promise<void> {
+  private async openDatabase(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const request = window.indexedDB.open(this.dbName, this.dbVersion)
-
-      request.onerror = () => {
-        reject(request.error)
-      }
-
-      request.onsuccess = () => {
-        this.db = request.result
-        resolve()
-      }
-
-      request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-        const db = event.target.result
-        const objectStore = db.createObjectStore('data', { keyPath: 'id' })
-        objectStore.createIndex('name', 'name', { unique: false })
-      }
-    })
+      const request = window.indexedDB.open(this.options.databaseName);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+      request.onupgradeneeded = () => {
+        const database = request.result;
+        database.createObjectStore(this.options.storeName, { keyPath: this.options.keyPath });
+      };
+    });
   }
 
-  public async close(): Promise<void> {
-    if (this.db) {
-      this.db.close()
-      this.db = null
-    }
-  }
-
-  public async put<T>(data: T): Promise<void> {
+  async getAll(): Promise<T[]> {
+    const db = await this.openDatabase();
+    const transaction = db.transaction(this.options.storeName, 'readonly');
+    const store = transaction.objectStore(this.options.storeName);
     return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not open'))
-        return
-      }
-
-      const transaction = this.db.transaction('data', 'readwrite')
-      const objectStore = transaction.objectStore('data')
-      const request = objectStore.put(data)
-
-      request.onerror = () => {
-        reject(request.error)
-      }
-
-      request.onsuccess = () => {
-        resolve()
-      }
-    })
+      const request = store.getAll();
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+    });
   }
 
-  public async get<T>(id: string): Promise<T | undefined> {
+  async getById(id: number | string): Promise<T> {
+    const db = await this.openDatabase();
+    const transaction = db.transaction(this.options.storeName, 'readonly');
+    const store = transaction.objectStore(this.options.storeName);
     return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not open'))
-        return
-      }
-
-      const transaction = this.db.transaction('data', 'readonly')
-      const objectStore = transaction.objectStore('data')
-      const request = objectStore.get(id)
-
-      request.onerror = () => {
-        reject(request.error)
-      }
-
-      request.onsuccess = () => {
-        resolve(request.result)
-      }
-    })
+      const request = store.get(id);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+    });
   }
 
-  public async getAll<T>(): Promise<T[]> {
+  async add(item: T): Promise<void> {
+    const db = await this.openDatabase();
+    const transaction = db.transaction(this.options.storeName, 'readwrite');
+    const store = transaction.objectStore(this.options.storeName);
     return new Promise((resolve, reject) => {
-      if (!this.db) {
-        reject(new Error('Database not open'))
-        return
-      }
+      const request = store.add(item);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve();
+    });
+  }
 
-      const transaction = this.db.transaction('data', 'readonly')
-      const objectStore = transaction.objectStore('data')
-      const request = objectStore.getAll()
+  async update(id: number | string, item: T): Promise<void> {
+    const db = await this.openDatabase();
+    const transaction = db.transaction(this.options.storeName, 'readwrite');
+    const store = transaction.objectStore(this.options.storeName);
+    return new Promise((resolve, reject) => {
+      const request = store.put(item, id);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve();
+    });
+  }
 
-      request.onerror = () => {
-        reject(request.error)
-      }
-
-      request.onsuccess = () => {
-        resolve(request.result)
-      }
-    })
+  async delete(id: number | string): Promise<void> {
+    const db = await this.openDatabase();
+    const transaction = db.transaction(this.options.storeName, 'readwrite');
+    const store = transaction.objectStore(this.options.storeName);
+    return new Promise((resolve, reject) => {
+      const request = store.delete(id);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve();
+    });
   }
 }
