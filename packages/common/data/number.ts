@@ -12,9 +12,9 @@ class Num {
       money = 0
     }
     let [intPart, decPart = ''] = String(money).split('.')
-    const len = intPart.length - 1
+    const len = intPart!.length - 1
     let arr: string[] = []
-    intPart
+    intPart!
       .split('')
       .reverse()
       .forEach((item: string, index: number) => {
@@ -42,11 +42,11 @@ class Num {
     if (!money) return '零元整'
     if (money >= 999999999999999.9999) return ''
     const [intPart, decPart] = String(+money.toFixed(4)).split('.')
-    if (parseInt(intPart, 10) > 0) {
+    if (parseInt(intPart!, 10) > 0) {
       let count = 0
-      const IntLen = intPart.length
+      const IntLen = intPart!.length
       for (let i = 0; i < IntLen; i++) {
-        let n = intPart.substring(i, i + 1)
+        let n = intPart!.substring(i, i + 1)
         let p = IntLen - i - 1
         let q = p / 4
         let m = p % 4
@@ -57,7 +57,7 @@ class Num {
             result += CN_NUMS[0]
           }
           count = 0
-          result += CN_NUMS[parseInt(n)] + CN_INT_RADICE[m]
+          result += CN_NUMS[parseInt(n)]! + CN_INT_RADICE[m]
         }
         if (m === 0 && count < 4) {
           result += CN_INT_UNITS[q]
@@ -69,7 +69,7 @@ class Num {
       const decLen = decPart.length
       for (let i = 0; i < decLen; i++) {
         let n = decPart.substring(i, i + 1)
-        if (n !== '0') result += CN_NUMS[Number(n)] + CN_DEC_UNITS[i]
+        if (n !== '0') result += CN_NUMS[Number(n)]! + CN_DEC_UNITS[i]
       }
     } else {
       result = `${result}整`
@@ -110,10 +110,6 @@ class Num {
   }
 }
 
-interface N {
-  (n: number): Num
-}
-
 /**
  * 包裹一个数字以方便
  * @param n 数字
@@ -122,40 +118,170 @@ const n = function n(n: number) {
   return new Num(n)
 }
 
+interface NumberBlock {
+  type: 'number'
+  value: number
+  nextOperator: string
+}
+
+interface GroupBlock {
+  type: 'group'
+  blocks: Block[]
+}
+
+type Block = NumberBlock | GroupBlock
+
+/** 数学运算解释器 */
+class CalcInterpreter {
+  /** 匹配数字 */
+  static NumRE = /[\d\.]/
+  /** 匹配操作符 */
+  static OprRE = /[\+\-\*\/\%]/
+
+  numberStr = ''
+
+  preBlock: Block | null = null
+  blocks: Block[] = []
+
+  /** 添加数字块 */
+  addNumberBlock() {
+    if (!this.numberStr) return
+    const block = {
+      type: 'number' as const,
+      value: +this.numberStr,
+      nextOperator: ''
+    }
+    this.preBlock = block
+    this.blocks.push(block)
+    this.numberStr = ''
+  }
+
+  constructor(expression: string) {
+    this.compile(expression)
+  }
+
+  compile(expression: string) {
+    let i = -1
+    const len = expression.length
+    while (++i < len) {
+      const char = expression[i]!
+
+      // 忽略空白
+      if (char === ' ') continue
+
+      // 数字字符开始拼接
+      if (CalcInterpreter.NumRE.test(char)) {
+        this.numberStr += char
+        continue
+      }
+
+      this.addNumberBlock()
+
+      // 操作符
+      if (CalcInterpreter.OprRE.test(char)) {
+        const { preBlock } = this
+        if (!preBlock || preBlock.type !== 'number') {
+          throw new Error(`表达式 ${expression} 不合法!`)
+        }
+        preBlock.nextOperator = char
+        continue
+      }
+
+      // 分组
+      if (char === '(') {
+        let stack = ['(']
+        let startIndex = i + 1
+        while (stack.length && i < len) {
+          i++
+          let groupChar = expression[i]!
+          if (groupChar === '(') {
+            stack.push(groupChar)
+          } else if (groupChar === ')') {
+            stack.pop()
+          }
+        }
+
+        if (stack.length) {
+          throw new Error(`'${char}'不合法!`)
+        }
+
+        this.blocks.push({
+          type: 'group',
+          blocks: new CalcInterpreter(expression.slice(startIndex, i)).blocks
+        })
+
+        continue
+      }
+    }
+
+    this.addNumberBlock()
+  }
+}
+
+/**
+ * 求和
+ * @param numbers 需要求和的数字
+ * @returns
+ */
+n.sum = function (...numbers: number[]) {
+  const mul = Math.pow(
+    10,
+    Math.max(
+      ...numbers.map((n, i) => (String(n).match(/\.(\d+)$/)?.[1] || '').length)
+    )
+  )
+  return (
+    numbers.map(n => Math.round(n * mul)).reduce((acc, cur) => acc + cur, 0) /
+    mul
+  )
+}
+
+const operatorCalcTactics = {
+  '+'(current: number, next: number) {
+    return current + next
+  }
+}
+
 /**
  * 精确计算
  * @param expression 计算表达式
  */
-n.calc = function(expression: string) {
-  // const units: Array<{
-  //   value: string;
-  //   type: 'number' | 'operator' | 'brackets'
-  // }> = []
+n.calc = function (expression: string) {
+  const ci = new CalcInterpreter(expression)
 
-  // const len = expression.length
-  // let i = -1
-  // let acc = ''
-  // while(++i < len) {
-  //   let char = expression[i]
+  // Plus Minus RegExp
+  const PM_RE = /[\+\-]/
 
-  //   if (!isNaN(+char)) {
-  //     acc += char
-  //     continue
-  //   }
+  function c(blocks: Block[]) {
+    let current: null | number = null
 
+    let currentOperator = ''
 
-  // }
+    blocks.forEach((block, i) => {
+      let nextBlock = blocks[i + 1]
 
+      if (block.type === 'number') {
+        if (current === null) {
+          current = block.value
+        }
 
-  // const numbers = expression.split(/[\+-\*\/]/).map(item => item.trim())
+        // + -
+        if (PM_RE.test(block.nextOperator)) {
+        }
+      } else {
+        if (current !== null) {
+          current = operatorCalcTactics[currentOperator](
+            current,
+            c(block.blocks)
+          )
+        }
+      }
+    })
 
-  // const dotLen = Math.max(...numbers.map(n => {
-  //   let dotIndex = n.lastIndexOf('.')
-  //   return dotIndex === -1 ? 0 : n.length - dotIndex - 1
-  // }))
+    return current
+  }
 
-  // let factor = 10 ** dotLen
-  // // 将所有的运算符放大成整数
+  return c(ci.blocks)
 }
 
 export { n }
