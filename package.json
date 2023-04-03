@@ -43,7 +43,7 @@
   "license": "MIT",
   "bugs": { "url": "https://github.com/cabinet-fe/cat-kit/issues" },
   "devDependencies": {
-    "ts-conf-base": "^1.0.4",
+    "ts-conf-base": "^2.0.1",
     "@types/fs-extra": "^11.0.1",
     "@types/node": "^18.11.18",
     "fast-glob": "^3.2.12",
