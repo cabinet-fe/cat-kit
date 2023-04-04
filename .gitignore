@@ -89,7 +89,7 @@ dist
 # public
 
 # vitepress build output
-**/cache
+docs/.vitepress/cache
 
 
 # Serverless directories
