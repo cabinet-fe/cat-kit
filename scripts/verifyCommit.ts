@@ -1,8 +1,10 @@
 import chalk from 'chalk'
 import fs from 'fs'
-import path from 'path'
+import { fileURLToPath } from 'url'
 
-const msgPath = path.resolve(__dirname, '../.git/COMMIT_EDITMSG')
+const msgPath = fileURLToPath(
+  new URL('../.git/COMMIT_EDITMSG', import.meta.url)
+)
 
 const msg = fs.readFileSync(msgPath, 'utf-8').trim()
 
