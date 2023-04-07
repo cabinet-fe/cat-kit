@@ -1,22 +1,22 @@
-import { readFileSync, writeFileSync, copyFileSync } from 'fs-extra'
+import fs from 'fs-extra'
 import path from 'path'
 import prettier from 'prettier'
 import { OUTPUT, PKG } from './constants'
 
 export const copy = () => {
-  const str = readFileSync(PKG, 'utf-8')
+  const str = fs.readFileSync(PKG, 'utf-8')
   const obj = JSON.parse(str)
 
   ~['scripts', 'devDependencies'].forEach(key => {
     delete obj[key]
   })
 
-  writeFileSync(
+  fs.writeFileSync(
     path.resolve(OUTPUT, 'package.json'),
     prettier.format(JSON.stringify(obj), { parser: 'json' })
   )
 
-  copyFileSync(
+  fs.copyFileSync(
     path.resolve(process.cwd(), 'README.md'),
     path.resolve(OUTPUT, 'README.md')
   )
