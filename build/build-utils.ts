@@ -13,7 +13,7 @@ const writeBundle = async (
   // js文件打包
   const bundle = await rollup({
     input,
-    plugins: [esbuild({ minify: true }), nodeResolve()]
+    plugins: [esbuild({ minify: false }), nodeResolve()]
   })
 
   await Promise.all(
