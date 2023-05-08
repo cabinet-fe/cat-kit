@@ -56,4 +56,16 @@ title: 其他分享
 
 ## 终端模拟器
 
-tabby[https://tabby.sh/], 一个可以让你在windows上也能用者舒服的模拟器
+[tabby](https://tabby.sh/), 一个可以让你在windows上也能用者舒服的模拟器
+
+## 开源远程桌面软件
+
+[RustDesk](https://rustdesk.com/), 支持多平台, 包括windows, macos, ubuntu, ios, android, manjaro
+
+## 代码片段生成截图
+
+[snappify](https://snappify.com/editor)
+
+## 图片编辑
+
+[vue-fabric-editor](https://github.com/nihaojob/vue-fabric-editor),基于 fabric.js 和 Vue 开发的图片编辑器，可自定义字体、素材、设计模板。
