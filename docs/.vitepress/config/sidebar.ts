@@ -5,7 +5,7 @@ const sidebar: DefaultTheme.Sidebar = {
     {
       text: '前端工具',
       items: [
-        { text: '概要', link: '/utils/' },
+        { text: '概要', link: '/utils/fe/' },
         { text: '缓存', link: '/utils/fe/cache' },
         { text: 'HTTP', link: '/utils/fe/http' },
         { text: '路径', link: '/utils/fe/path' },
@@ -17,7 +17,10 @@ const sidebar: DefaultTheme.Sidebar = {
     },
     {
       text: '后端工具',
-      items: []
+      items: [
+        { text: '概要', link: '/utils/be/' },
+        { text: '文件系统', link: '/utils/be/fs' },
+      ]
     },
     {
       text: '通用工具',
