@@ -52,10 +52,6 @@ export function openDB(name: string, version?: number, options?: DBOptions) {
   })
 }
 
-openDB('aa', 1).then((createObjectStore) => {
-  createObjectStore('key')
-})
-
 /**
  * 数据
  */

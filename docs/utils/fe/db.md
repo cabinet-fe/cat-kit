@@ -40,6 +40,4 @@ cat-kit中的数据库操作
 import { openDB } from 'cat-kit'
 
 const db = openDB()
-
-
 ```
