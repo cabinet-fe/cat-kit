@@ -119,16 +119,38 @@ export default {
   border-radius: 8px;
   overflow: hidden;
   margin: 16px 0;
+  position: relative;
+  padding-left: 32px;
+  background-color: #282c34;
+}
+
+.source-container :deep(.line-numbers) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #ccc;
+  font-size: 14px;
+  width: 32px;
+  font-family: var(--vp-font-family-mono);
+  line-height: 24px;
+  text-align: center;
+  border-right: 1px solid #ccc;
+  padding: 12px 0;
+  box-sizing: border-box;
+}
+
+.source-container :deep(.line-number) {
+  /* line-height: 18px; */
+  display: block;
 }
 
 .source-container :deep(pre) {
-  background-color: transparent;
   overflow-x: auto;
   margin: 0;
+  padding: 12px 12px;
 }
 
 .source-container :deep(code) {
-  padding: 12px 24px;
   min-width: 100%;
   display: block;
   white-space: pre;

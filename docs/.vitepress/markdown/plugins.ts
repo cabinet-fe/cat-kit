@@ -57,9 +57,24 @@ export async function demoContainer(md: MarkdownIt) {
           lang: 'vue'
         })
 
+        const lines = highlightSourceCode
+          .slice(
+            highlightSourceCode.indexOf('<code>'),
+            highlightSourceCode.indexOf('</code>')
+          )
+          .split('\n')
+
+        const lineNumberCode = `<div class="line-numbers">${Array.from(
+          { length: lines.length }
+        )
+          .map((_, index) => {
+            return `<span class="line-number">${index + 1}</span>`
+          })
+          .join('')}</div>`
+
         return `
         <v-demo :demos="demos" source="${encodeURIComponent(
-          highlightSourceCode
+          lineNumberCode + highlightSourceCode
         )}" path="${sourceFilePath}">
       `
       }
