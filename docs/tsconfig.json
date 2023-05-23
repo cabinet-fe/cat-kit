@@ -5,5 +5,5 @@
     "lib": ["ESNext", "DOM"],
     "types": ["vite/client"]
   },
-  "include": ["."]
+  "include": ["./**/*.ts", "./.vitepress/**/*.ts"]
 }

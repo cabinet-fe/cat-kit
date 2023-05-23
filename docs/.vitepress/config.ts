@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 import nav from './config/navbar'
 import sidebar from './config/sidebar'
-import { demoContainer } from './config/plugins'
+import { demoContainer } from './markdown/plugins'
 
 export default defineConfig({
   lang: 'zh-CN',
@@ -24,8 +24,9 @@ export default defineConfig({
   markdown: {
     lineNumbers: true,
 
-    config: md => {
-      md.use(...demoContainer('demo'))
+    config: async md => {
+
+      md.use(demoContainer)
     }
   },
 

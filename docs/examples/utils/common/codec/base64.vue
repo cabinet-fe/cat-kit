@@ -1,23 +1,20 @@
 <template>
   <div>
-
     <textarea class="input" placeholder="输入" v-model="input" />
 
-    <span style="display: inline-block; width: 100px; text-align: center;">
+    <span style="display: inline-block; width: 100px; text-align: center">
       <a class="button" @click="handleEncode">编码</a>
       <br />
       <a class="button" @click="handleDecode">解码</a>
     </span>
 
-   <textarea  class="input" placeholder="输出" readonly :value="output" />
-
-
+    <textarea class="input" placeholder="输出" readonly :value="output" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { base64 } from '@cat-kit/fe'
-import {  shallowRef } from 'vue'
+import { shallowRef } from 'vue'
 
 const input = shallowRef('')
 const output = shallowRef('')
@@ -28,7 +25,6 @@ const handleEncode = () => {
 const handleDecode = () => {
   output.value = base64.decode(input.value)
 }
-
 </script>
 
 <style scoped>

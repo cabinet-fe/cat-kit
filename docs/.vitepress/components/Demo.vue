@@ -21,11 +21,11 @@
   </ClientOnly>
 
   <!-- 源代码 -->
-  <div v-else-if="visibleType === 'code'">
-    <pre
-      class="language-vue line-numbers"
-    ><code v-html="decodedCode"></code></pre>
-  </div>
+  <div
+    v-else-if="visibleType === 'code'"
+    class="source-container"
+    v-html="decodedCode"
+  ></div>
 </template>
 
 <script lang="ts" setup>
@@ -115,7 +115,22 @@ export default {
   color: var(--vp-c-brand);
 }
 
-.language-vue {
+.source-container {
   border-radius: 8px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.source-container :deep(pre) {
+  background-color: transparent;
+  overflow-x: auto;
+  margin: 0;
+}
+
+.source-container :deep(code) {
+  padding: 12px 24px;
+  min-width: 100%;
+  display: block;
+  white-space: pre;
 }
 </style>

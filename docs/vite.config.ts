@@ -8,7 +8,7 @@
  */
 import { defineConfig } from 'vite'
 import { SearchPlugin } from 'vitepress-plugin-search'
-import { DemoPlugin } from './.vitepress/plugins/demo-plugin'
+import { DemoPlugin } from './.vitepress/vite-plugins/demo-plugin'
 
 export default defineConfig(({ mode }) => {
   return {
