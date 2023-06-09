@@ -1,7 +1,7 @@
 import { DefaultTheme } from 'vitepress'
 
 const navbar: DefaultTheme.NavItem[] = [
-  { text: `工具`, link: '/utils/index', activeMatch: '/utils/' },
+  { text: `工具`, link: '/utils/fe/', activeMatch: '/utils/' },
   {
     text: '实验室',
     items: [

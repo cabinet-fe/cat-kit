@@ -67,5 +67,26 @@ title: 其他分享
 [snappify](https://snappify.com/editor)
 
 ## 图片编辑
+[pintura](https://pqina.nl/pintura/?affiliate_id=854594675), 图片编辑器, 可以做裁剪滤镜等等
 
 [vue-fabric-editor](https://github.com/nihaojob/vue-fabric-editor),基于 fabric.js 和 Vue 开发的图片编辑器，可自定义字体、素材、设计模板。
+
+
+## 流程图/组织图/图编辑
+
+[gojs](https://gojs.net/latest/)
+
+[web-pdm](https://erd.zyking.xyz/zh-CN/config), ER图显示工具
+
+## 交互式Canvas
+
+[Konva](https://konvajs.org/docs/index.html), [中文文档](http://konvajs-doc.bluehymn.com/docs/overview.html)
+
+
+## 全景图
+
+[Pannellum](https://pannellum.org/)
+
+[Panolens.js](https://pchen66.github.io/Panolens/#Documentation)
+
+[js-cloudimage-360-view](https://github.com/Scaleflex/js-cloudimage-360-view)
