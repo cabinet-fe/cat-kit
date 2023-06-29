@@ -179,9 +179,9 @@ export function concurrent<T, R>(
           pool.delete(promise)
           tryFinish()
         })
-        .catch(() => {
+        .catch((err) => {
           pool.delete(promise)
-          rj('错误')
+          rj(err)
         })
     }
 
