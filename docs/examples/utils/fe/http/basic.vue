@@ -25,8 +25,9 @@ const request = async () => {
 
       return res
     }
+  }).catch(err => {
+    console.log(err)
   })
-  console.log(res.data)
   // data.value = res.data
 }
 </script>
