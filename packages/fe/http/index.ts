@@ -28,7 +28,8 @@ export class Http {
   private after: null | HTTPAfterHandler = null
 
   constructor(options: HttpOptions) {
-    const { before, after, timeout, baseUrl, headers, withCredentials } = options
+    const { before, after, timeout, baseUrl, headers, withCredentials } =
+      options
     if (before) {
       this.before = before
     }
@@ -75,7 +76,7 @@ export class Http {
       returnType = type
     }
 
-    let handleResponse = (response: HttpResponse) => {
+    const handleResponse = (response: HttpResponse) => {
       if (response.code >= 400 && response.code <= 600) {
         returnBy('error')
       }
@@ -85,12 +86,12 @@ export class Http {
       } else if (this.after) {
         response = this.after(response, returnBy, returnType) || response
       }
+      this.deleteXhr(config)
       if (returnType === 'normal') {
         resolve(response)
       } else {
         reject(response)
       }
-      this.deleteXhr(config)
     }
 
     let onloadend = () => {
@@ -119,7 +120,7 @@ export class Http {
         getResponse({
           code: 400,
           data: null,
-          message: '请求被客户端终止'
+          message: '请求被终止'
         })
       )
 
@@ -189,14 +190,18 @@ export class Http {
       const { method, url, params, headers, baseUrl } = config
       const data = transformData(config.data, headers)
 
-      xhr.open(method, url.startsWith('http') ? url : getUrl(path.join(baseUrl, url), params), true)
+      xhr.open(
+        method,
+        url.startsWith('http') ? url : getUrl(path.join(baseUrl, url), params),
+        true
+      )
 
       // 发送请求头
       for (const key in headers) {
         if (data === undefined && key.toLowerCase() === 'content-type') {
           delete headers[key]
         } else {
-          xhr.setRequestHeader(key, headers[key])
+          xhr.setRequestHeader(key, headers[key] ?? '')
         }
       }
 

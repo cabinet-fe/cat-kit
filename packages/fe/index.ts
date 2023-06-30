@@ -2,7 +2,7 @@ export * from '@cat-kit/common'
 
 export * from './cache/cache'
 
-export * from './http/index'
+export * from './http/http'
 
 export { default as path } from './path/path'
 

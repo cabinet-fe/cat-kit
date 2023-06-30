@@ -13,6 +13,11 @@ const http = new Http({
 })
 ```
 
+## 例子
+:::demo
+render(utils/fe/http/basic)
+:::
+
 ## api
 
 ### 构造参数 new Http(options: Options)

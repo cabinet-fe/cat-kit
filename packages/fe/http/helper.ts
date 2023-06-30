@@ -11,8 +11,8 @@ function parseResponseHeaders(headStr: string) {
     .trim()
     .split(/[\r\n]+/)
     .reduce((acc, cur) => {
-      let [key, value] = cur.split(': ')
-      acc[key] = value
+      const [key, value] = cur.split(': ')
+      acc[key!] = value
       return acc
     }, {} as Record<string, any>)
 }
@@ -48,7 +48,7 @@ export class HttpResponse<T = any> {
   }
 }
 
-interface ResponseConf {
+export interface ResponseConf {
   code: HTTPCodeNumber
   data: any
   message: string

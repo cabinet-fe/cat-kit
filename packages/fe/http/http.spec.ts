@@ -1,4 +1,4 @@
-import { Http } from './index'
+import { Http } from './http'
 
 describe('http测试', () => {
   const http = new Http({
@@ -9,6 +9,7 @@ describe('http测试', () => {
       return conf
     }
   })
+
   it('test', async () => {
     const defaultConfig = http.getDefaultConfig()
 
@@ -16,7 +17,8 @@ describe('http测试', () => {
       headers: {},
       baseUrl: '/api',
       timeout: 0,
-      withCredentials: false
+      withCredentials: false,
+      method: 'GET'
     })
   })
 
