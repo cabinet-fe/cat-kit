@@ -7,23 +7,26 @@ let errMsgsMap: Record<number, any> = {
 }
 
 function parseResponseHeaders(headStr: string) {
-  return headStr
-    .trim()
-    .split(/[\r\n]+/)
-    .reduce((acc, cur) => {
-      const [key, value] = cur.split(': ')
-      acc[key!] = value
-      return acc
-    }, {} as Record<string, any>)
+  const trimHeadStr = headStr.trim()
+  if (!trimHeadStr) return {}
+  return trimHeadStr.split(/[\r\n]+/).reduce((acc, cur) => {
+    const [key, value] = cur.split(': ')
+    acc[key!] = value
+    return acc
+  }, {} as Record<string, any>)
 }
 
 export class HttpResponse<T = any> {
+  /** 请求状态码 */
   code!: HTTPCodeNumber
 
+  /** 返回的数据 */
   data!: T
 
+  /** 返回的信息 */
   message = ''
 
+  /** 响应头 */
   headers: Record<string, any> = {}
 
   constructor(

@@ -5,7 +5,7 @@ import path from 'path'
 import fs from 'fs'
 import shiki from 'shiki'
 import MarkdownIt from 'markdown-it'
-import { readFileLine } from '../config/readline'
+// import { readFileLine } from '../config/readline'
 
 const getPath = (tokens: Token[], idx: number, info: 'demo') => {
   while (idx++) {

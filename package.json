@@ -1,9 +1,10 @@
 {
   "name": "cat-kit",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "前后端一体开发工具包",
   "scripts": {
     "docs:dev": "vitepress dev docs",
+    "docs:server": "node docs/.vitepress/server",
     "docs:build": "vitepress build docs",
     "kit:build": "tsx build/index.ts",
     "test": "vitest run",
@@ -53,9 +54,9 @@
     "rollup": "^3.20.0",
     "rollup-plugin-dts": "^5.2.0",
     "rollup-plugin-esbuild": "^5.0.0",
-    "tsx": "^3.12.5",
+    "tsx": "^3.12.7",
     "typescript": "^5.0.4",
-    "vite": "^4.3.5",
+    "vite": "^4.3.9",
     "vitepress": "1.0.0-alpha.75",
     "vitest": "^0.31.0",
     "vue": "^3.2.47",

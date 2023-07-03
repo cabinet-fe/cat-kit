@@ -6,14 +6,13 @@
   "devDependencies": {
     "@cat-kit/be": "workspace:*",
     "@cat-kit/fe": "workspace:*",
-    "sass": "^1.57.1",
+    "sass": "^1.63.6",
     "markdown-it-container": "^3.0.0",
     "@types/markdown-it-container": "^2.0.5",
     "markdown-it": "^13.0.1",
-    "prismjs": "^1.29.0",
     "shiki": "^0.14.2",
-    "@types/prismjs": "^1.26.0",
     "vitepress-plugin-search": "^1.0.4-alpha.20",
-    "flexsearch": "^0.7.31"
+    "flexsearch": "^0.7.31",
+    "fastify": "^4.19.1"
   }
 }

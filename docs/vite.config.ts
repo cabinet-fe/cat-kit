@@ -22,6 +22,15 @@ export default defineConfig(({ mode }) => {
         cache: true,
         optimize: true
       })
-    ]
+    ],
+
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:2334',
+          changeOrigin: true
+        }
+      }
+    }
   }
 })

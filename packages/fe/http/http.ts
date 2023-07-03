@@ -17,6 +17,10 @@ import type {
 } from './type'
 import path from '../path/path'
 
+export * from './type'
+
+export type { HttpResponse } from './helper'
+
 export class Http {
   before: null | HTTPBeforeHandler = null
   after: null | HTTPAfterHandler = null
@@ -254,6 +258,7 @@ class Requestor {
       })
       .catch(() => {
         this.end()
+        options.onError('拦截器异常')
       })
   }
 
@@ -363,11 +368,11 @@ class Requestor {
     }
 
     xhr.onloadend = () => {
-      xhr && this.reply(xhr)
+      this.xhr && this.reply(xhr)
     }
 
     xhr.onreadystatechange = () => {
-      if (!xhr) return
+      if (!this.xhr) return
       this.readyState = xhr.readyState
     }
 

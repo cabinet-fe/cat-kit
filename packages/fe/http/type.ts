@@ -63,7 +63,7 @@ export type HTTPAfterHandler = (
   returnBy: (type: ResponseReturnType) => void,
   /** 当前返回值抛出的类型 */
   returnType: ResponseReturnType
-) => HttpResponse
+) => HttpResponse | void | undefined
 
 export interface HttpOptions {
   baseUrl?: string
