@@ -14,6 +14,7 @@ const http = new Http({
 ```
 
 ## 例子
+
 :::demo
 render(utils/fe/http/basic)
 :::
@@ -85,7 +86,9 @@ const http = new Http({
   baseUrl: '/api',
   timeout: 18000,
   before(conf) {
-    const isXWF = conf.headers['Content-Type'].includes('application/x-www-form-urlencoded')
+    const isXWF = conf.headers['Content-Type'].includes(
+      'application/x-www-form-urlencoded'
+    )
 
     // 对于表单对象, 你需要手动将其转化成一个key=value拼接的字符串
     if (isXWF && isObj(conf.data)) {
@@ -95,7 +98,10 @@ const http = new Http({
     }
 
     // post请求不允许什么都不穿
-    if (conf.method === 'POST' && (conf.data === undefined || conf.data === null)) {
+    if (
+      conf.method === 'POST' &&
+      (conf.data === undefined || conf.data === null)
+    ) {
       console.error('请传点东西')
       return false
     }
@@ -116,17 +122,13 @@ const http = new Http({
 
 ### after
 
-after 在请求完成后调用, 该函数有两个参数, 第一个参数是响应对象, 第二个参数指定以何种形式抛出响应值(当以error抛出时,
+after 在请求完成后调用, 该函数有两个参数, 第一个参数是响应对象, 第二个参数指定以何种形式抛出响应值(当以 error 抛出时,
 一个异步函数中的代码将不会执行), 看以下的例子:
-默认地, 以Http标准将400到600之间的状态码作为错误抛出
+默认地, 以 Http 标准将 400 到 600 之间的状态码作为错误抛出
 
 ```ts
 // 指定以下状态吗都是报错的状态码
-const customErrorCode = new Set<number>([
-  1001,
-  1002,
-  1003
-])
+const customErrorCode = new Set<number>([1001, 1002, 1003])
 
 export const authHttp = new Http({
   baseUrl: 'http://localhost',
@@ -145,7 +147,6 @@ export const authHttp = new Http({
   }
 })
 
-
 // 假设后端返回的状态码是1001(错误状态吗)
 const postTo = async () => {
   await authHttp.post('/path/of/api')
@@ -163,4 +164,39 @@ const badPostTo = async () => {
   if (code !== 200) return // 这段代码不必要增加了很多判断
   alert('成功')
 }
+```
+
+### 终止请求
+
+```ts
+const http = new Http()
+
+Array.from({ length: 10 }).forEach(() => {
+  http.get('/path/of/api')
+})
+
+// 终止当前所有的有http发起的请求
+http.abort()
+
+// 更加细粒度的请求终止
+function batchRequest() {
+  const requests = new Set<IRequestor>()
+  Array.from({ length: 10 }).forEach(() => {
+    http.get('/path/of/api', {
+      created(req) {
+        requests.add(req)
+      },
+      complete(req) {
+        requests.delete(req)
+      }
+    })
+  })
+  return requests
+}
+const requests = batchRequest()
+// 1s后将所有没有请求的响应终止
+setTimeout(() => {
+  requests.forEach(item => item.abort())
+}, 1000)
+
 ```

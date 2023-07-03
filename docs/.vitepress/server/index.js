@@ -4,21 +4,25 @@ const fastify = Fastify({
   logger: true
 })
 
-fastify.register((app, _, done) => {
-  app.post('/test', (req, res) => {
-    const { sleep } = req.body || {}
+fastify.register(
+  (app, _, done) => {
+    app.post('/test', (req, res) => {
+      const { sleep } = req.body || {}
 
-    setTimeout(() => {
-      res.send('请求完成')
-    }, typeof sleep === 'number' ? sleep : 0)
-  })
+      setTimeout(
+        () => {
+          res.send('请求完成')
+        },
+        typeof sleep === 'number' ? sleep : 0
+      )
+    })
 
-
-
-  done()
-}, {
-  prefix: '/api'
-})
+    done()
+  },
+  {
+    prefix: '/api'
+  }
+)
 
 fastify
   .listen({

@@ -11,6 +11,7 @@ import type {
   HTTPBeforeHandler,
   HTTPMethod,
   HttpOptions,
+  IRequestor,
   MergedConfig,
   RequestConfig,
   ResponseReturnType
@@ -227,17 +228,17 @@ interface RequestorOptions {
   onError: (reason?: any) => void
 }
 
-class Requestor {
-  private xhr: XMLHttpRequest | null = null
+class Requestor implements IRequestor {
+  xhr: XMLHttpRequest | null = null
 
-  private options!: RequestorOptions
+  options!: RequestorOptions
 
-  private url!: string
+  url!: string
 
-  private body?: Document | XMLHttpRequestBodyInit | null
+  body?: Document | XMLHttpRequestBodyInit | null
 
   /** 响应类型, normal普通响应, error错误响应 */
-  private replyType: ResponseReturnType = 'normal'
+  replyType: ResponseReturnType = 'normal'
 
   readyState = 0
 
@@ -257,8 +258,8 @@ class Requestor {
         this.sendBody()
       })
       .catch(() => {
-        this.end()
         options.onError('拦截器异常')
+        this.end()
       })
   }
 
@@ -286,6 +287,7 @@ class Requestor {
 
     const xhr = new XMLHttpRequest()
     this.xhr = xhr
+    config.created?.(this)
 
     const {
       url,
@@ -351,6 +353,7 @@ class Requestor {
   /** 结束当前请求 */
   private end() {
     this.xhr = null
+    this.options.config.complete?.(this)
   }
 
   /** 添加事件 */
@@ -368,7 +371,8 @@ class Requestor {
     }
 
     xhr.onloadend = () => {
-      this.xhr && this.reply(xhr)
+      this.xhr && this.reply(this.xhr)
+      this.end()
     }
 
     xhr.onreadystatechange = () => {
@@ -421,6 +425,9 @@ class Requestor {
   }
 
   abort() {
+    if (this.readyState === 0 || this.readyState === 4) {
+      return console.warn(`readyState: ${this.readyState}, 无法停止`)
+    }
     this.xhr?.abort()
   }
 }

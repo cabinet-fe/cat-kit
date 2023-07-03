@@ -10,6 +10,11 @@ export type ReadyState =
   | 'DONE'
 
 
+export interface IRequestor {
+  readyState: number
+  abort(): void
+}
+
 export interface RequestConfig {
   url: string
 
@@ -27,6 +32,12 @@ export interface RequestConfig {
   params?: string | Record<string, any> // 和api叠加
   data?: any
   responseType?: XMLHttpRequestResponseType
+
+  /** 请求实例被创建时调用的方法 */
+  created?: (request: IRequestor) => any
+
+  /** 一个请求完成时调用的方法 */
+  complete?: (request: IRequestor) => any
 
   /** 下载进度 */
   onProgress?: (e: ProgressEvent<EventTarget>) => void
