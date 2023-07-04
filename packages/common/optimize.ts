@@ -60,7 +60,9 @@ export function throttle<T extends any[], R>(
 }
 
 export type ConcurrentOptions = {
-  /** 最大并发数量 */
+  /** 并发模式, continue并发任务中有部分失败继续执行剩余任务, end并发任务中有1个失败立马结束所有并发, 默认end  */
+  mode?: 'continue' | 'end'
+  /** 最大并发数量, 默认为1 */
   max?: number
   /** 指定可重试的项 */
   retry?: (err: any) => boolean | void
@@ -69,7 +71,7 @@ export type ConcurrentOptions = {
 /**
  * 并发控制
  * @param list 并发列表
- * @param action 并发操作
+ * @param action 单个并发的操作
  * @param max 最大并发数量
  */
 export function concurrent<T, R>(
@@ -99,11 +101,18 @@ export function concurrent<T, R>(
     let max: number
 
     let retry: ConcurrentOptions['retry'] | undefined
+
+    let mode: ConcurrentOptions['mode'] = 'end'
+
+    let errors: any[] = []
     if (typeof options === 'number') {
       max = options
     } else if (options instanceof Object) {
       max = options.max ?? 1
       retry = options.retry
+      if (options.mode) {
+        mode = options.mode
+      }
     } else if (!options) {
       max = 1
     } else {
@@ -127,7 +136,9 @@ export function concurrent<T, R>(
     const tryFinish = () => {
       // 并发池空并且point已经走完则表示并发任务完成
       if (!pool.size && point > list.length - 1) {
-        rs(result)
+        errors.length ? rj(errors) : rs(result)
+      } else {
+        errors.length && mode === 'end' && rj(errors)
       }
     }
 
@@ -135,6 +146,7 @@ export function concurrent<T, R>(
      * 添加任务
      */
     const push = () => {
+      if (errors.length && mode === 'end') return rj(errors)
       // list空退出
       if (point > list.length - 1) {
         return tryFinish()
@@ -147,6 +159,7 @@ export function concurrent<T, R>(
 
       if (promise instanceof Promise) {
         pool.add(promise)
+
         promise
           .then(ret => {
             result.push(ret)
@@ -155,12 +168,15 @@ export function concurrent<T, R>(
           })
           .catch(err => {
             pool.delete(promise)
-
-            if (retry) {
-              retry(err) === true && tryOnce(item)
-            } else {
-              tryOnce(item)
+            if (!retry) {
+              return tryOnce(item)
             }
+            if (retry(err) === true) {
+              return tryOnce(item)
+            }
+
+            // 抛出错误
+            errors.push(err)
           })
       } else {
         push()
@@ -179,9 +195,9 @@ export function concurrent<T, R>(
           pool.delete(promise)
           tryFinish()
         })
-        .catch((err) => {
+        .catch(err => {
           pool.delete(promise)
-          rj(err)
+          errors.push(err)
         })
     }
 

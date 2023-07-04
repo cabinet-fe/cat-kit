@@ -10,6 +10,19 @@
 
     <br />
     <br />
+
+    失败后停止所有操作:
+    <v-button @click="runMode()">运行</v-button>
+
+    <br />
+    <br />
+
+    失败后继续剩余操作:
+    <v-button @click="runMode('continue')">运行</v-button>
+
+    <br />
+    <br />
+
     <div>所有任务({{ timeouts.length }}个): {{ timeouts }}</div>
     <div>成功执行任务({{ finished.length }}个): {{ finished }}</div>
     <div>失败任务: {{ errs }}</div>
@@ -21,7 +34,7 @@
 import { concurrent, type ConcurrentOptions } from '@cat-kit/fe'
 import { shallowReactive, ref } from 'vue'
 const timeouts = [
-  1100, 500, 180, 400, 300, 200, 150, 400, 300, 200, 100, 500, 600, 500, 200,
+  1100, 500, 180, 400, 300, 200, 150, 400, 1300, 200, 100, 500, 600, 500, 200,
   200, 190, 330
 ]
 
@@ -35,8 +48,9 @@ const reset = () => {
   count.value = 0
 }
 
-const runOptions = (options?: ConcurrentOptions | number) => {
-  concurrent(
+const runOptions = async (options?: ConcurrentOptions | number) => {
+  console.log('并发开始, 并发数量:', options)
+  await concurrent(
     timeouts,
     async delay => {
       count.value++
@@ -55,6 +69,8 @@ const runOptions = (options?: ConcurrentOptions | number) => {
     },
     options as any
   )
+
+  console.log('都完成')
 }
 
 const run = () => {
@@ -68,9 +84,33 @@ const runWithoutRetry = () => {
     max: 3,
     /** 不再重试 */
     retry: err => {
-      console.log(err)
       return false
     }
   })
+}
+
+const runMode = async (mode?: 'continue' | 'end') => {
+  await concurrent(
+    timeouts,
+    async delay => {
+      count.value++
+      const result = await new Promise<number>((rs, rj) => {
+        setTimeout(() => {
+          if (delay > 1000) {
+            rj(delay)
+            errs.push(delay)
+          } else {
+            rs(delay)
+          }
+        }, delay)
+      })
+
+      finished.push(result)
+    },
+    {
+      max: 3,
+      mode,
+    }
+  )
 }
 </script>
