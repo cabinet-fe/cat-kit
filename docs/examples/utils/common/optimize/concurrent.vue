@@ -2,14 +2,14 @@
   <div>
     <div>大于1000的超时</div>
 
-    运行任务, 遇到错误重试一次: <v-button @click="run">运行</v-button>
+    运行任务:
+    <v-button @click="run">运行</v-button>
+    <v-button @click="pause">暂停</v-button>
+    <v-button @click="cont">继续</v-button>
+    <v-button @click="retry">错误重试</v-button>
     <br />
     <br />
-    运行任务, 出错的任务不再重试:
-    <v-button @click="runWithoutRetry">运行</v-button>
 
-    <br />
-    <br />
 
     失败后停止所有操作:
     <v-button @click="runMode()">运行</v-button>
@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { concurrent, type ConcurrentOptions } from '@cat-kit/fe'
+import { ConcurrenceController } from '@cat-kit/fe'
 import { shallowReactive, ref } from 'vue'
 const timeouts = [
   1100, 500, 180, 400, 300, 200, 150, 400, 1300, 200, 100, 500, 600, 500, 200,
@@ -48,51 +48,15 @@ const reset = () => {
   count.value = 0
 }
 
-const runOptions = async (options?: ConcurrentOptions | number) => {
-  console.log('并发开始, 并发数量:', options)
-  await concurrent(
-    timeouts,
-    async delay => {
-      count.value++
-      const result = await new Promise<number>((rs, rj) => {
-        setTimeout(() => {
-          if (delay > 1000) {
-            rj(delay)
-            errs.push(delay)
-          } else {
-            rs(delay)
-          }
-        }, delay)
-      })
 
-      finished.push(result)
-    },
-    options as any
-  )
 
-  console.log('都完成')
-}
+let cc: null | ConcurrenceController = null
 
 const run = () => {
   reset()
-  runOptions(3)
-}
-
-const runWithoutRetry = () => {
-  reset()
-  runOptions({
-    max: 3,
-    /** 不再重试 */
-    retry: err => {
-      return false
-    }
-  })
-}
-
-const runMode = async (mode?: 'continue' | 'end') => {
-  await concurrent(
-    timeouts,
-    async delay => {
+  cc = new ConcurrenceController({
+    queue: timeouts,
+    action: async delay => {
       count.value++
       const result = await new Promise<number>((rs, rj) => {
         setTimeout(() => {
@@ -106,11 +70,66 @@ const runMode = async (mode?: 'continue' | 'end') => {
       })
 
       finished.push(result)
+      return result
     },
-    {
-      max: 3,
-      mode,
-    }
-  )
+    max: 3,
+    mode: 'continue'
+  })
+
+  cc.on('complete', e => {
+    console.log(e)
+    // cc = null
+  })
+
+  cc.start()
+}
+
+const pause = () => {
+  cc?.pause()
+}
+
+const cont = () => {
+  cc?.continue()
+}
+
+const retry = () => {
+  cc?.retry()
+}
+
+const runMode = async (mode?: 'continue' | 'end') => {
+  reset()
+  await new Promise((rs, rj) => {
+    const cc = new ConcurrenceController({
+      queue: timeouts,
+      action: async delay => {
+        count.value++
+        const result = await new Promise<number>((rs, rj) => {
+          setTimeout(() => {
+            if (delay > 1000) {
+              rj(delay)
+              errs.push(delay)
+            } else {
+              rs(delay)
+            }
+          }, delay)
+        })
+
+        finished.push(result)
+      },
+      max: 2,
+      mode
+    })
+
+    cc.on('failed', e => {
+      rj(e.errors)
+    })
+
+    cc.on('success', e => {
+      rs(e.result)
+    })
+
+    cc.start()
+  })
+  console.log('success')
 }
 </script>

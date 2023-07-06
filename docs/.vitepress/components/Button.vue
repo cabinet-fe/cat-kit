@@ -20,6 +20,10 @@ export default {
   color: #fff;
 }
 
+.v-button + .v-button {
+  margin-left: 6px;
+}
+
 .v-button:active {
   background-color: var(--vp-c-brand-dark);
 }
