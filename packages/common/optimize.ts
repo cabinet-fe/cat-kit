@@ -187,37 +187,33 @@ export class ConcurrenceController<Item = any, Result = any> {
     }
   }
 
-  /** 将操作加入并发池 */
-  private add() {
-    const {
-      queue,
-      action,
-      pool,
-      result,
-      finished,
-      errors,
-      addable,
-      eventsCallbacks
-    } = this
-
-    // 操作都完成则退出
-    if (finished) {
-      if (errors.length) {
-        eventsCallbacks.failed?.({
-          result,
-          errors
-        })
-      } else {
-        eventsCallbacks.success?.({
-          result
-        })
-      }
-
-      eventsCallbacks.complete?.({
+  /** 完成此次并发 */
+  private finish() {
+    const { errors, result, eventsCallbacks } = this
+    if (errors.length) {
+      eventsCallbacks.failed?.({
         result,
         errors
       })
-      return
+    } else {
+      eventsCallbacks.success?.({
+        result
+      })
+    }
+
+    eventsCallbacks.complete?.({
+      result,
+      errors
+    })
+  }
+
+  /** 将操作加入并发池 */
+  private add() {
+    const { queue, action, pool, result, finished, addable } = this
+
+    // 操作都完成则退出
+    if (finished) {
+      return this.finish()
     }
 
     if (!addable) return
@@ -282,7 +278,12 @@ export class ConcurrenceController<Item = any, Result = any> {
     const { max, queue } = this
     let i = -1
     const len = Math.min(queue.length, max)
-    while (++i < len) this.add()
+
+    if (len) {
+      while (++i < len) this.add()
+    } else {
+      this.finish()
+    }
   }
 
   /** 暂停该并发中的任务 */
