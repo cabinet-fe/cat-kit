@@ -147,10 +147,12 @@ export class ConcurrenceController<Item = any, Result = any> {
     this.status = 'ready'
   }
 
-  /** 是否完成 */
+  /**
+   * 是否完成, 并发池为空且队列为空或者状态已经为失败视为完成
+   */
   private get finished() {
-    const { queue, pool } = this
-    return !pool.size && !queue.length
+    const { queue, pool, status } = this
+    return !pool.size && (!queue.length || status === 'failed')
   }
 
   /** 是否可新增 */
@@ -191,11 +193,13 @@ export class ConcurrenceController<Item = any, Result = any> {
   private finish() {
     const { errors, result, eventsCallbacks } = this
     if (errors.length) {
+      this.status = 'failed'
       eventsCallbacks.failed?.({
         result,
         errors
       })
     } else {
+      this.status = 'success'
       eventsCallbacks.success?.({
         result
       })
@@ -315,9 +319,12 @@ export class ConcurrenceController<Item = any, Result = any> {
         `无法执行ConcurrenceController.retry方法, 因为没有失败的任务`
       )
     }
+
+    // 剩余队列加上失败项
+    this.queue = [...this.failedItems, ...this.queue]
     this.errors = []
-    this.queue = [...this.failedItems]
     this.failedItems = []
+
     this.ready()
     this.start()
   }
