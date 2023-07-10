@@ -3,15 +3,12 @@ type FormatType = 'money' | 'cn_money'
 class Num {
   private v!: number
 
-  private static numberFmt = new Intl.NumberFormat('zh-Hans-CN', {
-    maximumFractionDigits: 2
-  })
-
   private money(money: number, decimal?: number) {
     if (!money) {
       money = 0
     }
-    let [intPart, decPart = ''] = String(money).split('.')
+    let isNegative = money < 0
+    let [intPart, decPart = ''] = String(Math.abs(money)).split('.')
     const len = intPart!.length - 1
     let arr: string[] = []
     intPart!
@@ -30,7 +27,7 @@ class Num {
     } else {
       decPart ? (result = `${result}.${decPart}`) : void 0
     }
-    return result
+    return isNegative ? '-' + result : result
   }
 
   private cn_money(money: number) {
@@ -234,6 +231,32 @@ n.sum = function (...numbers: number[]) {
     numbers.map(n => Math.round(n * mul)).reduce((acc, cur) => acc + cur, 0) /
     mul
   )
+}
+
+interface NumberFormatterOptions {
+  /** 数字格式的样式 decimal:十进制, currency货币, percent百分比 */
+  style?: 'decimal' | 'currency' | 'percent'
+  /** 货币符号, 如果style为currency则默认CNY人民币 */
+  currency?: 'CNY' | 'USD' | 'JPY' | 'EUR'
+  /** 小数精度(小数点位数) */
+  precision?: number
+  /** 最大小数位数, 默认3 */
+  maximumFractionDigits?: number
+  /** 最小小数位数 */
+  minimumFractionDigits?: number
+  /** 表现方法, standard: 标准, scientific: 科学计数法, engineering: 引擎, compact: 简洁计数   */
+  notation?: Intl.NumberFormatOptions['notation']
+}
+n.formatter = function (options: NumberFormatterOptions) {
+  const formatter = new Intl.NumberFormat('zh-CN', {
+    notation: options.notation,
+    style: options.style,
+    maximumFractionDigits: options.maximumFractionDigits ?? options.precision,
+    minimumFractionDigits: options.minimumFractionDigits ?? options.precision,
+    currency: options.style === 'currency' ? options.currency ?? 'CNY' : options.currency
+  })
+
+  return formatter
 }
 
 const operatorCalcTactics = {

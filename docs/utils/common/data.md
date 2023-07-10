@@ -231,6 +231,10 @@ obj({ name: '李四', age: 20 }).omit(['name'])
 
 cat-kit 中提供了一个包装函数**n**来包裹数字.
 
+::: demo
+render(utils/common/data/number)
+:::
+
 ### n(num).fixed(n)
 
 指定一个数字保留几位小数点, 并且截取掉无用的 0
