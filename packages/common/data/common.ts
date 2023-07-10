@@ -17,7 +17,7 @@ export function isEmpty(val: any) {
       }
       return true
   }
-  return !!val
+  return !val
 }
 
 /**

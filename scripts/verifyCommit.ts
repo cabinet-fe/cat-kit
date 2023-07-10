@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import color from 'picocolors'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
 
@@ -12,6 +12,6 @@ const commitRE =
   /^(feat|fix|docs|style|refactor|perf|test|build|init|daily|chore|release)(\(.+\))?: .{1,50}/
 
 if (!commitRE.test(msg)) {
-  console.error(chalk.red('Git提交格式错误'))
+  console.error(color.red('Git提交格式错误'))
   process.exit(1)
 }

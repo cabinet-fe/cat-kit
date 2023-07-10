@@ -31,6 +31,7 @@ export function DemoPlugin(): PluginOption {
       // 是否存在目标demo文件
       const hasDemos = fs.existsSync(path.resolve(examplesPath, modulePath))
       if (!hasDemos) return
+      console.log(modulePath)
       // 导入模块下的所有vue文件
       const script = `<script setup>
         const demos = import.meta.glob('/examples/${modulePath}/*.vue', { eager: true })

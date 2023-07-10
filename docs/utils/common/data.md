@@ -1,12 +1,9 @@
 # 数据操作
 
 ## 快速使用
-
-```ts
-import { omit } from 'cat-kit'
-const data = omit({ id: 1, name: '张三', age: 20 }, ['id'])
-// data: { name: '张三', age: 20 }
-```
+::: demo
+render(utils/common/data/quick)
+:::
 
 ## 通用操作
 
@@ -16,49 +13,26 @@ const data = omit({ id: 1, name: '张三', age: 20 }, ['id'])
 
 判断一个值是否为空值, 其中**0**和**false**会被视作空值. 通常判断对象或者数组尤其是对象使用此方法.
 
-```ts
-isEmpty({})
-// return true
-
-isEmpty({ name: '张三' })
-// return false
-
-isEmpty([])
-// return true
-
-isEmpty(0)
-// return false
-
-isEmpty(1)
-// return true
-
-isEmpty(false)
-// return false
-
-isEmpty(true)
-// return true
-```
+::: demo
+render(utils/common/data/empty)
+:::
 
 ### getChainValue
 
 通过一个字符串属性链来获取一个嵌套的对象的值
 
-```ts
-getChainValue({ person: { name: '张三' } }, 'person.name')
-// return 张三
-```
+::: demo
+render(utils/common/data/get-chain-value)
+:::
+
 
 ### oneOf
 
 判断是否为给定值中的一种
 
-```ts
-oneOf(1, [1, 2])
-// return true
-
-oneOf(1, [2, 3])
-// return false
-```
+::: demo
+render(utils/common/data/one-of)
+:::
 
 ### equal
 
@@ -68,21 +42,9 @@ oneOf(1, [2, 3])
 
 比如从服务器过来的对象总是和你程序的对象不相等, 而我们可以通过约定的结构或者属性标识来确定其是否相等, 在与后端对接时, 该方法或许会很有用.
 
-```ts
-let a = { name: '张三' }
-let b = { name: '张三' }
-equal(a, b)
-// return true
-
-let c = { name: '张三', id: '1' }
-let d = { name: '张三', id: '1', age: 20 }
-
-equal(c, d)
-// false
-
-equal(c, d, 'id')
-// true, 尽管结构不一样, 但id一样, 因此是相等的
-```
+::: demo
+render(utils/common/data/equal)
+:::
 
 ::: danger
 你不能够用它来判断两个值是否相等!
@@ -116,19 +78,10 @@ if (equal(a, b)) {
 
 深拷贝, 此函数能够深拷贝数组, 对象, 函数, 日期这四种常用的引用类型
 
-```ts
-const person = { name: '张三', school: { name: '清华大学' } }
-const result = deepCopy(person)
+::: demo
+render(utils/common/data/deep-copy)
+:::
 
-console.log(person === result)
-// log false
-
-console.log(person.name === result.name)
-// log true
-
-console.log(person.school === result.school)
-// log false
-```
 
 ### merge
 
@@ -141,34 +94,19 @@ console.log(person.school === result.school)
 这意味着如果 merge 只传入一个参数时, 是和 [deepCopy](#deepcopy) 等效的.
 :::
 
-```ts
-merge({ name: '张三' }, { name: '李四', age: 20 })
-//  return { name: '李四', age: 20 }
-```
+::: demo
+render(utils/common/data/merge)
+:::
 
-### serialize 对象序列化
+### serialize & deserialize  对象序列化 & 反序列化为对象
 
-对象序列化将对象转化为可传输的字符串
+对象序列化: 将对象转化为可传输的字符串
 
-```ts
-serialize({ a: 1 })
-// 'a=1'
+反序列化: 将字符串转化为对象
 
-serialize({ a: '1' })
-// 'a="1"'
-```
-
-### deserialize 反序列化为对象
-
-将字符串转化为对象
-
-```ts
-deserialize('a=1')
-// { a: 1 }
-
-serialize('a="1"')
-// { a: '1' }
-```
+::: demo
+render(utils/common/data/serialize)
+:::
 
 ## array 操作
 

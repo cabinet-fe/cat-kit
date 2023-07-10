@@ -1,5 +1,5 @@
 <template>
-  <ul class="menus">
+  <!-- <ul class="menus">
     <li
       class="menu-item"
       :class="{
@@ -11,21 +11,17 @@
     >
       {{ menu }}
     </li>
-  </ul>
+  </ul> -->
 
   <!-- 显示示例 -->
-  <ClientOnly v-if="visibleType === 'example'">
+  <ClientOnly>
     <div class="demo-box">
       <component v-if="demos" :is="_demos[path]" v-bind="$attrs" />
     </div>
   </ClientOnly>
 
   <!-- 源代码 -->
-  <div
-    v-else-if="visibleType === 'code'"
-    class="source-container"
-    v-html="decodedCode"
-  ></div>
+  <div class="source-container" v-html="decodedCode"></div>
 </template>
 
 <script lang="ts" setup>
@@ -52,13 +48,13 @@ const menus = {
   code: '查看代码'
 }
 
-type VisibleType = keyof typeof menus
+// type VisibleType = keyof typeof menus
 
-const visibleType = shallowRef<VisibleType>('example')
+// const visibleType = shallowRef<VisibleType>('example')
 
-const handleClick = (type: VisibleType) => {
-  visibleType.value = type
-}
+// const handleClick = (type: VisibleType) => {
+//   visibleType.value = type
+// }
 
 const decodedCode = computed(() => {
   return decodeURIComponent(props.source || '')
