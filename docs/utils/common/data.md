@@ -235,32 +235,6 @@ cat-kit 中提供了一个包装函数**n**来包裹数字.
 render(utils/common/data/number)
 :::
 
-### n(num).fixed(n)
-
-指定一个数字保留几位小数点, 并且截取掉无用的 0
-
-```ts
-n(1.296).fixed(2)
-// return 1.3
-```
-
-### format
-
-数字金额格式化
-
-```ts
-import { n } from 'cat-kit'
-
-n(1234.5678).format('money')
-//return 1,234.5678
-
-n(1234.5678).format('money', 5)
-//return 1,234.56780
-
-n(1234.5678).format('cn-money')
-//return 壹仟贰佰叁拾肆元伍角陆分柒毫捌厘
-```
-
 ### each
 
 数字遍历

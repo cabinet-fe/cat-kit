@@ -115,106 +115,6 @@ const n = function n(n: number) {
   return new Num(n)
 }
 
-interface NumberBlock {
-  type: 'number'
-  value: number
-  nextOperator: string
-}
-
-interface GroupBlock {
-  type: 'group'
-  blocks: Block[]
-}
-
-type Block = NumberBlock | GroupBlock
-
-/** 数学运算解释器 */
-class CalcInterpreter {
-  /** 匹配数字 */
-  static NumRE = /[\d\.]/
-  /** 匹配操作符 */
-  static OprRE = /[\+\-\*\/\%]/
-
-  numberStr = ''
-
-  preBlock: Block | null = null
-  blocks: Block[] = []
-
-  /** 添加数字块 */
-  addNumberBlock() {
-    if (!this.numberStr) return
-    const block = {
-      type: 'number' as const,
-      value: +this.numberStr,
-      nextOperator: ''
-    }
-    this.preBlock = block
-    this.blocks.push(block)
-    this.numberStr = ''
-  }
-
-  constructor(expression: string) {
-    this.compile(expression)
-  }
-
-  compile(expression: string) {
-    let i = -1
-    const len = expression.length
-    while (++i < len) {
-      const char = expression[i]!
-
-      // 忽略空白
-      if (char === ' ') continue
-
-      // 数字字符开始拼接
-      if (CalcInterpreter.NumRE.test(char)) {
-        this.numberStr += char
-        continue
-      }
-
-      this.addNumberBlock()
-
-      // 操作符
-      if (CalcInterpreter.OprRE.test(char)) {
-        const { preBlock } = this
-        if (!preBlock || preBlock.type !== 'number') {
-          throw new Error(`表达式 ${expression} 不合法!`)
-        }
-        preBlock.nextOperator = char
-        continue
-      }
-
-      // 分组
-      if (char === '(') {
-        let stack = ['(']
-        let startIndex = i + 1
-        while (stack.length && i < len) {
-          i++
-          let groupChar = expression[i]!
-          if (groupChar === '(') {
-            stack.push(groupChar)
-          } else if (groupChar === ')') {
-            stack.pop()
-          }
-        }
-
-        if (stack.length) {
-          throw new Error(`'${char}'不合法!`)
-        }
-
-        this.blocks.push({
-          type: 'group',
-          blocks: new CalcInterpreter(expression.slice(startIndex, i)).blocks
-        })
-
-        continue
-      }
-    }
-
-    this.addNumberBlock()
-  }
-}
-
 /**
  * 求和
  * @param numbers 需要求和的数字
@@ -253,16 +153,171 @@ n.formatter = function (options: NumberFormatterOptions) {
     style: options.style,
     maximumFractionDigits: options.maximumFractionDigits ?? options.precision,
     minimumFractionDigits: options.minimumFractionDigits ?? options.precision,
-    currency: options.style === 'currency' ? options.currency ?? 'CNY' : options.currency
+    currency:
+      options.style === 'currency'
+        ? options.currency ?? 'CNY'
+        : options.currency
   })
 
   return formatter
 }
 
-const operatorCalcTactics = {
-  '+'(current: number, next: number) {
-    return current + next
+// 3 + (2 + 5) - (3 + 5 / (2 + 3)) - 2 + 5
+// 3 + 7 - (3 + 5 / 5) - 2 + 5
+// 3 + 7 - (3 + 1) - 2 + 5
+
+// 1.定义一颗抽象树, 当前表达初始等于抽象树
+// 2.往树的左边插入一个字面量3
+// 3.往树的操作符号插入+
+// 4.看到(往树的右边插入一个空表达式, 定义当前表达式为该空表达式
+// 5.往当前树的左边插入一个字面量2
+// 6.往当前树的操作符插入+
+// 7.往当前树的右边插入一个字面量5
+// 8.看到当前树节点已满, 抽象树节点已满, 且-符号的优先级为低, 则新增一颗抽象树,
+// 抽象树的左节点为此前的抽象树, 当前表达式为该抽象树. 如果遇到高优先级符号, 则
+// 抽象树右节点被置换为一个表达式, 且该表达式的左节点为被置换的节点, 当前表达式为
+// 该表达式
+
+
+
+class Expression {
+  operator?: '+' | '-' | '*' | '/'
+  left?: NumberLiteral | Expression
+  right?: NumberLiteral | Expression
+  constructor(options: {
+    left?: NumberLiteral | Expression
+    right?: NumberLiteral | Expression
+    operator?: '+' | '-' | '*' | '/'
+  }) {
+    this.left = options.left
+    this.right = options.right
+    this.operator = options.operator
   }
+}
+
+class NumberLiteral {
+  value!: number
+  constructor(n: number) {
+    this.value = n
+  }
+}
+
+const scan = (str: string) => {
+  str = str.trim()
+
+  let groupStack: string[] = []
+
+  /** 语法树 */
+  let ast: Expression = new Expression({})
+  let currentExpression: Expression | null = ast
+  let numberLiteral = ''
+
+  const setExpression = (exp: Expression) => {
+    if (!ast.left) {
+      ast.left = exp
+    } else if (!ast.right) {
+      ast.right = exp
+    } else {
+      throw new Error('表达式错误')
+    }
+
+  }
+
+  const setLiteral = (literal: NumberLiteral) => {
+    if (!ast.left) {
+      ast.left = literal
+    } else if (!ast.right) {
+      ast.right = literal
+    } else {
+      throw new Error('表达式错误')
+    }
+  }
+
+  const setOperator = (operator: '+' | '-' | '*' | '/') => {
+    if (!currentExpression) {
+      throw new Error('表达式错误')
+    }
+    if (currentExpression.operator) {
+      if (!currentExpression.left || !currentExpression.right) {
+        throw new Error('表达式错误')
+      }
+      if (/[\+-]/.test(operator)) {
+
+        ast = new Expression({
+          left: ast,
+          operator
+        })
+        currentExpression = ast
+      } else if (/[\*\/]/.test(operator)) {
+        currentExpression.right = new Expression({
+          left: ast.right,
+          operator
+        })
+        currentExpression = ast
+      }
+
+    } else {
+      ast.operator = operator
+    }
+  }
+
+
+
+  const charOperate = {
+    '(': () => {
+      setExpression(new Expression({}))
+      groupStack.push('(')
+    },
+    ')': () => {
+      if (groupStack[groupStack.length - 1] === '(') {
+        groupStack.pop()
+      } else {
+        throw new Error('表达式错误')
+      }
+    },
+    // 低优先级
+    '+': () => {
+      setOperator('+')
+    },
+    '-': () => {
+      setOperator('-')
+    },
+
+    // 高优先级
+    '*': () => {
+      setOperator('*')
+    },
+    '/': () => {
+      setOperator('/')
+    }
+  }
+
+  let i = 0
+
+  while (i < str.length) {
+    const c = str[i]!
+
+    // 对象字面量
+    if (/\d/.test(c)) {
+      numberLiteral += c
+    } else {
+      // 如果存在对象字面量
+      if (numberLiteral) {
+        setLiteral(new NumberLiteral(+numberLiteral))
+        numberLiteral = ''
+      }
+
+      if (c === ' ') continue
+
+      if (charOperate[c]) {
+        charOperate[c]()
+      }
+    }
+
+    i++
+  }
+
+  return ast
 }
 
 /**
@@ -270,41 +325,12 @@ const operatorCalcTactics = {
  * @param expression 计算表达式
  */
 n.calc = function (expression: string) {
-  const ci = new CalcInterpreter(expression)
-
-  // Plus Minus RegExp
-  const PM_RE = /[\+\-]/
-
-  function c(blocks: Block[]) {
-    let current: null | number = null
-
-    let currentOperator = ''
-
-    blocks.forEach((block, i) => {
-      let nextBlock = blocks[i + 1]
-
-      if (block.type === 'number') {
-        if (current === null) {
-          current = block.value
-        }
-
-        // + -
-        if (PM_RE.test(block.nextOperator)) {
-        }
-      } else {
-        if (current !== null) {
-          current = operatorCalcTactics[currentOperator](
-            current,
-            c(block.blocks)
-          )
-        }
-      }
-    })
-
-    return current
+  try {
+    console.log(scan(expression))
+  } catch (e) {
+    console.error(e)
   }
-
-  return c(ci.blocks)
+  return 1
 }
 
 export { n }
