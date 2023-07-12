@@ -16,7 +16,7 @@ const packagesJson = packagesJsonPath.map(path =>
 type Action = 'downgrade' | 'upgrade'
 type VersionType = 'major' | 'minor' | 'patch'
 
-const updateVersion = (action: Action, type: VersionType) => {
+const updateVersion = async (action: Action, type: VersionType) => {
   const rootPackageJsonPath = path.resolve(cwd(), 'package.json')
   const rootPackageJson = JSON.parse(
     fs.readFileSync(rootPackageJsonPath, 'utf-8')
@@ -49,17 +49,17 @@ const updateVersion = (action: Action, type: VersionType) => {
 
   fs.writeFile(
     rootPackageJsonPath,
-    pretty.format(JSON.stringify(rootPackageJson), { parser: 'json' }),
+    await pretty.format(JSON.stringify(rootPackageJson), { parser: 'json' }),
     err => {
       err && console.error(err)
     }
   )
 
-  packagesJson.forEach((json, i) => {
+  packagesJson.forEach(async (json, i) => {
     json.version = rootPackageJson.version
     fs.writeFile(
       packagesJsonPath[i],
-      pretty.format(JSON.stringify(json), { parser: 'json' }),
+      await pretty.format(JSON.stringify(json), { parser: 'json' }),
       err => {
         err && console.error(err)
       }
