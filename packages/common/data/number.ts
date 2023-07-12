@@ -178,8 +178,6 @@ n.formatter = function (options: NumberFormatterOptions) {
 // 抽象树右节点被置换为一个表达式, 且该表达式的左节点为被置换的节点, 当前表达式为
 // 该表达式
 
-
-
 class Expression {
   operator?: '+' | '-' | '*' | '/'
   left?: NumberLiteral | Expression
@@ -202,122 +200,169 @@ class NumberLiteral {
   }
 }
 
+type Token =
+  | {
+      type: 'number'
+      value: number
+    }
+  | {
+      type: 'op'
+      value: string
+    }
+
+/** 词法分析 */
 const scan = (str: string) => {
-  str = str.trim()
-
-  let groupStack: string[] = []
-
-  /** 语法树 */
-  let ast: Expression = new Expression({})
-  let currentExpression: Expression | null = ast
-  let numberLiteral = ''
-
-  const setExpression = (exp: Expression) => {
-    if (!ast.left) {
-      ast.left = exp
-    } else if (!ast.right) {
-      ast.right = exp
-    } else {
-      throw new Error('表达式错误')
-    }
-
-  }
-
-  const setLiteral = (literal: NumberLiteral) => {
-    if (!ast.left) {
-      ast.left = literal
-    } else if (!ast.right) {
-      ast.right = literal
-    } else {
-      throw new Error('表达式错误')
-    }
-  }
-
-  const setOperator = (operator: '+' | '-' | '*' | '/') => {
-    if (!currentExpression) {
-      throw new Error('表达式错误')
-    }
-    if (currentExpression.operator) {
-      if (!currentExpression.left || !currentExpression.right) {
-        throw new Error('表达式错误')
-      }
-      if (/[\+-]/.test(operator)) {
-
-        ast = new Expression({
-          left: ast,
-          operator
-        })
-        currentExpression = ast
-      } else if (/[\*\/]/.test(operator)) {
-        currentExpression.right = new Expression({
-          left: ast.right,
-          operator
-        })
-        currentExpression = ast
-      }
-
-    } else {
-      ast.operator = operator
-    }
-  }
-
-
-
-  const charOperate = {
-    '(': () => {
-      setExpression(new Expression({}))
-      groupStack.push('(')
-    },
-    ')': () => {
-      if (groupStack[groupStack.length - 1] === '(') {
-        groupStack.pop()
-      } else {
-        throw new Error('表达式错误')
-      }
-    },
-    // 低优先级
-    '+': () => {
-      setOperator('+')
-    },
-    '-': () => {
-      setOperator('-')
-    },
-
-    // 高优先级
-    '*': () => {
-      setOperator('*')
-    },
-    '/': () => {
-      setOperator('/')
-    }
-  }
+  const tokens: Token[] = []
 
   let i = 0
-
+  let tokenVal = ''
   while (i < str.length) {
-    const c = str[i]!
-
-    // 对象字面量
-    if (/\d/.test(c)) {
-      numberLiteral += c
-    } else {
-      // 如果存在对象字面量
-      if (numberLiteral) {
-        setLiteral(new NumberLiteral(+numberLiteral))
-        numberLiteral = ''
+    let c = str[i]!
+    i++
+    if (c === ' ') continue
+    // 可能组成数字的字符
+    if (/[\d\.]/.test(c)) {
+      if (tokenVal[tokenVal.length - 1] === '.' && c === '.') {
+        throw new Error('表达式错误')
+      } else {
+        tokenVal += c
       }
-
-      if (c === ' ') continue
-
-      if (charOperate[c]) {
-        charOperate[c]()
+      continue
+    }
+    if (/[\*\/\%\(\)]/.test(c)) {
+      if (tokenVal) {
+        tokens.push({ type: 'number', value: +tokenVal })
+        tokenVal = ''
+      }
+      tokens.push({ type: 'op', value: c })
+      continue
+    }
+    // (1 + 2) + 4
+    // 操作符
+    if (/[\+\-]/.test(c)) {
+      if (tokenVal) {
+        tokens.push({ type: 'number', value: +tokenVal })
+        tokenVal = ''
+        tokens.push({ type: 'op', value: c })
+      } else {
+        tokenVal += c
       }
     }
-
-    i++
   }
 
-  return ast
+  return tokens
+
+  // let groupStack: string[] = []
+
+  // /** 语法树 */
+  // let ast: Expression = new Expression({})
+  // let currentExpression: Expression | null = ast
+  // let numberLiteral = ''
+
+  // const setExpression = (exp: Expression) => {
+  //   if (!ast.left) {
+  //     ast.left = exp
+  //   } else if (!ast.right) {
+  //     ast.right = exp
+  //   } else {
+  //     throw new Error('表达式错误')
+  //   }
+
+  // }
+
+  // const setLiteral = (literal: NumberLiteral) => {
+  //   if (!ast.left) {
+  //     ast.left = literal
+  //   } else if (!ast.right) {
+  //     ast.right = literal
+  //   } else {
+  //     throw new Error('表达式错误')
+  //   }
+  // }
+
+  // const setOperator = (operator: '+' | '-' | '*' | '/') => {
+  //   if (!currentExpression) {
+  //     throw new Error('表达式错误')
+  //   }
+  //   if (currentExpression.operator) {
+  //     if (!currentExpression.left || !currentExpression.right) {
+  //       throw new Error('表达式错误')
+  //     }
+  //     if (/[\+-]/.test(operator)) {
+
+  //       ast = new Expression({
+  //         left: ast,
+  //         operator
+  //       })
+  //       currentExpression = ast
+  //     } else if (/[\*\/]/.test(operator)) {
+  //       currentExpression.right = new Expression({
+  //         left: ast.right,
+  //         operator
+  //       })
+  //       currentExpression = ast
+  //     }
+
+  //   } else {
+  //     ast.operator = operator
+  //   }
+  // }
+
+  // const charOperate = {
+  //   '(': () => {
+  //     setExpression(new Expression({}))
+  //     groupStack.push('(')
+  //   },
+  //   ')': () => {
+  //     if (groupStack[groupStack.length - 1] === '(') {
+  //       groupStack.pop()
+  //     } else {
+  //       throw new Error('表达式错误')
+  //     }
+  //   },
+  //   // 低优先级
+  //   '+': () => {
+  //     setOperator('+')
+  //   },
+  //   '-': () => {
+  //     setOperator('-')
+  //   },
+
+  //   // 高优先级
+  //   '*': () => {
+  //     setOperator('*')
+  //   },
+  //   '/': () => {
+  //     setOperator('/')
+  //   }
+  // }
+
+  // let i = 0
+
+  // while (i < str.length) {
+  //   const c = str[i]!
+
+  //   // 对象字面量
+  //   if (/\d/.test(c)) {
+  //     numberLiteral += c
+  //   } else {
+  //     // 如果存在对象字面量
+  //     if (numberLiteral) {
+  //       setLiteral(new NumberLiteral(+numberLiteral))
+  //       numberLiteral = ''
+  //     }
+
+  //     if (c === ' ') continue
+
+  //     if (charOperate[c]) {
+  //       charOperate[c]()
+  //     }
+  //   }
+
+  //   i++
+  // }
+
+  // return ast
 }
 
 /**
