@@ -20,6 +20,10 @@ export * from './data/number'
 
 export * from './date/date'
 
+export * from './data-structure/stack'
+
+export * from './data-structure/tree'
+
 export * from './optimize'
 
 export { default as base64 } from './codec/base64'
