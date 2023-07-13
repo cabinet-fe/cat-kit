@@ -1,4 +1,4 @@
-import { isObj, isArray } from './data-type'
+import { isObj } from './data-type'
 
 type Last<T> = T extends [...any, infer L]
   ? L

@@ -14,6 +14,5 @@ const data = [
 ]
 
 const tree =  new Tree(data)
-
-console.log(tree)
+console.log(tree.getNodeList(node => node.data.id < 3))
 </script>
