@@ -9,6 +9,7 @@
 import { defineConfig } from 'vite'
 import { SearchPlugin } from 'vitepress-plugin-search'
 import { DemoPlugin } from './.vitepress/vite-plugins/demo-plugin'
+import jsx from '@vitejs/plugin-vue-jsx'
 
 export default defineConfig(({ mode }) => {
   return {
@@ -21,7 +22,8 @@ export default defineConfig(({ mode }) => {
         placeholder: '查询文档',
         cache: true,
         optimize: true
-      })
+      }),,
+      jsx()
     ],
 
     server: {

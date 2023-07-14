@@ -8,4 +8,6 @@ import VButton from './Button.vue'
 
 import VRunCode from './RunCode.vue'
 
-export default [VBadge, VDemo, VBinNumber, VButton, VRunCode]
+import JsonEditor from './JsonEditor.vue'
+
+export default [VBadge, VDemo, VBinNumber, VButton, VRunCode, JsonEditor]

@@ -1,49 +1,18 @@
 import { omitArr } from '../data/array'
 
-class TreeNode<D = any> {
-  root: TreeNode<D> | TreeNode<D>[] | null = null
+export class BaseNode<D = any> {
   /** 当前节点的索引路径, 路径的数量和树的深度相等 */
   readonly indexes: number[] = []
   /** 节点数据 */
   readonly data: D
   /** 父节点 */
-  readonly parent: TreeNode<D> | null = null
-  /** 子节点 */
-  children?: TreeNode<D>[]
-  /** 在当前深度下的索引 */
-  index: number
-  /** 树深 */
-  get depth(): number {
-    let depth = 0
-    let node: TreeNode<D> | null = this
-    while (node.parent) {
-      depth++
-      node = node.parent
-    }
-    return depth
-  }
+  // readonly parent: TreeNode<D> | null = null
 
-  /** 是否是叶子节点 */
-  get isLeaf(): boolean {
-    return !this.children || this.children.length === 0
-  }
+  // /** 在当前深度下的索引 */
+  // index: number
 
-  constructor(
-    data: D,
-    index: number,
-    root?: TreeNode<D> | TreeNode<D>[],
-    parent?: TreeNode<D>
-  ) {
+  constructor(data: D) {
     this.data = data
-    this.index = index
-
-    if (root) {
-      this.root = root
-    }
-
-    if (parent) {
-      this.parent = parent
-    }
   }
 
   /** 从当前父节点中移除自身 */
@@ -127,6 +96,44 @@ class TreeNode<D = any> {
   }
 }
 
+class TreeNode<D> extends BaseNode<D> {
+  /** 父节点 */
+  parent: TreeNode<D> | null = null
+  /** 子节点 */
+  children?: TreeNode<D>[]
+
+  /** 树深 */
+  get depth(): number {
+    let depth = 0
+    let node: BaseNode<D> | null = this
+    while (node?.parent) {
+      depth++
+      node = node.parent
+    }
+    return depth
+  }
+
+  /** 是否是叶子节点 */
+  get isLeaf(): boolean {
+    return !this.children || this.children.length === 0
+  }
+
+  constructor(options: TreeNodeOptions) {
+    this.root
+  }
+}
+
+/** 树的根节点 */
+class RootTreeNode<D, ChildData> extends BaseNode<D> {
+  parent = null
+
+  children?: TreeNode<ChildData>[]
+
+  constructor(data: D) {
+    super(data, 0)
+  }
+}
+
 interface TreeOptions {
   /** 数据中用于访问子节点的key */
   childrenKey?: string
@@ -138,12 +145,84 @@ export class Tree<
     ? Data[number]
     : Data,
   Root = Data extends Array<any>
-    ? Array<TreeNode<DataItem>>
-    : TreeNode<DataItem>
+    ? RootTreeNode<null, DataItem>
+    : RootTreeNode<DataItem, DataItem>
 > {
   readonly root!: Root
 
   private childrenKey = 'children'
+
+  constructor(data: Data, options?: TreeOptions) {
+    if (options?.childrenKey) {
+      this.childrenKey = options.childrenKey
+    }
+
+    const root = new RootTreeNode(Array.isArray(data) ? null : data)
+
+    this.root = root
+  }
+
+  /**
+   * 遍历
+   * @param cb 回调, 如果在该回调中返回一个false则立即终止当前遍历
+   * @param type
+   */
+  traverse(
+    cb: (node: TreeNode<DataItem>) => boolean | void,
+    type: 'bfs' | 'dfs' = 'dfs'
+  ): void {
+    const data = Array.isArray(this.root)
+      ? this.root
+      : ([this.root] as TreeNode<DataItem>[])
+    if (type === 'dfs') {
+      return Tree.dfs(data, cb, this.childrenKey)
+    }
+    if (type === 'bfs') {
+      return Tree.bfs(data, cb, this.childrenKey)
+    }
+  }
+
+  getNode(
+    matcher: (node: TreeNode<DataItem>) => boolean
+  ): TreeNode<DataItem> | null {
+    let ret: TreeNode<DataItem> | null = null
+    if (!this.root) {
+      return ret
+    }
+    Tree.bfs(
+      Array.isArray(this.root) ? this.root : [this.root],
+      node => {
+        if (matcher(node)) {
+          ret = node
+          return false
+        }
+      },
+      'children'
+    )
+    return ret
+  }
+
+  getNodeList(
+    matcher: (node: TreeNode<DataItem>) => boolean
+  ): TreeNode<DataItem>[] {
+    let ret: TreeNode<DataItem>[] = []
+    if (!this.root) {
+      return ret
+    }
+    Tree.bft(
+      Array.isArray(this.root) ? this.root : [this.root],
+      node => {
+        if (matcher(node)) {
+          ret.push(node)
+        }
+      },
+      'children'
+    )
+
+    return ret
+  }
+
+  flat() {}
 
   static create(
     data: any[],
@@ -168,121 +247,56 @@ export class Tree<
     return nodes
   }
 
-  constructor(data: Data, options?: TreeOptions) {
-    if (options?.childrenKey) {
-      this.childrenKey = options.childrenKey
-    }
-
-    if (Array.isArray(data)) {
-      const root = Tree.create(data, this.childrenKey)
-      // @ts-ignore
-      this.root = root
-    } else {
-      const root = new TreeNode(data, 0)
-      root.children = Tree.create(data[this.childrenKey], this.childrenKey)
-      // @ts-ignore
-      this.root = root
-    }
-  }
-
   /**
-   * 遍历
-   * @param cb 回调, 如果在该回调中返回一个false则立即终止当前遍历
-   * @param type
-   */
-  traverse(
-    cb: (node: TreeNode<DataItem>) => boolean | void,
-    type: 'bfs' | 'dfs' = 'dfs'
-  ): void {
-    const data = Array.isArray(this.root)
-      ? this.root
-      : ([this.root] as TreeNode<DataItem>[])
-    if (type === 'dfs') {
-      return Tree.dfs(data, cb, this.childrenKey)
-    }
-    if (type === 'bfs') {
-      return Tree.bfs(data, cb, this.childrenKey)
-    }
-  }
-
-
-
-
-  getNode(matcher: (node: TreeNode<DataItem>) => boolean): TreeNode<DataItem> | null {
-    let ret: TreeNode<DataItem> | null = null
-    if (!this.root) {
-      return ret
-    }
-    Tree.bfs(
-      Array.isArray(this.root) ? this.root : [this.root],
-      node => {
-        if (matcher(node)) {
-          ret = node
-          return false
-        }
-      },
-      'children'
-    )
-    return ret
-  }
-
-  getNodeList(matcher: (node: TreeNode<DataItem>) => boolean): TreeNode<DataItem>[] {
-    let ret: TreeNode<DataItem>[] = []
-    if (!this.root) {
-      return ret
-    }
-    Tree.bfs(
-      Array.isArray(this.root) ? this.root : [this.root],
-      node => {
-        if (matcher(node)) {
-          ret.push(node)
-        }
-      },
-      'children'
-    )
-
-    return ret
-  }
-
-  /**
-   *
-   * @param data 一个可以被描述为属性的数据结构
+   * 深度优先遍历
+   * @param data 一个可以被描述为树形的数据结构
    * @param cb 遍历时的回调
    * @param childrenKey 子节点的key
    */
-  static dfs<T extends Record<string, any>>(
-    data: T[],
+  static dft<T extends Record<string, any>>(
+    data: T,
     cb: (item: T) => boolean | void,
     childrenKey: string
   ) {
-    let i = 0
-    while (i < data.length) {
-      let item = data[i]!
-      if (cb(item) === false) break
-      if (Array.isArray(item[childrenKey])) {
-        Tree.dfs(item[childrenKey], cb, childrenKey)
+    if (cb(data) === false) return false
+
+    let children = data[childrenKey]
+    if (children) {
+      let i = 0
+      while (i < children.length) {
+        if (Tree.dft(children[i], cb, childrenKey)) break
+        i++
       }
-      i++
     }
   }
 
-  static bfs<T extends Record<string, any>>(
-    data: T[],
-    cb: (item: T) => boolean | void,
-    childrenKey: string
+  /**
+   * 广度优先遍历
+   * @param data 一个可以被描述为树形的数据结构
+   * @param cb 遍历时的回调, 当回调返回一个false时跳出当前循环
+   * @param childrenKey 子节点的key
+   */
+  static bft<T extends Record<string, any>>(
+    root: T,
+    cb: (item: T) => void | boolean,
+    childrenKey = 'children'
   ) {
-    let i = 0
-    let nextFloor = []
-    while (i < data.length) {
-      let item = data[i]!
-      if (cb(item) === false) break
-      if (Array.isArray(item[childrenKey])) {
-        nextFloor = nextFloor.concat(item[childrenKey])
+    const queue: T[] = []
+
+    queue.push(root)
+
+    while (queue.length > 0) {
+      const node = queue.shift()!
+      if (cb(node) === false) break
+
+      let children = node[childrenKey]
+      if (!!children) {
+        let i = 0
+        while (i < children.length) {
+          queue.push(children[i])
+          i++
+        }
       }
-      i++
-    }
-    if (nextFloor.length) {
-      Tree.bfs(nextFloor, cb, childrenKey)
     }
   }
 }

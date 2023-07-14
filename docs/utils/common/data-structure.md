@@ -14,7 +14,7 @@ render(utils/common/data-structure/stack)
 
 树是最广泛使用的数据结构之一, 文件系统, 目录, 多级分类, 数据库引擎...
 
-本示例是对普通树的一个实现, 前端的大部分场景下用于构建一个树形组件.
+基于本工具库提供的Tree和TreeNode API, 你可以很轻易地构建一个树形组件
 
 ::: demo
 render(utils/common/data-structure/tree)

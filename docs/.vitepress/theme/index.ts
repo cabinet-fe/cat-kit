@@ -18,6 +18,7 @@ const theme: Theme = {
     components.forEach(component => {
       app.component(component.name, component)
     })
+    app.config.globalProperties.c = console
   }
 }
 

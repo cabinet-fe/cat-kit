@@ -1,9 +1,9 @@
 {
-  "extends": "ts-conf-base/tsconfig.json",
+  "extends": "ts-conf-base/tsconfig.vue.json",
   "compilerOptions": {
     "composite": true,
     "lib": ["ESNext", "DOM"],
     "types": ["vite/client"]
   },
-  "include": ["./**/*.ts", "./.vitepress/**/*.ts"]
+  "include": ["./**/*.ts", "./**/*.vue", "./.vitepress/**/*.ts"]
 }
