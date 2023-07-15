@@ -1,14 +1,18 @@
-import { BaseTreeNode } from './base-tree-node'
-
-export class TreeNode<Data> extends BaseTreeNode<Data> {
+import { omitArr } from '../../data/array'
+import { dft, bft } from './helper'
+export class TreeNode<Data> {
   children?: TreeNode<Data>[]
 
-  parent: TreeNode<Data> | RootTreeNode<null, Data> | null = null
+  data: Data
+
+  parent: TreeNode<Data> | null = null
+
+  index: number
 
   /** 树深 */
   get depth(): number {
     let depth = 0
-    let node: TreeNode<Data> | RootTreeNode<Data | null, Data> | null = this
+    let node: TreeNode<Data> = this
     while (node?.parent) {
       depth++
       node = node.parent
@@ -21,8 +25,13 @@ export class TreeNode<Data> extends BaseTreeNode<Data> {
     return !this.children || this.children.length === 0
   }
 
-  constructor(data: Data, parent?: TreeNode<Data>) {
-    super(data)
+  constructor(data: Data, index: number, parent?: TreeNode<Data>) {
+    this.data = data
+    this.index = index
+
+    if (parent) {
+      this.parent = parent
+    }
   }
 
   /** 从当前父节点中移除自身 */
@@ -34,36 +43,69 @@ export class TreeNode<Data> extends BaseTreeNode<Data> {
     this.parent.children!.splice(this.index, 1)
     return true
   }
-}
 
-export class RootTreeNode<Data, ChildData> extends BaseTreeNode<Data> {
-  children?: TreeNode<ChildData>[]
-
-  parent = null
-
-  isRoot = true
-
-  /** 树深 */
-  readonly depth = 0
-
-  /** 是否是叶子节点 */
-  get isLeaf(): boolean {
-    return !this.children || this.children.length === 0
-  }
-
-  constructor(data: Data) {
-    super(data)
-  }
-
-  /** 从当前父节点中移除自身 */
-  remove(): boolean {
-    if (!this.parent) {
-      console.warn('父节点不存在')
-      return false
+  removeChild(childNode: TreeNode<Data>) {
+    if (childNode.parent === this || !this.children?.length) {
+      throw new Error('要移除的子节点不存在于当前节点中')
     }
-    this.parent.children!.splice(this.index, 1)
-    return true
+
+    const result = omitArr(this.children!, childNode.index)
+    // 需要重新排序
+    if (!result.length) {
+      delete this.children
+    } else {
+      this.children = result
+    }
+  }
+
+  getChild(matcher: (node: TreeNode<Data>) => boolean): TreeNode<Data> | null {
+    let ret: TreeNode<Data> | null = null
+    if (!this.children?.length) {
+      return ret
+    }
+    bft(
+      this,
+      node => {
+        if (matcher(node)) {
+          ret = node
+          return false
+        }
+      },
+      'children'
+    )
+
+    return ret
+  }
+
+  getChildren(matcher: (node: TreeNode<Data>) => boolean): TreeNode<Data>[] {
+    let ret: TreeNode<Data>[] = []
+    if (!this.children?.length) {
+      return ret
+    }
+    dft(
+      this,
+      node => {
+        matcher(node) && ret.push(node)
+      },
+      'children'
+    )
+
+    return ret
+  }
+
+  append(node: TreeNode<Data>) {
+    if (this.children) {
+      this.children.push(node)
+    } else {
+      this.children = [node]
+    }
+  }
+
+  insert(node: TreeNode<Data>) {
+    if (this.children) {
+      this.children.push(node)
+    } else {
+      this.children = [node]
+    }
   }
 }
-
-

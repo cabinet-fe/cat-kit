@@ -8,8 +8,8 @@
     "moduleResolution": "bundler"
   },
   "include": [
-    "packages/fe/",
-    "packages/common/",
+    "packages/fe/**/*.ts",
+    "packages/common/**/*.ts",
     "docs/",
     "docs/.vitepress/plugins/*.ts"
   ]

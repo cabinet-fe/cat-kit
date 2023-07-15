@@ -43,9 +43,7 @@ const NodeRender = defineComponent({
   }
 })
 
-Tree.create(data.value, {
 
-})
 
 const tree = computed(() => {
   return new Tree(data.value)
