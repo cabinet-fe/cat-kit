@@ -1,30 +1,43 @@
 import { TreeNode } from './tree/tree-node'
 import { dft, bft } from './tree/helper'
-interface TreeOptions {
+
+interface TreeOptions<Data, Node> {
   /** 数据中用于访问子节点的key */
   childrenKey?: string
+
+  /** 节点生成 */
+  createNode: (data: Data, index: number, parent?: Node) => Node
+}
+
+export { TreeNode }
+
+interface BaseNode {
+  getChild(matcher: (node: BaseNode) => boolean): BaseNode | null
 }
 
 export class Tree<
-  Data extends Record<string, any> | Record<string, any>[],
-  DataItem extends Record<string, any> = Data extends Array<any>
-    ? Data[number]
-    : Data
+  Data extends Record<string, any>,
+  Node extends BaseNode
 > {
-  readonly root!: TreeNode<DataItem>
+  /** 根节点 */
+  readonly root: Node
 
+  /** 子节点的key */
   private childrenKey = 'children'
 
-  private flattedData: DataItem[] = []
+  /** 被碾平的数据 */
+  private flattedData: Data[] = []
 
-  constructor(data: Data, options?: TreeOptions) {
-    if (options?.childrenKey) {
-      this.childrenKey = options.childrenKey
+  private createNode: TreeOptions<Data, Node>['createNode']
+
+  constructor(data: Data, options: TreeOptions<Data, Node>) {
+    const { childrenKey, createNode } = options
+    if (childrenKey) {
+      this.childrenKey = childrenKey
     }
+    this.createNode = createNode
+    const root = this.createNode(data, 0)
 
-    const root = new TreeNode(Array.isArray(data) ? null : data, 0)
-
-    // @ts-ignore
     this.root = root
   }
 
@@ -33,10 +46,7 @@ export class Tree<
    * @param cb 回调, 如果在该回调中返回一个false则立即终止当前遍历
    * @param type
    */
-  traverse(
-    cb: (node: TreeNode<DataItem>) => boolean | void,
-    type: 'bfs' | 'dfs' = 'dfs'
-  ) {
+  traverse(cb: (node: Node) => boolean | void, type: 'bfs' | 'dfs' = 'dfs') {
     if (type === 'dfs') {
       return Tree.dft(this.root, cb, this.childrenKey)
     }
@@ -45,24 +55,19 @@ export class Tree<
     }
   }
 
-  getNode(
-    matcher: (node: TreeNode<DataItem>) => boolean
-  ): TreeNode<DataItem> | null {
+  getNode(matcher: (node: Node) => boolean): Node | null {
     if (!this.root) {
       return null
     }
     return this.root.getChild(matcher)
   }
 
-  getNodeList(
-    matcher: (node: TreeNode<DataItem>) => boolean
-  ): TreeNode<DataItem>[] {
+  getNodeList(matcher: (node: Node) => boolean): Node[] {
     if (!this.root) {
       return []
     }
     return this.root.getChildren(matcher)
   }
-
 
   flat() {
     if (this.flattedData) {
@@ -70,27 +75,7 @@ export class Tree<
     }
     this.flattedData
 
-    Tree.dft(this.root, (item) => {
-
-    }, this.childrenKey)
-  }
-
-  static create(data: any[], key: string) {
-    const nodes = data.map((item, i) => {
-      const node = new TreeNode(item, i, parent)
-
-      if (item[key]) {
-        if (Array.isArray(item[key])) {
-          node.children = Tree.create(item[key], key, root, node)
-        } else {
-          throw new Error(`${key}属性的值必须是个数组`)
-        }
-      }
-
-      return node
-    })
-
-    return nodes
+    Tree.dft(this.root, item => {}, this.childrenKey)
   }
 
   /**

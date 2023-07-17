@@ -1,12 +1,13 @@
 import { omitArr } from '../../data/array'
 import { dft, bft } from './helper'
 export class TreeNode<Data> {
-  children?: TreeNode<Data>[]
-
+  /** 节点数据 */
   data: Data
 
+  /** 父节点 */
   parent: TreeNode<Data> | null = null
 
+  /** 当前节点的索引 */
   index: number
 
   /** 树深 */
@@ -24,6 +25,9 @@ export class TreeNode<Data> {
   get isLeaf(): boolean {
     return !this.children || this.children.length === 0
   }
+
+  /** 子节点 */
+  children?: TreeNode<Data>[]
 
   constructor(data: Data, index: number, parent?: TreeNode<Data>) {
     this.data = data
