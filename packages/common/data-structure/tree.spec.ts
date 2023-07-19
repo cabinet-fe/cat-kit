@@ -5,7 +5,7 @@ describe('树', () => {
     id: 1,
     children: [{ id: 2 }, { id: 3, children: [{ id: 4 }] }, { id: 5 }]
   }
-  const tree = Tree.new(treeData, (v, index, parent) => {
+  const tree = Tree.create(treeData, (v, index, parent) => {
     return new TreeNode(v, index, parent)
   })
 

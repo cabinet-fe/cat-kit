@@ -9,7 +9,7 @@ export const Tree = {
    * @param childrenKey - 子节点的键名，默认为 'children'
    * @returns 生成的树形结构数据
    */
-  new<Val extends Record<string, any>, Node extends Record<string, any>>(
+  create<Val extends Record<string, any>, Node extends Record<string, any>>(
     val: Val,
     createNode: (data: Val, index: number, parent?: any) => Node,
     childrenKey = 'children'

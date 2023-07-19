@@ -26,7 +26,7 @@ const data = {
   children: [{ id: 1 }, { id: 2 }]
 }
 // 创建树
-const tree = Tree.new(data, (v, index, parent) => new TreeNode(v, index, parent))
+const tree = Tree.create(data, (v, index, parent) => new TreeNode(v, index, parent))
 
 // 深度优先遍历
 Tree.dft(tree, node => {})
