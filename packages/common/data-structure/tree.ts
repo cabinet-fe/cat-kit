@@ -1,96 +1,142 @@
 import { TreeNode } from './tree/tree-node'
-import { dft, bft } from './tree/helper'
 
-interface TreeOptions<Data, Node> {
-  /** 数据中用于访问子节点的key */
-  childrenKey?: string
+export const Tree = {
+  /**
+   * 生成树形结构数据
+   *
+   * @param val - 原始数据
+   * @param createNode - 创建节点的回调函数
+   * @param childrenKey - 子节点的键名，默认为 'children'
+   * @returns 生成的树形结构数据
+   */
+  new<Val extends Record<string, any>, Node extends Record<string, any>>(
+    val: Val,
+    createNode: (data: Val, index: number, parent?: any) => Node,
+    childrenKey = 'children'
+  ): Node {
+    function generate(data: any, index: number, parent?: any) {
+      const node = createNode(data, index, parent)
+      const children = data[childrenKey]
+      if (Array.isArray(children) && children.length) {
+        ;(node as any).children = children.map((item, index) =>
+          generate(item, index, node)
+        )
+      }
 
-  /** 节点生成 */
-  createNode: (data: Data, index: number, parent?: Node) => Node
+      return node
+    }
+
+    return generate(val, 0)
+  },
+
+  /**
+   * 深度优先遍历树结构，并对每个节点执行回调函数。
+   * @param data - 树结构的根节点。
+   * @param cb - 回调函数，接收当前节点作为参数，返回值为布尔值或无返回值, 当返回值为false时停止遍历。
+   * @param childrenKey - 子节点的键名。
+   * @returns 返回布尔值，表示是否遇到了回调函数返回 `false` 的节点。
+   */
+  dft<T extends Record<string, any>>(
+    data: T,
+    cb: (item: T) => boolean | void,
+    childrenKey = 'children'
+  ) {
+    if (cb(data) === false) return false
+
+    let children = data[childrenKey]
+    if (children) {
+      let i = 0
+      while (i < children.length) {
+        if (Tree.dft(children[i], cb, childrenKey) === false) break
+        i++
+      }
+    }
+  },
+
+  /**
+   * 广度优先遍历树结构
+   * @param root - 根节点
+   * @param cb - 遍历回调函数，返回值为false时中断遍历
+   * @param childrenKey - 子节点属性名，默认为'children'
+   */
+  bft<T extends Record<string, any>>(
+    root: T,
+    cb: (item: T) => void | boolean,
+    childrenKey = 'children'
+  ) {
+    const queue: T[] = []
+
+    queue.push(root)
+
+    while (queue.length > 0) {
+      const node = queue.shift()!
+      if (cb(node) === false) break
+
+      let children = node[childrenKey]
+      if (!!children) {
+        let i = 0
+        while (i < children.length) {
+          queue.push(children[i])
+          i++
+        }
+      }
+    }
+  },
+
+  /**
+   * 获取节点的子节点
+   * @param node 节点
+   * @param matcher 匹配函数，用于判断节点是否符合条件
+   * @param childrenKey 子节点键名，默认为'children'
+   * @returns 符合条件的子节点数组
+   */
+  getChildren<Node extends Record<string, any>>(
+    node: Node,
+    matcher: (node: Node) => boolean,
+    childrenKey = 'children'
+  ): Node[] {
+    let ret: Node[] = []
+    Tree.dft(
+      node,
+      node => {
+        matcher(node) && ret.push(node)
+      },
+      childrenKey
+    )
+    return ret
+  },
+
+  /**
+   * 获取满足条件的第一个子节点。
+   *
+   * @param node - 父节点。
+   * @param matcher - 匹配子节点的条件。
+   * @param childrenKey - 访问父节点中子节点的键。
+   * @returns 第一个满足条件的子节点，如果没有匹配项则返回 null。
+   */
+  getChild<Node extends Record<string, any>>(
+    node: Node,
+    matcher: (node: Node) => boolean,
+    childrenKey = 'children'
+  ): Node | null {
+    let ret: Node | null = null
+
+    Tree.bft(
+      node,
+      node => {
+        if (matcher(node)) {
+          ret = node
+          return false
+        }
+
+        return true
+      },
+      childrenKey
+    )
+    return ret
+  },
+
+  flat() {}
 }
 
 export { TreeNode }
-
-interface BaseNode {
-  getChild(matcher: (node: BaseNode) => boolean): BaseNode | null
-}
-
-export class Tree<
-  Data extends Record<string, any>,
-  Node extends BaseNode
-> {
-  /** 根节点 */
-  readonly root: Node
-
-  /** 子节点的key */
-  private childrenKey = 'children'
-
-  /** 被碾平的数据 */
-  private flattedData: Data[] = []
-
-  private createNode: TreeOptions<Data, Node>['createNode']
-
-  constructor(data: Data, options: TreeOptions<Data, Node>) {
-    const { childrenKey, createNode } = options
-    if (childrenKey) {
-      this.childrenKey = childrenKey
-    }
-    this.createNode = createNode
-    const root = this.createNode(data, 0)
-
-    this.root = root
-  }
-
-  /**
-   * 遍历
-   * @param cb 回调, 如果在该回调中返回一个false则立即终止当前遍历
-   * @param type
-   */
-  traverse(cb: (node: Node) => boolean | void, type: 'bfs' | 'dfs' = 'dfs') {
-    if (type === 'dfs') {
-      return Tree.dft(this.root, cb, this.childrenKey)
-    }
-    if (type === 'bfs') {
-      return Tree.bft(this.root, cb, this.childrenKey)
-    }
-  }
-
-  getNode(matcher: (node: Node) => boolean): Node | null {
-    if (!this.root) {
-      return null
-    }
-    return this.root.getChild(matcher)
-  }
-
-  getNodeList(matcher: (node: Node) => boolean): Node[] {
-    if (!this.root) {
-      return []
-    }
-    return this.root.getChildren(matcher)
-  }
-
-  flat() {
-    if (this.flattedData) {
-      return this.flattedData
-    }
-    this.flattedData
-
-    Tree.dft(this.root, item => {}, this.childrenKey)
-  }
-
-  /**
-   * 深度优先遍历
-   * @param data 一个可以被描述为树形的数据结构
-   * @param cb 遍历时的回调
-   * @param childrenKey 子节点的key
-   */
-  static dft = dft
-
-  /**
-   * 广度优先遍历
-   * @param data 一个可以被描述为树形的数据结构
-   * @param cb 遍历时的回调, 当回调返回一个false时跳出当前循环
-   * @param childrenKey 子节点的key
-   */
-  static bft = bft
-}

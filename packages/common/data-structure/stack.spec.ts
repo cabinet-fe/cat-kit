@@ -20,7 +20,7 @@ describe('栈结构测试', () => {
     expect(stack.size).toBe(0)
 
     let j = 0
-    while (i < errStr.length) {
+    while (j < errStr.length) {
       let item = errStr[j]
       if (item === '(') {
         stack.push(item)
