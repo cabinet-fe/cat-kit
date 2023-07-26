@@ -27,3 +27,5 @@ export * from './data-structure/tree'
 export * from './optimize'
 
 export { default as base64 } from './codec/base64'
+
+export * from './anime/tween'

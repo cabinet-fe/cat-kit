@@ -28,6 +28,7 @@ const sidebar: DefaultTheme.Sidebar = {
         { text: '数据处理', link: '/utils/common/data' },
         { text: '数据类型', link: '/utils/common/data-type' },
         { text: '数据结构', link: '/utils/common/data-structure' },
+        { text: '动画', link: '/utils/common/anime' },
         { text: '日期', link: '/utils/common/date' },
         { text: '加密', link: '/utils/common/crypto' },
         { text: '信息摘要', link: '/utils/common/hash' },

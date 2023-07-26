@@ -2,8 +2,16 @@
   cursor: pointer;
 }
 
-.input {
+input[type="text"] {
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 0 4px;
+}
+
+a {
+  cursor: pointer;
+}
+
+a + a {
+  margin-left: 4px;
 }
