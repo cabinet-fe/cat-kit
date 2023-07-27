@@ -5,7 +5,7 @@ import { copy } from './copy'
 async function build() {
   await clean()
   await buildUtils()
-  copy()
+  copy(process.argv[2])
 }
 
 build()

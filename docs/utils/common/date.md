@@ -91,6 +91,13 @@ render(utils/common/date/month-end)
 render(utils/common/date/quick-prop)
 :::
 
+## 反向格式化
+根据提供的被格式化的数据和格式化字符串来反推日期
+
+::: demo
+render(utils/common/date/from)
+:::
+
 ## 插件
 
 一个插件就是一个函数， 该函数接受一个 Date 上下文参数, 可以用来设置匹配器等等

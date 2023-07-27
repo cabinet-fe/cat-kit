@@ -133,7 +133,10 @@ class Dater {
    * @returns
    */
   compare(date: string | Date | number | Dater): number
-  compare<R>(date: string | Date | number | Dater, reducer: DateCompareReducer<R>): R
+  compare<R>(
+    date: string | Date | number | Dater,
+    reducer: DateCompareReducer<R>
+  ): R
   compare(
     date: string | Date | number | Dater,
     reducer?: DateCompareReducer<any>
@@ -178,6 +181,14 @@ interface DateFactory {
     reg: string,
     matcher: (date: Date, len: number) => string
   ) => void
+
+  /**
+   * 根据格式化日期字符串得到日期
+   * @param dateStr 格式化后的日期字符串
+   * @param formatter 格式化字符串
+   * @returns
+   */
+  from: (dateStr: string, formatter?: string) => Dater
 }
 
 export const date = <DateFactory>function (date) {
@@ -189,5 +200,37 @@ date.use = Dater.use
 date.getMatchers = Dater.getMatchers
 
 date.setMatcher = Dater.setMatcher
+
+const getDateTypeStr = (str: string, formatter: string, re: RegExp): string => {
+  let matched = formatter.match(re)
+
+  if (matched) {
+    return str.slice(matched.index!, matched.index! + matched[0].length)
+  }
+  return ''
+}
+
+date.from = function (dateStr: string, formatter = 'yyyy-MM-dd') {
+  if (dateStr.length !== formatter.length) {
+    console.warn('dateStr与formatter的格式不一致')
+    return new Dater(dateStr)
+  }
+
+  // 年月日
+  const YMD = [/(y|Y)+/, /M+/, /d+/]
+    .map(re => getDateTypeStr(dateStr, formatter, re))
+    .filter(item => !!item)
+    .join('-')
+
+  // 时分秒
+  const HMS = [/(h|H)+/, /m+/, /s+/]
+    .map(re => getDateTypeStr(dateStr, formatter, re))
+    .filter(item => !!item)
+    .join(':')
+
+  dateStr = YMD + (HMS ? ` ${HMS}` : '')
+
+  return new Dater(dateStr)
+}
 
 export type { Dater }

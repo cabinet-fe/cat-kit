@@ -1,6 +1,39 @@
-import { isString } from '../data/data-type'
-export default class MD5 {
-  private static FF = (
+/**
+ * 计算 MD5 哈希值
+ * @param data 要计算哈希值的数据
+ * @returns 计算得到的 MD5 哈希值
+ */
+export function calculateMD5(data: string): string {
+  function rotateLeft(x: number, n: number): number {
+    return (x << n) | (x >>> (32 - n))
+  }
+
+  function addUnsigned(x: number, y: number): number {
+    const mask = 0xffffffff
+    const xh = (x & 0xffff0000) >>> 16
+    const xl = x & 0x0000ffff
+    const yh = (y & 0xffff0000) >>> 16
+    const yl = y & 0x0000ffff
+    const l = (xl + yl) & 0x0000ffff
+    const h = (yh + xh + ((l & 0xffff0000) >>> 16)) & 0x0000ffff
+    return (h << 16) | (l & 0x0000ffff)
+  }
+
+  function md5cmn(
+    q: number,
+    a: number,
+    b: number,
+    x: number,
+    s: number,
+    t: number
+  ): number {
+    return addUnsigned(
+      rotateLeft(addUnsigned(addUnsigned(a, q), addUnsigned(x, t)), s),
+      b
+    )
+  }
+
+  function md5ff(
     a: number,
     b: number,
     c: number,
@@ -8,11 +41,11 @@ export default class MD5 {
     x: number,
     s: number,
     t: number
-  ) => {
-    let n = a + ((b & c) | (~b & d)) + (x >>> 0) + t
-    return ((n << s) | (n >>> (32 - s))) + b
+  ): number {
+    return md5cmn((b & c) | (~b & d), a, b, x, s, t)
   }
-  private static GG = (
+
+  function md5gg(
     a: number,
     b: number,
     c: number,
@@ -20,11 +53,11 @@ export default class MD5 {
     x: number,
     s: number,
     t: number
-  ) => {
-    let n = a + ((b & d) | (c & ~d)) + (x >>> 0) + t
-    return ((n << s) | (n >>> (32 - s))) + b
+  ): number {
+    return md5cmn((b & d) | (c & ~d), a, b, x, s, t)
   }
-  private static HH = (
+
+  function md5hh(
     a: number,
     b: number,
     c: number,
@@ -32,11 +65,11 @@ export default class MD5 {
     x: number,
     s: number,
     t: number
-  ) => {
-    let n = a + (b ^ c ^ d) + (x >>> 0) + t
-    return ((n << s) | (n >>> (32 - s))) + b
+  ): number {
+    return md5cmn(b ^ c ^ d, a, b, x, s, t)
   }
-  private static II = (
+
+  function md5ii(
     a: number,
     b: number,
     c: number,
@@ -44,160 +77,158 @@ export default class MD5 {
     x: number,
     s: number,
     t: number
-  ) => {
-    let n = a + (c ^ (b | ~d)) + (x >>> 0) + t
-    return ((n << s) | (n >>> (32 - s))) + b
+  ): number {
+    return md5cmn(c ^ (b | ~d), a, b, x, s, t)
   }
 
+  function binlMD5(x: number[], len: number): number[] {
+    x[len >> 5] |= 0x80 << len % 32
+    x[(((len + 64) >>> 9) << 4) + 14] = len
 
-  // 循环
-  private static _md5cycle(x: Int32Array | Uint32Array, k: Int32Array | Uint32Array) {
-    let a = x[0]
-    let b = x[1]
-    let c = x[2]
-    let d = x[3]
-    // ff()
-    a += (((b & c) | (~b & d)) + k[0] - 680876936) | 0
-    a = (((a << 7) | (a >>> 25)) + b) | 0
-    d += (((a & b) | (~a & c)) + k[1] - 389564586) | 0
-    d = (((d << 12) | (d >>> 20)) + a) | 0
-    c += (((d & a) | (~d & b)) + k[2] + 606105819) | 0
-    c = (((c << 17) | (c >>> 15)) + d) | 0
-    b += (((c & d) | (~c & a)) + k[3] - 1044525330) | 0
-    b = (((b << 22) | (b >>> 10)) + c) | 0
-    a += (((b & c) | (~b & d)) + k[4] - 176418897) | 0
-    a = (((a << 7) | (a >>> 25)) + b) | 0
-    d += (((a & b) | (~a & c)) + k[5] + 1200080426) | 0
-    d = (((d << 12) | (d >>> 20)) + a) | 0
-    c += (((d & a) | (~d & b)) + k[6] - 1473231341) | 0
-    c = (((c << 17) | (c >>> 15)) + d) | 0
-    b += (((c & d) | (~c & a)) + k[7] - 45705983) | 0
-    b = (((b << 22) | (b >>> 10)) + c) | 0
-    a += (((b & c) | (~b & d)) + k[8] + 1770035416) | 0
-    a = (((a << 7) | (a >>> 25)) + b) | 0
-    d += (((a & b) | (~a & c)) + k[9] - 1958414417) | 0
-    d = (((d << 12) | (d >>> 20)) + a) | 0
-    c += (((d & a) | (~d & b)) + k[10] - 42063) | 0
-    c = (((c << 17) | (c >>> 15)) + d) | 0
-    b += (((c & d) | (~c & a)) + k[11] - 1990404162) | 0
-    b = (((b << 22) | (b >>> 10)) + c) | 0
-    a += (((b & c) | (~b & d)) + k[12] + 1804603682) | 0
-    a = (((a << 7) | (a >>> 25)) + b) | 0
-    d += (((a & b) | (~a & c)) + k[13] - 40341101) | 0
-    d = (((d << 12) | (d >>> 20)) + a) | 0
-    c += (((d & a) | (~d & b)) + k[14] - 1502002290) | 0
-    c = (((c << 17) | (c >>> 15)) + d) | 0
-    b += (((c & d) | (~c & a)) + k[15] + 1236535329) | 0
-    b = (((b << 22) | (b >>> 10)) + c) | 0
-    // gg()
-    a += (((b & d) | (c & ~d)) + k[1] - 165796510) | 0
-    a = (((a << 5) | (a >>> 27)) + b) | 0
-    d += (((a & c) | (b & ~c)) + k[6] - 1069501632) | 0
-    d = (((d << 9) | (d >>> 23)) + a) | 0
-    c += (((d & b) | (a & ~b)) + k[11] + 643717713) | 0
-    c = (((c << 14) | (c >>> 18)) + d) | 0
-    b += (((c & a) | (d & ~a)) + k[0] - 373897302) | 0
-    b = (((b << 20) | (b >>> 12)) + c) | 0
-    a += (((b & d) | (c & ~d)) + k[5] - 701558691) | 0
-    a = (((a << 5) | (a >>> 27)) + b) | 0
-    d += (((a & c) | (b & ~c)) + k[10] + 38016083) | 0
-    d = (((d << 9) | (d >>> 23)) + a) | 0
-    c += (((d & b) | (a & ~b)) + k[15] - 660478335) | 0
-    c = (((c << 14) | (c >>> 18)) + d) | 0
-    b += (((c & a) | (d & ~a)) + k[4] - 405537848) | 0
-    b = (((b << 20) | (b >>> 12)) + c) | 0
-    a += (((b & d) | (c & ~d)) + k[9] + 568446438) | 0
-    a = (((a << 5) | (a >>> 27)) + b) | 0
-    d += (((a & c) | (b & ~c)) + k[14] - 1019803690) | 0
-    d = (((d << 9) | (d >>> 23)) + a) | 0
-    c += (((d & b) | (a & ~b)) + k[3] - 187363961) | 0
-    c = (((c << 14) | (c >>> 18)) + d) | 0
-    b += (((c & a) | (d & ~a)) + k[8] + 1163531501) | 0
-    b = (((b << 20) | (b >>> 12)) + c) | 0
-    a += (((b & d) | (c & ~d)) + k[13] - 1444681467) | 0
-    a = (((a << 5) | (a >>> 27)) + b) | 0
-    d += (((a & c) | (b & ~c)) + k[2] - 51403784) | 0
-    d = (((d << 9) | (d >>> 23)) + a) | 0
-    c += (((d & b) | (a & ~b)) + k[7] + 1735328473) | 0
-    c = (((c << 14) | (c >>> 18)) + d) | 0
-    b += (((c & a) | (d & ~a)) + k[12] - 1926607734) | 0
-    b = (((b << 20) | (b >>> 12)) + c) | 0
-    // hh()
-    a += ((b ^ c ^ d) + k[5] - 378558) | 0
-    a = (((a << 4) | (a >>> 28)) + b) | 0
-    d += ((a ^ b ^ c) + k[8] - 2022574463) | 0
-    d = (((d << 11) | (d >>> 21)) + a) | 0
-    c += ((d ^ a ^ b) + k[11] + 1839030562) | 0
-    c = (((c << 16) | (c >>> 16)) + d) | 0
-    b += ((c ^ d ^ a) + k[14] - 35309556) | 0
-    b = (((b << 23) | (b >>> 9)) + c) | 0
-    a += ((b ^ c ^ d) + k[1] - 1530992060) | 0
-    a = (((a << 4) | (a >>> 28)) + b) | 0
-    d += ((a ^ b ^ c) + k[4] + 1272893353) | 0
-    d = (((d << 11) | (d >>> 21)) + a) | 0
-    c += ((d ^ a ^ b) + k[7] - 155497632) | 0
-    c = (((c << 16) | (c >>> 16)) + d) | 0
-    b += ((c ^ d ^ a) + k[10] - 1094730640) | 0
-    b = (((b << 23) | (b >>> 9)) + c) | 0
-    a += ((b ^ c ^ d) + k[13] + 681279174) | 0
-    a = (((a << 4) | (a >>> 28)) + b) | 0
-    d += ((a ^ b ^ c) + k[0] - 358537222) | 0
-    d = (((d << 11) | (d >>> 21)) + a) | 0
-    c += ((d ^ a ^ b) + k[3] - 722521979) | 0
-    c = (((c << 16) | (c >>> 16)) + d) | 0
-    b += ((c ^ d ^ a) + k[6] + 76029189) | 0
-    b = (((b << 23) | (b >>> 9)) + c) | 0
-    a += ((b ^ c ^ d) + k[9] - 640364487) | 0
-    a = (((a << 4) | (a >>> 28)) + b) | 0
-    d += ((a ^ b ^ c) + k[12] - 421815835) | 0
-    d = (((d << 11) | (d >>> 21)) + a) | 0
-    c += ((d ^ a ^ b) + k[15] + 530742520) | 0
-    c = (((c << 16) | (c >>> 16)) + d) | 0
-    b += ((c ^ d ^ a) + k[2] - 995338651) | 0
-    b = (((b << 23) | (b >>> 9)) + c) | 0
-    // ii()
-    a += ((c ^ (b | ~d)) + k[0] - 198630844) | 0
-    a = (((a << 6) | (a >>> 26)) + b) | 0
-    d += ((b ^ (a | ~c)) + k[7] + 1126891415) | 0
-    d = (((d << 10) | (d >>> 22)) + a) | 0
-    c += ((a ^ (d | ~b)) + k[14] - 1416354905) | 0
-    c = (((c << 15) | (c >>> 17)) + d) | 0
-    b += ((d ^ (c | ~a)) + k[5] - 57434055) | 0
-    b = (((b << 21) | (b >>> 11)) + c) | 0
-    a += ((c ^ (b | ~d)) + k[12] + 1700485571) | 0
-    a = (((a << 6) | (a >>> 26)) + b) | 0
-    d += ((b ^ (a | ~c)) + k[3] - 1894986606) | 0
-    d = (((d << 10) | (d >>> 22)) + a) | 0
-    c += ((a ^ (d | ~b)) + k[10] - 1051523) | 0
-    c = (((c << 15) | (c >>> 17)) + d) | 0
-    b += ((d ^ (c | ~a)) + k[1] - 2054922799) | 0
-    b = (((b << 21) | (b >>> 11)) + c) | 0
-    a += ((c ^ (b | ~d)) + k[8] + 1873313359) | 0
-    a = (((a << 6) | (a >>> 26)) + b) | 0
-    d += ((b ^ (a | ~c)) + k[15] - 30611744) | 0
-    d = (((d << 10) | (d >>> 22)) + a) | 0
-    c += ((a ^ (d | ~b)) + k[6] - 1560198380) | 0
-    c = (((c << 15) | (c >>> 17)) + d) | 0
-    b += ((d ^ (c | ~a)) + k[13] + 1309151649) | 0
-    b = (((b << 21) | (b >>> 11)) + c) | 0
-    a += ((c ^ (b | ~d)) + k[4] - 145523070) | 0
-    a = (((a << 6) | (a >>> 26)) + b) | 0
-    d += ((b ^ (a | ~c)) + k[11] - 1120210379) | 0
-    d = (((d << 10) | (d >>> 22)) + a) | 0
-    c += ((a ^ (d | ~b)) + k[2] + 718787259) | 0
-    c = (((c << 15) | (c >>> 17)) + d) | 0
-    b += ((d ^ (c | ~a)) + k[9] - 343485551) | 0
-    b = (((b << 21) | (b >>> 11)) + c) | 0
+    let a = 1732584193
+    let b = -271733879
+    let c = -1732584194
+    let d = 271733878
 
-    x[0] = (a + x[0]) | 0
-    x[1] = (b + x[1]) | 0
-    x[2] = (c + x[2]) | 0
-    x[3] = (d + x[3]) | 0
+    for (let i = 0; i < x.length; i += 16) {
+      const olda = a
+      const oldb = b
+      const oldc = c
+      const oldd = d
+
+      a = md5ff(a, b, c, d, x[i], 7, -680876936)
+      d = md5ff(d, a, b, c, x[i + 1], 12, -389564586)
+      c = md5ff(c, d, a, b, x[i + 2], 17, -606105819)
+      b = md5ff(b, c, d, a, x[i + 3], 22, 1926607734)
+      a = md5ff(a, b, c, d, x[i + 4], 7, -378558)
+      d = md5ff(d, a, b, c, x[i + 5], 12, -2022574463)
+      c = md5ff(c, d, a, b, x[i + 6], 17, 1839030562)
+      b = md5ff(b, c, d, a, x[i + 7], 22, -35309556)
+      a = md5ff(a, b, c, d, x[i + 8], 7, -1530992060)
+      d = md5ff(d, a, b, c, x[i + 9], 12, 1272893353)
+      c = md5ff(c, d, a, b, x[i + 10], 17, -155497632)
+      b = md5ff(b, c, d, a, x[i + 11], 22, -1094730640)
+      a = md5ff(a, b, c, d, x[i + 12], 7, 681279174)
+      d = md5ff(d, a, b, c, x[i + 13], 12, -358537222)
+      c = md5ff(c, d, a, b, x[i + 14], 17, -722521979)
+      b = md5ff(b, c, d, a, x[i + 15], 22, 76029189)
+
+      a = md5gg(a, b, c, d, x[i + 1], 5, -640364487)
+      d = md5gg(d, a, b, c, x[i + 6], 9, -421815835)
+      c = md5gg(c, d, a, b, x[i + 11], 14, 530742520)
+      b = md5gg(b, c, d, a, x[i], 20, -995338651)
+      a = md5gg(a, b, c, d, x[i + 5], 5, -198630844)
+      d = md5gg(d, a, b, c, x[i + 10], 9, 1126891415)
+      c = md5gg(c, d, a, b, x[i + 15], 14, -1416354905)
+      b = md5gg(b, c, d, a, x[i + 4], 20, -57434055)
+      a = md5gg(a, b, c, d, x[i + 9], 5, 1700485571)
+      d = md5gg(d, a, b, c, x[i + 14], 9, -1894986606)
+      c = md5gg(c, d, a, b, x[i + 3], 14, -1051523)
+      b = md5gg(b, c, d, a, x[i + 8], 20, -2054922799)
+      a = md5gg(a, b, c, d, x[i + 13], 5, 1873313359)
+      d = md5gg(d, a, b, c, x[i + 2], 9, -30611744)
+      c = md5gg(c, d, a, b, x[i + 7], 14, -1560198380)
+      b = md5gg(b, c, d, a, x[i + 12], 20, 1309151649)
+
+      a = md5hh(a, b, c, d, x[i + 5], 4, -145523070)
+      d = md5hh(d, a, b, c, x[i + 8], 11, -1120210379)
+      c = md5hh(c, d, a, b, x[i + 11], 16, 718787259)
+      b = md5hh(b, c, d, a, x[i + 14], 23, -343485551)
+      a = md5hh(a, b, c, d, x[i + 1], 4, -1051523)
+      d = md5hh(d, a, b, c, x[i + 4], 11, -2054922799)
+      c = md5hh(c, d, a, b, x[i + 7], 16, 1873313359)
+      b = md5hh(b, c, d, a, x[i + 10], 23, -30611744)
+      a = md5hh(a, b, c, d, x[i + 13], 4, -1560198380)
+      d = md5hh(d, a, b, c, x[i], 11, -145523070)
+      c = md5hh(c, d, a, b, x[i + 3], 16, -1120210379)
+      b = md5hh(b, c, d, a, x[i + 6], 23, 718787259)
+      a = md5hh(a, b, c, d, x[i + 9], 4, -343485551)
+      d = md5hh(d, a, b, c, x[i + 12], 11, -1051523)
+      c = md5hh(c, d, a, b, x[i + 15], 16, -2054922799)
+      b = md5hh(b, c, d, a, x[i + 2], 23, 1873313359)
+
+      a = md5ii(a, b, c, d, x[i], 6, -2054922799)
+      d = md5ii(d, a, b, c, x[i + 7], 10, 1873313359)
+      c = md5ii(c, d, a, b, x[i + 14], 15, -30611744)
+      b = md5ii(b, c, d, a, x[i + 5], 21, -1560198380)
+      a = md5ii(a, b, c, d, x[i + 12], 6, -145523070)
+      d = md5ii(d, a, b, c, x[i + 3], 10, -1120210379)
+      c = md5ii(c, d, a, b, x[i + 10], 15, 718787259)
+      b = md5ii(b, c, d, a, x[i + 1], 21, -343485551)
+      a = md5ii(a, b, c, d, x[i + 8], 6, -1051523)
+      d = md5ii(d, a, b, c, x[i + 15], 10, -2054922799)
+      c = md5ii(c, d, a, b, x[i + 6], 15, 1873313359)
+      b = md5ii(b, c, d, a, x[i + 13], 21, -30611744)
+      a = md5ii(a, b, c, d, x[i + 4], 6, -1560198380)
+      d = md5ii(d, a, b, c, x[i + 11], 10, -145523070)
+      c = md5ii(c, d, a, b, x[i + 2], 15, -1120210379)
+      b = md5ii(b, c, d, a, x[i + 9], 21, 718787259)
+
+      a = addUnsigned(a, olda)
+      b = addUnsigned(b, oldb)
+      c = addUnsigned(c, oldc)
+      d = addUnsigned(d, oldd)
+    }
+
+    return [a, b, c, d]
   }
 
-  static hash = (content: string) => {
-    isString(content)
+  function utf8Encode(data: string): string {
+    data = data.replace(/\r\n/g, '\n')
+    let utf8Data = ''
+
+    for (let i = 0; i < data.length; i++) {
+      const charCode = data.charCodeAt(i)
+
+      if (charCode < 128) {
+        utf8Data += String.fromCharCode(charCode)
+      } else if (charCode < 2048) {
+        utf8Data += String.fromCharCode(
+          (charCode >> 6) | 192,
+          (charCode & 63) | 128
+        )
+      } else {
+        utf8Data += String.fromCharCode(
+          (charCode >> 12) | 224,
+          ((charCode >> 6) & 63) | 128,
+          (charCode & 63) | 128
+        )
+      }
+    }
+
+    return utf8Data
   }
 
-  constructor() {}
+  function binToHex(bin: number[]): string {
+    const hexTable = '0123456789abcdef'
+    let hex = ''
+
+    for (let i = 0; i < bin.length * 4; i++) {
+      hex +=
+        hexTable.charAt((bin[i >> 2] >> ((i % 4) * 8 + 4)) & 0xf) +
+        hexTable.charAt((bin[i >> 2] >> ((i % 4) * 8)) & 0xf)
+    }
+
+    return hex
+  }
+
+  const dataChunks = data.match(/.{1,64}/g) || []
+  let hash = [1732584193, -271733879, -1732584194, 271733878]
+
+  for (const chunk of dataChunks) {
+    const x = []
+
+    for (let i = 0; i < chunk.length; i++) {
+      x[i >> 2] |= chunk.charCodeAt(i) << ((i % 4) * 8)
+    }
+
+    hash = binlMD5(x, chunk.length * 8)
+  }
+
+  return binToHex(hash)
 }
+
+// 使用示例
+const data = '你好'
+const md5Hash = calculateMD5(data)
+console.log(md5Hash)
