@@ -1,44 +1,51 @@
-type FormatType = 'money' | 'cn_money'
+type CurrencyType = 'CNY' | 'CNY_HAN'
 
-class Num {
-  private v!: number
+type CurrencyConfig = {
+  /** 保留小数位数 */
+  precision?: number
+  /** 最小小数位数 */
+  minPrecision?: number
+  /** 最大小数位数 */
+  maxPrecision?: number
+}
 
-  private money(money: number, decimal?: number) {
-    if (!money) {
-      money = 0
+const CurrencyFormatters: Record<
+  CurrencyType,
+  (num: number, config?: CurrencyConfig) => string
+> = {
+  CNY(num, config) {
+    const { precision, minPrecision, maxPrecision } = config || {}
+
+    const isNegative = num < 0
+    num = Math.abs(num)
+    const numStr = num.toString()
+
+    let dotIndex = numStr.indexOf('.')
+    let intPart = dotIndex === -1 ? numStr : numStr.slice(0, dotIndex)
+    let decimalPart = dotIndex === -1 ? '' : numStr.slice(dotIndex)
+
+    let result = ''
+
+    for (let i = intPart.length; i >= 0; i -= 3) {
+      result = intPart.slice(i - 3 < 0 ? 0 : i - 3, i) + ',' + result
     }
-    let isNegative = money < 0
-    let [intPart, decPart = ''] = String(Math.abs(money)).split('.')
-    const len = intPart!.length - 1
-    let arr: string[] = []
-    intPart!
-      .split('')
-      .reverse()
-      .forEach((item: string, index: number) => {
-        arr.push(item)
-        if (index && (index + 1) % 3 === 0 && index !== len) {
-          arr.push(',')
-        }
-      })
-    let result = arr.reverse().join('')
-    if (decimal) {
-      decPart = decPart?.substring(0, decimal)
-      result = `${result}.${decPart.padEnd(decimal, '0')}`
-    } else {
-      decPart ? (result = `${result}.${decPart}`) : void 0
-    }
-    return isNegative ? '-' + result : result
-  }
+    result = result.slice(1)
 
-  private cn_money(money: number) {
+    if (isNegative) {
+      result = '-' + result
+    }
+
+    return result + decimalPart
+  },
+  CNY_HAN(num) {
     const CN_NUMS = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
     const CN_INT_RADICE = ['', '拾', '佰', '仟']
     const CN_INT_UNITS = ['', '万', '亿', '兆']
     const CN_DEC_UNITS = ['角', '分', '毫', '厘']
     let result = ''
-    if (!money) return '零元整'
-    if (money >= 999999999999999.9999) return ''
-    const [intPart, decPart] = String(+money.toFixed(4)).split('.')
+    if (!num) return '零元整'
+    if (num >= 999999999999999.9999) return ''
+    const [intPart, decPart] = String(+num.toFixed(4)).split('.')
     if (parseInt(intPart!, 10) > 0) {
       let count = 0
       const IntLen = intPart!.length
@@ -73,18 +80,39 @@ class Num {
     }
     return result
   }
+}
+
+class Num {
+  private v!: number
 
   constructor(n: number) {
     this.v = n
   }
 
   /**
-   * 将数字格式化
-   * @param type 格式化类型
-   * @param decimal 小数位数
+   * 数字转货币
+   * @param currencyType 货币类型 CNY人民币 CNY_HAN 人民币中文大写
+   * @param config 其他配置, 对CNY_HAN无效
+   * @returns
    */
-  format(type: FormatType, decimal?: number) {
-    return this[type](this.v, decimal)
+  currency(currencyType: CurrencyType, config: CurrencyConfig): string
+  /**
+   * 数字转货币
+   * @param currencyType 货币类型 CNY人民币 CNY_HAN 人民币中文大写
+   * @param precision 精度, 对CNY_HAN无效
+   * @returns
+   */
+  currency(currencyType: CurrencyType, precision?: number): string
+  currency(
+    currencyType: CurrencyType,
+    config?: CurrencyConfig | number
+  ): string {
+    if (typeof config === 'number') {
+      config = {
+        precision: config
+      }
+    }
+    return CurrencyFormatters[currencyType](this.v, config)
   }
 
   /**
@@ -162,220 +190,6 @@ n.formatter = function (options: NumberFormatterOptions) {
   return formatter
 }
 
-// 3 + (2 + 5) - (3 + 5 / (2 + 3)) - 2 + 5
-// 3 + 7 - (3 + 5 / 5) - 2 + 5
-// 3 + 7 - (3 + 1) - 2 + 5
-
-// 1.定义一颗抽象树, 当前表达初始等于抽象树
-// 2.往树的左边插入一个字面量3
-// 3.往树的操作符号插入+
-// 4.看到(往树的右边插入一个空表达式, 定义当前表达式为该空表达式
-// 5.往当前树的左边插入一个字面量2
-// 6.往当前树的操作符插入+
-// 7.往当前树的右边插入一个字面量5
-// 8.看到当前树节点已满, 抽象树节点已满, 且-符号的优先级为低, 则新增一颗抽象树,
-// 抽象树的左节点为此前的抽象树, 当前表达式为该抽象树. 如果遇到高优先级符号, 则
-// 抽象树右节点被置换为一个表达式, 且该表达式的左节点为被置换的节点, 当前表达式为
-// 该表达式
-
-class Expression {
-  operator?: '+' | '-' | '*' | '/'
-  left?: NumberLiteral | Expression
-  right?: NumberLiteral | Expression
-  constructor(options: {
-    left?: NumberLiteral | Expression
-    right?: NumberLiteral | Expression
-    operator?: '+' | '-' | '*' | '/'
-  }) {
-    this.left = options.left
-    this.right = options.right
-    this.operator = options.operator
-  }
-}
-
-class NumberLiteral {
-  value!: number
-  constructor(n: number) {
-    this.value = n
-  }
-}
-
-type Token =
-  | {
-      type: 'number'
-      value: number
-    }
-  | {
-      type: 'op'
-      value: string
-    }
-
-/** 词法分析 */
-const scan = (str: string) => {
-  const tokens: Token[] = []
-
-  let i = 0
-  let tokenVal = ''
-  while (i < str.length) {
-    let c = str[i]!
-    i++
-    if (c === ' ') continue
-    // 可能组成数字的字符
-    if (/[\d\.]/.test(c)) {
-      if (tokenVal[tokenVal.length - 1] === '.' && c === '.') {
-        throw new Error('表达式错误')
-      } else {
-        tokenVal += c
-      }
-      continue
-    }
-    if (/[\*\/\%\(\)]/.test(c)) {
-      if (tokenVal) {
-        tokens.push({ type: 'number', value: +tokenVal })
-        tokenVal = ''
-      }
-      tokens.push({ type: 'op', value: c })
-      continue
-    }
-    // (1 + 2) + 4
-    // 操作符
-    if (/[\+\-]/.test(c)) {
-      if (tokenVal) {
-        tokens.push({ type: 'number', value: +tokenVal })
-        tokenVal = ''
-        tokens.push({ type: 'op', value: c })
-      } else {
-        tokenVal += c
-      }
-    }
-  }
-
-  return tokens
-
-  // let groupStack: string[] = []
-
-  // /** 语法树 */
-  // let ast: Expression = new Expression({})
-  // let currentExpression: Expression | null = ast
-  // let numberLiteral = ''
-
-  // const setExpression = (exp: Expression) => {
-  //   if (!ast.left) {
-  //     ast.left = exp
-  //   } else if (!ast.right) {
-  //     ast.right = exp
-  //   } else {
-  //     throw new Error('表达式错误')
-  //   }
-
-  // }
-
-  // const setLiteral = (literal: NumberLiteral) => {
-  //   if (!ast.left) {
-  //     ast.left = literal
-  //   } else if (!ast.right) {
-  //     ast.right = literal
-  //   } else {
-  //     throw new Error('表达式错误')
-  //   }
-  // }
-
-  // const setOperator = (operator: '+' | '-' | '*' | '/') => {
-  //   if (!currentExpression) {
-  //     throw new Error('表达式错误')
-  //   }
-  //   if (currentExpression.operator) {
-  //     if (!currentExpression.left || !currentExpression.right) {
-  //       throw new Error('表达式错误')
-  //     }
-  //     if (/[\+-]/.test(operator)) {
-
-  //       ast = new Expression({
-  //         left: ast,
-  //         operator
-  //       })
-  //       currentExpression = ast
-  //     } else if (/[\*\/]/.test(operator)) {
-  //       currentExpression.right = new Expression({
-  //         left: ast.right,
-  //         operator
-  //       })
-  //       currentExpression = ast
-  //     }
-
-  //   } else {
-  //     ast.operator = operator
-  //   }
-  // }
-
-  // const charOperate = {
-  //   '(': () => {
-  //     setExpression(new Expression({}))
-  //     groupStack.push('(')
-  //   },
-  //   ')': () => {
-  //     if (groupStack[groupStack.length - 1] === '(') {
-  //       groupStack.pop()
-  //     } else {
-  //       throw new Error('表达式错误')
-  //     }
-  //   },
-  //   // 低优先级
-  //   '+': () => {
-  //     setOperator('+')
-  //   },
-  //   '-': () => {
-  //     setOperator('-')
-  //   },
-
-  //   // 高优先级
-  //   '*': () => {
-  //     setOperator('*')
-  //   },
-  //   '/': () => {
-  //     setOperator('/')
-  //   }
-  // }
-
-  // let i = 0
-
-  // while (i < str.length) {
-  //   const c = str[i]!
-
-  //   // 对象字面量
-  //   if (/\d/.test(c)) {
-  //     numberLiteral += c
-  //   } else {
-  //     // 如果存在对象字面量
-  //     if (numberLiteral) {
-  //       setLiteral(new NumberLiteral(+numberLiteral))
-  //       numberLiteral = ''
-  //     }
-
-  //     if (c === ' ') continue
-
-  //     if (charOperate[c]) {
-  //       charOperate[c]()
-  //     }
-  //   }
-
-  //   i++
-  // }
-
-  // return ast
-}
-
-/**
- * 精确计算
- * @param expression 计算表达式
- */
-n.calc = function (expression: string) {
-  try {
-    console.log(scan(expression))
-  } catch (e) {
-    console.error(e)
-  }
-  return 1
-}
-
 export { n }
+
+n(100).currency('CNY', 2)
