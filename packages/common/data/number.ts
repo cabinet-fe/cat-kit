@@ -18,24 +18,49 @@ const CurrencyFormatters: Record<
 
     const isNegative = num < 0
     num = Math.abs(num)
-    const numStr = num.toString()
 
-    let dotIndex = numStr.indexOf('.')
-    let intPart = dotIndex === -1 ? numStr : numStr.slice(0, dotIndex)
-    let decimalPart = dotIndex === -1 ? '' : numStr.slice(dotIndex)
+    let [intPart, decimalPart = ''] = String(num).split('.') as [
+      string,
+      string | undefined
+    ]
+
+    let decimal = decimalPart ? +('0.' + decimalPart) : 0
+
+    if (precision !== undefined) {
+      decimalPart = decimal.toFixed(precision).slice(2)
+    } else {
+      if (minPrecision !== undefined && minPrecision > 0) {
+        let minStr = decimal.toFixed(minPrecision).slice(2)
+        if (decimalPart.length < minStr.length) {
+          decimalPart = minStr
+        }
+      }
+
+      if (maxPrecision !== undefined && maxPrecision > 0) {
+        let maxStr = decimal.toFixed(maxPrecision).slice(2)
+        if (decimalPart.length > maxStr.length) {
+          decimalPart = maxStr
+        }
+      }
+    }
 
     let result = ''
 
-    for (let i = intPart.length; i >= 0; i -= 3) {
-      result = intPart.slice(i - 3 < 0 ? 0 : i - 3, i) + ',' + result
+    for (let i = intPart.length; i > 0; i -= 3) {
+      result = ',' + intPart.slice(i - 3 < 0 ? 0 : i - 3, i) + result
     }
+
     result = result.slice(1)
 
     if (isNegative) {
       result = '-' + result
     }
 
-    return result + decimalPart
+    if (decimalPart) {
+      result = result + '.' + decimalPart
+    }
+
+    return result
   },
   CNY_HAN(num) {
     const CN_NUMS = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
@@ -191,5 +216,3 @@ n.formatter = function (options: NumberFormatterOptions) {
 }
 
 export { n }
-
-n(100).currency('CNY', 2)
