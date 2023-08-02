@@ -9,6 +9,11 @@ type CurrencyConfig = {
   maxPrecision?: number
 }
 
+const CN_UPPER_NUM = '零壹贰叁肆伍陆柒捌玖'
+const CN_INT_RADICE = ['', '拾', '佰', '仟']
+const CN_INT_UNITS = ['', '万', '亿', '兆']
+const CN_DEC_UNITS = ['角', '分', '毫', '厘']
+
 const CurrencyFormatters: Record<
   CurrencyType,
   (num: number, config?: CurrencyConfig) => string
@@ -62,15 +67,14 @@ const CurrencyFormatters: Record<
 
     return result
   },
-  CNY_HAN(num) {
-    const CN_NUMS = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖']
-    const CN_INT_RADICE = ['', '拾', '佰', '仟']
-    const CN_INT_UNITS = ['', '万', '亿', '兆']
-    const CN_DEC_UNITS = ['角', '分', '毫', '厘']
-    let result = ''
+  CNY_HAN(num, config) {
     if (!num) return '零元整'
-    if (num >= 999999999999999.9999) return ''
-    const [intPart, decPart] = String(+num.toFixed(4)).split('.')
+    let result = ''
+    if (num >= 999999999999999.9999) return result
+
+    const [intPart, decPart] = String(
+      +num.toFixed(config?.precision || 4)
+    ).split('.')
     if (parseInt(intPart!, 10) > 0) {
       let count = 0
       const IntLen = intPart!.length
@@ -83,10 +87,10 @@ const CurrencyFormatters: Record<
           count++
         } else {
           if (count > 0) {
-            result += CN_NUMS[0]
+            result += CN_UPPER_NUM[0]
           }
           count = 0
-          result += CN_NUMS[parseInt(n)]! + CN_INT_RADICE[m]
+          result += CN_UPPER_NUM[parseInt(n)]! + CN_INT_RADICE[m]
         }
         if (m === 0 && count < 4) {
           result += CN_INT_UNITS[q]
@@ -98,7 +102,7 @@ const CurrencyFormatters: Record<
       const decLen = decPart.length
       for (let i = 0; i < decLen; i++) {
         let n = decPart.substring(i, i + 1)
-        if (n !== '0') result += CN_NUMS[Number(n)]! + CN_DEC_UNITS[i]
+        if (n !== '0') result += CN_UPPER_NUM[Number(n)]! + CN_DEC_UNITS[i]
       }
     } else {
       result = `${result}整`
@@ -117,14 +121,14 @@ class Num {
   /**
    * 数字转货币
    * @param currencyType 货币类型 CNY人民币 CNY_HAN 人民币中文大写
-   * @param config 其他配置, 对CNY_HAN无效
+   * @param config 其他配置, 仅precision对CNY_HAN生效
    * @returns
    */
   currency(currencyType: CurrencyType, config: CurrencyConfig): string
   /**
    * 数字转货币
    * @param currencyType 货币类型 CNY人民币 CNY_HAN 人民币中文大写
-   * @param precision 精度, 对CNY_HAN无效
+   * @param precision 精度, 为CNY_HAN时最大和默认只能支持到小数点后四位(厘)
    * @returns
    */
   currency(currencyType: CurrencyType, precision?: number): string
