@@ -1,10 +1,10 @@
 import { n } from "./number"
 
 describe('数字操作', () => {
-  it('精度', () => {
+  test('精度', () => {
     expect(n(1.296).fixed(2)).toBe(1.3)
   })
-  it('currency("CNY")', () => {
+  test('currency("CNY")', () => {
     expect(n(1234.5678).currency('CNY', 5)).toBe('1,234.56780')
     expect(n(1234.5678).currency('CNY', {
       precision: 2
@@ -19,15 +19,37 @@ describe('数字操作', () => {
       maxPrecision: 3
     })).toBe('1,234.568')
   })
-  it('currency("RMB_HAN")', () => {
+  test('currency("RMB_HAN")', () => {
     expect(n(1234.5678).currency('CNY_HAN')).toBe('壹仟贰佰叁拾肆元伍角陆分柒毫捌厘')
   })
-  it('each', () => {
+  test('each', () => {
     let arr: number[] = []
     n(10).each((v)=>{
       arr.push(v)
     })
     expect(arr).toEqual([1,2,3,4,5,6,7,8,9,10])
+  })
+
+  test('多数相加', () => {
+    expect(n.plus(0.1, 0.2, 3, 100)).toBe(103.3)
+  })
+
+  test('多数相减', () => {
+    expect(n.minus(8.12, 1, 10)).toBe(-2.88)
+  })
+
+  test('两数相乘', () => {
+    expect(n.mul(8.12, 100)).toBe(812)
+  })
+
+  test('两数相除', () => {
+    expect(n.div(1.1, 5)).toBe(0.22)
+  })
+
+  test('组合运算', () => {
+    expect(
+      n.plus(0.1, n.minus(.3, .1), n.mul(8.12, 100), n.div(1.1, 5))
+    ).toBe(812.52)
   })
 
   // test('计算表达式', () => {
