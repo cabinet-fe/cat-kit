@@ -90,3 +90,6 @@ title: 其他分享
 [Panolens.js](https://pchen66.github.io/Panolens/#Documentation)
 
 [js-cloudimage-360-view](https://github.com/Scaleflex/js-cloudimage-360-view)
+
+## 笔记
+[memos](https://github.com/usememos/memos)
