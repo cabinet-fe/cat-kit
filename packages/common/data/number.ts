@@ -9,6 +9,46 @@ type CurrencyConfig = {
   maxPrecision?: number
 }
 
+function int(numbers: number[]) {
+  const numberStrings = numbers.map(n => String(n))
+  const numStringsLen = numberStrings.map(ns => ns.split('.')[1]?.length ?? 0)
+
+  const factor = Math.pow(10, Math.max(...numStringsLen))
+
+  return {
+    /** 整数 */
+    ints: numbers.map(n => Math.round(n * factor)),
+    /** 让所有数值成为整数的最小系数 */
+    factor
+  }
+}
+
+/**
+ * 将浮点数小数部分的字符串转换为目标精度的长度并遵循四舍五入
+ * @param decimalPart 浮点数的小数部分
+ * @param precision 保留的小数位数
+ * @returns
+ */
+function decimalPrecision(decimalPart: string, precision: number) {
+  return String(
+    Math.round(
+      +(decimalPart.slice(0, precision) + '.' + decimalPart.slice(precision))
+    )
+  )
+}
+
+function toFixed(v: number, precision: number) {
+  let [int, decimal = ''] = String(v).split('.') as [string, string | undefined]
+
+  if (decimal.length < precision) {
+    decimal = decimal.padEnd(precision, '0')
+  } else if (decimal.length > precision) {
+    decimal = decimalPrecision(decimal, precision)
+  }
+
+  return int + '.' + decimal
+}
+
 const CN_UPPER_NUM = '零壹贰叁肆伍陆柒捌玖'
 const CN_INT_RADICE = ['', '拾', '佰', '仟']
 const CN_INT_UNITS = ['', '万', '亿', '兆']
@@ -29,22 +69,23 @@ const CurrencyFormatters: Record<
       string | undefined
     ]
 
-    let decimal = decimalPart ? +('0.' + decimalPart) : 0
-
     if (precision !== undefined) {
-      decimalPart = decimal.toFixed(precision).slice(2)
+      if (decimalPart.length < precision) {
+        decimalPart = decimalPart.padEnd(precision, '0')
+      } else if (decimalPart.length > precision) {
+        decimalPart = decimalPrecision(decimalPart, precision)
+      }
     } else {
+      // 有最小精度
       if (minPrecision !== undefined && minPrecision > 0) {
-        let minStr = decimal.toFixed(minPrecision).slice(2)
-        if (decimalPart.length < minStr.length) {
-          decimalPart = minStr
+        if (decimalPart.length < minPrecision) {
+          decimalPart = decimalPart.padEnd(minPrecision, '0')
         }
       }
-
+      // 有最大精度
       if (maxPrecision !== undefined && maxPrecision > 0) {
-        let maxStr = decimal.toFixed(maxPrecision).slice(2)
-        if (decimalPart.length > maxStr.length) {
-          decimalPart = maxStr
+        if (decimalPart.length > maxPrecision) {
+          decimalPart = decimalPrecision(decimalPart, maxPrecision)
         }
       }
     }
@@ -73,7 +114,7 @@ const CurrencyFormatters: Record<
     if (num >= 999999999999999.9999) return result
 
     const [intPart, decPart] = String(
-      +num.toFixed(config?.precision || 4)
+      +toFixed(num, config?.precision || 4)
     ).split('.')
     if (parseInt(intPart!, 10) > 0) {
       let count = 0
@@ -146,11 +187,10 @@ class Num {
 
   /**
    * 指定数字最大保留几位小数点
-   * @param n 位数
+   * @param precision 位数
    */
-  fixed(n: number) {
-    const { v } = this
-    return +v.toFixed(n)
+  fixed(precision: number) {
+    return toFixed(this.v, precision)
   }
 
   /**
@@ -217,20 +257,6 @@ n.formatter = function (options: NumberFormatterOptions) {
   })
 
   return formatter
-}
-
-function int(numbers: number[]) {
-  const numberStrings = numbers.map(n => String(n))
-  const numStringsLen = numberStrings.map(ns => ns.split('.')[1]?.length ?? 0)
-
-  const factor = Math.pow(10, Math.max(...numStringsLen))
-
-  return {
-    /** 整数 */
-    ints: numbers.map(n => Math.round(n * factor)),
-    /** 让所有数值成为整数的最小系数 */
-    factor
-  }
 }
 
 /**

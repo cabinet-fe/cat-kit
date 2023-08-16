@@ -2,13 +2,15 @@ import { n } from "./number"
 
 describe('数字操作', () => {
   test('精度', () => {
-    expect(n(1.296).fixed(2)).toBe(1.3)
+    expect(n(1.296).fixed(2)).toBe('1.30')
+    expect(n(1.255).fixed(2)).toBe('1.26')
+    expect(n(1).fixed(2)).toBe('1.00')
   })
   test('currency("CNY")', () => {
     expect(n(1234.5678).currency('CNY', 5)).toBe('1,234.56780')
-    expect(n(1234.5678).currency('CNY', {
+    expect(n(1.245).currency('CNY', {
       precision: 2
-    })).toBe('1,234.57')
+    })).toBe('1.25')
     expect(n(1234.5678).currency('CNY', {
       minPrecision: 2
     })).toBe('1,234.5678')
