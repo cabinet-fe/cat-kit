@@ -40,7 +40,7 @@
       <div class="sub-title">原生JS</div>
       <div class="result">结果: {{ plusNum1 + plusNum2 }}</div>
       <div class="sub-title">n.plus()方法</div>
-      <div class="result">结果: {{ n.plus(0.1, 0.2) }}</div>
+      <div class="result">结果: {{ n.plus(plusNum1, plusNum2) }}</div>
 
       <div class="ele">
         <input style="width: 100px" type="text" v-model.number="minusNum1" />
