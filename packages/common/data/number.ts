@@ -30,6 +30,8 @@ function int(numbers: number[]) {
  * @returns
  */
 function decimalPrecision(decimalPart: string, precision: number) {
+  if (precision <= 0) return ''
+
   return String(
     Math.round(
       +(decimalPart.slice(0, precision) + '.' + decimalPart.slice(precision))
@@ -46,7 +48,7 @@ function toFixed(v: number, precision: number) {
     decimal = decimalPrecision(decimal, precision)
   }
 
-  return int + '.' + decimal
+  return decimal ? int + '.' + decimal : int
 }
 
 const CN_UPPER_NUM = '零壹贰叁肆伍陆柒捌玖'
@@ -113,32 +115,44 @@ const CurrencyFormatters: Record<
     let result = ''
     if (num >= 999999999999999.9999) return result
 
-    const [intPart, decPart] = String(
-      +toFixed(num, config?.precision || 4)
-    ).split('.')
-    if (parseInt(intPart!, 10) > 0) {
-      let count = 0
-      const IntLen = intPart!.length
-      for (let i = 0; i < IntLen; i++) {
-        let n = intPart!.substring(i, i + 1)
-        let p = IntLen - i - 1
-        let q = p / 4
-        let m = p % 4
-        if (n === '0') {
-          count++
-        } else {
-          if (count > 0) {
-            result += CN_UPPER_NUM[0]
-          }
-          count = 0
-          result += CN_UPPER_NUM[parseInt(n)]! + CN_INT_RADICE[m]
-        }
-        if (m === 0 && count < 4) {
-          result += CN_INT_UNITS[q]
-        }
-      }
-      result = `${result}元`
+    // 是否为负数
+    const isNegative = num < 0
+
+    let [intPart, decPart] = toFixed(
+      num,
+      config?.precision !== undefined ? (config.precision > 4 ? 4 : config.precision) : 4
+    ).split('.') as [string, string | undefined]
+
+    if (isNegative) {
+      intPart = intPart.slice(1)
     }
+
+    let count = 0
+    const IntLen = intPart!.length
+    for (let i = 0; i < IntLen; i++) {
+      let n = intPart!.substring(i, i + 1)
+      let p = IntLen - i - 1
+      let q = p / 4
+      let m = p % 4
+      if (n === '0') {
+        count++
+      } else {
+        if (count > 0) {
+          result += CN_UPPER_NUM[0]
+        }
+        count = 0
+        result += CN_UPPER_NUM[parseInt(n)]! + CN_INT_RADICE[m]
+      }
+      if (m === 0 && count < 4) {
+        result += CN_INT_UNITS[q]
+      }
+    }
+    result = `${result}元`
+    if (isNegative) {
+      result = `负${result}`
+    }
+
+
     if (decPart) {
       const decLen = decPart.length
       for (let i = 0; i < decLen; i++) {
@@ -218,16 +232,7 @@ const n = function n(n: number) {
  * @returns
  */
 n.sum = function (...numbers: number[]) {
-  const mul = Math.pow(
-    10,
-    Math.max(
-      ...numbers.map((n, i) => (String(n).match(/\.(\d+)$/)?.[1] || '').length)
-    )
-  )
-  return (
-    numbers.map(n => Math.round(n * mul)).reduce((acc, cur) => acc + cur, 0) /
-    mul
-  )
+  return n.plus(...numbers)
 }
 
 interface NumberFormatterOptions {
