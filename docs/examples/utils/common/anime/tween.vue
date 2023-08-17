@@ -35,8 +35,8 @@
     <div>
       <div>
         物体运动
-        <a @click="handleStart">前进</a>
-        <a @click="handleBack">后退</a>
+        <v-button @click="handleStart">前进</v-button>
+        <v-button @click="handleBack">后退</v-button>
       </div>
 
       <div class="box" ref="boxRef"></div>

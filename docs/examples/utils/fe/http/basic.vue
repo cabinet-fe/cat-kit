@@ -3,14 +3,14 @@
     <div>需要在开发模式下在项目根目录执行pnpm docs:server命令</div>
 
     <br />
-    <a @click="request1">发起请求></a> <br />
-    <a @click="request2">发起请求并使任意请求以错误的形式返回></a><br />
-    <a @click="request3">
+    <v-button @click="request1">发起请求></v-button> <br />
+    <v-button @click="request2">发起请求并使任意请求以错误的形式返回></v-button><br />
+    <v-button @click="request3">
       超时的请求>
       <template v-if="timeout">等待{{ timeout / 1000 }}s</template>
-    </a>
+    </v-button>
     <br />
-    <a @click="request4">1s后终止所有本次发起的请求</a>
+    <v-button @click="request4">1s后终止所有本次发起的请求</v-button>
   </div>
 </template>
 

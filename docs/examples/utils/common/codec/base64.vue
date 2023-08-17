@@ -3,9 +3,9 @@
     <textarea class="input" placeholder="输入" v-model="input" />
 
     <span style="display: inline-block; width: 100px; text-align: center">
-      <a class="button" @click="handleEncode">编码</a>
+      <v-button class="button" @click="handleEncode">编码</v-button>
       <br />
-      <a class="button" @click="handleDecode">解码</a>
+      <v-button class="button" @click="handleDecode">解码</v-button>
     </span>
 
     <textarea class="input" placeholder="输出" readonly :value="output" />
