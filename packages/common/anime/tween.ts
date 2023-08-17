@@ -116,6 +116,7 @@ export class Tween<
             this.state[key] = state[key]
           }
         }
+        this.onUpdate?.(this.state)
         onComplete?.(this.state)
       },
       tick: progress => {
