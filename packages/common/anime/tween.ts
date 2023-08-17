@@ -69,6 +69,7 @@ export class Tween<
       if (progress < 1) {
         this.frameId = requestAnimationFrame(update)
       } else {
+        tick(progress)
         this.stop()
         onComplete()
       }
@@ -109,7 +110,14 @@ export class Tween<
 
     this.raf({
       duration,
-      onComplete: () => onComplete?.(this.state),
+      onComplete: () => {
+        for (const key in state) {
+          if (key in this.state) {
+            this.state[key] = state[key]
+          }
+        }
+        onComplete?.(this.state)
+      },
       tick: progress => {
         for (const key in stateDistance) {
           const target =
