@@ -32,11 +32,17 @@ function int(numbers: number[]) {
 function decimalPrecision(decimalPart: string, precision: number) {
   if (precision <= 0) return ''
 
-  return String(
+  const decimalRet = String(
     Math.round(
       +(decimalPart.slice(0, precision) + '.' + decimalPart.slice(precision))
     )
   )
+
+  if (decimalRet.length < precision) {
+    return decimalRet.padStart(precision, '0')
+  }
+
+  return decimalRet
 }
 
 function toFixed(v: number, precision: number) {

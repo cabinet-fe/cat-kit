@@ -7,6 +7,7 @@ describe('数字操作', () => {
     expect(n(1).fixed(2)).toBe('1.00')
   })
   test('currency("CNY")', () => {
+    expect(n(1234.03123).currency('CNY', 2)).toBe('1,234.03')
     expect(n(1234.5678).currency('CNY', 5)).toBe('1,234.56780')
     expect(n(1.245).currency('CNY', {
       precision: 2
