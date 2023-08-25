@@ -40,6 +40,8 @@ function decimalPrecision(decimalPart: string, precision: number) {
 
   if (decimalRet.length < precision) {
     return decimalRet.padStart(precision, '0')
+  } else if (decimalRet.length > precision) {
+    return decimalRet.slice(0, precision)
   }
 
   return decimalRet
