@@ -76,6 +76,9 @@ importers:
       '@cat-kit/be':
         specifier: workspace:*
         version: link:../packages/be
+      '@cat-kit/canvas':
+        specifier: workspace:*
+        version: link:../packages/canvas
       '@cat-kit/fe':
         specifier: workspace:*
         version: link:../packages/fe
@@ -115,6 +118,8 @@ importers:
       '@cat-kit/common':
         specifier: workspace:*
         version: link:../common
+
+  packages/canvas: {}
 
   packages/common: {}
 

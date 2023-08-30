@@ -44,6 +44,11 @@
       "import": "./be/es/index.js",
       "require": "./be/cjs/index.js",
       "types": "./be/index.d.ts"
+    },
+    "./canvas": {
+      "import": "./canvas/es/index.js",
+      "require": "./canvas/cjs/index.js",
+      "types": "./canvas/index.d.ts"
     }
   },
   "types": "fe/index.d.ts",

@@ -16,10 +16,18 @@ const sidebar: DefaultTheme.Sidebar = {
       ]
     },
     {
+      text: '画布工具',
+      items: [
+        { text: '概要', link: '/utils/canvas/' },
+        { text: '舞台', link: '/utils/canvas/stage' },
+        { text: '矩形', link: '/utils/canvas/rect' }
+      ]
+    },
+    {
       text: '后端工具',
       items: [
         { text: '概要', link: '/utils/be/' },
-        { text: '文件系统', link: '/utils/be/fs' },
+        { text: '文件系统', link: '/utils/be/fs' }
       ]
     },
     {
@@ -33,7 +41,7 @@ const sidebar: DefaultTheme.Sidebar = {
         { text: '加密', link: '/utils/common/crypto' },
         { text: '信息摘要', link: '/utils/common/hash' },
         { text: '编解码', link: '/utils/common/codec' },
-        { text: '优化', link: '/utils/common/optimize' },
+        { text: '优化', link: '/utils/common/optimize' }
       ]
     }
   ],
@@ -80,9 +88,7 @@ const sidebar: DefaultTheme.Sidebar = {
   '/shared/': [
     {
       text: 'AI专题',
-      items: [
-        { text: 'chat-gpt', link: '/shared/ai/gpt' }
-      ]
+      items: [{ text: 'chat-gpt', link: '/shared/ai/gpt' }]
     },
     {
       text: '术语',

@@ -10,6 +10,7 @@
   "include": [
     "packages/fe/**/*.ts",
     "packages/common/**/*.ts",
+    "packages/canvas/*.ts",
     "docs/",
     "docs/.vitepress/plugins/*.ts"
   ]

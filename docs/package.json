@@ -7,6 +7,7 @@
   "devDependencies": {
     "@cat-kit/be": "workspace:*",
     "@cat-kit/fe": "workspace:*",
+    "@cat-kit/canvas": "workspace:*",
     "sass": "^1.63.6",
     "markdown-it-container": "^3.0.0",
     "@types/markdown-it-container": "^2.0.5",
