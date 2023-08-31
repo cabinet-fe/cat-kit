@@ -17,8 +17,9 @@ const rect = new Rect({
   h: 100,
   x: 0,
   y: 0,
-  strokeWidth: 1,
-  // fillStyle: '#ccc',
+  radius: 10,
+  strokeWidth: 10,
+  fillStyle: '#ccc',
   strokeStyle: '#f00'
 })
 

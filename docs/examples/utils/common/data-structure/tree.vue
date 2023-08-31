@@ -91,11 +91,11 @@ const NodeRender = defineComponent({
           <div style={{ paddingLeft: (node.depth - 1) * 20 + 'px' }}>
             <span>- {node.value.id}</span>
             {!node.isLeaf ? (
-              <a onClick={toggleExpand}>{node.expanded ? '收起' : '展开'}</a>
+              <VButton onClick={toggleExpand}>{node.expanded ? '收起' : '展开'}</VButton>
             ) : null}
-            <a onClick={handleDelete}>删除</a>
-            <a onClick={append}>添加</a>
-            <a onClick={insert}>插入到当前行下</a>
+            <VButton onClick={handleDelete}>删除</VButton>
+            <VButton onClick={append}>添加</VButton>
+            <VButton onClick={insert}>插入到当前行下</VButton>
           </div>
 
           {node.expanded

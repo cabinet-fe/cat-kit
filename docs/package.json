@@ -10,13 +10,13 @@
     "@cat-kit/canvas": "workspace:*",
     "sass": "^1.63.6",
     "markdown-it-container": "^3.0.0",
-    "@types/markdown-it-container": "^2.0.5",
+    "@types/markdown-it-container": "^2.0.6",
     "markdown-it": "^13.0.1",
-    "shiki": "^0.14.2",
+    "shiki": "^0.14.3",
     "vitepress-plugin-search": "^1.0.4-alpha.20",
     "flexsearch": "^0.7.31",
     "fastify": "^4.19.1",
-    "@vitejs/plugin-vue-jsx": "^3.0.1",
+    "@vitejs/plugin-vue-jsx": "^3.0.2",
     "jsoneditor": "^9.10.2"
   }
 }

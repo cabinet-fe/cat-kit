@@ -22,30 +22,26 @@ export class Rect implements Graph {
 
   render(ctx: CanvasRenderingContext2D): void {
     if (this.rendered) return
+    const { config } = this
+    let { x = 0, y = 0, w, h, radius = 0 } = config
+    x += (config.strokeWidth ?? 0) / 2
+    y += (config.strokeWidth ?? 0) / 2
 
-    let { x = 0, y = 0, w, h, fillStyle, strokeStyle, strokeWidth } = this.config
-    x += 0.5
-    y += 0.5
     ctx.beginPath()
-    ctx.moveTo(x, y)
-    ctx.lineTo(x + w, y)
-    ctx.lineTo(x + w, y + h)
-    ctx.lineTo(x, y + h)
+
+    ctx.moveTo(x + radius, y)
+    ctx.arcTo(x + w, y, x + w, y + h, radius)
+    ctx.arcTo(x + w, y + h, x, y + h, radius)
+    ctx.arcTo(x, y + h, x, y, radius)
+    ctx.arcTo(x, y, x + w, y, radius)
+
+    if (config.strokeStyle) {
+      ctx.strokeStyle = config.strokeStyle
+    }
+
+    ctx.lineWidth = 10
     ctx.closePath()
-
-    if (strokeStyle) {
-      ctx.strokeStyle = strokeStyle
-    }
-    if (strokeWidth) {
-      ctx.lineWidth = strokeWidth
-    }
-
     ctx.stroke()
-
-    if (fillStyle) {
-      ctx.fillStyle = fillStyle
-      ctx.fill()
-    }
 
     this.rendered = true
   }
