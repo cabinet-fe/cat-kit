@@ -3,10 +3,12 @@ import { readDir, DirWithoutChildren, DirFile } from './readdir'
 import path, { dirname } from 'path'
 
 describe('文件目录读取', () => {
-  const __filename = fileURLToPath(new URL(import.meta.url))
+  const baseUrl = import.meta.url
+  const __filename = fileURLToPath(new URL(baseUrl))
   const __dirname = dirname(__filename)
   const target = path.resolve(__dirname, 'dir-test')
-  const targetURL = new URL('./dir-test',import.meta.url)
+
+  const targetURL = new URL('./dir-test', baseUrl)
 
   const depth1File: DirFile = {
     type: 'file',
@@ -73,9 +75,11 @@ describe('文件目录读取', () => {
       recursive: true,
       include: [/dir/]
     })
-    expect(dirs).toEqual([{
-      ...depth1Dir,
-      children: []
-    }])
+    expect(dirs).toEqual([
+      {
+        ...depth1Dir,
+        children: []
+      }
+    ])
   })
 })

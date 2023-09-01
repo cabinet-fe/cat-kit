@@ -196,7 +196,10 @@ export function readDir<
   }
 
   if (dir instanceof URL) {
-    return recur(fileURLToPath(dir))
+    if (dir.protocol === 'file:') {
+      return recur(fileURLToPath(dir))
+    }
+    return Promise.resolve([] as Result)
   }
 
   return recur(dir)

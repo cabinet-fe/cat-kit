@@ -27,9 +27,10 @@ function int(numbers: number[]) {
  * 将浮点数小数部分的字符串转换为目标精度的长度并遵循四舍五入
  * @param decimalPart 浮点数的小数部分
  * @param precision 保留的小数位数
+ * @param carry 进位方法
  * @returns
  */
-function decimalPrecision(decimalPart: string, precision: number) {
+function decimalPrecision(decimalPart: string, precision: number, carry: () => void) {
   if (precision <= 0) return ''
 
   const decimalRet = String(
@@ -41,7 +42,8 @@ function decimalPrecision(decimalPart: string, precision: number) {
   if (decimalRet.length < precision) {
     return decimalRet.padStart(precision, '0')
   } else if (decimalRet.length > precision) {
-    return decimalRet.slice(0, precision)
+    carry()
+    return '0'.repeat(precision)
   }
 
   return decimalRet
@@ -53,7 +55,9 @@ function toFixed(v: number, precision: number) {
   if (decimal.length < precision) {
     decimal = decimal.padEnd(precision, '0')
   } else if (decimal.length > precision) {
-    decimal = decimalPrecision(decimal, precision)
+    decimal = decimalPrecision(decimal, precision, () => {
+      int = String(+int + 1)
+    })
   }
 
   return decimal ? int + '.' + decimal : int
@@ -83,7 +87,9 @@ const CurrencyFormatters: Record<
       if (decimalPart.length < precision) {
         decimalPart = decimalPart.padEnd(precision, '0')
       } else if (decimalPart.length > precision) {
-        decimalPart = decimalPrecision(decimalPart, precision)
+        decimalPart = decimalPrecision(decimalPart, precision, () => {
+          intPart = String(+intPart + 1)
+        })
       }
     } else {
       // 有最小精度
@@ -95,7 +101,9 @@ const CurrencyFormatters: Record<
       // 有最大精度
       if (maxPrecision !== undefined && maxPrecision > 0) {
         if (decimalPart.length > maxPrecision) {
-          decimalPart = decimalPrecision(decimalPart, maxPrecision)
+          decimalPart = decimalPrecision(decimalPart, maxPrecision, () => {
+            intPart = String(+intPart + 1)
+          })
         }
       }
     }
