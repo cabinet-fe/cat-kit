@@ -35,22 +35,25 @@ function decimalPrecision(
   precision: number,
   carry: () => void
 ) {
-  if (precision <= 0) return ''
-
-  const decimalRet = String(
-    Math.round(
-      +(decimalPart.slice(0, precision) + '.' + decimalPart.slice(precision))
-    )
+  if (decimalPart.length <= precision) {
+    return decimalPart.padEnd(precision, '0')
+  }
+  // 使用小数点移位来避免精度丢失
+  // 首先在字符串中插入小数点并转化为数字, 随后进行四舍五入, 最后再转化为字符串
+  const decimalNum = Math.round(
+    +(decimalPart.slice(0, precision) + '.' + decimalPart.slice(precision))
   )
+  const decimalRet = decimalNum ? String(decimalNum) : ''
 
+  if (decimalRet.length === precision) return decimalRet
+
+  // eg. 0.009保留2为小数 decimalRet此时为1, 所以需要再前面补0
   if (decimalRet.length < precision) {
     return decimalRet.padStart(precision, '0')
-  } else if (decimalRet.length > precision) {
-    carry()
-    return '0'.repeat(precision)
   }
-
-  return decimalRet
+  // 需要进位
+  carry()
+  return '0'.repeat(precision)
 }
 
 function toFixed(
@@ -59,32 +62,30 @@ function toFixed(
 ) {
   let [int, decimal = ''] = String(v).split('.') as [string, string | undefined]
 
+  let targetPrecision: undefined | number = undefined
   if (typeof precision === 'number') {
-    if (decimal.length < precision) {
-      decimal = decimal.padEnd(precision, '0')
-    } else if (decimal.length > precision) {
-      decimal = decimalPrecision(decimal, precision, () => {
-        int = String(+int + 1)
-      })
+    targetPrecision = precision
+  } else {
+    const { maxPrecision, minPrecision } = precision
+    if (maxPrecision !== undefined && maxPrecision > decimal.length) {
+      targetPrecision = maxPrecision
+    } else if (minPrecision !== undefined && minPrecision < decimal.length) {
+      targetPrecision = minPrecision
     }
-
-    return decimal ? int + '.' + decimal : int
   }
-  const { maxPrecision, minPrecision } = precision
-
-  // 最大精度拥有更高的优先级
-  if (maxPrecision !== undefined && decimal.length > maxPrecision) {
-    return decimalPrecision(decimal, maxPrecision, () => {
-      int = String(+int + 1)
-    })
-  }
-  if (minPrecision !== undefined && decimal.length < minPrecision) {
-    return decimalPrecision(decimal, minPrecision, () => {
-      int = String(+int + 1)
-    })
+  if (
+    targetPrecision !== undefined &&
+    Number.isInteger(targetPrecision) &&
+    targetPrecision >= 0
+  ) {
+    decimal = decimalPrecision(
+      decimal,
+      targetPrecision,
+      () => (int = String(+int + 1))
+    )
   }
 
-  return String(v)
+  return decimal ? int + '.' + decimal : int
 }
 
 const CN_UPPER_NUM = '零壹贰叁肆伍陆柒捌玖'
@@ -107,33 +108,29 @@ const CurrencyFormatters: Record<
       string | undefined
     ]
 
+    let targetPrecision: number | undefined = undefined
     if (precision !== undefined) {
-      if (decimalPart.length < precision) {
-        decimalPart = decimalPart.padEnd(precision, '0')
-      } else if (decimalPart.length > precision) {
-        decimalPart = decimalPrecision(decimalPart, precision, () => {
-          intPart = String(+intPart + 1)
-        })
-      }
-    } else {
-      // 有最大精度, 优先级最高(根据使用频率)
-      if (
-        maxPrecision !== undefined &&
-        maxPrecision > 0 &&
-        decimalPart.length > maxPrecision
-      ) {
-        decimalPart = decimalPrecision(decimalPart, maxPrecision, () => {
-          intPart = String(+intPart + 1)
-        })
-      }
-      // 有最小精度
-      else if (
-        minPrecision !== undefined &&
-        minPrecision > 0 &&
-        decimalPart.length < minPrecision
-      ) {
-        decimalPart = decimalPart.padEnd(minPrecision, '0')
-      }
+      targetPrecision = precision
+    } else if (
+      maxPrecision !== undefined &&
+      decimalPart.length > maxPrecision
+    ) {
+      targetPrecision = maxPrecision
+    } else if (
+      minPrecision !== undefined &&
+      decimalPart.length < minPrecision
+    ) {
+      targetPrecision = minPrecision
+    }
+
+    if (
+      targetPrecision !== undefined &&
+      Number.isInteger(targetPrecision) &&
+      targetPrecision >= 0
+    ) {
+      decimalPart = decimalPrecision(decimalPart, targetPrecision, () => {
+        intPart = String(+intPart + 1)
+      })
     }
 
     let result = ''
