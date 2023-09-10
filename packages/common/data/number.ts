@@ -30,7 +30,11 @@ function int(numbers: number[]) {
  * @param carry 进位方法
  * @returns
  */
-function decimalPrecision(decimalPart: string, precision: number, carry: () => void) {
+function decimalPrecision(
+  decimalPart: string,
+  precision: number,
+  carry: () => void
+) {
   if (precision <= 0) return ''
 
   const decimalRet = String(
@@ -49,18 +53,38 @@ function decimalPrecision(decimalPart: string, precision: number, carry: () => v
   return decimalRet
 }
 
-function toFixed(v: number, precision: number) {
+function toFixed(
+  v: number,
+  precision: number | { maxPrecision?: number; minPrecision?: number }
+) {
   let [int, decimal = ''] = String(v).split('.') as [string, string | undefined]
 
-  if (decimal.length < precision) {
-    decimal = decimal.padEnd(precision, '0')
-  } else if (decimal.length > precision) {
-    decimal = decimalPrecision(decimal, precision, () => {
+  if (typeof precision === 'number') {
+    if (decimal.length < precision) {
+      decimal = decimal.padEnd(precision, '0')
+    } else if (decimal.length > precision) {
+      decimal = decimalPrecision(decimal, precision, () => {
+        int = String(+int + 1)
+      })
+    }
+
+    return decimal ? int + '.' + decimal : int
+  }
+  const { maxPrecision, minPrecision } = precision
+
+  // 最大精度拥有更高的优先级
+  if (maxPrecision !== undefined && decimal.length > maxPrecision) {
+    return decimalPrecision(decimal, maxPrecision, () => {
+      int = String(+int + 1)
+    })
+  }
+  if (minPrecision !== undefined && decimal.length < minPrecision) {
+    return decimalPrecision(decimal, minPrecision, () => {
       int = String(+int + 1)
     })
   }
 
-  return decimal ? int + '.' + decimal : int
+  return String(v)
 }
 
 const CN_UPPER_NUM = '零壹贰叁肆伍陆柒捌玖'
@@ -92,19 +116,23 @@ const CurrencyFormatters: Record<
         })
       }
     } else {
-      // 有最小精度
-      if (minPrecision !== undefined && minPrecision > 0) {
-        if (decimalPart.length < minPrecision) {
-          decimalPart = decimalPart.padEnd(minPrecision, '0')
-        }
+      // 有最大精度, 优先级最高(根据使用频率)
+      if (
+        maxPrecision !== undefined &&
+        maxPrecision > 0 &&
+        decimalPart.length > maxPrecision
+      ) {
+        decimalPart = decimalPrecision(decimalPart, maxPrecision, () => {
+          intPart = String(+intPart + 1)
+        })
       }
-      // 有最大精度
-      if (maxPrecision !== undefined && maxPrecision > 0) {
-        if (decimalPart.length > maxPrecision) {
-          decimalPart = decimalPrecision(decimalPart, maxPrecision, () => {
-            intPart = String(+intPart + 1)
-          })
-        }
+      // 有最小精度
+      else if (
+        minPrecision !== undefined &&
+        minPrecision > 0 &&
+        decimalPart.length < minPrecision
+      ) {
+        decimalPart = decimalPart.padEnd(minPrecision, '0')
       }
     }
 
@@ -136,7 +164,11 @@ const CurrencyFormatters: Record<
 
     let [intPart, decPart] = toFixed(
       num,
-      config?.precision !== undefined ? (config.precision > 4 ? 4 : config.precision) : 4
+      config?.precision !== undefined
+        ? config.precision > 4
+          ? 4
+          : config.precision
+        : 4
     ).split('.') as [string, string | undefined]
 
     if (isNegative) {
@@ -167,7 +199,6 @@ const CurrencyFormatters: Record<
     if (isNegative) {
       result = `负${result}`
     }
-
 
     if (decPart) {
       const decLen = decPart.length
@@ -219,7 +250,16 @@ class Num {
    * 指定数字最大保留几位小数点
    * @param precision 位数
    */
-  fixed(precision: number) {
+  fixed(
+    precision:
+      | number
+      | {
+          /** 最小精度 */
+          minPrecision?: number
+          /** 最大精度 */
+          maxPrecision?: number
+        }
+  ) {
     return toFixed(this.v, precision)
   }
 

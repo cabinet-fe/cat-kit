@@ -19,8 +19,13 @@ describe('数字操作', () => {
       maxPrecision: 2
     })).toBe('1,234.57')
     expect(n(1234.5678).currency('CNY', {
-      maxPrecision: 3
+      maxPrecision: 3,
+      minPrecision: 1
     })).toBe('1,234.568')
+    expect(n(1234).currency('CNY', {
+      maxPrecision: 3,
+      minPrecision: 1
+    })).toBe('1,234.0')
   })
   test('currency("RMB_HAN")', () => {
     expect(n(1234.5678).currency('CNY_HAN')).toBe('壹仟贰佰叁拾肆元伍角陆分柒毫捌厘')
