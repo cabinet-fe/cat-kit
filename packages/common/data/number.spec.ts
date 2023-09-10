@@ -5,6 +5,7 @@ describe('数字操作', () => {
     expect(n(1.296).fixed(2)).toBe('1.30')
     expect(n(1.255).fixed(2)).toBe('1.26')
     expect(n(1).fixed(2)).toBe('1.00')
+    expect(n(2.999).fixed({ maxPrecision: 2 })).toBe('3.00')
   })
   test('currency("CNY")', () => {
     expect(n(1234.03123).currency('CNY', 2)).toBe('1,234.03')

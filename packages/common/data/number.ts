@@ -67,9 +67,9 @@ function toFixed(
     targetPrecision = precision
   } else {
     const { maxPrecision, minPrecision } = precision
-    if (maxPrecision !== undefined && maxPrecision > decimal.length) {
+    if (maxPrecision !== undefined && decimal.length > maxPrecision) {
       targetPrecision = maxPrecision
-    } else if (minPrecision !== undefined && minPrecision < decimal.length) {
+    } else if (minPrecision !== undefined && decimal.length < minPrecision) {
       targetPrecision = minPrecision
     }
   }
