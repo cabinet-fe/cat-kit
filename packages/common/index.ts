@@ -29,3 +29,5 @@ export * from './optimize'
 export { default as base64 } from './codec/base64'
 
 export * from './anime/tween'
+
+export { default as path } from './path/path'

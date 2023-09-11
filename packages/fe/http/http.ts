@@ -16,7 +16,7 @@ import type {
   RequestConfig,
   ResponseReturnType
 } from './type'
-import path from '../path/path'
+import path from '@cat-kit/common/path/path'
 
 export * from './type'
 
