@@ -123,7 +123,7 @@ export class Tween<
         for (const key in stateDistance) {
           const target =
             prevState[key]! +
-            Math.round(easingFunction(progress) * stateDistance[key]!)
+            easingFunction(progress) * stateDistance[key]!
           // @ts-ignore
           this.state[key] = target
         }

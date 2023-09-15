@@ -29,7 +29,7 @@
     <br />
 
     <div>
-      <div>数字补间: {{ tween.state.number }}</div>
+      <div>数字补间: {{ n(tween.state.number).fixed({ maxPrecision: 2 }) }}</div>
       <input v-once type="text" v-model.number="number" />
     </div>
     <div>
@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Tween } from '@cat-kit/fe'
+import { Tween, n } from '@cat-kit/fe'
 import { reactive, shallowRef, watch } from 'vue'
 
 const tweenFn = shallowRef('linear')
@@ -56,7 +56,12 @@ const number = shallowRef(0)
 const tween = new Tween(
   reactive({
     number: number.value
-  })
+  }),
+  {
+    onUpdate(state) {
+      console.log(state.number)
+    }
+  }
 )
 watch(number, n =>
   tween.to({ number: n }, { easingFunction: Tween.easing[tweenFn.value], duration: duration.value })
