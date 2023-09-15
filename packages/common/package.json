@@ -4,5 +4,9 @@
   "version": "3.1.3",
   "description": "前后端开发一体包通用分包",
   "main": "index.ts",
-  "author": "YH FE"
+  "author": "YH FE",
+  "exports": {
+    ".": "./index.ts",
+    "./*": "./*.ts"
+  }
 }
