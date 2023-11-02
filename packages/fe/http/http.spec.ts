@@ -6,6 +6,10 @@ describe('http测试', () => {
     withCredentials: false,
     before(conf) {
       conf.headers['Authorization'] = 'auth token'
+      if (['PUT', 'DELETE'].includes(conf.method) ) {
+        conf.headers['X-Forward-Http-Method'] = conf.method
+        conf.method = 'POST'
+      }
       return conf
     }
   })

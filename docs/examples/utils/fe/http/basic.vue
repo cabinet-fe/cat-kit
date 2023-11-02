@@ -4,23 +4,33 @@
 
     <br />
     <v-button @click="request1">发起请求></v-button> <br />
-    <v-button @click="request2">发起请求并使任意请求以错误的形式返回></v-button><br />
+    <v-button @click="request2">发起请求并使任意请求以错误的形式返回></v-button
+    ><br />
     <v-button @click="request3">
       超时的请求>
       <template v-if="timeout">等待{{ timeout / 1000 }}s</template>
     </v-button>
     <br />
     <v-button @click="request4">1s后终止所有本次发起的请求</v-button>
+    <br />
+    <v-button @click="request5">DELETE请求和PUT请求转换为POST请求</v-button>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { Http, type IRequestor } from '@cat-kit/fe'
 import { shallowRef } from 'vue'
-
+const env = 'zwt'
 const http = new Http({
   baseUrl: '/api',
   timeout: 18000,
+  before(conf) {
+    if (env === 'zwt' && ['PUT', 'DELETE'].includes(conf.method)) {
+      conf.headers['X-HTTP-Method-Override'] = conf.method
+      conf.method = 'POST'
+    }
+    return conf
+  },
   after(res, _, resType) {
     if (resType === 'error') {
       console.error('抛出错误, 错误信息: ', res.message)
@@ -81,29 +91,38 @@ const request4 = () => {
   Array.from({ length: 10 }).forEach((_, i) => {
     const sleep = Math.random() * 2000
     console.log(`第${i}个请求需要${sleep}ms返回数据`)
-    http.post(
-      '/test',
-      {
-        sleep
-      },
-      {
-        created(req) {
-          requests.add(req)
+    http
+      .post(
+        '/test',
+        {
+          sleep
         },
-        complete(req) {
-          requests.delete(req)
+        {
+          created(req) {
+            requests.add(req)
+          },
+          complete(req) {
+            requests.delete(req)
+          }
         }
-      }
-    ).then(() => {
-      console.log(`第${i}个请求完成`)
-    }).catch(() => {
-      console.log(`第${i}个请求被终止`)
-    })
+      )
+      .then(() => {
+        console.log(`第${i}个请求完成`)
+      })
+      .catch(() => {
+        console.log(`第${i}个请求被终止`)
+      })
   })
   console.timeEnd('耗时:')
   // 1s后将所有没有请求的响应终止
   setTimeout(() => {
     requests.forEach(item => item.abort())
   }, 1000)
+}
+
+const request5 = () => {
+  http.put('/put').then(res => {
+    console.log(res)
+  })
 }
 </script>
