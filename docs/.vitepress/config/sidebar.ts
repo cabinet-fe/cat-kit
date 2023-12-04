@@ -1,4 +1,4 @@
-import { DefaultTheme } from 'vitepress'
+import type { DefaultTheme } from 'vitepress'
 
 const sidebar: DefaultTheme.Sidebar = {
   '/utils/': [
@@ -39,7 +39,6 @@ const sidebar: DefaultTheme.Sidebar = {
         { text: '动画', link: '/utils/common/anime' },
         { text: '日期', link: '/utils/common/date' },
         { text: '加密', link: '/utils/common/crypto' },
-        { text: '信息摘要', link: '/utils/common/hash' },
         { text: '编解码', link: '/utils/common/codec' },
         { text: '优化', link: '/utils/common/optimize' }
       ]

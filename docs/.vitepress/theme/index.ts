@@ -6,14 +6,14 @@
  * @FilePath: /cat-kit/docs/.vitepress/theme/index.ts
  *
  */
-import { Theme } from 'vitepress'
-import defaultTheme from 'vitepress/dist/client/theme-default/index'
+import DefaultTheme from 'vitepress/theme'
+import type { Theme } from 'vitepress'
 import components from '../components'
 import './theme.css'
 import './component.css'
 
 const theme: Theme = {
-  ...(defaultTheme as Theme),
+  extends: DefaultTheme,
   enhanceApp({ app }) {
     components.forEach(component => {
       app.component(component.name, component)
@@ -23,5 +23,3 @@ const theme: Theme = {
 }
 
 export default theme
-
-

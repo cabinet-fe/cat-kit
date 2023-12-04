@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, PropType } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
   value: {

@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { watchEffect, shallowRef, PropType } from 'vue'
+import { watchEffect, shallowRef, type PropType } from 'vue'
 
 const props = defineProps({
   title: {

@@ -21,6 +21,10 @@ export default defineConfig({
   ],
   lastUpdated: true,
 
+  sitemap: {
+    hostname: 'https://cabinet-fe.github.io'
+  },
+
   markdown: {
     lineNumbers: true,
 

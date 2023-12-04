@@ -8,15 +8,15 @@
     "@cat-kit/be": "workspace:*",
     "@cat-kit/fe": "workspace:*",
     "@cat-kit/canvas": "workspace:*",
-    "sass": "^1.63.6",
+    "sass": "^1.69.5",
     "markdown-it-container": "^3.0.0",
-    "@types/markdown-it-container": "^2.0.6",
-    "markdown-it": "^13.0.1",
-    "shiki": "^0.14.3",
+    "@types/markdown-it-container": "^2.0.9",
+    "markdown-it": "^13.0.2",
+    "shiki": "^0.14.5",
     "vitepress-plugin-search": "^1.0.4-alpha.20",
     "flexsearch": "^0.7.31",
     "fastify": "^4.19.1",
-    "@vitejs/plugin-vue-jsx": "^3.0.2",
-    "jsoneditor": "^9.10.2"
+    "@vitejs/plugin-vue-jsx": "^3.1.0",
+    "jsoneditor": "^9.10.4"
   }
 }
