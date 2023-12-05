@@ -60,3 +60,31 @@ class Str {
 export function str(str: string): Str {
   return new Str(str)
 }
+
+/**
+ * 拼接路径字符串，通常用于防止拼接的路径出现重复的'/'
+ * @param firstPath 路径字符串, 也可以是一个有效的URL地址
+ * @param paths 待拼接的其他路径字符串
+ * @returns 拼接后的路径
+ *
+ * @example
+ * ```ts
+ * str.joinPath('/a/', '/b', '/c') // '/a/b/c'
+ * str.joinPath('/a/', '/b', '/c/') // '/a/b/c/'
+ * str.joinPath('a/', '/b', '/c/') // '/a/b/c/'
+ * ```
+ */
+str.joinPath = function joinPath(firstPath: string, ...paths: string[]) {
+  const secondPath = paths.join('/').replace(/\/{2,}/g, '/').replace(/^\//, '')
+
+  // URL协议需要验证URL的合法性
+  if (/^(https?|ftp|file):\/\//.test(firstPath)) {
+    const origin = firstPath.replace(/:\/*$/, '://')
+    if (origin.endsWith('//') || !origin.includes('.')) {
+      throw new Error(`无效的URL:${origin}`)
+    }
+    return `${origin.replace(/\/+$/, '')}/${secondPath}`
+  }
+
+  return `${firstPath.replace(/\/+$/, '')}/${secondPath}`
+}

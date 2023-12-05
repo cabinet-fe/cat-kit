@@ -1,4 +1,12 @@
 export default {
+
+  /**
+   * 拼接路径
+   * @deprecated 这个方法已过时，请使用str.joinPath替代
+   * @param firstPath
+   * @param args
+   * @returns
+   */
   join(firstPath: string, ...args: string[]) {
     let left = /^\/*/
     let right = /\/*$/

@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { readFile, ReadType, n } from '@cat-kit/fe'
+import { readFile, type ReadType, n, MD5 } from '@cat-kit/fe'
 import { computed, shallowRef, watch } from 'vue'
 
 const readType = shallowRef<ReadType>('text')
@@ -55,6 +55,11 @@ const fileType = shallowRef('')
 watch(readType, v => {
   content.value = undefined
 })
+
+MD5('123').then(res => {
+  console.log(res)
+})
+
 
 const handleChange = async (e: Event) => {
   const target = e.target as HTMLInputElement

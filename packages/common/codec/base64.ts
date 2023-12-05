@@ -16,11 +16,14 @@ function encodeString(s: string) {
 }
 
 /**
- * base编码
- * @param data 原始数据
- * @returns
+ * base64编码
+ * @param data 字符串或者数字类型数据
  */
 function encode(data: string | number): string
+/**
+ * base64编码
+ * @param data 文件类型数据
+ */
 function encode(data: Blob): Promise<string>
 function encode(data: string | number | Blob): string | Promise<string> {
   let type = getDataType(data)
@@ -53,9 +56,16 @@ function decode(str: string) {
   return td.decode(u8a)
 }
 
-const base64 = {
+export const base64 = {
+  /**
+   * base64编码
+   * @param data 输入数据
+   */
   encode,
+
+  /**
+   * base64解码
+   * @param data 待解码base64字符串
+   */
   decode
 }
-
-export default base64

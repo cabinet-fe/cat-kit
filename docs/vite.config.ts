@@ -7,24 +7,12 @@
  *
  */
 import { defineConfig } from 'vite'
-import { SearchPlugin } from 'vitepress-plugin-search'
 import { DemoPlugin } from './.vitepress/vite-plugins/demo-plugin'
 import jsx from '@vitejs/plugin-vue-jsx'
 
 export default defineConfig(({ mode }) => {
   return {
-    plugins: [
-      DemoPlugin(),
-
-      SearchPlugin({
-        previewLength: 62,
-        buttonLabel: '查询',
-        placeholder: '查询文档',
-        cache: true,
-        optimize: true
-      }),,
-      jsx()
-    ],
+    plugins: [DemoPlugin(), jsx()],
 
     server: {
       proxy: {

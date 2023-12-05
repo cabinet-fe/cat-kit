@@ -1,4 +1,4 @@
-import { DefaultTheme } from 'vitepress'
+import type { DefaultTheme } from 'vitepress/theme'
 
 const navbar: DefaultTheme.NavItem[] = [
   { text: `工具`, link: '/utils/fe/', activeMatch: '/utils/' },

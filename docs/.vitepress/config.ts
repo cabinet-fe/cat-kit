@@ -29,7 +29,6 @@ export default defineConfig({
     lineNumbers: true,
 
     config: async md => {
-
       md.use(demoContainer)
     }
   },
@@ -60,6 +59,10 @@ export default defineConfig({
     docFooter: {
       prev: '上一节',
       next: '下一节'
+    },
+
+    search: {
+      provider: 'local'
     }
   },
 
