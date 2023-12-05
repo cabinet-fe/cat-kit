@@ -56,8 +56,10 @@ watch(readType, v => {
   content.value = undefined
 })
 
-MD5('123').then(res => {
+MD5('1234').then(res => {
   console.log(res)
+}).catch(err => {
+  console.log(err)
 })
 
 

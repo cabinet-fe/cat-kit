@@ -22,7 +22,7 @@ async function fileMD5(file: Blob, cfg?: MD5Config) {
   const md5 = algo.MD5.create()
 
   let i = 0
-  while (i < chunkSize) {
+  while (i < file.size) {
     const { result } = await readFile(
       file.slice(i, i + chunkSize),
       'arrayBuffer'
