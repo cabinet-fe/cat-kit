@@ -1,8 +1,12 @@
 {
   "files": [],
   "references": [
-    { "path": "./docs/tsconfig.json" },
-    { "path": "./tsconfig.fe.json" },
-    { "path": "./tsconfig.be.json" }
+    { "path": "./packages/be/tsconfig.json" },
+    { "path": "./packages/fe/tsconfig.json" },
+    { "path": "./packages/common/tsconfig.json" },
+    { "path": "./packages/canvas/tsconfig.json" }
+  ],
+  "include": [
+    "./*.ts"
   ]
 }

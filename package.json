@@ -6,14 +6,13 @@
     "docs:dev": "vitepress dev docs",
     "docs:test-server": "node docs/.vitepress/server",
     "docs:build": "vitepress build docs",
-    "kit:build": "tsx build/index.ts",
+    "kit:build": "tsx builder/index.ts",
     "test": "vitest run",
     "kit:build-v2": "tsx build/index.ts v2",
     "commit-lint": "tsx scripts/verifyCommit.ts",
     "release": "pnpm test && pnpm kit:build && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
     "release:v2": "pnpm test && pnpm kit:build-v2 && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
-    "upgrade": "tsx scripts/version.ts upgrade",
-    "downgrade": "tsx scripts/version.ts downgrade"
+    "version": "tsx cmd/version.ts"
   },
   "type": "module",
   "repository": {
@@ -21,20 +20,6 @@
     "url": "git+https://github.com/cabinet-fe/cat-kit.git"
   },
   "exports": {
-    ".": {
-      "import": {
-        "node": "./be/es/index.js",
-        "default": "./fe/es/index.js"
-      },
-      "require": {
-        "node": "./be/cjs/index.js",
-        "default": "./fe/cjs/index.js"
-      },
-      "types": {
-        "node": "./be/index.d.ts",
-        "default": "./fe/index.d.ts"
-      }
-    },
     "./fe": {
       "import": "./fe/es/index.js",
       "require": "./fe/cjs/index.js",
@@ -64,7 +49,6 @@
     "url": "https://github.com/cabinet-fe/cat-kit/issues"
   },
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^15.2.3",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.10.3",
     "@types/prettier": "^3.0.0",
@@ -73,16 +57,13 @@
     "jsdom": "^23.0.1",
     "picocolors": "^1.0.0",
     "prettier": "3.1.0",
-    "rollup": "^4.6.1",
-    "rollup-plugin-dts": "^6.1.0",
-    "rollup-plugin-esbuild": "^6.1.0",
     "terser": "5.24.0",
     "ts-conf-base": "^2.2.0",
     "tsx": "^4.6.2",
     "typescript": "^5.3.2",
-    "vite": "^5.0.4",
+    "vite": "^5.0.5",
     "vitepress": "1.0.0-rc.31",
     "vitest": "^1.0.1",
-    "vue": "^3.3.9"
+    "vue": "^3.3.10"
   }
 }

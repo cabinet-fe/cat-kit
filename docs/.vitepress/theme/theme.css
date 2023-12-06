@@ -1,7 +1,24 @@
 :root {
-  --vp-c-brand: #ea0880;
-  --vp-c-brand-light: #ea0880cc;
-  --vp-c-brand-dark: #db2777;
+  --vp-c-brand: #ad643b;
+  --vp-c-brand-1: #ad643b;
+  --vp-c-brand-2: #9e613e;
+  --vp-c-brand-3: #ad643b;
+  --vp-c-brand-light: #df9d6f;
+  --vp-c-brand-dark: var(--vp-c-brand-2);
 
   --vp-button-brand-bg: var(--vp-c-brand);
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: -webkit-linear-gradient(
+    120deg,
+    #ad643b 30%,
+    #df9d6f
+  );
+  --vp-home-hero-image-background-image: linear-gradient(
+    0,
+    var(--vp-c-brand-light) 30%,
+    var(--vp-c-brand)
+  );
+
+  --vp-home-hero-image-filter: blur(44px);
 }

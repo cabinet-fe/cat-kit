@@ -1,9 +1,0 @@
-{
-  "extends": "ts-conf-base/tsconfig.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": ".",
-    "declaration": true,
-    "types": ["vitest/globals"]
-  }
-}

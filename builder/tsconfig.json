@@ -1,0 +1,7 @@
+{
+  "extends": "ts-conf-base/tsconfig.node.json",
+  "compilerOptions": {
+    "composite": true
+  },
+  "include": ["./*.ts"]
+}

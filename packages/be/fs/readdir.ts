@@ -1,4 +1,4 @@
-import { Dirent } from 'node:fs'
+import type { Dirent } from 'node:fs'
 import { readdir } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -48,13 +48,13 @@ type GetDirType<
   ? FileType extends 'all'
     ? DirFile | Dir
     : FileType extends 'file'
-    ? DirFile
-    : DirWithOnlyDir
+      ? DirFile
+      : DirWithOnlyDir
   : FileType extends 'all'
-  ? DirFile | DirWithoutChildren
-  : FileType extends 'file'
-  ? DirFile
-  : DirWithoutChildren
+    ? DirFile | DirWithoutChildren
+    : FileType extends 'file'
+      ? DirFile
+      : DirWithoutChildren
 
 /**
  * 读取目录配置

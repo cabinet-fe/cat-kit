@@ -5,5 +5,5 @@
     "lib": ["ESNext", "DOM"],
     "types": ["vite/client"]
   },
-  "include": ["./**/*.ts", "./**/*.vue", "./.vitepress/**/*.ts"]
+  "include": ["./**/*.ts", "./**/*.vue", "./.vitepress/**/*.ts", "./package.json"]
 }

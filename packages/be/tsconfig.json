@@ -4,7 +4,10 @@
     "composite": true
   },
   "include": [
-    "packages/be/**/*",
-    "docs/vite.config.ts"
+    "./**/*",
+    "./*.ts"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

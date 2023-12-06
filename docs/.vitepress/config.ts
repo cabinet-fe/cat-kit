@@ -5,7 +5,7 @@ import { demoContainer } from './markdown/plugins'
 
 export default defineConfig({
   lang: 'zh-CN',
-  title: 'cat-kit',
+  title: '喵喵工具箱',
   description: '前端开发工具包和知识分享',
   base: '/cat-kit/',
   head: [
@@ -37,6 +37,11 @@ export default defineConfig({
     footer: {
       message: 'MIT Licensed',
       copyright: '© 2022-PRESENT 元和前端'
+    },
+
+    outline: {
+      label: '当前页面',
+      level: 'deep'
     },
 
     editLink: {

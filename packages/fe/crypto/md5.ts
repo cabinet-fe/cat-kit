@@ -1,6 +1,6 @@
 import 'crypto-js/md5'
-import { algo } from 'crypto-js/core'
-import WordArray from 'crypto-js/lib-typedarrays'
+import CryptoJS from 'crypto-js/core'
+import * as WordArray from 'crypto-js/lib-typedarrays'
 import { readFile } from '../web-api'
 
 interface MD5Config {
@@ -9,7 +9,7 @@ interface MD5Config {
 }
 
 function msgMD5(msg: string) {
-  const md5 = algo.MD5.create()
+  const md5 = CryptoJS.algo.MD5.create()
 
   return md5.finalize(msg).toString()
 }
@@ -19,7 +19,7 @@ async function fileMD5(file: Blob, cfg?: MD5Config) {
   const { chunkSize = 10485760 } = cfg || {}
 
   // 创建MD5哈希算法实例
-  const md5 = algo.MD5.create()
+  const md5 = CryptoJS.algo.MD5.create()
 
   let i = 0
   while (i < file.size) {

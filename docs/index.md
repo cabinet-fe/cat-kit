@@ -1,11 +1,11 @@
 ---
 layout: home
-title: 喵喵工具箱
+title: CatKit
 
 hero:
-  name: cat-kit
-  text: 喵喵工具箱.
-  tagline: 精简, 强大, 易用.
+  name: CatKit
+  text: 基于JS的全栈开发工具包.
+  tagline: 现代API， 高性能，类型安全， 前后端一致.
 
   image:
     src: /images/logo.png
@@ -54,4 +54,8 @@ const members = [
 
 <br>
 
-<VPTeamMembers size="small" :members="members" />
+<hr style="border-color: #eee;" />
+
+<br>
+
+<VPTeamMembers class="members" size="small" :members="members" />

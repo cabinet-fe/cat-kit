@@ -1,3 +1,5 @@
+// 提交时校验
+
 import color from 'picocolors'
 import fs from 'fs'
 import { fileURLToPath } from 'url'

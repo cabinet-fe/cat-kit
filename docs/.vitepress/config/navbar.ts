@@ -1,7 +1,8 @@
 import type { DefaultTheme } from 'vitepress/theme'
+import { version } from '../../package.json'
 
 const navbar: DefaultTheme.NavItem[] = [
-  { text: `工具`, link: '/utils/fe/', activeMatch: '/utils/' },
+  { text: `工具 v${version}`, link: '/utils/fe/', activeMatch: '/utils/' },
   {
     text: '实验室',
     items: [
