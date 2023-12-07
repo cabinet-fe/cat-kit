@@ -3,7 +3,8 @@
   "compilerOptions": {
     "composite": true,
     "types": ["vitest/globals"],
-    "rootDir": ".."
+    "rootDir": "..",
+    "declaration": true
   },
   "include": [
     "../packages/fe/**/*.ts",
