@@ -12,6 +12,8 @@ import { nodeResolve } from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import { fileURLToPath } from 'url'
 import glob from 'fast-glob'
+import { readdirSync } from 'fs'
+import { cwd } from 'process'
 
 const writeBundle = async (
   input: string,
@@ -91,24 +93,29 @@ function roll() {
         })
       ),
       plugins,
+
+      // crypto-js上下文需要指定为window
       moduleContext: id =>
         /node_modules[\/\\]crypto-js/.test(id) ? 'window' : undefined
     }),
     rollup({
-      input: Object.fromEntries(
-        files.map(filePath => {
-          return [
-            // 这里将删除 `所有文件到packages/目录之前的所有路径` 以及每个文件的扩展名。
-            // 因此，例如 packages/fe/**/*.ts 会变成 fe/**/*
-            filePath.replace(pkgRE, '').replace(extRE, ''),
-
-            // 文件的绝对路径
-            fileURLToPath(new URL(path.join('..', filePath), import.meta.url))
-          ]
-        })
+      input: readdirSync(
+        fileURLToPath(new URL(`../${PKG_DIR_NAME}`, import.meta.url))
+      ).map(pkgPath =>
+        path.resolve(
+          fileURLToPath(new URL(`../${PKG_DIR_NAME}`, import.meta.url)),
+          pkgPath,
+          'index.ts'
+        )
       ),
       plugins: [
-        dts()
+        dts({
+          compilerOptions: {
+            moduleResolution: 2,
+            module: 99
+          },
+          tsconfig: path.resolve(cwd(), 'tsconfig/tsconfig.fe.json')
+        })
       ]
     })
   ]

@@ -65,7 +65,7 @@ interface DatabaseOptions {
   keyPath: string;
 }
 
-class IndexedDBApi<T> {
+export class IndexedDBApi<T> {
   private readonly options: DatabaseOptions;
 
   constructor(options: DatabaseOptions) {

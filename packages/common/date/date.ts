@@ -67,7 +67,7 @@ class Dater {
   }
 
   /** 时 */
-  get hour() {
+  get hour(): number {
     return this.date.getHours()
   }
 
@@ -95,7 +95,7 @@ class Dater {
   }
 
   /** 格式化日期 */
-  format(formatter = 'yyyy-MM-dd') {
+  format(formatter = 'yyyy-MM-dd'): string {
     Object.keys(Dater.matchers).forEach(reg => {
       formatter = formatter.replace(new RegExp(`(${reg})`), str => {
         return Dater.matchers[reg]!(this.date, str.length)
@@ -109,7 +109,7 @@ class Dater {
    * @param timeStep 计算的日期, 负数表示之前的日期, 正数表示之后的日期
    * @param type 时间步长类别, 默认以天为单位
    */
-  calc(timeStep: number, type?: 'days' | 'weeks' | 'months' | 'years') {
+  calc(timeStep: number, type?: 'days' | 'weeks' | 'months' | 'years'): Dater {
     let { date } = this
     if (type === 'days') {
       return new Dater(this.timestamp + timeStep * 86400000)

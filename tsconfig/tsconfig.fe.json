@@ -1,0 +1,17 @@
+{
+  "extends": "ts-conf-base/tsconfig.web.json",
+  "compilerOptions": {
+    "composite": true,
+    "types": ["vitest/globals"],
+    "rootDir": ".."
+  },
+  "include": [
+    "../packages/fe/**/*.ts",
+    "../packages/fe/*.ts",
+    "../packages/common/**/*.ts",
+    "../packages/common/*.ts",
+    "../packages/canvas/**/*.ts",
+    "../packages/canvas/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

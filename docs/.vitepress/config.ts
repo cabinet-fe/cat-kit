@@ -36,7 +36,7 @@ export default defineConfig({
   themeConfig: {
     footer: {
       message: 'MIT Licensed',
-      copyright: '© 2022-PRESENT 元和前端'
+      copyright: '© 2022-PRESENT 元智慧前端'
     },
 
     outline: {
@@ -67,7 +67,25 @@ export default defineConfig({
     },
 
     search: {
-      provider: 'local'
+      provider: 'local',
+      options: {
+        translations: {
+          button: {
+            buttonText: '搜索',
+            buttonAriaLabel: '搜索'
+          },
+          modal: {
+            noResultsText: '找不到该结果：',
+            resetButtonTitle: '清除查询',
+            footer: {
+              navigateText: '切换',
+              closeText: '关闭',
+              selectText: '选择'
+            },
+            displayDetails: '显示列表详情'
+          }
+        }
+      }
     }
   },
 

@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { date, Dater } from '@cat-kit/fe'
+import { date, type Dater } from '@cat-kit/fe'
 
 const pluginMatcher = (dater: typeof Dater) => {
   dater.setMatcher('w+', (date: Date, len: number) => {

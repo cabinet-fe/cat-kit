@@ -1,6 +1,7 @@
 {
   "name": "@cat-kit/common",
   "private": true,
+  "type": "module",
   "version": "3.4.13",
   "description": "前后端开发一体包通用分包",
   "main": "index.ts",

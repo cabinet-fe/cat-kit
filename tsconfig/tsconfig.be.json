@@ -1,0 +1,15 @@
+{
+  "extends": "ts-conf-base/tsconfig.node.json",
+  "compilerOptions": {
+    "composite": true,
+    "types": ["vitest/globals"],
+    "rootDir": ".."
+  },
+  "include": [
+    "../packages/be/**/*.ts",
+    "../packages/common/**/*.ts",
+    "../packages/be/*.ts",
+    "../packages/common/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
