@@ -21,18 +21,18 @@
   },
   "exports": {
     "./fe": {
-      "import": "./fe/es/index.js",
-      "require": "./fe/cjs/index.js",
+      "import": "./es/fe/index.js",
+      "require": "./cjs/fe/index.js",
       "types": "./fe/index.d.ts"
     },
     "./be": {
-      "import": "./be/es/index.js",
-      "require": "./be/cjs/index.js",
+      "import": "./es/be/index.js",
+      "require": "./cjs/be/index.js",
       "types": "./be/index.d.ts"
     },
     "./canvas": {
-      "import": "./canvas/es/index.js",
-      "require": "./canvas/cjs/index.js",
+      "import": "./es/canvas/index.js",
+      "require": "./cjs/canvas/index.js",
       "types": "./canvas/index.d.ts"
     }
   },

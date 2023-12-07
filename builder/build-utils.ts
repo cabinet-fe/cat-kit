@@ -6,7 +6,7 @@ import {
   type InputPluginOption
 } from 'rollup'
 import esbuild from 'rollup-plugin-esbuild'
-import { FE_INPUT, BE_INPUT, OUTPUT } from './constants'
+import { OUTPUT, PKG_DIR_NAME } from './constants'
 import dts from 'rollup-plugin-dts'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
@@ -66,50 +66,51 @@ function roll() {
     nodeResolve(),
     commonjs()
   ]
-  console.log(path.resolve(__dirname, '../packages/fe/**/*.ts'))
-  console.log(Object.fromEntries(
-    glob.sync(path.resolve(__dirname, '../packages/fe/**/*.ts'), {
-      ignore: ['*.spec.ts', 'node_modules/**']
-    }).map(file => [
-      // 这里将删除 `src/` 以及每个文件的扩展名。
-      // 因此，例如 src/nested/foo.js 会变成 nested/foo
-      path.relative(
-        'src',
-        file.slice(0, file.length - path.extname(file).length)
-      ),
-      // 这里可以将相对路径扩展为绝对路径，例如
-      // src/nested/foo 会变成 /project/src/nested/foo.js
-      fileURLToPath(new URL(file, import.meta.url))
-    ])
-  ))
 
+  // packages下所有的ts文件，并忽略测试和node_modules中的文件
+  const files = glob.sync('packages/**/*.ts', {
+    ignore: ['**/*.spec.ts', '**/node_modules', 'packages/common']
+  })
+
+  const pkgRE = new RegExp('^' + PKG_DIR_NAME)
+  const extRE = /\.[A-z\d]+$/
   return [
     rollup({
+      // 当input是一个对象时，会将key作为输出目录,value作为输入文件
+      // key不应该是个绝对路径
       input: Object.fromEntries(
-        glob.sync('../packages/fe/*.ts', {
-          ignore: ['*.spec.ts']
-        }).map(file => [
-          // 这里将删除 `src/` 以及每个文件的扩展名。
-          // 因此，例如 src/nested/foo.js 会变成 nested/foo
-          path.relative(
-            'src',
-            file.slice(0, file.length - path.extname(file).length)
-          ),
-          // 这里可以将相对路径扩展为绝对路径，例如
-          // src/nested/foo 会变成 /project/src/nested/foo.js
-          fileURLToPath(new URL(file, import.meta.url))
-        ])
+        files.map(filePath => {
+          return [
+            // 这里将删除 `所有文件到packages/目录之前的所有路径` 以及每个文件的扩展名。
+            // 因此，例如 packages/fe/**/*.ts 会变成 fe/**/*
+            filePath.replace(pkgRE, '').replace(extRE, ''),
+
+            // 文件的绝对路径
+            fileURLToPath(new URL(path.join('..', filePath), import.meta.url))
+          ]
+        })
       ),
       plugins,
       moduleContext: id =>
         /node_modules[\/\\]crypto-js/.test(id) ? 'window' : undefined
+    }),
+    rollup({
+      input: Object.fromEntries(
+        files.map(filePath => {
+          return [
+            // 这里将删除 `所有文件到packages/目录之前的所有路径` 以及每个文件的扩展名。
+            // 因此，例如 packages/fe/**/*.ts 会变成 fe/**/*
+            filePath.replace(pkgRE, '').replace(extRE, ''),
+
+            // 文件的绝对路径
+            fileURLToPath(new URL(path.join('..', filePath), import.meta.url))
+          ]
+        })
+      ),
+      plugins: [
+        dts()
+      ]
     })
-    // rollup({
-    //   input: path.resolve(entry, `../${basename}.d.ts`),
-    //   plugins: [
-    //     dts()
-    //   ]
-    // })
   ]
 }
 
@@ -121,9 +122,7 @@ async function build() {
   const outputOptions: OutputOptions[] = formats.map(format => ({
     format,
     dir: path.resolve(OUTPUT, format),
-    sourcemap: true,
-    exports: 'auto',
-    preserveModules: true
+    sourcemap: true
   }))
 
   await Promise.all(

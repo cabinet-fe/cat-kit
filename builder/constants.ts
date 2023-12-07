@@ -1,6 +1,9 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+/** 存放包的目录名 */
+export const PKG_DIR_NAME = 'packages/'
+
 /** 入口文件 */
 export const FE_INPUT = fileURLToPath(
   new URL('../packages/fe/index.ts', import.meta.url)
