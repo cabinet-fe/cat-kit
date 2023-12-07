@@ -111,20 +111,27 @@ function buildJS() {
 }
 
 function buildDTS() {
-  const input = ['fe', 'be', 'canvas'].map(pkg => {
+  const input = ['fe',  'canvas'].map(pkg => {
     return path.resolve(
       fileURLToPath(new URL(`../${PKG_DIR_NAME}/${pkg}`, import.meta.url)),
       'index.ts'
     )
   })
   return rollup({
-    input,
+    input: Object.fromEntries(
+      input.map(file => [
+        file
+          .split(/packages[\\\/]/)[1]!
+          .replace(/\.[A-z\d]+$/, ''),
+        file
+      ])
+    ),
     plugins: [
       dts({
         compilerOptions: {
           moduleResolution: 100
         },
-        respectExternal: true
+        // respectExternal: true
       })
     ]
   })
