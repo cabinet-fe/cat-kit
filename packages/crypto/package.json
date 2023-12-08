@@ -1,0 +1,13 @@
+{
+  "name": "@cat-kit/crypto",
+  "version": "3.4.13",
+  "description": "喵喵工具箱加密分包",
+  "main": "index.ts",
+  "author": "YH FE",
+  "type": "module",
+  "dependencies": {
+    "@cat-kit/fe": "workspace:*",
+    "crypto-js": "4.2.0"
+  },
+  "devDependencies": { "@types/crypto-js": "4.2.1" }
+}

@@ -18,7 +18,7 @@ import type {
 } from './type'
 import path from '@cat-kit/common/path/path'
 
-export * from './type'
+export type * from './type'
 
 export type { HttpResponse } from './helper'
 

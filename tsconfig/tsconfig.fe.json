@@ -9,6 +9,8 @@
   "include": [
     "../packages/fe/**/*.ts",
     "../packages/fe/*.ts",
+    "../packages/crypto/**/*.ts",
+    "../packages/crypto/*.ts",
     "../packages/common/**/*.ts",
     "../packages/common/*.ts",
     "../packages/canvas/**/*.ts",

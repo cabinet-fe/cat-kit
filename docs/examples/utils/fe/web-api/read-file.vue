@@ -12,13 +12,21 @@
       <label>
         <input v-model="readType" type="radio" value="arrayBuffer" /> 缓冲数据
       </label>
+      <label>
+        <input v-model="readType" type="radio" value="binaryString" />
+        二进制字符串
+      </label>
     </div>
 
-    <div>当前文件类型: {{ fileType  }}</div>
+    <div>当前文件类型: {{ fileType }}</div>
 
     <!-- 读取文本 -->
     <div style="word-break: break-all" v-if="readType === 'text'">
-      <input type="file" accept="text/*, image/svg+xml" @change="handleChange" />
+      <input
+        type="file"
+        accept="text/*, image/svg+xml"
+        @change="handleChange"
+      />
 
       <div>{{ content }}</div>
     </div>
@@ -34,17 +42,25 @@
       <input type="file" @change="handleChange" />
 
       <div>
-        总计 {{ bytes.length }}字节, {{ n(bytes.length / 1024).fixed(2) }}KB, {{ n(bytes.length / 1024 / 1024 ).fixed(2) }}MB
-        <br>
+        总计 {{ bytes.length }}字节, {{ n(bytes.length / 1024).fixed(2) }}KB,
+        {{ n(bytes.length / 1024 / 1024).fixed(2) }}MB
+        <br />
         前100个字节: {{ bytes.slice(0, 100) }}...
       </div>
+    </div>
+    <!-- 读取二进制字符串 -->
+    <div style="word-break: break-all" v-else-if="readType === 'binaryString'">
+      <input type="file" @change="handleChange" />
+
+      <div>{{ content?.slice(0, 100) }}...</div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { readFile, type ReadType, n, MD5 } from '@cat-kit/fe'
+import { readFile, type ReadType, n } from '@cat-kit/fe'
 import { computed, shallowRef, watch } from 'vue'
+import { MD5, DES } from '@cat-kit/crypto'
 
 const readType = shallowRef<ReadType>('text')
 
@@ -56,17 +72,22 @@ watch(readType, v => {
   content.value = undefined
 })
 
-MD5('1234').then(res => {
-  console.log(res)
-}).catch(err => {
-  console.log(err)
-})
+const td = new TextEncoder()
 
+// MD5(new Blob([td.encode('1234')]))
+//   .then(res => {
+//     console.log(res)
+//   })
+//   .catch(err => {
+//     console.log(err)
+//   })
+
+console.log(DES.encrypt('1234', 'aaaaaaaabbbbbbbb'))
 
 const handleChange = async (e: Event) => {
   const target = e.target as HTMLInputElement
   const file = target.files![0]
-  if(!file) {
+  if (!file) {
     fileType.value = ''
     content.value = undefined
     return
@@ -76,8 +97,9 @@ const handleChange = async (e: Event) => {
   content.value = result
 }
 
-
 const bytes = computed(() => {
-  return readType.value === 'arrayBuffer' ? new Uint8Array(content.value) : new Uint8Array()
+  return readType.value === 'arrayBuffer'
+    ? new Uint8Array(content.value)
+    : new Uint8Array()
 })
 </script>

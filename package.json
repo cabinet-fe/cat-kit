@@ -23,17 +23,22 @@
     "./fe": {
       "import": "./es/fe/index.js",
       "require": "./cjs/fe/index.js",
-      "types": "./fe/index.d.ts"
+      "types": "./es/fe/index.d.ts"
     },
     "./be": {
       "import": "./es/be/index.js",
       "require": "./cjs/be/index.js",
-      "types": "./be/index.d.ts"
+      "types": "./es/be/index.d.ts"
     },
     "./canvas": {
       "import": "./es/canvas/index.js",
       "require": "./cjs/canvas/index.js",
-      "types": "./canvas/index.d.ts"
+      "types": "./es/canvas/index.d.ts"
+    },
+    "./crypto": {
+      "import": "./es/crypto/index.js",
+      "require": "./cjs/crypto/index.js",
+      "types": "./es/crypto/index.d.ts"
     }
   },
   "types": "fe/index.d.ts",

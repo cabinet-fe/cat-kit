@@ -1,0 +1,13 @@
+{
+  "extends": "ts-conf-base/tsconfig.vue.json",
+  "compilerOptions": {
+    "composite": true,
+    "lib": ["ESNext", "DOM"],
+    "types": ["vite/client"],
+    "target": "ESNext",
+    "jsx": "preserve",
+    "rootDir": ".."
+  },
+  "include": ["../docs/**/*.vue"],
+  "exclude": ["node_modules"]
+}

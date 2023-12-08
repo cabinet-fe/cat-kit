@@ -2,9 +2,9 @@
   "files": [],
   "references": [
     { "path": "./tsconfig/tsconfig.be.json" },
-    { "path": "./tsconfig/tsconfig.fe.json" }
+    { "path": "./tsconfig/tsconfig.fe.json" },
+    { "path": "./tsconfig/tsconfig.vue.json" },
+    { "path": "./tsconfig/tsconfig.doc.json" }
   ],
-  "include": [
-    "./*.ts"
-  ]
+  "include": ["./*.ts"]
 }
