@@ -60,7 +60,6 @@
 <script lang="ts" setup>
 import { readFile, type ReadType, n } from '@cat-kit/fe'
 import { computed, shallowRef, watch } from 'vue'
-import { MD5, DES } from '@cat-kit/crypto'
 
 const readType = shallowRef<ReadType>('text')
 
@@ -71,18 +70,6 @@ const fileType = shallowRef('')
 watch(readType, v => {
   content.value = undefined
 })
-
-const td = new TextEncoder()
-
-// MD5(new Blob([td.encode('1234')]))
-//   .then(res => {
-//     console.log(res)
-//   })
-//   .catch(err => {
-//     console.log(err)
-//   })
-
-console.log(DES.encrypt('1234', 'aaaaaaaabbbbbbbb'))
 
 const handleChange = async (e: Event) => {
   const target = e.target as HTMLInputElement

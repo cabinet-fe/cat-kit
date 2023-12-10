@@ -42,6 +42,16 @@ const sidebar: DefaultTheme.Sidebar = {
         { text: '编解码', link: '/utils/common/codec' },
         { text: '优化', link: '/utils/common/optimize' }
       ]
+    },
+    {
+      text: '加密工具',
+      items: [
+        { text: '概要', link: '/utils/crypto/' },
+        { text: '哈希函数', link: '/utils/crypto/hash' },
+        { text: '对称加密', link: '/utils/crypto/symmetric' },
+        { text: '非对称加密', link: '/utils/crypto/asymmetric' },
+        { text: '加密性能', link: '/utils/crypto/performance' }
+      ]
     }
   ],
 
@@ -113,6 +123,13 @@ const sidebar: DefaultTheme.Sidebar = {
       ]
     },
 
+    {
+      text: '实用密码学',
+      items: [
+        { text: '概要', link: '/shared/crypto/' },
+        { text: '加密算法', link: '/shared/crypto/algo' }
+      ]
+    },
     {
       text: 'Typescript',
       items: [

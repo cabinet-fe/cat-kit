@@ -2,9 +2,17 @@ import CryptoJS from 'crypto-js/core'
 
 import _ from 'crypto-js/tripledes'
 
-function encrypt(message: string, key: string) {
-  return CryptoJS.DES.encrypt(message, key, {
 
+console.log(CryptoJS)
+
+interface DESConfig {
+  /** 算法模式 */
+  mode: ''
+}
+
+function encrypt(message: string, key: string, cfg?: DESConfig) {
+  return CryptoJS.DES.encrypt(message, key, {
+    // mode:
   }).toString()
 }
 

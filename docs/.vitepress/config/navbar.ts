@@ -27,6 +27,10 @@ const navbar: DefaultTheme.NavItem[] = [
         link: '/shared/db/'
       },
       {
+        text: '加密',
+        link: '/shared/crypto/'
+      },
+      {
         text: 'Typescript',
         link: '/shared/typescript/'
       },
