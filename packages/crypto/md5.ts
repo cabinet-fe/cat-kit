@@ -1,4 +1,4 @@
-import  CryptoJS from 'crypto-js/core'
+import CryptoJS from 'crypto-js/core'
 import _ from 'crypto-js/md5'
 import { readFile } from '@cat-kit/fe'
 import { arrBufToWordArray } from './word-array'
@@ -19,7 +19,7 @@ async function fileMD5(file: Blob, cfg?: MD5Config) {
   const { chunkSize = 10485760 } = cfg || {}
 
   // 创建MD5哈希算法实例
-  console.log(CryptoJS.algo)
+
   const md5 = CryptoJS.algo.MD5.create()
 
   let i = 0
