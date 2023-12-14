@@ -19,6 +19,7 @@ function compressImageSource(img: HTMLImageElement, type: string, quality: numbe
     const ctx = canvas.getContext('2d')!
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
     canvas.toBlob(blob => (blob ? rs(blob) : rj('压缩失败')), type)
+
   })
 }
 

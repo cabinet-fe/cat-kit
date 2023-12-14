@@ -50,7 +50,7 @@ export const clipboard = {
     const { clipboard } = navigator
 
     if (!clipboard) {
-      if (typeof data === 'string') {
+      if (!(data instanceof Blob)) {
         let el: HTMLTextAreaElement = document.createElement('textarea')
         el.value = JSON.stringify(data)
 

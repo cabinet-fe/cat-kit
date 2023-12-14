@@ -1,6 +1,7 @@
 # 数据操作
 
 ## 快速使用
+
 ::: demo
 render(utils/common/data/quick)
 :::
@@ -24,7 +25,6 @@ render(utils/common/data/empty)
 ::: demo
 render(utils/common/data/get-chain-value)
 :::
-
 
 ### oneOf
 
@@ -82,7 +82,6 @@ if (equal(a, b)) {
 render(utils/common/data/deep-copy)
 :::
 
-
 ### merge
 
 合并对象.
@@ -98,7 +97,7 @@ render(utils/common/data/deep-copy)
 render(utils/common/data/merge)
 :::
 
-### serialize & deserialize  对象序列化 & 反序列化为对象
+### serialize & deserialize 对象序列化 & 反序列化为对象
 
 对象序列化: 将对象转化为可传输的字符串
 
@@ -248,28 +247,49 @@ n(3).each(v => {
 
 ## 字符串操作
 
-### kebabCase 大小驼峰转 kebab-case
+### kebabCase 大小驼峰转kebab-case
 
 ```ts
-import { kebabCase } from 'cat-kit'
+import { str } from 'cat-kit/fe'
+// import { str } from 'cat-kit/be' node.js
 
-kebabCase('aaBbCc')
+str('aaBbCc').kebabCase()
 // 返回aa-bb-cc
-kebabCase('AaBbCc')
+str('AaBbCc').kebabCase()
 // 返回aa-bb-cc
 ```
 
-### camelCase kebab-case 转大小驼峰
+### camelCase kebab-case转大小驼峰
 
 ```ts
-import { camelCase } from 'cat-kit'
+import { str } from 'cat-kit/fe'
+// import { str } from 'cat-kit/be' node.js
 
-camelCase('aa-bb-cc')
+str('aa-bb-cc').camelCase()
 // 返回aaBbCc
-camelCase('aa-bb-cc', 'lower')
+str('aa-bb-cc').camelCase('lower')
 // 返回aaBbCc
-camelCase('aa-bb-cc', 'upper')
+str('aa-bb-cc').camelCase('upper')
 // 返回AaBbCc
+```
+
+### joinPath路径拼接
+
+路径通常用于路由, url之类的拼接, 解析
+
+joinPath 方法用于拼接各个路径片段, 拼接成一个以 '/' 开头的路径字符串.
+
+```ts
+import { str } from 'cat-kit/fe'
+
+const url = str.joinPath('a', 'b', 'c')
+// return '/a/b/c'
+
+const url = str.joinPath('/a', '/b', '/c')
+// return '/a/b/c'
+
+const url = str.joinPath('/a', 'b', '/c')
+// return '/a/b/c'
 ```
 
 ## 静态资源
