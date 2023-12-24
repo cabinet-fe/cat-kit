@@ -148,7 +148,10 @@ const sidebar: DefaultTheme.Sidebar = {
     },
     {
       text: '其他',
-      items: [{ text: '概要', link: '/shared/others/' }]
+      items: [
+        { text: '概要', link: '/shared/others/' },
+        { text: '职级评定指南', link: '/shared/others/position' }
+      ]
     }
   ]
 }
