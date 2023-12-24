@@ -40,6 +40,8 @@ fn main() {
 
 ## 职级评定 Level
 
+
+
 ### 初级前端工程师 L1
 
 仅能完成简单模块和项目的开发工作，难以胜任复杂模块的开发。通常是入行不久， 1 年及以下工作经验。
@@ -109,3 +111,157 @@ fn main() {
 6. 掌握更加高级的数据结构和算法, 能够利用这些算法解决各种问题。
 7. 具备前端安全的知识和实践，能够识别和防止常见的前端安全漏洞，保护用户数据和应用的安全性。
 8. 具备一定的技术领导能力，能够指导和指导团队中的其他成员，分享最佳实践和贡献对技术决策的见解。
+
+## 前端内容体系
+
+- CSS
+  - 框架。 tailwind, unocss, animate
+  - BEM
+  - Houdini
+
+- Canvas/SVG
+  - leafer-ui
+  - fabric.js
+- WebGl
+  - three.js
+  - pixijs
+- WebRTC
+- 数据可视化
+  - echarts
+  - D3
+  - zrender
+- 前端框架
+- Web Components
+- 实用密码学
+  - crypto-js
+- 移动端开发
+  - 小程序
+  - h5
+  - native
+- 桌面端开发
+- 地图
+  - Leaflet
+  - deck.gl
+  - OpenLayers
+- 流程图
+  - Flowy
+  - GoJS
+  - flowchart.js
+  - BPMN
+
+## 前端内容体系扩展
+- 数据库
+  - sequelize
+  - prisma
+  - typeorm
+- 自动化 & 机器人流程自动化 - RPA
+  - puppeteer
+  - wechaty
+
+- 云函数开发
+
+- E2E端到端测试
+  - cypress
+
+- 单元测试
+  - vitest
+
+- 办公
+  - excel
+    - sheetjs
+    - luckysheet
+    - xlsx-populate
+
+  - word
+    - officegen
+    - Mammoth
+    - docx
+  - PDF
+    - PDF.js
+
+- 解压缩
+  - jszip
+  - pako
+  - adm-zip
+
+- 构建编译工具
+  - vite
+  - swc
+  - esbuild
+  - rollup
+  - tspack
+  - turbo repo
+
+- 代理
+  - http-proxy
+  - http-proxy-middleware
+
+- 限流
+  - rate-limiter-flexible
+
+- 序列化
+  - protobuf
+
+- RPC
+  - grpc-js
+  - thrift
+
+- 爬虫
+  - node-crawler
+  - x-ray
+  - headless-chrome-crawler
+  - node-osmosis
+
+- AST抽象语法树
+  - babel-parser
+  - acorn
+  - antlr
+  - esprima
+
+  - JS-Interpreter
+  - jsjs
+  - sval
+
+- 硬件
+  - johnny-five
+  - serialport
+  - usb
+  - i2c-bus
+  - gps
+  - node-bluetooth
+  - spi-device
+
+- 机器学习和神经网络
+  - tfjs
+
+- 自然语言处理
+  - compromise
+  - natural
+
+- GPT
+  - chatgpt
+  - @waylaidwanderer/chatgpt-api
+  - open-ai
+  - gemini-pro
+
+- OCR
+  - paddle-ocr
+  - easy-ocr
+
+## 前路漫漫
+
+如何应对前路的挑战？
+
+1. 持续学习
+2. 实践出真知
+3. 寻求反馈
+4. 拓宽技能边界
+5. 积极拥抱变化
+
+## 2024到了
+
+潜龙在渊 龙战于野
+
+龙吟虎啸 龙行虎步
+
+龙争虎斗 龙腾虎跃！
