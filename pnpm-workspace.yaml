@@ -1,4 +1,5 @@
-- docs
-- builder
-- cmd
-- packages/*
+packages:
+  - docs
+  - builder
+  - cmd
+  - packages/*
