@@ -48,7 +48,6 @@ export class WebDB {
     this.#init()
   }
 
-
   /**
    * 定义一个对象库
    * @param name
@@ -143,24 +142,5 @@ class WebDBStore<
 
   read() {}
 
-  count() {
-
-  }
+  count() {}
 }
-
-const db = new WebDB('aa')
-
-const users = db.defineStore('users', {
-  id: {
-    autoIncrement: true,
-    primary: true,
-    example: 2,
-    // required: true
-  }
-})
-
-users.create({
-  id: undefined
-})
-
-
