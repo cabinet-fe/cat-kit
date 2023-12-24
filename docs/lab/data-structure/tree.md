@@ -247,4 +247,34 @@ class AVLTree<T> {
 
 ## trie 前缀树
 
-前缀树最常用的情景在于服务端url的命中,
+前缀树最常用的情景在于服务端url的命中算法中。
+
+```ts
+// 比较以下以下几个url
+const url1 = '/a/b/c'
+const url2 = '/a/c'
+const url3 = '/a/d'
+const url4 = '/a/e'
+const url5 = '/b/c'
+
+// 假设要匹配URL4，最坏的情况下要匹配4次
+
+// 改一下数据结构
+const urlTrie = {
+  a: {
+    b: {
+      c: null
+    },
+    c: null,
+    d: null,
+    e: null
+  },
+  b: {
+    c: null
+  }
+}
+
+// 当我们要命中/a/e时只需要把 /a/e用/切割成['a', 'e']两个部分再去urlTrie中去查找当碰到null时则代表命中
+// 测试仅需要两次访问即可命中
+// 当路由越多，这种优势越明显
+```
