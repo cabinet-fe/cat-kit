@@ -10,12 +10,12 @@
     "@cat-kit/canvas": "workspace:*",
     "@cat-kit/crypto": "workspace:*",
     "sass": "^1.69.5",
-    "markdown-it-container": "^3.0.0",
+    "markdown-it-container": "^4.0.0",
     "@types/markdown-it-container": "^2.0.9",
-    "markdown-it": "^13.0.2",
-    "shiki": "^0.14.5",
-    "fastify": "^4.19.1",
+    "markdown-it": "^14.0.0",
+    "shiki": "^0.14.7",
+    "fastify": "^4.25.2",
     "@vitejs/plugin-vue-jsx": "^3.1.0",
-    "jsoneditor": "^9.10.4"
+    "jsoneditor": "^10.0.0"
   }
 }
