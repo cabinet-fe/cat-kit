@@ -3,8 +3,8 @@ import { isObj } from './data-type'
 type Last<T> = T extends [...any, infer L]
   ? L
   : T extends (infer P)[]
-  ? P
-  : undefined
+    ? P
+    : undefined
 
 /**
  * 获取数组最后一位
@@ -97,12 +97,18 @@ class Arr<T> {
     this._source = arr
   }
 
-  eachRight(cb: (v: T, i: number, arr: T[]) => void) {
+  eachRight(cb: (v: T, i: number, arr: T[]) => void): void {
     eachRight(this._source, cb)
   }
 
-  omit(index: number | number[]) {
+  omit(index: number | number[]): T[] {
     return omitArr(this._source, index)
+  }
+
+  find(condition: Record<string, any>): T | undefined {
+    return this._source.find(item =>
+      Object.keys(condition).every(key => item[key] === condition[key])
+    )
   }
 }
 
