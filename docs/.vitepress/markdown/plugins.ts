@@ -3,7 +3,7 @@ import type { RenderRule } from 'markdown-it/lib/renderer'
 import type Token from 'markdown-it/lib/token'
 import path from 'path'
 import fs from 'fs'
-import shiki from 'shiki'
+import { getHighlighter,  } from 'shikiji'
 import MarkdownIt from 'markdown-it'
 // import { readFileLine } from '../config/readline'
 
@@ -26,9 +26,9 @@ const getPath = (tokens: Token[], idx: number, info: 'demo') => {
  * @returns
  */
 export async function demoContainer(md: MarkdownIt) {
-  const highlighter = await shiki.getHighlighter({
-    theme: 'one-dark-pro',
-    langs: ['vue', 'typescript', 'javascript', 'html']
+  const highlighter = await getHighlighter({
+    langs: ['vue', 'typescript', 'javascript', 'html'],
+    themes: ['github-light', 'github-dark']
   })
 
   const render: RenderRule = (tokens, idx) => {
@@ -54,7 +54,11 @@ export async function demoContainer(md: MarkdownIt) {
         const source = fs.readFileSync(sourceAbsolutePath, 'utf-8')
 
         const highlightSourceCode = highlighter.codeToHtml(source, {
-          lang: 'vue'
+          lang: 'vue',
+          themes: {
+            light: 'github-light',
+            dark: 'github-dark'
+          }
         })
 
         const lines = highlightSourceCode
@@ -64,14 +68,15 @@ export async function demoContainer(md: MarkdownIt) {
           )
           .split('\n')
 
-        const lineNumberCode = `<div class="line-numbers">${Array.from(
-          { length: lines.length }
-        )
+        const lineNumberCode = `<div class="line-numbers">${Array.from({
+          length: lines.length
+        })
           .map((_, index) => {
             return `<span class="line-number">${index + 1}</span>`
           })
           .join('')}</div>`
 
+          // demos在
         return `
         <v-demo :demos="demos" source="${encodeURIComponent(
           lineNumberCode + highlightSourceCode

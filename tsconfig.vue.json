@@ -6,8 +6,7 @@
     "types": ["vite/client"],
     "target": "ESNext",
     "jsx": "preserve",
-    "rootDir": ".."
   },
-  "include": ["../docs/**/*.vue"],
+  "include": ["./docs/**/*.vue"],
   "exclude": ["node_modules"]
 }

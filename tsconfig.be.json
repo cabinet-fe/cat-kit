@@ -3,14 +3,13 @@
   "compilerOptions": {
     "composite": true,
     "types": ["vitest/globals"],
-    "rootDir": "..",
     "declaration": true
   },
   "include": [
-    "../packages/be/**/*.ts",
-    "../packages/common/**/*.ts",
-    "../packages/be/*.ts",
-    "../packages/common/*.ts"
+    "./packages/be/**/*.ts",
+    "./packages/common/**/*.ts",
+    "./packages/be/*.ts",
+    "./packages/common/*.ts"
   ],
   "exclude": ["node_modules"]
 }

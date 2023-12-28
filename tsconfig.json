@@ -1,10 +1,10 @@
 {
   "files": [],
   "references": [
-    { "path": "./tsconfig/tsconfig.be.json" },
-    { "path": "./tsconfig/tsconfig.fe.json" },
-    { "path": "./tsconfig/tsconfig.vue.json" },
-    { "path": "./tsconfig/tsconfig.doc.json" }
+    { "path": "./tsconfig.be.json" },
+    { "path": "./tsconfig.fe.json" },
+    { "path": "./tsconfig.vue.json" },
+    { "path": "./tsconfig.doc.json" }
   ],
   "include": ["./*.ts"]
 }

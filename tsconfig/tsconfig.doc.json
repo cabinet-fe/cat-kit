@@ -1,9 +1,0 @@
-{
-  "extends": "ts-conf-base/tsconfig.node.json",
-  "compilerOptions": {
-    "composite": true,
-    "target": "ESNext",
-    "rootDir": "../docs"
-  },
-  "include": ["./**/*.ts", "./.vitepress/**/*.ts", "./package.json"]
-}

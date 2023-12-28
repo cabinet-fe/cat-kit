@@ -1,18 +1,4 @@
 <template>
-  <!-- <ul class="menus">
-    <li
-      class="menu-item"
-      :class="{
-        'menu-item--active': visibleType === key
-      }"
-      v-for="(menu, key) of menus"
-      :key="key"
-      @click="handleClick(key)"
-    >
-      {{ menu }}
-    </li>
-  </ul> -->
-
   <!-- 显示示例 -->
   <ClientOnly>
     <div class="demo-box">
@@ -25,36 +11,26 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, shallowRef } from 'vue'
+import { PropType, computed, shallowRef } from 'vue'
 
 const props = defineProps({
+  /** demo列表 */
   demos: {
-    type: Object,
+    type: Object as PropType<Record<string, any>>,
     required: true
   },
 
+  /** 当前指定的渲染路径 */
   path: {
     type: String,
     required: true
   },
 
+  /** 源代码 */
   source: {
     type: String
   }
 })
-
-const menus = {
-  example: '示例',
-  code: '查看代码'
-}
-
-// type VisibleType = keyof typeof menus
-
-// const visibleType = shallowRef<VisibleType>('example')
-
-// const handleClick = (type: VisibleType) => {
-//   visibleType.value = type
-// }
 
 const decodedCode = computed(() => {
   return decodeURIComponent(props.source || '')
@@ -63,11 +39,14 @@ const decodedCode = computed(() => {
 const _demos = computed(() => {
   const { demos } = props
   if (!demos) return {}
-  return Object.keys(demos).reduce((acc, cur) => {
-    const key = cur.match(/examples\/(.+)\.vue$/)?.[1] || 'default'
-    acc[key] = demos[cur].default
-    return acc
-  }, {} as any)
+  return Object.keys(demos).reduce(
+    (acc, cur) => {
+      const key = cur.match(/examples\/(.+)\.vue$/)?.[1] || 'default'
+      acc[key] = demos[cur].default
+      return acc
+    },
+    {} as Record<string, any>
+  )
 })
 </script>
 
@@ -117,14 +96,14 @@ export default {
   margin: 16px 0;
   position: relative;
   padding-left: 32px;
-  background-color: #282c34;
+  background-color: var(--vp-code-block-bg);
 }
 
 .source-container :deep(.line-numbers) {
   position: absolute;
   top: 0;
   left: 0;
-  color: #ccc;
+  color: var(--vp-code-line-number-color);
   font-size: 14px;
   width: 32px;
   font-family: var(--vp-font-family-mono);
@@ -144,6 +123,7 @@ export default {
   overflow-x: auto;
   margin: 0;
   padding: 12px 12px;
+  background-color: transparent!important;
 }
 
 .source-container :deep(code) {
