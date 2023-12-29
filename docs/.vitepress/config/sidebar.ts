@@ -151,7 +151,8 @@ const sidebar: DefaultTheme.Sidebar = {
       text: '其他',
       items: [
         { text: '概要', link: '/shared/others/' },
-        { text: '前端生存指南', link: '/shared/others/position' }
+        { text: '前端生存指南', link: '/shared/others/position' },
+        { text: '前端详设', link: '/shared/others/fe-design' },
       ]
     }
   ]
