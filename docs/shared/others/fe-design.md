@@ -804,7 +804,6 @@ const importerRef = shallowRef()
 #### 2.7.3 API设计
 
 ```ts
-
 interface ImportOptions {
   /** 导入接口 */
   importApi: string
@@ -817,134 +816,247 @@ interface ImportOptions {
 /** 方法  */
 defineExpose({
   /** 打开导入弹框 */
-  open(options: ImportOptions){}
+  open(options: ImportOptions) {}
 })
 ```
 
 ### 2.8 Exporter 导出组件
+
 导出组件用于导出业务数据为excel，csv等文件。
 
 #### 2.8.1 使用示例
+
 ```vue
 <template>
-
+  <Exporter ref="exporterRef" />
 </template>
 
 <script lang="ts" setup>
-
+const exporterRef = shallowRef()
 </script>
 ```
+
 #### 2.8.2 功能列表
 
-#### 2.8.3 API设计
-```ts
+1. 支持指定导出文件的名称。
+2. 支持选择导出的列。
+3. 支持选择数据导出。
+4. 支持配置导出接口
+5. 支持配置查询参数导出。
 
+#### 2.8.3 API设计
+
+```ts
+/** 导出选项 */
+type ExportOptions = {
+  /** 导出的列配置 */
+  columns?: (ProTableColumn & { preset?: string })[]
+  /** 导出数据 */
+  data?: any[]
+  /** 导出总数 */
+  total?: number
+  /** 导出接口 */
+  exportApi?: string
+  /** 查询条件 */
+  query?: Record<string, any>
+  /** 导出的文件的名称 */
+  nameOfExportedFile?: string
+}
+/** 方法 */
+defineExpose({
+  open(options: ExportOptions) {}
+})
 ```
+
 ### 2.9 Invoice 发票组件
 
+发票组件用于统一控制各种发票的识别和上传入库。
+
+发票组件底层基于附件上传组件，也一样支持秒传和发票预览。
+
 #### 2.9.1 使用示例
+
 ```vue
 <template>
-
+  <Invoice ref="invoiceRef" business-id="xxx" :editable="false" />
 </template>
 
 <script lang="ts" setup>
-
+const invoiceRef = shallowRef()
 </script>
 ```
+
 #### 2.9.2 功能列表
 
-#### 2.9.3 API设计
-```ts
+1. 支持发票上传和识别。
+2. 支持使用自定义识别模型。
+3. 支持发票的类型指定。
+4. 支持识别失败后自定义填写发票数据。
+5. 支持发票预览。
+6. 支持本地上传识别和扫码上传识别。
+7. 支持发票金额合计。
 
+#### 2.9.3 API设计
+
+```ts
+/** 属性 */
+const InvoiceProps = {
+  /** 发票关联的业务id */
+  businessId: {
+    type: String
+  },
+  /** 是否可编辑 */
+  editable: {
+    type: Boolean,
+    default: true
+  },
+  /** 控制发票接收的文件上传类型 */
+  accept: {
+    type: Array,
+    default: () => []
+  }
+}
+
+/** 方法 */
+defineExpose({
+  /** 获取发票数据 */
+  getInvoiceData() {}
+})
 ```
+
 ### 2.10 ProcessViewer 流程查看组件
 
+流程查看组件用于审批过程中查看审批进度和审批记录。
+
 #### 2.10.1 使用示例
+
 ```vue
 <template>
-
+  <ProcessViewer ref="processRef" />
 </template>
 
 <script lang="ts" setup>
-
+const processRef = shallowRef()
 </script>
 ```
+
 #### 2.10.2 功能列表
 
-#### 2.10.3 API设计
-```ts
+1. 支持展示流程图的所有节点。
+2. 支持展现流程图当前的进度并提供动画交互效果。
+3. 支持配置网格背景效果。
+4. 支持缩放操作。
 
+#### 2.10.3 API设计
+
+```ts
+/** 属性 */
+const ProcessViewerProps = {
+  /** 流程图渲染文件 */
+  xml: {
+    type: String,
+    required: true
+  },
+
+  /** 渲染前钩子 */
+  beforeDraw: {
+    type: Function
+  },
+
+  /** 是否显示网格 */
+  showGrid: {
+    type: Boolean,
+    default: false
+  }
+}
+
+/** 方法 */
+defineExpose({
+  /** 侦听事件 */
+  on() {},
+  /** 移除事件 */
+  off() {},
+  /** 缩放 */
+  zoom() {},
+  /** 绘制 */
+  draw() {},
+  /** 清空 */
+  clear() {}
+})
 ```
+
 ### 2.11 ReviewTag 审批状态标签组件
+审批状态标签用于展示不同状态的样式。
 
 #### 2.11.1 使用示例
+
 ```vue
 <template>
-
+  <ReviewTag status="checked" />
 </template>
 
-<script lang="ts" setup>
-
-</script>
+<script lang="ts" setup></script>
 ```
+
 #### 2.11.2 功能列表
+1. 支持根据不同的状态显示不同的样式效果
 
 #### 2.11.3 API设计
+
 ```ts
 
 ```
+
 ### 2.12 Printer 打印组件
 
 #### 2.12.1 使用示例
+
 ```vue
-<template>
+<template></template>
 
-</template>
-
-<script lang="ts" setup>
-
-</script>
+<script lang="ts" setup></script>
 ```
+
 #### 2.12.2 功能列表
 
 #### 2.12.3 API设计
+
 ```ts
 
 ```
+
 ### 2.13 BusinessPage 业务分页组件
 
 #### 2.13.1 使用示例
+
 ```vue
-<template>
+<template></template>
 
-</template>
-
-<script lang="ts" setup>
-
-</script>
+<script lang="ts" setup></script>
 ```
+
 #### 2.13.2 功能列表
 
 #### 2.13.3 API设计
+
 ```ts
 
 ```
+
 ### 2.14 BusinessForm 业务表单组件
 
 #### 2.14.1 使用示例
+
 ```vue
-<template>
+<template></template>
 
-</template>
-
-<script lang="ts" setup>
-
-</script>
+<script lang="ts" setup></script>
 ```
+
 #### 2.14.2 功能列表
 
 #### 2.14.3 API设计
+
 ```ts
 
 ```
