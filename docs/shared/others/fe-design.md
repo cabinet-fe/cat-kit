@@ -1,6 +1,6 @@
 # 前端详细设计
 
-## 1 技术选型和架构
+## 1. 技术选型和架构
 
 ### 1.1 通信方式
 
@@ -19,6 +19,7 @@
 - swiper：用于展示轮播图。
 - nanoid: 用于生成唯一标识。
 - vite: 用于开发和打包代码的开发工具。
+- Vant: 移动端开发组件库
 
 ### 1.3 代码结构
 
@@ -175,7 +176,21 @@ export const routes = [
 <template></template>
 ```
 
-## 2 组件设计
+### 1.7 移动端
+
+PC端和移动端双端分两个独立的项目进行开发，但采用一致的路径，方便在政务微信中跳转。
+
+移动端的免登通过单点登录方式实现。
+
+![alt](./fe-design-assets/dan-dian.png)
+
+### 1.8 版本控制
+
+使用git作为版本控制工具（Git是目前世界上最先进的分布式版本控制系统，没有之一）。
+
+采用双分支开发模式，dev分支用于开发并随时构建， 测试通过后将会被合并到main分支。
+
+## 2. 组件
 
 业务组件是复杂项目的基石，考虑到实际需求，我们将会实现一些通用的业务组件。
 
@@ -986,6 +1001,7 @@ defineExpose({
 ```
 
 ### 2.11 ReviewTag 审批状态标签组件
+
 审批状态标签用于展示不同状态的样式。
 
 #### 2.11.1 使用示例
@@ -999,64 +1015,509 @@ defineExpose({
 ```
 
 #### 2.11.2 功能列表
+
 1. 支持根据不同的状态显示不同的样式效果
 
 #### 2.11.3 API设计
 
 ```ts
-
+const ReviewTagProps = {
+  /** 状态 */
+  status: {
+    type: String,
+    default: 'unknown'
+  }
+}
 ```
 
 ### 2.12 Printer 打印组件
 
+打印组件用于打印一条或多条数据。并支持输出对应的文件格式内容。
+
 #### 2.12.1 使用示例
 
 ```vue
-<template></template>
+<template>
+  <Printer ref="printerRef" @print="" />
+</template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+const printerRef = shallowRef()
+</script>
 ```
 
 #### 2.12.2 功能列表
 
+1. 支持配置打印列表。
+2. 支持打印参数自定义。
+3. 支持多种打印模板配置。
+
 #### 2.12.3 API设计
 
 ```ts
+type PrintItem = {
+  /** 打印名称 */
+  name: string
+  /** 打印路径 */
+  printPath: string
+}
 
+interface Options {
+  /** 打印列表, 打印时可能有多种打印方式 */
+  printList: PrintItem[]
+}
+
+/** 方法 */
+defineExpose({
+  open(options: Options) {}
+})
 ```
 
 ### 2.13 BusinessPage 业务分页组件
 
+业务分页组件是整个系统最核心，封装度最高的组件之一。
+底层基于已经集成后的表格组件ProTable,是抽象所有业务分页页面后的统一封装的组件。
+
 #### 2.13.1 使用示例
 
 ```vue
-<template></template>
+<template>
+  <BusinessPage code="code">
+    <!-- 定义工具 -->
+    <template #tools></template>
+
+    <!-- 定义每一行的操作按钮 -->
+    <template #action="{ row }"></template>
+  </BusinessPage>
+</template>
 
 <script lang="ts" setup></script>
 ```
 
 #### 2.13.2 功能列表
 
+1. 支持传入模块标识来获取页面的列配置信息（列的名称，对齐，宽度，顺序等）。
+2. 支持配置分页的接口地址来获得不同的数据。
+3. 支持配置操作栏最大按钮数量。
+4. 支持配置表尾合计行。
+5. 支持配置显示序号。
+6. 支持配置是否可以多选或单选。
+7. 支持配置分页的查询条件。
+
 #### 2.13.3 API设计
 
 ```ts
+/** 属性 */
+const BusinessPageProps = {
+  /** 模块标识 */
+  code: {
+    type: String,
+    required: true
+  },
 
+  /** 自定义列渲染 */
+  columnsRender: {
+    type: Object as PropType<
+      Record<string, (ctx: { val: any; index: number; row: any }) => any>
+    >
+  },
+
+  /**
+   * 自定义分页配置，优先级大于模块标识中的配置。
+   */
+  pageConfig: {
+    type: Object as PropType<ShallowReactive<PageConfig>>
+  },
+
+  /** 查询条件配置 */
+  query: {
+    type: Object as PropType<Record<string, any>>
+  }
+}
+
+/** 事件 */
+const BusinessPageEmits = {
+  /** 多选 */
+  check: (checked: any[]) => true,
+  /** 单选 */
+  select: (selected: any) => true,
+  /** 数据加载 */
+  ready: (data: { moduleData; metaData }) => true
+}
+
+/** 方法 */
+defineExpose({
+  /** 获取数据 */
+  fetchData() {}
+})
 ```
 
 ### 2.14 BusinessForm 业务表单组件
 
+业务表单和业务分页组件一样，属于高度封装组件，都是为了加快迭代速度而封装的。
+
 #### 2.14.1 使用示例
 
 ```vue
-<template></template>
+<template>
+  <BusinessForm
+    ref="businessFormRef"
+    code="code-xxx"
+    business-key="xxx"
+    :editable="false"
+  >
+  </BusinessForm>
+</template>
 
 <script lang="ts" setup></script>
 ```
 
 #### 2.14.2 功能列表
 
+1. 支持配置表单项的名称。
+2. 支持配置表单名称宽度。
+3. 支持配置表单项的提示消息配置。
+4. 支持配置表单项是否必填配置。
+5. 支持配置表单项是否显示。
+6. 支持配置选择器的数据选项。
+7. 支持配置日期的格式。
+8. 支持配置表单的附件。
+9. 支持配置文件的渲染。
+
 #### 2.14.3 API设计
 
 ```ts
+interface FormConfig {
+  /** 页面版块列表 */
+  parts: FormPart[]
+  /** 是否显示附件 */
+  showInvoice: boolean
+  /** 附件接受文件类型 */
+  invoiceAccept: string[]
+  /** 显示审批记录 */
+  showAuditRecords: boolean
+  /** 附件 */
+  showAttach: boolean
+  /** label宽度 */
+  labelWidth?: number
+  /** 业务指南 */
+  businessGuide?: string
+}
 
+/** 属性 */
+const BusinessFormProps = {
+  /** 模块标识 */
+  code: {
+    type: String,
+    required: true
+  },
+
+  /** 表单配置项, 只用于配置页面 */
+  formConfig: {
+    type: Object as PropType<FormConfig>
+  },
+
+  /** 业务主健 */
+  businessKey: {
+    type: String
+  },
+
+  /** 字段事件 */
+  fieldsEvent: {
+    type: Object
+  },
+
+  /** 隐藏附件 */
+  hideAttach: {
+    type: Boolean
+  },
+
+  /** 可编辑状态 */
+  editable: {
+    type: Boolean,
+    default: true
+  },
+
+  /** 附件可编辑 */
+  attachEditable: {
+    type: Boolean,
+    default: undefined
+  },
+
+  /** 回显的数据 */
+  data: {
+    type: Object
+  }
+}
 ```
+
+## 3. 页面
+
+### 3.1 登录
+
+#### 路由
+
+/login
+
+#### 功能需求
+
+- 账号密码输入登录系统。
+
+### 3.2 单点登录
+
+#### 路由
+
+/sso-login
+
+#### 功能需求
+
+- 提供无须账号密码进入系统的授权方式。
+
+### 3.2 工作台
+
+#### 路由
+
+/home/workbench
+
+#### 功能需求
+
+- 待办工作。可以在这里查看和查询待办事项和已办事项，提供办事的入口（按钮）， 以及查看每个事项的办理进度。
+- 常用功能。可以在此处配置各种常用的功能模块， 方便快速进入。
+- 工作动态。用来显示一些广播内容和站内消息等。
+
+### 3.4 基础信息-数据字典
+
+#### 路由
+
+/common/basic/dict
+
+#### 功能需求
+
+- 查询数据字典。
+- 添加，修改和删除数据字典。
+- 查询数据字典项。
+- 配置数据字典项。
+- 字典项要求为树形结构。
+- 字典项可以排序，可以在不同的位置插入字典项。
+
+### 3.5 基础信息-编码规则
+
+#### 路由
+
+/common/basic/code-rule
+
+#### 功能需求
+
+- 查询编码规则。
+- 添加，修改和删除编码规则。
+- 编码规则由常量，日期，自增序列自由排列组成。
+
+#### 3.6 基础信息-日志管理
+
+#### 路由
+
+/common/basic/log
+
+#### 功能需求
+
+- 查询数据请求日志。
+- 需要显示请求的IP地址，请求时间，请求的服务端接口，操作人， 操作机器。
+- 日志卸初以便于释放存储空间。
+
+### 3.7 系统管理-角色管理
+
+#### 路由
+
+/common/system/role
+
+#### 功能需求
+
+- 查询角色列表。
+- 添加，修改和删除角色。
+- 给角色授予功能权限和数据权限。
+- 数据权限支持，所有数据，单位级以下， 本级及下级，本人，手动选择5种选项。
+
+### 3.8 系统管理-部门管理
+
+#### 路由
+
+common/system/org/dept
+
+#### 功能需求
+
+- 查询部门数据。
+- 新增和编辑部门数据。
+- 支持设置部门名称，负责人， 分管领导，岗位。
+- 部门列表以树形结构展示。
+
+### 3.9 系统管理-职工子女管理
+
+#### 路由
+
+/common/system/offspring
+
+#### 功能需求
+
+- 查询职工子女数据。
+- 新增，编辑和删除职工子女。
+- 子女可以填写多个，并需要填写每个子女的姓名，性别，出生日期（年月日）。
+
+### 3.10 系统管理-单位管理
+
+#### 路由
+
+/common/system/org
+
+#### 功能需求
+
+- 查询单位数据。
+- 新增和编辑单位数据。
+- 支持设置单位名称，负责人， 分管领导，岗位。
+- 单位列表以树形结构展示。
+
+### 3.10 系统管理-用户管理
+
+#### 路由
+
+/common/system/user
+
+#### 功能需求
+
+- 查询系统用户。
+- 新增，编辑和删除用户。
+- 可以授权其他用户自己的权限。
+- 支持导入用户。
+- 支持填写用户银行卡信息。
+
+### 3.11 系统管理-权限管理
+
+#### 路由
+/common/system/permission
+#### 功能需求
+- 查询系统的菜单和功能权限。
+- 新增，编辑和删除菜单及功能权限。
+### 3.12 报表设计
+
+#### 路由
+
+#### 功能需求
+
+### 3.13 报销管理-通用报销
+
+#### 路由
+
+#### 功能需求
+
+### 3.14 报销管理-保育费报销
+
+#### 路由
+
+#### 功能需求
+
+### 3.15 报销管理-子女医药费报销
+
+#### 路由
+
+#### 功能需求
+
+### 3.16 报销管理-子女医保费报销
+
+#### 路由
+
+#### 功能需求
+
+### 3.17 报销管理-会议费报销
+
+#### 路由
+
+#### 功能需求
+
+### 3.18 报销管理-公务接待费报销
+
+#### 路由
+
+#### 功能需求
+
+### 3.19 报销管理-用款计划单报销
+
+#### 路由
+
+#### 功能需求
+
+### 3.20 报销管理-职工医药费报销
+
+#### 路由
+
+#### 功能需求
+
+### 3.21 报销管理-培训费报销
+
+#### 路由
+
+#### 功能需求
+
+### 3.22 报销管理-市内交通费报销
+
+#### 路由
+
+#### 功能需求
+
+### 3.23 报销管理- 差旅费报销
+
+#### 路由
+
+#### 功能需求
+
+## 4. 界面
+
+### 4.1 颜色
+
+颜色主要有5种：1个主要颜色，4个辅助色。
+
+主要颜色十六进制值：#409eff。
+
+辅助色十六进制值：(成功色: #67C23A), (警告色: #E6A23C), (危险色: #F56C6C), (信息色: #909399)。
+
+其中主要颜色在系统的设置种可以配置。
+
+![color](./fe-design-assets/color.jpg)
+
+### 4.2 字体
+
+字体家族配置如下:
+
+```css
+font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+  'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+```
+
+### 4.3 布局
+
+系统整体布局采用上下和左右两栏式布局，这也是目前比较主流的布局方案之一。
+
+![layout](./fe-design-assets/layout.jpg)
+
+### 4.4 图标
+
+图标采用彩色但简洁的风格。
+
+![icon](./fe-design-assets/icon1.jpg)
+![icon](./fe-design-assets/icon2.jpg)
+
+除此之外，还将提供图标上传功能，先将将上传的图标文件转化为base64格式，然后通过后端接口保存至数据库中。
+
+### 4.5 个性化
+
+点击设置按钮即可进入个性化配置页面。个性化配置提供以下四种配置：
+
+1. 紧凑度配置，有紧凑，标准，松散三种选项，默认为标准。越紧凑显示的内容越多，反之则越少。
+2. 主题色配置，默认主题色为蓝色。
+3.
+
+## 5. 用户交互
+### 5.1 用户操作流程
+### 5.2 表单和输入验证
+### 5.3 错误处理
+### 5.4 通知和提示
+
+

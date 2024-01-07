@@ -41,7 +41,8 @@ export default defineConfig({
 
     outline: {
       label: '当前页面',
-      level: 'deep'
+      level: [2, 3]
+      // level: 'deep'
     },
 
     editLink: {
