@@ -1251,9 +1251,36 @@ const BusinessFormProps = {
 }
 ```
 
-## 3. 页面
+## 3. 全局通用业务设计
 
-### 3.1 登录
+### 3.1 审批
+
+所有的审批分以下状态：
+
+- 待提交（draft）。
+- 待审核（uncheck）。
+- 审核中（checking）。
+- 已通过（checked）。
+- 已退回（reject）。
+- 已作废（invalid）。
+- 未填报（unfilled）。
+
+不同的审批使用不同的色彩展示：
+
+- 待提交: #E6A23C。
+- 已退回: #F56C6C。
+- 已作废: #909399。
+- 待审核: #E6A23C。
+- 审核中: 主要颜色（5.1章节）。
+- 已通过: #67C23A。
+- 未填报: #909399。
+
+### 3.2 加密
+所有需要加密的数据均采用aes-cbc的加密方式。
+
+## 4. 页面
+
+### 4.1 登录
 
 #### 路由
 
@@ -1263,7 +1290,7 @@ const BusinessFormProps = {
 
 - 账号密码输入登录系统。
 
-### 3.2 单点登录
+### 4.2 单点登录
 
 #### 路由
 
@@ -1273,7 +1300,7 @@ const BusinessFormProps = {
 
 - 提供无须账号密码进入系统的授权方式。
 
-### 3.2 工作台
+### 4.2 工作台
 
 #### 路由
 
@@ -1285,7 +1312,7 @@ const BusinessFormProps = {
 - 常用功能。可以在此处配置各种常用的功能模块， 方便快速进入。
 - 工作动态。用来显示一些广播内容和站内消息等。
 
-### 3.4 基础信息-数据字典
+### 4.4 基础信息-数据字典
 
 #### 路由
 
@@ -1300,7 +1327,7 @@ const BusinessFormProps = {
 - 字典项要求为树形结构。
 - 字典项可以排序，可以在不同的位置插入字典项。
 
-### 3.5 基础信息-编码规则
+### 4.5 基础信息-编码规则
 
 #### 路由
 
@@ -1312,7 +1339,7 @@ const BusinessFormProps = {
 - 添加，修改和删除编码规则。
 - 编码规则由常量，日期，自增序列自由排列组成。
 
-#### 3.6 基础信息-日志管理
+#### 4.6 基础信息-日志管理
 
 #### 路由
 
@@ -1324,7 +1351,7 @@ const BusinessFormProps = {
 - 需要显示请求的IP地址，请求时间，请求的服务端接口，操作人， 操作机器。
 - 日志卸初以便于释放存储空间。
 
-### 3.7 系统管理-角色管理
+### 4.7 系统管理-角色管理
 
 #### 路由
 
@@ -1337,7 +1364,7 @@ const BusinessFormProps = {
 - 给角色授予功能权限和数据权限。
 - 数据权限支持，所有数据，单位级以下， 本级及下级，本人，手动选择5种选项。
 
-### 3.8 系统管理-部门管理
+### 4.8 系统管理-部门管理
 
 #### 路由
 
@@ -1350,7 +1377,7 @@ common/system/org/dept
 - 支持设置部门名称，负责人， 分管领导，岗位。
 - 部门列表以树形结构展示。
 
-### 3.9 系统管理-职工子女管理
+### 4.9 系统管理-职工子女管理
 
 #### 路由
 
@@ -1362,7 +1389,7 @@ common/system/org/dept
 - 新增，编辑和删除职工子女。
 - 子女可以填写多个，并需要填写每个子女的姓名，性别，出生日期（年月日）。
 
-### 3.10 系统管理-单位管理
+### 4.10 系统管理-单位管理
 
 #### 路由
 
@@ -1375,7 +1402,7 @@ common/system/org/dept
 - 支持设置单位名称，负责人， 分管领导，岗位。
 - 单位列表以树形结构展示。
 
-### 3.10 系统管理-用户管理
+### 4.10 系统管理-用户管理
 
 #### 路由
 
@@ -1389,88 +1416,201 @@ common/system/org/dept
 - 支持导入用户。
 - 支持填写用户银行卡信息。
 
-### 3.11 系统管理-权限管理
+### 4.11 系统管理-权限管理
 
 #### 路由
+
 /common/system/permission
+
 #### 功能需求
+
 - 查询系统的菜单和功能权限。
 - 新增，编辑和删除菜单及功能权限。
-### 3.12 报表设计
+
+### 4.12 报表设计
 
 #### 路由
 
+/report/ureport
+
 #### 功能需求
 
-### 3.13 报销管理-通用报销
+- 通过配置数据源来展示单元格数据。
+- 可以配置列表数据。
+- 可以配置字体。
+- 可以允许撤销操作。
+- 可以更改单元格背景色。
+- 可以给单元格增加边框样式。
+- 可以配置对齐方式。
+- 可以插入图片。
+- 可以插入二维码。
+
+### 4.13 报销管理-通用功能
+
+#### 功能需求
+
+- 查询报销数据。
+- 新增报销数据。具备新增权限的任何人都能发起新增。
+- 删除和编辑数据。具备删除和编辑权限且在已退回或者草稿状态下可以使用。
+- 审核。单子提交后到达指定的审批人节点后，审批人可以发起审批。
+- 查看流程图。单子进入审核状态后，发起人可以看到当前的流程图和办理进度。
+- 消审。审核通过的数据如果有异常，则拥有消审权限的人可以对其发起消审，被消审的数据进入待审批状态。
+- 作废。审核通过的数据如果有异常，则拥有作废权限的人可以对其发起作废，被作废的数据可以通过激活重新让其生效。
+- 激活。作废的逆操作。
+
+### 4.13 报销管理-通用报销
 
 #### 路由
 
+- 分页：/reimbursement/reimburse/normal
+- 新增：/reimbursement/reimburse/normal/new
+- 查看：/reimbursement/reimburse/normal/view/:id
+- 编辑：/reimbursement/reimburse/normal/update/:id
+- 审核：/reimbursement/reimburse/normal/audit/:id/:taskId
+
 #### 功能需求
 
-### 3.14 报销管理-保育费报销
+- 选择预算项目。
+- 填写预算信息。
+- 填写结算方式。
+- 填写报销信息。
+- 允许上传附件和发票。
+
+### 4.14 报销管理-保育费报销
 
 #### 路由
 
+- 分页：/reimbursement/reimburse/childCare
+- 新增：/reimbursement/reimburse/childCare/new
+- 查看：/reimbursement/reimburse/childCare/view/:id
+- 编辑：/reimbursement/reimburse/childCare/update/:id
+- 审核：/reimbursement/reimburse/childCare/audit/:id/:taskId
+
 #### 功能需求
 
-### 3.15 报销管理-子女医药费报销
+- 选择预算项目。
+- 填写预算信息。
+- 填写结算方式。
+- 填写报销信息。
+- 允许上传附件和发票。
+
+### 4.15 报销管理-子女医药费报销
 
 #### 路由
 
+- 分页：/reimbursement/reimburse/childMedicine
+- 新增：/reimbursement/reimburse/childMedicine/new
+- 查看：/reimbursement/reimburse/childMedicine/view/:id
+- 编辑：/reimbursement/reimburse/childMedicine/update/:id
+- 审核：/reimbursement/reimburse/childMedicine/audit/:id/:taskId
+
 #### 功能需求
 
-### 3.16 报销管理-子女医保费报销
+- 选择预算项目。
+- 填写预算信息。
+- 填写结算方式。
+- 填写报销信息。
+- 允许上传附件和发票。
+
+### 4.16 报销管理-子女医保费报销
 
 #### 路由
 
+- 分页：/reimbursement/reimburse/medicalInsurance
+- 新增：/reimbursement/reimburse/medicalInsurance/new
+- 查看：/reimbursement/reimburse/medicalInsurance/view/:id
+- 编辑：/reimbursement/reimburse/medicalInsurance/update/:id
+- 审核：/reimbursement/reimburse/medicalInsurance/audit/:id/:taskId
+
 #### 功能需求
 
-### 3.17 报销管理-会议费报销
+### 4.17 报销管理-会议费报销
 
 #### 路由
 
+- 分页：/reimbursement/reimburse/meeting
+- 新增：/reimbursement/reimburse/meeting/new
+- 查看：/reimbursement/reimburse/meeting/view/:id
+- 编辑：/reimbursement/reimburse/meeting/update/:id
+- 审核：/reimbursement/reimburse/meeting/audit/:id/:taskId
+
 #### 功能需求
 
-### 3.18 报销管理-公务接待费报销
+### 4.18 报销管理-公务接待费报销
 
 #### 路由
 
+- 分页：/reimbursement/reimburse/official
+- 新增：/reimbursement/reimburse/official/new
+- 查看：/reimbursement/reimburse/official/view/:id
+- 编辑：/reimbursement/reimburse/official/update/:id
+- 审核：/reimbursement/reimburse/official/audit/:id/:taskId
+
 #### 功能需求
 
-### 3.19 报销管理-用款计划单报销
+### 4.19 报销管理-用款计划单报销
 
 #### 路由
 
+- 分页：/reimbursement/reimburse/payment
+- 新增：/reimbursement/reimburse/payment/new
+- 查看：/reimbursement/reimburse/payment/view/:id
+- 编辑：/reimbursement/reimburse/payment/update/:id
+- 审核：/reimbursement/reimburse/payment/audit/:id/:taskId
+
 #### 功能需求
 
-### 3.20 报销管理-职工医药费报销
+### 4.20 报销管理-职工医药费报销
 
 #### 路由
 
+- 分页：/reimbursement/reimburse/staffMedicine
+- 新增：/reimbursement/reimburse/staffMedicine/new
+- 查看：/reimbursement/reimburse/staffMedicine/view/:id
+- 编辑：/reimbursement/reimburse/staffMedicine/update/:id
+- 审核：/reimbursement/reimburse/staffMedicine/audit/:id/:taskId
+
 #### 功能需求
 
-### 3.21 报销管理-培训费报销
+### 4.21 报销管理-培训费报销
 
 #### 路由
 
+- 分页：/reimbursement/reimburse/train
+- 新增：/reimbursement/reimburse/train/new
+- 查看：/reimbursement/reimburse/train/view/:id
+- 编辑：/reimbursement/reimburse/train/update/:id
+- 审核：/reimbursement/reimburse/train/audit/:id/:taskId
+
 #### 功能需求
 
-### 3.22 报销管理-市内交通费报销
+### 4.22 报销管理-市内交通费报销
 
 #### 路由
 
+- 分页：/reimbursement/reimburse/travelLocal
+- 新增：/reimbursement/reimburse/travelLocal/new
+- 查看：/reimbursement/reimburse/travelLocal/view/:id
+- 编辑：/reimbursement/reimburse/travelLocal/update/:id
+- 审核：/reimbursement/reimburse/travelLocal/audit/:id/:taskId
+
 #### 功能需求
 
-### 3.23 报销管理- 差旅费报销
+### 4.23 报销管理- 差旅费报销
 
 #### 路由
 
+- 分页：/reimbursement/reimburse/travelSimple
+- 新增：/reimbursement/reimburse/travelSimple/new
+- 查看：/reimbursement/reimburse/travelSimple/view/:id
+- 编辑：/reimbursement/reimburse/travelSimple/update/:id
+- 审核：/reimbursement/reimburse/travelSimple/audit/:id/:taskId
+
 #### 功能需求
 
-## 4. 界面
+## 5. 界面
 
-### 4.1 颜色
+### 5.1 颜色
 
 颜色主要有5种：1个主要颜色，4个辅助色。
 
@@ -1482,7 +1622,7 @@ common/system/org/dept
 
 ![color](./fe-design-assets/color.jpg)
 
-### 4.2 字体
+### 5.2 字体
 
 字体家族配置如下:
 
@@ -1491,13 +1631,13 @@ font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
   'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
 ```
 
-### 4.3 布局
+### 5.3 布局
 
 系统整体布局采用上下和左右两栏式布局，这也是目前比较主流的布局方案之一。
 
 ![layout](./fe-design-assets/layout.jpg)
 
-### 4.4 图标
+### 5.4 图标
 
 图标采用彩色但简洁的风格。
 
@@ -1506,18 +1646,23 @@ font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
 
 除此之外，还将提供图标上传功能，先将将上传的图标文件转化为base64格式，然后通过后端接口保存至数据库中。
 
-### 4.5 个性化
+### 5.5 个性化
 
 点击设置按钮即可进入个性化配置页面。个性化配置提供以下四种配置：
 
 1. 紧凑度配置，有紧凑，标准，松散三种选项，默认为标准。越紧凑显示的内容越多，反之则越少。
 2. 主题色配置，默认主题色为蓝色。
-3.
 
-## 5. 用户交互
-### 5.1 用户操作流程
-### 5.2 表单和输入验证
-### 5.3 错误处理
-### 5.4 通知和提示
+## 6. 用户交互
 
+### 6.1 表单和输入验证
 
+表单验证采取所见即所得的验证方式，验证不通过的字段消息提示将会显示在该字段下方，并且会自动跳转至错误位置。
+
+### 6.2 错误处理
+
+所有的错误将会使用红色的弹框提示。
+
+### 6.3 通知和提示
+
+操作完成后会使用绿色的弹框提示。

@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import { PropType, computed, shallowRef } from 'vue'
+import { type PropType, computed } from 'vue'
 
 const props = defineProps({
   /** demo列表 */
