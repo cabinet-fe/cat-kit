@@ -6,8 +6,6 @@
   "author": "YH FE",
   "type": "module",
   "dependencies": {
-    "@cat-kit/fe": "workspace:*",
-    "crypto-js": "4.2.0"
-  },
-  "devDependencies": { "@types/crypto-js": "4.2.1" }
+    "@cat-kit/fe": "workspace:*"
+  }
 }
