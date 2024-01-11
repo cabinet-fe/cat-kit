@@ -42,7 +42,6 @@ class MD5Algo extends Hasher implements Hasher {
 
   constructor() {
     super()
-    // this._hash = new WordArray([0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476])
   }
 
   _doReset() {
@@ -201,7 +200,7 @@ class MD5Algo extends Hasher implements Hasher {
         (((H_i << 8) | (H_i >>> 24)) & 0x00ff00ff) |
         (((H_i << 24) | (H_i >>> 8)) & 0xff00ff00)
     }
-
+    console.log(hash)
     // Return final computed hash
     return hash
   }
@@ -214,7 +213,8 @@ interface MD5Config {
 
 function msgMD5(msg: string) {
   const md5 = new MD5Algo()
-  return Hex.stringify(md5.finalize(msg))
+  return md5.finalize(msg)
+  return Hex.stringify()
 }
 
 async function fileMD5(file: Blob, cfg?: MD5Config) {

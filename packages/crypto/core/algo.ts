@@ -95,8 +95,8 @@ export abstract class Hasher extends BufferedBlockAlgorithm {
 
   override reset(): void {
     super.reset.call(this)
+
     this._doReset()
-    // FIXME
   }
 
   /**
@@ -114,6 +114,7 @@ export abstract class Hasher extends BufferedBlockAlgorithm {
   abstract _doFinalize(): WordArray
 
   finalize(message?: string | WordArray) {
+    return console.log(this)
     message && this._append(message)
     return this._doFinalize()
   }
