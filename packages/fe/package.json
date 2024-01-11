@@ -7,8 +7,6 @@
   "type": "module",
   "dependencies": {
     "@cat-kit/common": "workspace:*",
-    "jsqr": "^1.4.0",
-    "crypto-js": "4.2.0"
-  },
-  "devDependencies": { "@types/crypto-js": "4.2.1" }
+    "jsqr": "^1.4.0"
+  }
 }
