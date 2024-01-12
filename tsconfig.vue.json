@@ -2,11 +2,9 @@
   "extends": "ts-conf-base/tsconfig.vue.json",
   "compilerOptions": {
     "composite": true,
-    "lib": ["ESNext", "DOM"],
-    "types": ["vite/client"],
-    "target": "ESNext",
-    "jsx": "preserve",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"]
   },
-  "include": ["./docs/**/*.vue"],
+  "include": ["./docs/examples/**/*.vue", "./docs/examples/**/*.ts"],
   "exclude": ["node_modules"]
 }

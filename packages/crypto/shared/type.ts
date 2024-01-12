@@ -20,3 +20,11 @@ export interface Encoder {
   parse(str: string): IWordArray
   stringify(wordArray: IWordArray): string
 }
+
+
+export interface HashConfig {
+   /** 文件块大小(单位：字节)，默认为10MB(1024 * 1024 * 10) */
+   chunkSize?: number
+   /** 进度 */
+   onProgress?(progress: number): void
+}

@@ -1,229 +1,289 @@
 import { readFile } from '@cat-kit/fe'
-import { WordArray, arrBufToWordArray } from './core/word-array'
-import { Hasher } from './core/algo'
-import { Hex } from './core/enc'
+import { encodeUTF8ToU8A, hex } from './shared/helper'
 
-// Constants table
-const T: number[] = []
+type _Hash = [number, number, number, number]
 
-// Compute constants
-for (let i = 0; i < 64; i += 1) {
-  T[i] = (Math.abs(Math.sin(i + 1)) * 0x100000000) | 0
+/** refer: spark-md5 */
+function concatArrayBuffers(buffer1: ArrayBuffer, buffer2: ArrayBuffer) {
+  const result = new Uint8Array(buffer1.byteLength + buffer2.byteLength)
+
+  result.set(new Uint8Array(buffer1))
+  result.set(new Uint8Array(buffer2), buffer1.byteLength)
+
+  return result
 }
 
-type NumParams = [number, number, number, number, number, number, number]
+function md5cycle(x: _Hash, k: any[]) {
+  let a = x[0],
+    b = x[1],
+    c = x[2],
+    d = x[3]
 
-const FF = (...args: NumParams) => {
-  const [a, b, c, d, x, s, t] = args
-  const n = a + ((b & c) | (~b & d)) + x + t
-  return ((n << s) | (n >>> (32 - s))) + b
+  a += (((b & c) | (~b & d)) + k[0] - 680876936) | 0
+  a = (((a << 7) | (a >>> 25)) + b) | 0
+  d += (((a & b) | (~a & c)) + k[1] - 389564586) | 0
+  d = (((d << 12) | (d >>> 20)) + a) | 0
+  c += (((d & a) | (~d & b)) + k[2] + 606105819) | 0
+  c = (((c << 17) | (c >>> 15)) + d) | 0
+  b += (((c & d) | (~c & a)) + k[3] - 1044525330) | 0
+  b = (((b << 22) | (b >>> 10)) + c) | 0
+  a += (((b & c) | (~b & d)) + k[4] - 176418897) | 0
+  a = (((a << 7) | (a >>> 25)) + b) | 0
+  d += (((a & b) | (~a & c)) + k[5] + 1200080426) | 0
+  d = (((d << 12) | (d >>> 20)) + a) | 0
+  c += (((d & a) | (~d & b)) + k[6] - 1473231341) | 0
+  c = (((c << 17) | (c >>> 15)) + d) | 0
+  b += (((c & d) | (~c & a)) + k[7] - 45705983) | 0
+  b = (((b << 22) | (b >>> 10)) + c) | 0
+  a += (((b & c) | (~b & d)) + k[8] + 1770035416) | 0
+  a = (((a << 7) | (a >>> 25)) + b) | 0
+  d += (((a & b) | (~a & c)) + k[9] - 1958414417) | 0
+  d = (((d << 12) | (d >>> 20)) + a) | 0
+  c += (((d & a) | (~d & b)) + k[10] - 42063) | 0
+  c = (((c << 17) | (c >>> 15)) + d) | 0
+  b += (((c & d) | (~c & a)) + k[11] - 1990404162) | 0
+  b = (((b << 22) | (b >>> 10)) + c) | 0
+  a += (((b & c) | (~b & d)) + k[12] + 1804603682) | 0
+  a = (((a << 7) | (a >>> 25)) + b) | 0
+  d += (((a & b) | (~a & c)) + k[13] - 40341101) | 0
+  d = (((d << 12) | (d >>> 20)) + a) | 0
+  c += (((d & a) | (~d & b)) + k[14] - 1502002290) | 0
+  c = (((c << 17) | (c >>> 15)) + d) | 0
+  b += (((c & d) | (~c & a)) + k[15] + 1236535329) | 0
+  b = (((b << 22) | (b >>> 10)) + c) | 0
+
+  a += (((b & d) | (c & ~d)) + k[1] - 165796510) | 0
+  a = (((a << 5) | (a >>> 27)) + b) | 0
+  d += (((a & c) | (b & ~c)) + k[6] - 1069501632) | 0
+  d = (((d << 9) | (d >>> 23)) + a) | 0
+  c += (((d & b) | (a & ~b)) + k[11] + 643717713) | 0
+  c = (((c << 14) | (c >>> 18)) + d) | 0
+  b += (((c & a) | (d & ~a)) + k[0] - 373897302) | 0
+  b = (((b << 20) | (b >>> 12)) + c) | 0
+  a += (((b & d) | (c & ~d)) + k[5] - 701558691) | 0
+  a = (((a << 5) | (a >>> 27)) + b) | 0
+  d += (((a & c) | (b & ~c)) + k[10] + 38016083) | 0
+  d = (((d << 9) | (d >>> 23)) + a) | 0
+  c += (((d & b) | (a & ~b)) + k[15] - 660478335) | 0
+  c = (((c << 14) | (c >>> 18)) + d) | 0
+  b += (((c & a) | (d & ~a)) + k[4] - 405537848) | 0
+  b = (((b << 20) | (b >>> 12)) + c) | 0
+  a += (((b & d) | (c & ~d)) + k[9] + 568446438) | 0
+  a = (((a << 5) | (a >>> 27)) + b) | 0
+  d += (((a & c) | (b & ~c)) + k[14] - 1019803690) | 0
+  d = (((d << 9) | (d >>> 23)) + a) | 0
+  c += (((d & b) | (a & ~b)) + k[3] - 187363961) | 0
+  c = (((c << 14) | (c >>> 18)) + d) | 0
+  b += (((c & a) | (d & ~a)) + k[8] + 1163531501) | 0
+  b = (((b << 20) | (b >>> 12)) + c) | 0
+  a += (((b & d) | (c & ~d)) + k[13] - 1444681467) | 0
+  a = (((a << 5) | (a >>> 27)) + b) | 0
+  d += (((a & c) | (b & ~c)) + k[2] - 51403784) | 0
+  d = (((d << 9) | (d >>> 23)) + a) | 0
+  c += (((d & b) | (a & ~b)) + k[7] + 1735328473) | 0
+  c = (((c << 14) | (c >>> 18)) + d) | 0
+  b += (((c & a) | (d & ~a)) + k[12] - 1926607734) | 0
+  b = (((b << 20) | (b >>> 12)) + c) | 0
+
+  a += ((b ^ c ^ d) + k[5] - 378558) | 0
+  a = (((a << 4) | (a >>> 28)) + b) | 0
+  d += ((a ^ b ^ c) + k[8] - 2022574463) | 0
+  d = (((d << 11) | (d >>> 21)) + a) | 0
+  c += ((d ^ a ^ b) + k[11] + 1839030562) | 0
+  c = (((c << 16) | (c >>> 16)) + d) | 0
+  b += ((c ^ d ^ a) + k[14] - 35309556) | 0
+  b = (((b << 23) | (b >>> 9)) + c) | 0
+  a += ((b ^ c ^ d) + k[1] - 1530992060) | 0
+  a = (((a << 4) | (a >>> 28)) + b) | 0
+  d += ((a ^ b ^ c) + k[4] + 1272893353) | 0
+  d = (((d << 11) | (d >>> 21)) + a) | 0
+  c += ((d ^ a ^ b) + k[7] - 155497632) | 0
+  c = (((c << 16) | (c >>> 16)) + d) | 0
+  b += ((c ^ d ^ a) + k[10] - 1094730640) | 0
+  b = (((b << 23) | (b >>> 9)) + c) | 0
+  a += ((b ^ c ^ d) + k[13] + 681279174) | 0
+  a = (((a << 4) | (a >>> 28)) + b) | 0
+  d += ((a ^ b ^ c) + k[0] - 358537222) | 0
+  d = (((d << 11) | (d >>> 21)) + a) | 0
+  c += ((d ^ a ^ b) + k[3] - 722521979) | 0
+  c = (((c << 16) | (c >>> 16)) + d) | 0
+  b += ((c ^ d ^ a) + k[6] + 76029189) | 0
+  b = (((b << 23) | (b >>> 9)) + c) | 0
+  a += ((b ^ c ^ d) + k[9] - 640364487) | 0
+  a = (((a << 4) | (a >>> 28)) + b) | 0
+  d += ((a ^ b ^ c) + k[12] - 421815835) | 0
+  d = (((d << 11) | (d >>> 21)) + a) | 0
+  c += ((d ^ a ^ b) + k[15] + 530742520) | 0
+  c = (((c << 16) | (c >>> 16)) + d) | 0
+  b += ((c ^ d ^ a) + k[2] - 995338651) | 0
+  b = (((b << 23) | (b >>> 9)) + c) | 0
+
+  a += ((c ^ (b | ~d)) + k[0] - 198630844) | 0
+  a = (((a << 6) | (a >>> 26)) + b) | 0
+  d += ((b ^ (a | ~c)) + k[7] + 1126891415) | 0
+  d = (((d << 10) | (d >>> 22)) + a) | 0
+  c += ((a ^ (d | ~b)) + k[14] - 1416354905) | 0
+  c = (((c << 15) | (c >>> 17)) + d) | 0
+  b += ((d ^ (c | ~a)) + k[5] - 57434055) | 0
+  b = (((b << 21) | (b >>> 11)) + c) | 0
+  a += ((c ^ (b | ~d)) + k[12] + 1700485571) | 0
+  a = (((a << 6) | (a >>> 26)) + b) | 0
+  d += ((b ^ (a | ~c)) + k[3] - 1894986606) | 0
+  d = (((d << 10) | (d >>> 22)) + a) | 0
+  c += ((a ^ (d | ~b)) + k[10] - 1051523) | 0
+  c = (((c << 15) | (c >>> 17)) + d) | 0
+  b += ((d ^ (c | ~a)) + k[1] - 2054922799) | 0
+  b = (((b << 21) | (b >>> 11)) + c) | 0
+  a += ((c ^ (b | ~d)) + k[8] + 1873313359) | 0
+  a = (((a << 6) | (a >>> 26)) + b) | 0
+  d += ((b ^ (a | ~c)) + k[15] - 30611744) | 0
+  d = (((d << 10) | (d >>> 22)) + a) | 0
+  c += ((a ^ (d | ~b)) + k[6] - 1560198380) | 0
+  c = (((c << 15) | (c >>> 17)) + d) | 0
+  b += ((d ^ (c | ~a)) + k[13] + 1309151649) | 0
+  b = (((b << 21) | (b >>> 11)) + c) | 0
+  a += ((c ^ (b | ~d)) + k[4] - 145523070) | 0
+  a = (((a << 6) | (a >>> 26)) + b) | 0
+  d += ((b ^ (a | ~c)) + k[11] - 1120210379) | 0
+  d = (((d << 10) | (d >>> 22)) + a) | 0
+  c += ((a ^ (d | ~b)) + k[2] + 718787259) | 0
+  c = (((c << 15) | (c >>> 17)) + d) | 0
+  b += ((d ^ (c | ~a)) + k[9] - 343485551) | 0
+  b = (((b << 21) | (b >>> 11)) + c) | 0
+
+  x[0] = (a + x[0]) | 0
+  x[1] = (b + x[1]) | 0
+  x[2] = (c + x[2]) | 0
+  x[3] = (d + x[3]) | 0
 }
 
-const GG = (...args: NumParams) => {
-  const [a, b, c, d, x, s, t] = args
-  const n = a + ((b & d) | (c & ~d)) + x + t
-  return ((n << s) | (n >>> (32 - s))) + b
+function md5blk_array(a) {
+  let md5blks: number[] = []
+
+  for (let i = 0; i < 64; i += 4) {
+    md5blks[i >> 2] =
+      a[i] + (a[i + 1] << 8) + (a[i + 2] << 16) + (a[i + 3] << 24)
+  }
+  return md5blks
 }
 
-const HH = (...args: NumParams) => {
-  const [a, b, c, d, x, s, t] = args
-  const n = a + (b ^ c ^ d) + x + t
-  return ((n << s) | (n >>> (32 - s))) + b
-}
+class MD5HashAlgorithm {
+  private u8a?: Uint8Array
 
-const II = (...args: NumParams) => {
-  const [a, b, c, d, x, s, t] = args
-  const n = a + (c ^ (b | ~d)) + x + t
-  return ((n << s) | (n >>> (32 - s))) + b
-}
+  private length?: number
 
-class MD5Algo extends Hasher implements Hasher {
-  _hash!: WordArray
+  private _hash?: _Hash
 
   constructor() {
-    super()
+    this.reset()
   }
 
-  _doReset() {
-    this._hash = new WordArray([0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476])
-  }
+  update(buffer: ArrayBuffer | Uint8Array) {
+    if (!this.u8a) return
 
-  _doProcessBlock(M: number[], offset: number): void {
-    // Swap endian
-    for (let i = 0; i < 16; i++) {
-      // Shortcuts
-      let offset_i = offset + i
-      let M_offset_i = M[offset_i]!
+    const result = concatArrayBuffers(
+        this.u8a.buffer,
+        buffer instanceof Uint8Array ? buffer.buffer : buffer
+      ),
+      length = result.length
 
-      M[offset_i] =
-        (((M_offset_i << 8) | (M_offset_i >>> 24)) & 0x00ff00ff) |
-        (((M_offset_i << 24) | (M_offset_i >>> 8)) & 0xff00ff00)
+    let i: number
+
+    this.length! += buffer.byteLength
+    for (i = 64; i <= length; i += 64) {
+      md5cycle(this._hash!, md5blk_array(result.subarray(i - 64, i)))
     }
 
-    // Shortcuts
-    let H = this._hash.words
+    this.u8a =
+      i - 64 < length
+        ? new Uint8Array(result.buffer.slice(i - 64))
+        : new Uint8Array(0)
 
-    let M_offset_0 = M[offset + 0]!
-    let M_offset_1 = M[offset + 1]!
-    let M_offset_2 = M[offset + 2]!
-    let M_offset_3 = M[offset + 3]!
-    let M_offset_4 = M[offset + 4]!
-    let M_offset_5 = M[offset + 5]!
-    let M_offset_6 = M[offset + 6]!
-    let M_offset_7 = M[offset + 7]!
-    let M_offset_8 = M[offset + 8]!
-    let M_offset_9 = M[offset + 9]!
-    let M_offset_10 = M[offset + 10]!
-    let M_offset_11 = M[offset + 11]!
-    let M_offset_12 = M[offset + 12]!
-    let M_offset_13 = M[offset + 13]!
-    let M_offset_14 = M[offset + 14]!
-    let M_offset_15 = M[offset + 15]!
-
-    // Working letiables
-    let a = H[0]!
-    let b = H[1]!
-    let c = H[2]!
-    let d = H[3]!
-
-    // Computation
-    a = FF(a, b, c, d, M_offset_0, 7, T[0]!)
-    d = FF(d, a, b, c, M_offset_1, 12, T[1]!)
-    c = FF(c, d, a, b, M_offset_2, 17, T[2]!)
-    b = FF(b, c, d, a, M_offset_3, 22, T[3]!)
-    a = FF(a, b, c, d, M_offset_4, 7, T[4]!)
-    d = FF(d, a, b, c, M_offset_5, 12, T[5]!)
-    c = FF(c, d, a, b, M_offset_6, 17, T[6]!)
-    b = FF(b, c, d, a, M_offset_7, 22, T[7]!)
-    a = FF(a, b, c, d, M_offset_8, 7, T[8]!)
-    d = FF(d, a, b, c, M_offset_9, 12, T[9]!)
-    c = FF(c, d, a, b, M_offset_10, 17, T[10]!)
-    b = FF(b, c, d, a, M_offset_11, 22, T[11]!)
-    a = FF(a, b, c, d, M_offset_12, 7, T[12]!)
-    d = FF(d, a, b, c, M_offset_13, 12, T[13]!)
-    c = FF(c, d, a, b, M_offset_14, 17, T[14]!)
-    b = FF(b, c, d, a, M_offset_15, 22, T[15]!)
-
-    a = GG(a, b, c, d, M_offset_1, 5, T[16]!)
-    d = GG(d, a, b, c, M_offset_6, 9, T[17]!)
-    c = GG(c, d, a, b, M_offset_11, 14, T[18]!)
-    b = GG(b, c, d, a, M_offset_0, 20, T[19]!)
-    a = GG(a, b, c, d, M_offset_5, 5, T[20]!)
-    d = GG(d, a, b, c, M_offset_10, 9, T[21]!)
-    c = GG(c, d, a, b, M_offset_15, 14, T[22]!)
-    b = GG(b, c, d, a, M_offset_4, 20, T[23]!)
-    a = GG(a, b, c, d, M_offset_9, 5, T[24]!)
-    d = GG(d, a, b, c, M_offset_14, 9, T[25]!)
-    c = GG(c, d, a, b, M_offset_3, 14, T[26]!)
-    b = GG(b, c, d, a, M_offset_8, 20, T[27]!)
-    a = GG(a, b, c, d, M_offset_13, 5, T[28]!)
-    d = GG(d, a, b, c, M_offset_2, 9, T[29]!)
-    c = GG(c, d, a, b, M_offset_7, 14, T[30]!)
-    b = GG(b, c, d, a, M_offset_12, 20, T[31]!)
-
-    a = HH(a, b, c, d, M_offset_5, 4, T[32]!)
-    d = HH(d, a, b, c, M_offset_8, 11, T[33]!)
-    c = HH(c, d, a, b, M_offset_11, 16, T[34]!)
-    b = HH(b, c, d, a, M_offset_14, 23, T[35]!)
-    a = HH(a, b, c, d, M_offset_1, 4, T[36]!)
-    d = HH(d, a, b, c, M_offset_4, 11, T[37]!)
-    c = HH(c, d, a, b, M_offset_7, 16, T[38]!)
-    b = HH(b, c, d, a, M_offset_10, 23, T[39]!)
-    a = HH(a, b, c, d, M_offset_13, 4, T[40]!)
-    d = HH(d, a, b, c, M_offset_0, 11, T[41]!)
-    c = HH(c, d, a, b, M_offset_3, 16, T[42]!)
-    b = HH(b, c, d, a, M_offset_6, 23, T[43]!)
-    a = HH(a, b, c, d, M_offset_9, 4, T[44]!)
-    d = HH(d, a, b, c, M_offset_12, 11, T[45]!)
-    c = HH(c, d, a, b, M_offset_15, 16, T[46]!)
-    b = HH(b, c, d, a, M_offset_2, 23, T[47]!)
-
-    a = II(a, b, c, d, M_offset_0, 6, T[48]!)
-    d = II(d, a, b, c, M_offset_7, 10, T[49]!)
-    c = II(c, d, a, b, M_offset_14, 15, T[50]!)
-    b = II(b, c, d, a, M_offset_5, 21, T[51]!)
-    a = II(a, b, c, d, M_offset_12, 6, T[52]!)
-    d = II(d, a, b, c, M_offset_3, 10, T[53]!)
-    c = II(c, d, a, b, M_offset_10, 15, T[54]!)
-    b = II(b, c, d, a, M_offset_1, 21, T[55]!)
-    a = II(a, b, c, d, M_offset_8, 6, T[56]!)
-    d = II(d, a, b, c, M_offset_15, 10, T[57]!)
-    c = II(c, d, a, b, M_offset_6, 15, T[58]!)
-    b = II(b, c, d, a, M_offset_13, 21, T[59]!)
-    a = II(a, b, c, d, M_offset_4, 6, T[60]!)
-    d = II(d, a, b, c, M_offset_11, 10, T[61]!)
-    c = II(c, d, a, b, M_offset_2, 15, T[62]!)
-    b = II(b, c, d, a, M_offset_9, 21, T[63]!)
-
-    // Intermediate hash value
-    H[0] = (H[0]! + a) | 0
-    H[1] = (H[1]! + b) | 0
-    H[2] = (H[2]! + c) | 0
-    H[3] = (H[3]! + d) | 0
+    return this
   }
 
-  _doFinalize() {
-    // Shortcuts
-    const { data } = this
-    const dataWords = data.words
+  finalize() {
+    const { u8a } = this
+    if (!u8a) return
+    const length = u8a.length,
+      tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-    let nBitsTotal = this.dataBytes * 8
-    let nBitsLeft = data.sigBytes * 8
-
-    // Add padding
-    dataWords[nBitsLeft >>> 5] |= 0x80 << (24 - (nBitsLeft % 32))
-
-    let nBitsTotalH = Math.floor(nBitsTotal / 0x100000000)
-    let nBitsTotalL = nBitsTotal
-    dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 15] =
-      (((nBitsTotalH << 8) | (nBitsTotalH >>> 24)) & 0x00ff00ff) |
-      (((nBitsTotalH << 24) | (nBitsTotalH >>> 8)) & 0xff00ff00)
-    dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 14] =
-      (((nBitsTotalL << 8) | (nBitsTotalL >>> 24)) & 0x00ff00ff) |
-      (((nBitsTotalL << 24) | (nBitsTotalL >>> 8)) & 0xff00ff00)
-
-    data.sigBytes = (dataWords.length + 1) * 4
-
-    // Hash final blocks
-    this._process()
-
-    // Shortcuts
-    let hash = this._hash
-    let H = hash.words
-
-    // Swap endian
-    for (let i = 0; i < 4; i++) {
-      // Shortcut
-      let H_i = H[i]!
-
-      H[i] =
-        (((H_i << 8) | (H_i >>> 24)) & 0x00ff00ff) |
-        (((H_i << 24) | (H_i >>> 8)) & 0xff00ff00)
+    for (let i = 0; i < length; i += 1) {
+      tail[i >> 2] |= u8a[i]! << (i % 4 << 3)
     }
-    console.log(hash)
-    // Return final computed hash
-    return hash
+    this.finish(tail, length)
+
+    const ret = hex(this._hash!)
+
+    this.reset()
+    return ret
+  }
+
+  reset() {
+    this.u8a = new Uint8Array()
+    this.length = 0
+    this._hash = [1732584193, -271733879, -1732584194, 271733878]
+
+    return this
+  }
+
+  destroy() {
+    delete this.u8a
+    delete this.length
+    delete this._hash
+  }
+
+  private finish(tail: number[], length: number) {
+    if (!this._hash) return
+    let i = length,
+      tmp: RegExpMatchArray,
+      lo: number,
+      hi: number
+
+    tail[i >> 2] |= 0x80 << (i % 4 << 3)
+    if (i > 55) {
+      md5cycle(this._hash, tail)
+      for (i = 0; i < 16; i += 1) {
+        tail[i] = 0
+      }
+    }
+
+    // Do the final computation based on the tail and length
+    // Beware that the final length may not fit in 32 bits so we take care of that
+    tmp = (this.length! * 8).toString(16).match(/(.*?)(.{0,8})$/)!
+    lo = parseInt(tmp[2]!, 16)
+    hi = parseInt(tmp[1]!, 16) || 0
+
+    tail[14] = lo
+    tail[15] = hi
+    md5cycle(this._hash, tail)
   }
 }
 
 interface MD5Config {
-  /** 文件块大小，默认为10MB */
+  /** 文件块大小(单位：字节)，默认为10MB(1024 * 1024 * 10) */
   chunkSize?: number
+  /** 进度 */
+  onProgress?(progress: number): void
 }
 
+
+
 function msgMD5(msg: string) {
-  const md5 = new MD5Algo()
-  return md5.finalize(msg)
-  return Hex.stringify()
+  const hasher = new MD5HashAlgorithm()
+  hasher.update(encodeUTF8ToU8A(msg))
+  const result = hasher.finalize()
+
+  hasher.destroy()
+  return result
 }
 
 async function fileMD5(file: Blob, cfg?: MD5Config) {
-  // 每块大小为10MB
-  const { chunkSize = 10485760 } = cfg || {}
+  // 每块大小为2MB
+  const { chunkSize = 2097152, onProgress } = cfg || {}
 
   // 创建MD5哈希算法实例
-
-  const md5 = new MD5Algo()
+  const hasher = new MD5HashAlgorithm()
 
   let i = 0
   while (i < file.size) {
@@ -233,15 +293,26 @@ async function fileMD5(file: Blob, cfg?: MD5Config) {
     )
 
     // 将ArrayBuffer转换为WordArray
-    md5.update(arrBufToWordArray(result))
-    i += chunkSize
-  }
+    hasher.update(result)
 
-  return md5.finalize().toString()
+    i += chunkSize
+    onProgress?.(i > file.size ? 1 : i / file.size)
+  }
+  const result = hasher.finalize()
+  hasher.destroy()
+  return result
 }
 
-/** MD5计算 */
+/**
+ * 计算字符串的MD5
+ * @param msg 消息
+ */
 export function MD5(msg: string): Promise<string>
+/**
+ * 计算文件的MD5
+ * @param file 文件
+ * @param cfg  配置
+ */
 export function MD5(file: Blob, cfg?: MD5Config): Promise<string>
 export function MD5(content: Blob | string, cfg?: MD5Config) {
   if (content instanceof Blob) {
