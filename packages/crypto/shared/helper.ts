@@ -1,5 +1,3 @@
-import { HEX_CHARS } from './constants'
-
 /** 获取安全随机数 */
 export function getSecureRandomValues(): number {
   if (typeof crypto.getRandomValues === 'function') {
@@ -35,24 +33,6 @@ export function mixin<
   Obj2 extends Record<string, any>
 >(obj1: Obj1, obj2: Obj2): Obj1 & Obj2 {
   return Object.assign(obj1, obj2)
-}
-
-function r_hex(n: number): string {
-  let s = ''
-  for (let j = 0; j < 4; j += 1) {
-    s +=
-      HEX_CHARS[(n >> (j * 8 + 4)) & 0x0f] + HEX_CHARS[(n >> (j * 8)) & 0x0f]!
-  }
-  return s
-}
-
-/**
- * 将hash值转换为16进制字符串
- * @param hash hash值
- * @returns
- */
-export function hex(hash: number[]): string {
-  return hash.map(n => r_hex(n)).join('')
 }
 
 const te = new TextEncoder()

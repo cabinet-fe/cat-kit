@@ -1,5 +1,6 @@
 import { readFile } from '@cat-kit/fe'
-import { encodeUTF8ToU8A, hex } from './shared/helper'
+import { encodeUTF8ToU8A } from './shared/helper'
+import { HEX_CHARS } from './shared/constants'
 
 type _Hash = [number, number, number, number]
 
@@ -11,6 +12,25 @@ function concatArrayBuffers(buffer1: ArrayBuffer, buffer2: ArrayBuffer) {
   result.set(new Uint8Array(buffer2), buffer1.byteLength)
 
   return result
+}
+
+function r_hex(n: number): string {
+  let s = ''
+
+  for (let j = 0; j < 4; j += 1) {
+    s +=
+      HEX_CHARS[(n >> (j * 8 + 4)) & 0x0f] + HEX_CHARS[(n >> (j * 8)) & 0x0f]!
+  }
+  return s
+}
+
+/**
+ * 将hash值转换为16进制字符串
+ * @param hash hash值
+ * @returns
+ */
+export function hex(hash: number[]): string {
+  return hash.map(n => r_hex(n)).join('')
 }
 
 function md5cycle(x: _Hash, k: any[]) {

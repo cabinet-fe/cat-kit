@@ -1,7 +1,7 @@
 // refer: js-sha256
 
 import { readFile } from '@cat-kit/fe'
-import { encodeUTF8ToU8A, hex } from './shared/helper'
+import { encodeUTF8ToU8A } from './shared/helper'
 import type { HashConfig } from './shared/type'
 import { HEX_CHARS } from './shared/constants'
 
@@ -20,7 +20,7 @@ const K = [
   0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
   0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 ]
-class SHA256HashAlgorithm {
+class SHA256Algorithm {
   blocks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   block = 0
   start = 0
@@ -138,81 +138,20 @@ class SHA256HashAlgorithm {
   }
 
   hex() {
-    var h0 = this.h0,
-      h1 = this.h1,
-      h2 = this.h2,
-      h3 = this.h3,
-      h4 = this.h4,
-      h5 = this.h5,
-      h6 = this.h6,
-      h7 = this.h7
+    const { h0, h1, h2, h3, h4, h5, h6, h7 } = this
 
-    var hex =
-      HEX_CHARS[(h0 >> 28) & 0x0f] +
-      HEX_CHARS[(h0 >> 24) & 0x0f] +
-      HEX_CHARS[(h0 >> 20) & 0x0f] +
-      HEX_CHARS[(h0 >> 16) & 0x0f] +
-      HEX_CHARS[(h0 >> 12) & 0x0f] +
-      HEX_CHARS[(h0 >> 8) & 0x0f] +
-      HEX_CHARS[(h0 >> 4) & 0x0f] +
-      HEX_CHARS[h0 & 0x0f] +
-      HEX_CHARS[(h1 >> 28) & 0x0f] +
-      HEX_CHARS[(h1 >> 24) & 0x0f] +
-      HEX_CHARS[(h1 >> 20) & 0x0f] +
-      HEX_CHARS[(h1 >> 16) & 0x0f] +
-      HEX_CHARS[(h1 >> 12) & 0x0f] +
-      HEX_CHARS[(h1 >> 8) & 0x0f] +
-      HEX_CHARS[(h1 >> 4) & 0x0f] +
-      HEX_CHARS[h1 & 0x0f] +
-      HEX_CHARS[(h2 >> 28) & 0x0f] +
-      HEX_CHARS[(h2 >> 24) & 0x0f] +
-      HEX_CHARS[(h2 >> 20) & 0x0f] +
-      HEX_CHARS[(h2 >> 16) & 0x0f] +
-      HEX_CHARS[(h2 >> 12) & 0x0f] +
-      HEX_CHARS[(h2 >> 8) & 0x0f] +
-      HEX_CHARS[(h2 >> 4) & 0x0f] +
-      HEX_CHARS[h2 & 0x0f] +
-      HEX_CHARS[(h3 >> 28) & 0x0f] +
-      HEX_CHARS[(h3 >> 24) & 0x0f] +
-      HEX_CHARS[(h3 >> 20) & 0x0f] +
-      HEX_CHARS[(h3 >> 16) & 0x0f] +
-      HEX_CHARS[(h3 >> 12) & 0x0f] +
-      HEX_CHARS[(h3 >> 8) & 0x0f] +
-      HEX_CHARS[(h3 >> 4) & 0x0f] +
-      HEX_CHARS[h3 & 0x0f] +
-      HEX_CHARS[(h4 >> 28) & 0x0f] +
-      HEX_CHARS[(h4 >> 24) & 0x0f] +
-      HEX_CHARS[(h4 >> 20) & 0x0f] +
-      HEX_CHARS[(h4 >> 16) & 0x0f] +
-      HEX_CHARS[(h4 >> 12) & 0x0f] +
-      HEX_CHARS[(h4 >> 8) & 0x0f] +
-      HEX_CHARS[(h4 >> 4) & 0x0f] +
-      HEX_CHARS[h4 & 0x0f] +
-      HEX_CHARS[(h5 >> 28) & 0x0f] +
-      HEX_CHARS[(h5 >> 24) & 0x0f] +
-      HEX_CHARS[(h5 >> 20) & 0x0f] +
-      HEX_CHARS[(h5 >> 16) & 0x0f] +
-      HEX_CHARS[(h5 >> 12) & 0x0f] +
-      HEX_CHARS[(h5 >> 8) & 0x0f] +
-      HEX_CHARS[(h5 >> 4) & 0x0f] +
-      HEX_CHARS[h5 & 0x0f] +
-      HEX_CHARS[(h6 >> 28) & 0x0f] +
-      HEX_CHARS[(h6 >> 24) & 0x0f] +
-      HEX_CHARS[(h6 >> 20) & 0x0f] +
-      HEX_CHARS[(h6 >> 16) & 0x0f] +
-      HEX_CHARS[(h6 >> 12) & 0x0f] +
-      HEX_CHARS[(h6 >> 8) & 0x0f] +
-      HEX_CHARS[(h6 >> 4) & 0x0f] +
-      HEX_CHARS[h6 & 0x0f]
-    hex +=
-      HEX_CHARS[(h7 >> 28) & 0x0f] +
-      HEX_CHARS[(h7 >> 24) & 0x0f] +
-      HEX_CHARS[(h7 >> 20) & 0x0f] +
-      HEX_CHARS[(h7 >> 16) & 0x0f] +
-      HEX_CHARS[(h7 >> 12) & 0x0f] +
-      HEX_CHARS[(h7 >> 8) & 0x0f] +
-      HEX_CHARS[(h7 >> 4) & 0x0f] +
-      HEX_CHARS[h7 & 0x0f]
+    const hash = [h0, h1, h2, h3, h4, h5, h6, h7]
+    let hex = ''
+
+    for (let j = 0; j < hash.length; j++) {
+      const h = hash[j]!
+      for (let i = 3; i > -1; i--) {
+        hex +=
+          HEX_CHARS[(h >> (i * 8 + 4)) & 0x0f]! +
+          HEX_CHARS[(h >> (i * 8)) & 0x0f]
+      }
+    }
+
     return hex
   }
 
@@ -335,7 +274,7 @@ export async function SHA256(
   content: string | Blob,
   cfg?: HashConfig
 ): Promise<string> {
-  const hasher = new SHA256HashAlgorithm()
+  const hasher = new SHA256Algorithm()
   if (typeof content === 'string') {
     hasher.update(encodeUTF8ToU8A(content))
     return Promise.resolve(hasher.finalize()!)

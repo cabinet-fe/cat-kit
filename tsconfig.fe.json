@@ -3,7 +3,8 @@
   "compilerOptions": {
     "composite": true,
     "types": ["vitest/globals"],
-    "declaration": true
+    "declaration": true,
+    "noUncheckedIndexedAccess": false
   },
   "include": [
     "./packages/fe/**/*.ts",

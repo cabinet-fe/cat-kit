@@ -48,8 +48,7 @@ const sidebar: DefaultTheme.Sidebar = {
         { text: '概要', link: '/utils/crypto/' },
         { text: '哈希函数', link: '/utils/crypto/hash' },
         { text: '对称加密', link: '/utils/crypto/symmetric' },
-        { text: '非对称加密', link: '/utils/crypto/asymmetric' },
-        { text: '加密性能', link: '/utils/crypto/performance' }
+        { text: '非对称加密', link: '/utils/crypto/asymmetric' }
       ]
     }
   ],

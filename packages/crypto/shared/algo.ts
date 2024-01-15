@@ -83,39 +83,3 @@ export abstract class BufferedBlockAlgorithm {
     return new WordArray(processedWords, nBytesReady)
   }
 }
-
-export abstract class Hasher extends BufferedBlockAlgorithm {
-  constructor() {
-    super()
-    this.blockSize = 512 / 32
-    this.reset()
-  }
-
-  abstract _doReset(): void
-
-  override reset(): void {
-    super.reset.call(this)
-    this._doReset()
-  }
-
-  /**
-   * 更新数据
-   * @param message 消息
-   * @returns
-   */
-  update(message: string | WordArray) {
-    this._append(message)
-    this._process()
-    return this
-  }
-
-  /** 最终处理 */
-  abstract _doFinalize(): WordArray
-
-  finalize(message?: string | WordArray) {
-    message && this._append(message)
-    return this._doFinalize()
-  }
-}
-
-export abstract class HMAC extends BufferedBlockAlgorithm {}
