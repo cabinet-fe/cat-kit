@@ -136,25 +136,31 @@ export function readDir<
   // 包含选项是否为空
   const isIncludeEmpty = include.length === 0
 
-  const filter = (dir: Dirent) => {
+  const filter = (dirent: Dirent) => {
+
+    // 排除的项
     const excluded =
-      excludeStr.has(dir.name) || excludeRE.some(item => item.test(dir.name))
+      excludeStr.has(dirent.name) ||
+      excludeRE.some(item => item.test(join(dirent.path, dirent.name)))
+    // 如果未指定包含项
     if (isIncludeEmpty) {
       return !excluded
     }
     return (
       !excluded &&
-      (includeStr.has(dir.name) || includeRE.some(item => item.test(dir.name)))
+      (includeStr.has(dirent.name) ||
+        includeRE.some(item => item.test(join(dirent.path, dirent.name))))
     )
   }
 
   const recur = async (dir: string, depth = 1) => {
-    const direntList = (
+    let direntList = (
       await readdir(dir, {
         withFileTypes: true,
         encoding: 'utf-8'
       })
-    ).filter(filter)
+    )
+   direntList = direntList.filter(filter)
 
     const dirs = await Promise.all(
       direntList.map(async dirent => {

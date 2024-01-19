@@ -4,6 +4,7 @@
   "type": "module",
   "devDependencies": {
     "inquirer": "^9.2.12",
-    "@types/inquirer": "9.0.7"
+    "@types/inquirer": "9.0.7",
+    "@cat-kit/be": "workspace:*"
   }
 }

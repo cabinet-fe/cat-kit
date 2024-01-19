@@ -1,4 +1,4 @@
-import base64 from './base64'
+import { base64 } from './base64'
 
 describe('base64', () => {
   const text = '你好'

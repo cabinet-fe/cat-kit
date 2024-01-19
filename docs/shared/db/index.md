@@ -1,7 +1,3 @@
----
-title: 数据库
----
-
 # 数据库 DataBase
 
 数据库不是一个高深的概念. 包括现实中的档案室, 文件夹, 书籍. 任何实体的东西, 你都可以称之为数据库.
@@ -105,25 +101,27 @@ insert into Users (name, age, school) values ('xxx', 20, 'xx')
 多个条件在每个条件中使用 and 拼接, 表示既满足...又满足..., 使用 or 拼接表示满足其中一个即可
 
 where not表达的思想用编程语言表达为:
+
 ```ts
-let a = 1, b = 2
+let a = 1,
+  b = 2
 let result1 = a === 1 && b === 2
-let result2 = !(a !==1 || b !== 2)
+let result2 = !(a !== 1 || b !== 2)
 ```
 
 运算符有以下几种
 
-| 运算符  | 描述 |
-| ------- | ---- |
-| =       |      |
-| <>      |   不等于   |
-| >       |      |
-| <      |      |
-| >=      |      |
-| <=      |      |
-| between |      |
-| like    |   像, like %a% -> babb满足, baa满足, abb不满足   |
-| in      |  field in (1,2,3) 就等于 field=1 or field=2 or field=3    |
+| 运算符  | 描述                                                  |
+| ------- | ----------------------------------------------------- |
+| =       |                                                       |
+| <>      | 不等于                                                |
+| >       |                                                       |
+| <       |                                                       |
+| >=      |                                                       |
+| <=      |                                                       |
+| between |                                                       |
+| like    | 像, like %a% -> babb满足, baa满足, abb不满足          |
+| in      | field in (1,2,3) 就等于 field=1 or field=2 or field=3 |
 
 ```sql
 -- 查找id为xxx的用户
@@ -136,6 +134,5 @@ select * from Users where id='xxx' and school='xxx';
 ```
 
 ### join 关联查询
-
 
 ### 聚合

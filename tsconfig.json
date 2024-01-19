@@ -4,7 +4,8 @@
     { "path": "./tsconfig.be.json" },
     { "path": "./tsconfig.fe.json" },
     { "path": "./tsconfig.vue.json" },
-    { "path": "./tsconfig.doc.json" }
+    { "path": "./tsconfig.doc.json" },
+    { "path": "./tsconfig.test.json" }
   ],
   "include": ["./*.ts"]
 }

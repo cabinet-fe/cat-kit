@@ -1,7 +1,6 @@
 ---
 layout: home
 title: CatKit
-
 hero:
   name: CatKit
   text: 基于JS的全环境开发工具包。

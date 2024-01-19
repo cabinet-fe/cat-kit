@@ -4,5 +4,5 @@
     "composite": true,
     "target": "ESNext"
   },
-  "include": ["./docs/**/*.ts", "./docs/package.json"]
+  "include": ["./docs/**/*.ts", "./docs/package.json", "./docs/.vitepress/**/*.ts"]
 }

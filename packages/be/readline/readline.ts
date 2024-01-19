@@ -8,7 +8,7 @@ import { createInterface } from 'readline'
  */
 export function readFileLine(
   filePath: string,
-  filter: (lineIndex: number, str: string) => boolean
+  filter: (lineIndex: number, str: string, content: string[]) => boolean | undefined
 ) {
   return new Promise<string[]>((rs, rj) => {
     if (!existsSync(filePath)) return rj('文件不存在')
@@ -19,11 +19,14 @@ export function readFileLine(
 
     let index = 0
     rl.on('line', str => {
-      if (filter(index, str) !== false) {
+      const ret = filter(index, str, content)
+      if (ret === true) {
         content.push(str)
         index++
-      } else {
+      } else if (ret === false)  {
         rl.close()
+      } else {
+        index++
       }
     })
 

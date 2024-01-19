@@ -1,15 +1,13 @@
 import { fileURLToPath } from 'url'
-import { readDir, DirWithoutChildren, DirFile } from './readdir'
+import { readDir, type DirWithoutChildren, type DirFile } from './readdir'
 import path, { dirname } from 'path'
+const baseUrl = import.meta.url
+const __filename = fileURLToPath(new URL(baseUrl))
+const __dirname = dirname(__filename)
+const target = path.resolve(__dirname, 'dir-test')
 
+const targetURL = new URL('./dir-test', baseUrl)
 describe('文件目录读取', () => {
-  const baseUrl = import.meta.url
-  const __filename = fileURLToPath(new URL(baseUrl))
-  const __dirname = dirname(__filename)
-  const target = path.resolve(__dirname, 'dir-test')
-
-  const targetURL = new URL('./dir-test', baseUrl)
-
   const depth1File: DirFile = {
     type: 'file',
     name: 'file',
@@ -65,20 +63,21 @@ describe('文件目录读取', () => {
   test('排除某些文件', async () => {
     const dirs = await readDir(target, {
       recursive: true,
-      exclude: [/dir/]
+      exclude: [/dir-test\/dir/]
     })
+
     expect(dirs).toEqual([depth1File])
   })
 
   test('仅包含某些文件', async () => {
     const dirs = await readDir(target, {
       recursive: true,
-      include: [/dir/]
+      include: [/dir-test\/dir/]
     })
     expect(dirs).toEqual([
       {
         ...depth1Dir,
-        children: []
+        children: [depth2File]
       }
     ])
   })

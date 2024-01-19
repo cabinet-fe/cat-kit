@@ -6,7 +6,7 @@
  * @FilePath: /cat-kit/docs/.vitepress/plugins/demo-plugin.ts
  *
  */
-import type { PluginOption } from 'vite'
+import type { Plugin } from 'vite'
 import path from 'path'
 import fs from 'fs'
 import { cwd } from 'process'
@@ -14,7 +14,7 @@ import { cwd } from 'process'
 // 该插件的作用是往md文件中插入一个vue的script标签脚本
 // vitepress检测到这个脚本时会将其作为每一个vue模板的公共script来用
 // 详细查看此文档: https://vitepress.vuejs.org/guide/using-vue#script-style-hoisting
-export function DemoPlugin(): PluginOption {
+export function DemoPlugin(): Plugin {
   return {
     name: 'md-transform',
     enforce: 'pre',
