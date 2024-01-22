@@ -3,7 +3,7 @@ layout: home
 title: CatKit
 hero:
   name: CatKit
-  text: 基于JS的全环境开发工具包。
+  text: 基于TS的全环境开发工具包。
   tagline: 现代API，高性能，类型安全， 前后端一致。
 
   image:
@@ -22,7 +22,7 @@ hero:
 features:
   - title: 统一
     icon: 🧰
-    details: 为团队而生, 统一管理代码。
+    details: 为团队而生, 前端基础设施的最前线。
   - title: 易用
     icon: 😁
     details: 新人融入无所适从? 上手慢? 这里提供了工具库的完备中文文档!
@@ -31,13 +31,13 @@ features:
     details: 除了完全利用构建工具的tree-shaking机制，还使用更少的代码实现相同的功能。
   - title: 分享
     icon: 🤝
-    details: 在实验室中发现别人的分享, 你也可以畅所欲言, 分享你的见解。
+    details: 在实验室中发现别人的分享, 你也可以在本仓库发起贡献, 分享你的见解。
   - title: 广泛
     icon: 🔭
-    details: 众所周知, 不会后端的前端不是好设计师, 所以我们涉及的内容很广泛，而不仅仅是前端。
+    details: 众所周知, 不会后端的前端不是好设计师, 所以我们涉及的内容很广泛，我们的目标是触类旁通。
   - title: 积累
     icon: 📖
-    details: 这是一个积累的过程, 我们的内容会不断的完善，沉淀, 以此提升我们应对问题的能力和效率。
+    details: 随着我们的内容不断的完善，沉淀， 最终将提升我们解决问题的效率。
 ---
 
 <script setup>
