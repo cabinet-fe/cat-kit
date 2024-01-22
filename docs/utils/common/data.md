@@ -230,13 +230,20 @@ obj({ name: '李四', age: 20 }).omit(['name'])
 
 cat-kit 中提供了一个包装函数**n**来包裹数字.
 
+### 数字计算
+函数**n**提供了4个用于计算的静态属性：
+- n.plus 加
+- n.minus 减
+- n.mul 乘
+- n.div 除
+
 ::: demo
 render(utils/common/data/number)
 :::
 
-### each
+### 遍历
 
-数字遍历
+使用n(n: number).each进行数字遍历。
 
 ```ts
 n(3).each(v => {
@@ -244,6 +251,12 @@ n(3).each(v => {
 })
 //log 1,2,3
 ```
+### 货币
+使用n(n: number).currency()进行数字货币化。
+
+::: demo
+render(utils/common/data/number-currency)
+:::
 
 ## 字符串操作
 
