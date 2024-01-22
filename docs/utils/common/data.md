@@ -230,6 +230,11 @@ obj({ name: '李四', age: 20 }).omit(['name'])
 
 cat-kit 中提供了一个包装函数**n**来包裹数字.
 
+### 小数精确
+::: demo
+render(utils/common/data/number-fixed)
+:::
+
 ### 数字计算
 函数**n**提供了4个用于计算的静态属性：
 - n.plus 加

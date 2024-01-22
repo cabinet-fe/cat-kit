@@ -1,19 +1,15 @@
 <template>
   <div class="wrap">
-    <div class="title">货币</div>
+    <div class="title">保留小数位数</div>
     <div>
-      <input type="text" v-model.number="currencyNum" />
+      <input style="width: 100px" type="text" v-model.number="fixedNum" />
       保留
       <input style="width: 100px" type="text" v-model.number="precision" />
     </div>
-    <div class="sub-title">人民币</div>
-    <div class="result">
-      结果: {{ n(currencyNum).currency('CNY', precision) }}
-    </div>
-    <div class="sub-title">人民币大写</div>
-    <div class="result">
-      结果: {{ n(currencyNum).currency('CNY_HAN', precision) }}
-    </div>
+    <div class="sub-title">原生JS</div>
+    <div class="result">结果: {{ fixedNum.toFixed(precision) }}</div>
+    <div class="sub-title">n(num).fixed()方法</div>
+    <div class="result">结果: {{ n(fixedNum).fixed(precision) }}</div>
   </div>
 </template>
 
@@ -21,9 +17,9 @@
 import { n } from '@cat-kit/fe'
 import { ref } from 'vue'
 
+const fixedNum = ref(1.255)
 const precision = ref(2)
 
-const currencyNum = ref(-123456.23)
 </script>
 
 <style scoped>
