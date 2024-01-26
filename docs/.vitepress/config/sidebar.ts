@@ -41,7 +41,7 @@ export default {
     },
   ],
   "/shared/": [
-    { text: "ai", items: [{ text: "AI", link: "/shared/ai/gpt" }] },
+    { text: "ai", items: [{ text: "AI专题", link: "/shared/ai/gpt" }] },
     {
       text: "开发者实用密码学",
       items: [
@@ -61,14 +61,45 @@ export default {
         { text: "sqlite", link: "/shared/db/sqlite" },
       ],
     },
-    { text: "玩转GitHub", items: [] },
+    {
+      text: "玩转GitHub",
+      items: [
+        { text: "创建仓库", link: "/shared/github/create-repo" },
+        { text: "github首页", link: "/shared/github/home" },
+        { text: "概要", link: "/shared/github/" },
+        { text: "议题 Issue", link: "/shared/github/issue" },
+        { text: "何为PR", link: "/shared/github/pr" },
+      ],
+    },
     { text: "图形化", items: [{ text: "概要", link: "/shared/graph/" }] },
-    { text: "# 文档开发工具", items: [] },
+    {
+      text: "其他分享",
+      items: [
+        { text: "前端详细设计", link: "/shared/others/fe-design" },
+        { text: "概要", link: "/shared/others/" },
+        { text: "前端工程师生存指南 2024版", link: "/shared/others/position" },
+        { text: "2023前端总结", link: "/shared/others/summary-2023" },
+      ],
+    },
     {
       text: "performance",
       items: [{ text: "事件性能", link: "/shared/performance/event" }],
     },
-    { text: "术语", items: [] },
+    {
+      text: "术语",
+      items: [
+        { text: "计算机基础术语", link: "/shared/term/basic" },
+        { text: "云原生", link: "/shared/term/cloud-native" },
+        { text: "容器", link: "/shared/term/container" },
+        { text: "概要", link: "/shared/term/" },
+        { text: "开源协议", link: "/shared/term/license" },
+        { text: "元编程", link: "/shared/term/meta-program" },
+        { text: "开放授权 OAuth2.0", link: "/shared/term/oauth2" },
+        { text: "REST APIs", link: "/shared/term/restful" },
+        { text: "流", link: "/shared/term/stream" },
+        { text: "工作流 workflow", link: "/shared/term/workflow" },
+      ],
+    },
     {
       text: "typescript",
       items: [

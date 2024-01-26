@@ -43,10 +43,11 @@ async function getSidebar() {
         const second: { text: string; link: string }[] = []
 
         if (firstChild.type === 'dir') {
+
           for (let k = 0; k < firstChild.children.length; k++) {
             const secondChild = firstChild.children[k]!
             try {
-              if (secondChild.type !== 'file') break
+              if (secondChild.type !== 'file') continue
               const [content] = await readFileLine(
                 secondChild.path,
                 (_, str, content) => {
