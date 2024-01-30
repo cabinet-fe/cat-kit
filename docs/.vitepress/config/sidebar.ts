@@ -75,7 +75,7 @@ export default {
     {
       text: "其他分享",
       items: [
-        { text: "前端详细设计", link: "/shared/others/fe-design" },
+        { text: "开发规范和详设", link: "/shared/others/fe-design" },
         { text: "概要", link: "/shared/others/" },
         { text: "前端工程师生存指南 2024版", link: "/shared/others/position" },
         { text: "2023前端总结", link: "/shared/others/summary-2023" },

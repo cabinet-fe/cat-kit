@@ -3,7 +3,8 @@
     <div>需要在开发模式下在项目根目录执行pnpm docs:server命令</div>
 
     <br />
-    <v-button @click="request1">发起请求></v-button> <br />
+    <v-button @click="request1">发起请求</v-button> <br />
+
     <v-button @click="request2">发起请求并使任意请求以错误的形式返回></v-button
     ><br />
     <v-button @click="request3">
@@ -14,6 +15,8 @@
     <v-button @click="request4">1s后终止所有本次发起的请求</v-button>
     <br />
     <v-button @click="request5">DELETE请求和PUT请求转换为POST请求</v-button>
+    <br />
+    <v-button @click="request6">发起二进制请求</v-button>
   </div>
 </template>
 
@@ -124,5 +127,23 @@ const request5 = () => {
   http.put('/put').then(res => {
     console.log(res)
   })
+}
+
+const request6 = async () => {
+  let buffer = new ArrayBuffer(512)
+  let u8a = new Uint8Array(buffer)
+
+  for (let i = 0; i < u8a.length; i++) {
+    u8a[i] = i % 255
+  }
+  const res = await http.post('/test3', buffer, {
+    created(req) {
+      console.log(req)
+    },
+    headers: {
+      'Content-Type': 'application/octet-stream'
+    }
+  })
+  console.log('request1: ', res.data)
 }
 </script>

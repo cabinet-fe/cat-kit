@@ -1,129 +1,193 @@
-# 前端详细设计
+# 开发规范和详设
+
+本文档提供开发规范和详细设计，每个点为何要这样设计都会给出具体的解释。
 
 ## 1. 技术选型和架构
 
+项目类型绝大部分是管理类软件，多个软件间有重合和高度定制的部分。
+
+后端基于Java(能否用Java17，有性能上的提升，不能的原因是什么？)和.net。
+
+前端基于TS。
+
 ### 1.1 通信方式
 
-使用HTTP协议，RESTFul交互风格，json格式进行数据交换。
+通信协议基于http。
 
-响应结构：
+**常见http状态码**（相当重要所有岗位都需要掌握）：
 
-```ts
-
+```JSON
 /** 状态码 */
-const HTTP_CODE = {
+ {
   /** 请求头已接收 */
-  StatusContinue: 100, // RFC 7231, 6.2.1
-  /** 请求切换协议, 服务端同意切换 */
-  StatusSwitchingProtocols: 101, // RFC 7231, 6.2.2
-  /** 正在处理 */
-  StatusProcessing: 102, // RFC 2518, 10.1
-  /** 在完整应答之前，用于向客户端先返回部分 HTTP 响应头用于提示重要资源的预先加载。 */
-  StatusEarlyHints: 103, // RFC 8297
+  "StatusContinue": 100, // RFC 7231, 6.2.1
 
   /** 请求成功完成 */
-  StatusOK: 200, // RFC 7231, 6.3.1
-  /** 请求成功完成，并且结果是一个或者多个新的资源成功创建 */
-  StatusCreated: 201, // RFC 7231, 6.3.2
-  /** 请求被接受，但是处理还没有完成 */
-  StatusAccepted: 202, // RFC 7231, 6.3.3
-  /** 203 状态码表示请求成功，但是来自源站的 200 OK 内容被中间的代理服务器做了修改 */
-  StatusNonAuthoritativeInfo: 203, // RFC 7231, 6.3.4
+  "StatusOK": 200, // RFC 7231, 6.3.1
+
   /** 服务器的响应中不会包括任何内容 */
-  StatusNoContent: 204, // RFC 7231, 6.3.5
+  "StatusNoContent": 204, // RFC 7231, 6.3.5
 
-  StatusResetContent: 205, // RFC 7231, 6.3.6
-  StatusPartialContent: 206, // RFC 7233, 4.1
-  StatusMultiStatus: 207, // RFC 4918, 11.1
-  StatusAlreadyReported: 208, // RFC 5842, 7.1
-  StatusIMUsed: 226, // RFC 3229, 10.4.1
-
-  /** 多重选择 */
-  StatusMultipleChoices: 300, // RFC 7231, 6.4.1
   /** 地址永久移动到了新的地址, Location头给出新的URI */
-  StatusMovedPermanently: 301, // RFC 7231, 6.4.2
-  StatusFound: 302, // RFC 7231, 6.4.3
-  StatusSeeOther: 303, // RFC 7231, 6.4.4
-  /** 资源未更改, 意味着从缓存中拿到资源 */
-  StatusNotModified: 304, // RFC 7232, 4.1
-  /** 使用代理 */
-  StatusUseProxy: 305, // RFC 7231, 6.4.5
+  "StatusMovedPermanently": 301, // RFC 7231, 6.4.2
 
-  StatusTemporaryRedirect: 307, // RFC 7231, 6.4.7
-  StatusPermanentRedirect: 308, // RFC 7538, 3
+  /** 资源未更改, 意味着从缓存中拿到资源 */
+  "StatusNotModified": 304, // RFC 7232, 4.1
 
   // 客户端错误
   /** 错误的请求, 通常是请求参数错误 */
-  StatusBadRequest: 400, // RFC 7231, 6.5.1
+  "StatusBadRequest": 400, // RFC 7231, 6.5.1
   /** 未进行授权 */
-  StatusUnauthorized: 401, // RFC 7235, 3.1
-  StatusPaymentRequired: 402, // RFC 7231, 6.5.2
-  /** 拒绝请求 */
-  StatusForbidden: 403, // RFC 7231, 6.5.3
+  "StatusUnauthorized": 401, // RFC 7235, 3.1
+  /** 拒绝请求，跟401类似，通常在安全软件拦截时可能出现 */
+  "StatusForbidden": 403, // RFC 7231, 6.5.3
   /** 资源不存在 */
-  StatusNotFound: 404, // RFC 7231, 6.5.4
+  "StatusNotFound": 404, // RFC 7231, 6.5.4
   /** 请求方法错误 */
-  StatusMethodNotAllowed: 405, // RFC 7231, 6.5.5
-  /** 不接受 */
-  StatusNotAcceptable: 406, // RFC 7231, 6.5.6
-  StatusProxyAuthRequired: 407, // RFC 7235, 3.2
-  /** 请求超时 */
-  StatusRequestTimeout: 408, // RFC 7231, 6.5.7
-  StatusConflict: 409, // RFC 7231, 6.5.8
-  StatusGone: 410, // RFC 7231, 6.5.9
-  StatusLengthRequired: 411, // RFC 7231, 6.5.10
-  StatusPreconditionFailed: 412, // RFC 7232, 4.2
-  StatusRequestEntityTooLarge: 413, // RFC 7231, 6.5.11
-  /** 请求的URI太长 */
-  StatusRequestURITooLong: 414, // RFC 7231, 6.5.12
-  StatusUnsupportedMediaType: 415, // RFC 7231, 6.5.13
-  StatusRequestedRangeNotSatisfiable: 416, // RFC 7233, 4.4
-  StatusExpectationFailed: 417, // RFC 7231, 6.5.14
-  StatusTeapot: 418, // RFC 7168, 2.3.3
-  StatusMisdirectedRequest: 421, // RFC 7540, 9.1.2
-  StatusUnprocessableEntity: 422, // RFC 4918, 11.2
-  StatusLocked: 423, // RFC 4918, 11.3
-  StatusFailedDependency: 424, // RFC 4918, 11.4
-  StatusTooEarly: 425, // RFC 8470, 5.2.
-  StatusUpgradeRequired: 426, // RFC 7231, 6.5.15
-  StatusPreconditionRequired: 428, // RFC 6585, 3
-  StatusTooManyRequests: 429, // RFC 6585, 4
-  StatusRequestHeaderFieldsTooLarge: 431, // RFC 6585, 5
-  StatusUnavailableForLegalReasons: 451, // RFC 7725, 3
+  "StatusMethodNotAllowed": 405, // RFC 7231, 6.5.5
+
+  /** 请求超时，通常是服务器未能在预期时间内处理完请求 */
+  "StatusRequestTimeout": 408, // RFC 7231, 6.5.7
+
+  /** 请求的URI太长，一般不会出现, 除非使用了非常长的查询参数 */
+  "StatusRequestURITooLong": 414, // RFC 7231, 6.5.12
 
   // 服务器错误
   /** 内部服务器错误 */
-  StatusInternalServerError: 500, // RFC 7231, 6.6.1
-  StatusNotImplemented: 501, // RFC 7231, 6.6.2
-  /** 错误网关 */
-  StatusBadGateway: 502, // RFC 7231, 6.6.3
-  /** 服务不可用 */
-  StatusServiceUnavailable: 503, // RFC 7231, 6.6.4
+  "StatusInternalServerError": 500, // RFC 7231, 6.6.1
+  /** 错误网关，大部分情况就是服务挂掉了，负责网关和代理的服务器无法访问这些服务 */
+  "StatusBadGateway": 502, // RFC 7231, 6.6.3
+  /** 服务不可用或者过载了，通常发生在服务更新或维护期间 */
+  "StatusServiceUnavailable": 503, // RFC 7231, 6.6.4
   /** 网关超时 */
-  StatusGatewayTimeout: 504, // RFC 7231, 6.6.5
-  /** http版本不支持 */
-  StatusHTTPVersionNotSupported: 505, // RFC 7231, 6.6.6
-  StatusVariantAlsoNegotiates: 506, // RFC 2295, 8.1
-  StatusInsufficientStorage: 507, // RFC 4918, 11.5
-  StatusLoopDetected: 508, // RFC 5842, 7.2
-  StatusNotExtended: 510, // RFC 2774, 7
-  StatusNetworkAuthenticationRequired: 511 // RFC 6585, 6
-}
-
-
-type HTTPCode = typeof HTTP_CODE
-
-type HTTPCodeNumber = HTTPCode[keyof HTTPCode]
-
-interface ResponseData {
-  /** 响应数据 */
-  data: any;
-  /** 状态码 */
-  code: HTTPCodeNumber;
-  /** 消息 */
-  message: string;
+  "StatusGatewayTimeout": 504, // RFC 7231, 6.6.5
+  /** http版本不支持，现在基本上很少出现，早期http1.0往http1.1转换的时候可能回出现 */
+  "StatusHTTPVersionNotSupported": 505, // RFC 7231, 6.6.6
 }
 ```
+
+数据交换格式统一使用JSON。
+
+## 2. 开发规范
+
+### 2.1 http请求和响应的数据结构
+
+请求:
+
+```json
+{
+  "main": {
+    "name": "xxx项目",
+    "startDate": 1706509491317,
+    "endDate": 1707509491317,
+    "amount": 25000000
+  },
+  "paymentPlan": [
+    { "ratio": 0.3, "amount": 7500000 },
+    { "ratio": 0.4, "amount": 10000000 },
+    { "ratio": 0.3, "amount": 7500000 }
+  ]
+}
+```
+
+响应格式:
+
+```json
+{
+  // 数据
+  "data": {
+    "main": {
+      "id": "1234567",
+      "name": "xxx项目",
+      "startDate": 1706509491317,
+      "endDate": 1707509491317,
+      "amount": 25000000
+    },
+    "paymentPlan": [
+      { "ratio": 0.3, "amount": 7500000 },
+      { "ratio": 0.4, "amount": 10000000 },
+      { "ratio": 0.3, "amount": 7500000 }
+    ]
+  },
+  // 错误提示信息
+  "errorMsg": ""
+}
+```
+
+::: tip 为什么用这样的格式？
+首先，这种结构化的方式更加容易阅读（类似命名空间），尤其是在仅阅读子列表字段时更加有用。
+
+其次，为了方便低代码工具生成统一的入参格式，贯彻入参的可配置化。
+
+最后，此种数据格式符合UI上的直觉，有更好的UI和数据一致性。
+:::
+
+::: warning 讨论
+对于导入导出来说，这种数据格式会更加方便吗？
+:::
+
+### 2.2 字段命名
+::: danger 前言
+无数的实践证明，不规范的命名是导致bug率和项目维护成本快速增高的最重要因素之一！
+:::
+
+在理解字段命名的重要性之前先来看一个错误的例子：
+
+```json
+{
+  "xmmc": "",
+  "xmdm": "",
+  "xmbm": "",
+  "xmdw": "",
+  "bxbm": ""
+}
+```
+上面的例子你能知道具体的含义吗？
+
+再看下面的例子:
+```json
+{
+  "projectName": "",
+  "projectId": "",
+  "contractId": "",
+  "contractAmount": 0
+}
+```
+上面的项目对象中的字段你能够分辨哪个是主键哪个是外键吗？
+
+::: tip 软件开发速度由什么决定？
+虽然不规范的命名在软件开发前期会提升开发效率，但难以贯穿整个软件生命周期。因为软件开发从来不是一个人的事情，命名规范可以影响后端，前端，测试，运维，实施，甚至产品。因此软件开发效率着重提高的是整个团队的开发效率。
+:::
+
+接下来讨论命名的一些原则：
+1. 字段和变量等应该能够通过其命名知晓其表达的含义
+2. 命名同时要兼顾简洁
+3. 在一个对象中的字段应该能够让人清晰地分清主次
+
+还是用表示一个项目的对象来举个例子，更好的做法应该如下方一样：
+```json
+{
+  "name": "",
+  "id": "",
+  "contractId": "",
+  "contractAmount": ""
+}
+```
+对象本身已经用来表示项目，名称主键等其他有主语修饰的字段应该**丢弃主语**。
+
+这样做的好处是：
+
+1. 字段变得更加简洁，同时也不会失去其语义。
+2. 当字段命名遵循一种约定俗成，就会大大减少沟通成本。
+3. 对于低代码来讲，能够减少配置的复杂度，例如下拉选择器中的文本显示配置，子节点配置。
+4. 可以清楚地知道哪些字段是内部的，哪些字段是外部的。
+
+下面是一些常用的字段命名：
+- 形容词。
+- 名词。name(名称)，code（代码,代号），date(日期)，time(时间), year(年)，month(月), dateTime(年-月-日 时:分:秒)，amount(数量, 金额)，price(单价)，fee(费用)，remark(说明，备注)，number(编号), encoding(编码), type(类型), category(分类)
+
+### 2.3 接口风格
+
 ### 1.2 技术栈
 
 - node： 用于各种脚本工具开发。
@@ -1778,10 +1842,10 @@ common/system/org/dept
 - 审批通用操作(查看3.1章节)。
 - 报销通用操作(查看3.3章节)。
 
-
 ### 4.24 审批模型设计
 
 #### 路由
+
 - 分页：/low-code/model
 - 设计：/low-code/model/design/:modelKey
 
@@ -1847,3 +1911,5 @@ font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
 ### 6.3 通知和提示
 
 操作完成后会使用绿色的弹框提示。
+
+## 测试
