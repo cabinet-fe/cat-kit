@@ -17,6 +17,8 @@
     <v-button @click="request5">DELETE请求和PUT请求转换为POST请求</v-button>
     <br />
     <v-button @click="request6">发起二进制请求</v-button>
+    <br/>
+    <v-button @click="request7">发起form-data请求</v-button>
   </div>
 </template>
 
@@ -145,5 +147,22 @@ const request6 = async () => {
     }
   })
   console.log('request1: ', res.data)
+}
+const request7 = async () => {
+  const formData = new FormData()
+  formData.append('url', 'http://192.168.31.250:9000/chunk/cd461c8890bd0a5cc5bd847321c35e51/1.chunk?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=szyh%2F20240201%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240201T055829Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=86a6064efcbc288d71075bb62b7b1ff1304d716fea76f065885fa3d1c7eb2bc4')
+
+  const buffer = new ArrayBuffer(10)
+  const u8a = new Uint8Array(buffer)
+  for (let index = 0; index < 10; index++) {
+    u8a[index] = index
+  }
+
+  const file = new File([new Blob([buffer])], 'a.js')
+  formData.append('file', file)
+  const res = await http.put('/admin/file/forwardMinio', formData, {
+
+  })
+  console.log('request7: ', res.data)
 }
 </script>
