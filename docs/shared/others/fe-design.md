@@ -201,12 +201,16 @@
 对于RESTful我们无需理解单词的含义，而是理解为一种如何定位资源，如何操作资源，如何传输资源的一种规范。
 
 RESTful设计原则：
+
 - 用URI标识资源。在WEB中其实就是URL。
+
 ```
 # URI示例
 https://example.com/project/1
 ```
+
 - 用http方法操作资源。
+
 ```yaml
 # 读取资源
 GET: https://example.com/project/1
@@ -223,6 +227,7 @@ POST: https://example.com/project
 # 读取分页资源
 GET: https://example.com/project/page
 ```
+
 - 使用JSON进行数据交互
 
 ::: tip 对比
@@ -234,11 +239,19 @@ GET: https://example.com/project/1
 # 传统读取
 GET: https://example.com/project/getInfoById?id=1
 ```
+
+REST API要更加简洁，并且当project后面的参数丢失会抛出一个404错误更加符合直觉，传统API的id参数丢失将会报400错误。
+
+当你想对创建资源和更新资源做权限控制时，传统API会更加难以维护。
+
+更重要的是，传统API创建资源和更新资源通过请求体里面是否有主键(通常为ID)来判断是创建还是更新，在调试时增加了调试复杂度。
 :::
+
 
 ## 模块设计
 
 ### 低代码
+
 
 ### 支付系统
 
