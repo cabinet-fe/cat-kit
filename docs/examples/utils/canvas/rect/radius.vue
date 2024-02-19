@@ -13,14 +13,24 @@ const rect1 = new Rect({
   h: 100,
   x: 0,
   y: 0,
+  radius: 10,
   strokeStyle: '#ccc'
 })
 
 
+const rect2 = new Rect({
+  w: 100,
+  h: 100,
+  x: 120,
+  y: 0,
+  radius: [30, 20, 40, 10],
+  strokeStyle: '#ccc'
+})
+
 const stage = new Stage({
   height: 100,
   width: 600,
-  graphs: [rect1]
+  graphs: [rect1, rect2]
 })
 
 onMounted(() => {

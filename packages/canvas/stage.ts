@@ -1,8 +1,12 @@
 import type { Graph } from './graph'
 
 interface StageConfig {
+  /** 舞台宽度 */
   width?: number
+  /** 舞台高度 */
   height?: number
+  /** 图形 */
+  graphs?: Graph[]
 }
 
 export class Stage {
@@ -10,24 +14,41 @@ export class Stage {
 
   graphs: Graph[] = []
 
-  ctx!: CanvasRenderingContext2D
+  ctx: CanvasRenderingContext2D | null = null
+
+  /** 挂载时执行的任务 */
+  private tasksWhenMounted: Array<(state: Stage) => void> = []
 
   constructor(conf: StageConfig) {
-    this.config = conf
-  }
+    const { graphs, ...restConfig } = conf
+    this.config = restConfig
 
-  private render() {
-    let i = 0
-    while (i < this.graphs.length) {
-      this.graphs[i]!.render(this.ctx)
-      i++
+    if (graphs) {
+      this.tasksWhenMounted.push((stage: Stage) => {
+        stage.ctx && graphs.forEach(graph => graph.bind(stage.ctx!))
+      })
+
+      this.graphs = graphs
     }
   }
 
+  private render() {
+    this.graphs.forEach(graph => graph.render())
+  }
+
+  /**
+   * 添加图形
+   * @param graph 图形
+   */
   append(graph: Graph) {
+    this.ctx && graph.bind(this.ctx)
     this.graphs.push(graph)
   }
 
+  /**
+   * 挂载画布
+   * @param el 容器地址，如果它是一个画布元素则直接使用它作为2d上下文，否则创建一个新的
+   */
   mount(el: HTMLElement | string) {
     const { width, height } = this.config
 
@@ -56,6 +77,11 @@ export class Stage {
       }
 
       this.ctx = el.getContext('2d')!
+    }
+
+    // 执行任务队列
+    while (this.tasksWhenMounted.length) {
+      this.tasksWhenMounted.shift()!(this)
     }
 
     this.render()

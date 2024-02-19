@@ -13,7 +13,7 @@ const rect1 = new Rect({
   h: 100,
   x: 0,
   y: 0,
-  strokeStyle: '#ccc'
+  fillStyle: '#f00'
 })
 
 
