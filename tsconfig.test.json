@@ -2,6 +2,7 @@
   "extends": "ts-conf-base/tsconfig.node.json",
   "compilerOptions": {
     "composite": true,
+    "declaration": true,
     "types": ["vitest/globals"]
   },
   "include": ["./packages/be/**/*.spec.ts", "./vitest.config.ts"],

@@ -13,18 +13,21 @@ const rect1 = new Rect({
   h: 100,
   x: 0,
   y: 0,
-  radius: 10,
-  strokeStyle: '#ccc'
+  radius: 8,
+  borderWidth: 8,
+  borderColor: '#ccc',
+  fill: '#f00',
 })
 
-
 const rect2 = new Rect({
-  w: 100,
+  w: 150,
   h: 100,
   x: 120,
   y: 0,
-  radius: [30, 20, 40, 10],
-  strokeStyle: '#ccc'
+  radius: [50, 0, 0, 50],
+  borderColor: 'blue',
+  borderWidth: 3,
+  fill: 'green'
 })
 
 const stage = new Stage({

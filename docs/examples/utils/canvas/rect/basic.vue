@@ -8,19 +8,19 @@ import { onMounted, shallowRef } from 'vue'
 
 const canvasRef = shallowRef<HTMLElement>()
 
-const rect1 = new Rect({
+const rect = new Rect({
   w: 100,
   h: 100,
   x: 0,
   y: 0,
-  strokeStyle: '#ccc'
+  borderColor: 'rgb(255, 0, 0)',
+  borderWidth: 40
 })
-
 
 const stage = new Stage({
   height: 100,
   width: 600,
-  graphs: [rect1]
+  graphs: [rect]
 })
 
 onMounted(() => {

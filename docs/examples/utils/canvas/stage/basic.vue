@@ -36,55 +36,44 @@ class Table extends Graph {
     }
   }
 
-  protected draw(): void {
-    const { ctx, scaleX, scaleY } = this
+  draw(): void {
+    const { scaleX, scaleY, stage } = this
     const { rows, cols, rowHeight, colWidth } = this.config
 
     // 绘制横线
     for (let i = 0; i <= rows; i++) {
       const y = rowHeight * i * scaleY
-      if (rows === i) {
-        console.log(colWidth * cols * scaleX)
-      }
+
       const line = new Line({
-        x1: 0,
-        y1: y,
-        x2: Math.round(colWidth * cols * scaleX),
-        y2: y ,
-        strokeStyle: '#ccc'
+        start: [0, y],
+        end: [Math.round(colWidth * cols * scaleX), y],
+        color: '#ccc'
       })
-      line.bind(ctx)
-      line.render()
+      line.bind(stage)
+      line.draw()
     }
 
     // 绘制竖线
     for (let i = 0; i <= cols; i++) {
       const x = colWidth * i * scaleX
       const line = new Line({
-        x1: x,
-        y1: 0,
-        x2: x,
-        y2: rowHeight * rows * scaleY,
-        strokeStyle: '#ccc'
+        start: [x, 0],
+        end: [x, Math.round(rowHeight * rows * scaleY)],
+        color: '#ccc'
       })
-      line.bind(ctx)
-      line.render()
+      line.bind(stage)
+      line.draw()
     }
   }
 
   scale(op: (x: number, y: number) => { x?: number; y?: number }) {
-    const { config, scaleX, scaleY } = this
+    const { scaleX, scaleY, stage } = this
     const { x, y } = op(scaleX, scaleY)
+
     this.scaleX = x ?? 1
     this.scaleY = y ?? 1
 
-    this.ctx.clearRect(
-      0,
-      0,
-      600,
-      300
-    )
-    this.draw()
+    stage.render()
   }
 }
 

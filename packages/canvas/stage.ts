@@ -1,16 +1,18 @@
 import type { Graph } from './graph'
 
-interface StageConfig {
+export interface StageConfig {
   /** 舞台宽度 */
-  width?: number
+  width: number
   /** 舞台高度 */
-  height?: number
+  height: number
   /** 图形 */
   graphs?: Graph[]
 }
 
 export class Stage {
-  config: StageConfig = {}
+  private config: Omit<StageConfig, 'graphs'>
+
+  private rendered = false
 
   graphs: Graph[] = []
 
@@ -25,15 +27,20 @@ export class Stage {
 
     if (graphs) {
       this.tasksWhenMounted.push((stage: Stage) => {
-        stage.ctx && graphs.forEach(graph => graph.bind(stage.ctx!))
+        graphs.forEach(graph => graph.bind(stage))
       })
 
       this.graphs = graphs
     }
   }
 
-  private render() {
-    this.graphs.forEach(graph => graph.render())
+  /** 渲染舞台 */
+  render() {
+    const { ctx, config } = this
+    if (!ctx) return
+    this.rendered && ctx.clearRect(0, 0, config.width, config.height)
+    this.graphs.forEach(graph => graph.draw())
+    this.rendered = true
   }
 
   /**
@@ -41,7 +48,7 @@ export class Stage {
    * @param graph 图形
    */
   append(graph: Graph) {
-    this.ctx && graph.bind(this.ctx)
+    this.ctx && graph.bind(this)
     this.graphs.push(graph)
   }
 

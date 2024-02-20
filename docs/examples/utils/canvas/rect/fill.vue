@@ -13,9 +13,8 @@ const rect1 = new Rect({
   h: 100,
   x: 0,
   y: 0,
-  fillStyle: '#f00'
+  fill: '#f00'
 })
-
 
 const stage = new Stage({
   height: 100,

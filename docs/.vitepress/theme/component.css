@@ -22,3 +22,7 @@ input, textarea {
   border-radius: 4px;
   padding: 0 4px;
 }
+
+.search-input {
+  border: 0;
+}
