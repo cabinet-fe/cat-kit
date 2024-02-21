@@ -18,6 +18,8 @@ export class Stage {
 
   ctx: CanvasRenderingContext2D | null = null
 
+  canvas: HTMLCanvasElement | null = null
+
   /** 挂载时执行的任务 */
   private tasksWhenMounted: Array<(state: Stage) => void> = []
 
@@ -71,11 +73,13 @@ export class Stage {
 
     if (!(el instanceof HTMLCanvasElement)) {
       const canvas = document.createElement('canvas')
+      this.canvas = canvas
       canvas.width = width || el.offsetWidth
       canvas.height = height || el.offsetHeight
       el.appendChild(canvas)
       this.ctx = canvas.getContext('2d')!
     } else {
+      this.canvas = el
       if (width) {
         el.width = width
       }
@@ -91,6 +95,18 @@ export class Stage {
       this.tasksWhenMounted.shift()!(this)
     }
 
+    this.registerEvents()
+
     this.render()
+  }
+
+
+  /**
+   * 注册事件
+   */
+  registerEvents() {
+    const { canvas } = this
+    if (!canvas) return
+    canvas.addEventListener('click', e => {})
   }
 }

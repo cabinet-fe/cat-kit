@@ -120,6 +120,7 @@ export default {
     {
       text: "画布工具",
       items: [
+        { text: "圆形", link: "/utils/canvas/circle" },
         { text: "概要", link: "/utils/canvas/" },
         { text: "线段", link: "/utils/canvas/line" },
         { text: "矩形", link: "/utils/canvas/rect" },
