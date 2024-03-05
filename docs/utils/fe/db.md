@@ -18,6 +18,10 @@
 
 第一次打开数据库需要用户点击同意, 否则将无法连接数据库
 
+::: demo
+render(utils/fe/db/basic)
+:::
+
 ### 数据库版本
 数据库版本号是一个整数, 用来描述你的数据库的版本, 数据库版本存在目的是
 
@@ -36,8 +40,4 @@ cat-kit中的数据库操作
 
 ### 连接数据库
 
-```ts
-import { openDB } from 'cat-kit'
 
-const db = openDB()
-```
