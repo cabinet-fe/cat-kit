@@ -30,8 +30,9 @@ const data = shallowRef<Data[]>([
 
 type DataItem = (typeof data.value)[number]
 
+// TreeNode是一个抽象类，所以你必须派生出自己的子类才能使用树相关的API
 class CustomTreeNode<Val extends Record<string, any>> extends TreeNode<Val> {
-  children?: CustomTreeNode<Val>[] = undefined
+  children?: CustomTreeNode<Val>[]
 
   parent: CustomTreeNode<Val> | null = null
 
@@ -55,9 +56,7 @@ class CustomTreeNode<Val extends Record<string, any>> extends TreeNode<Val> {
 }
 
 const forest = computed(() => {
-  return Forest.create(data.value, (val, index, parent) =>
-    shallowReactive(new CustomTreeNode(val, index, parent))
-  )
+  return Forest.create(data.value, CustomTreeNode)
 })
 
 const NodeRender = defineComponent({

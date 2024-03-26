@@ -11,17 +11,22 @@ export class Tree<Node extends TreeNode> {
    * 生成树形结构数据
    *
    * @param val - 原始数据
-   * @param createNode - 创建节点的回调函数
+   * @param Node - 节点类
    * @param childrenKey - 子节点的键名，默认为 'children'
    * @returns 生成的树形结构数据
    */
   static create<Val extends Record<string, any>, Node extends TreeNode<Val>>(
     val: Val,
-    createNode: (data: Val, index: number, parent?: any) => Node,
+    Node: {
+      new (val: Val, index: number): Node
+    },
     childrenKey = 'children'
   ): Tree<Node> {
     function generate(data: any, index: number, parent?: any) {
-      const node = createNode(data, index, parent)
+      const node = new Node(data, index)
+      if (parent) {
+        node.parent = parent
+      }
       const children = data[childrenKey]
       if (Array.isArray(children) && children.length) {
         node.children = children.map((item, index) =>
@@ -159,13 +164,24 @@ export class Forest<Node extends TreeNode> {
     this.virtualRoot = node
   }
 
+  /**
+   * 创建树结构
+   * @param data - 树结构的根节点数据
+   * @param Node - 节点类
+   * @param childrenKey - 子节点的键名，默认为'children'
+   */
   static create<Data extends any[], Node extends TreeNode<Data[number]>>(
     data: Data,
-    createNode: (data: Data[number], index: number, parent?: any) => Node,
+    Node: {
+      new (val: Data[number], index: number): Node
+    },
     childrenKey = 'children'
   ): Forest<Node> {
     function generate(data: any, index: number, parent?: any) {
-      const node = createNode(data, index, parent)
+      const node = new Node(data, index)
+      if (parent) {
+        node.parent = parent
+      }
       const children = data[childrenKey]
       if (Array.isArray(children) && children.length) {
         node.children = children.map((item, index) =>
@@ -176,7 +192,7 @@ export class Forest<Node extends TreeNode> {
       return node
     }
 
-    const virtualRoot = createNode({}, 0)
+    const virtualRoot = new Node({}, 0)
     const nodes = data.map((item, index) => generate(item, index, virtualRoot))
     virtualRoot.children = nodes
     return new Forest(virtualRoot)
