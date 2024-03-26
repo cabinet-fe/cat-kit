@@ -51,7 +51,7 @@ export class Tree<Node extends TreeNode> {
     data: T,
     cb: (item: T) => boolean | void,
     childrenKey = 'children'
-  ) {
+  ): false | undefined {
     if (cb(data) === false) return false
 
     let children = data[childrenKey]
@@ -74,8 +74,8 @@ export class Tree<Node extends TreeNode> {
     root: T,
     cb: (item: T) => void | boolean,
     childrenKey = 'children'
-  ) {
-    const queue: T[] = []
+  ): void {
+    let queue: T[] = []
 
     queue.push(root)
 
@@ -85,11 +85,7 @@ export class Tree<Node extends TreeNode> {
 
       let children = node[childrenKey]
       if (!!children) {
-        let i = 0
-        while (i < children.length) {
-          queue.push(children[i])
-          i++
-        }
+        queue = queue.concat(children)
       }
     }
   }
@@ -151,6 +147,29 @@ export class Tree<Node extends TreeNode> {
   append(creator: (index: number) => Node) {
     return this.root.append(creator)
   }
+
+  /**
+   * 广度优先遍历树结构，并对每个节点执行回调函数。
+   * @param cb - 回调函数，接收当前节点作为参数，返回值为布尔值或无返回值, 当返回值为false时停止遍历。
+   * @param childrenKey - 子节点的键名。
+   * @returns 返回布尔值，表示是否遇到了回调函数返回 `false` 的节点。
+   */
+  bft(cb: (item: Node) => boolean | void, childrenKey?: string): void {
+    return Tree.bft(this.root, cb, childrenKey)
+  }
+
+  /**
+   * 深度优先遍历树结构，并对每个节点执行回调函数。
+   * @param cb - 回调函数，接收当前节点作为参数，返回值为布尔值或无返回值, 当返回值为false时停止遍历。
+   * @param childrenKey - 子节点的键名。
+   * @returns 返回布尔值，表示是否遇到了回调函数返回 `false` 的节点。
+   */
+  dft(
+    cb: (item: Node) => boolean | void,
+    childrenKey?: string
+  ): false | undefined {
+    return Tree.dft(this.root, cb, childrenKey)
+  }
 }
 
 export class Forest<Node extends TreeNode> {
@@ -201,6 +220,45 @@ export class Forest<Node extends TreeNode> {
   /** 追加节点 */
   append(creator: (index: number) => Node) {
     return this.virtualRoot.append(creator)
+  }
+
+  /**
+   * 广度优先遍历树结构，并对每个节点执行回调函数。
+   * @param cb - 回调函数，接收当前节点作为参数，返回值为布尔值或无返回值, 当返回值为false时停止遍历。
+   * @param childrenKey - 子节点的键名。
+   * @returns 返回布尔值，表示是否遇到了回调函数返回 `false` 的节点。
+   */
+  bft(cb: (item: Node) => boolean | void, childrenKey = 'children'): void {
+    let queue = [...this.nodes]
+    while (queue.length) {
+      const node = queue.shift()!
+      const result = cb(node)
+      if (result === false) return
+      const children = node[childrenKey]
+      if (!!children) {
+        queue = queue.concat(children)
+      }
+    }
+  }
+
+  /**
+   * 深度优先遍历树结构，并对每个节点执行回调函数。
+   * @param cb - 回调函数，接收当前节点作为参数，返回值为布尔值或无返回值, 当返回值为false时停止遍历。
+   * @param childrenKey - 子节点的键名。
+   * @returns 返回布尔值，表示是否遇到了回调函数返回 `false` 的节点。
+   */
+  dft(
+    cb: (item: Node) => boolean | void,
+    childrenKey?: string
+  ): false | undefined {
+    let failed = false
+    this.nodes.forEach(node => {
+      const result = Tree.dft(node, cb, childrenKey)
+      if (result === false) {
+        failed = true
+      }
+    })
+    return failed ? false : undefined
   }
 }
 

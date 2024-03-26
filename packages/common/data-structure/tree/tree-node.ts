@@ -1,15 +1,11 @@
 import { omitArr } from '../../data/array'
 
-interface ITreeNode<Val extends Record<string, any>> {
-  new (val: Val, index: number): any
-}
-
 /**
  * 树节点
  * @example 继承 TreeNode 示例
  * ```
  * class CustomTreeNode<Val extends Record<string, any>> extends TreeNode<Val> {
- *   override children?: CustomTreeNode<Val>[] = undefined
+ *    override children?: CustomTreeNode<Val>[] = undefined
  *
  *    override parent: CustomTreeNode<Val> | null = null
  *

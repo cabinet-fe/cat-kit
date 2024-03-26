@@ -1,4 +1,4 @@
-import { Tree, TreeNode } from './tree'
+import { Forest, Tree, TreeNode } from './tree'
 
 class Node<Val extends Record<string, any>> extends TreeNode<Val> {
   parent: Node<Val> | null = null
@@ -87,5 +87,28 @@ describe('树', () => {
   test('获取多个', () => {
     const children = Tree.getChildren(tree.root, v => v.value.id < 4)
     expect(children.length).toBe(3)
+  })
+
+  const forest = Forest.create(
+    [
+      { id: 1, children: [{ id: 2 }, { id: 3, children: [{ id: 4 }] }] },
+      { id: 5 }
+    ],
+    Node
+  )
+  test('森林', () => {
+    const bftQueue: number[] = []
+    const dftQueue: number[] = []
+
+    forest.bft(node => {
+      bftQueue.push(node.value.id)
+    })
+
+    forest.dft(node => {
+      dftQueue.push(node.value.id)
+    })
+
+    expect(bftQueue).toEqual([1, 5, 2, 3, 4])
+    expect(dftQueue).toEqual([1, 2, 3, 4, 5])
   })
 })
