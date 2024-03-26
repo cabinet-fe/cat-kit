@@ -56,7 +56,10 @@ const node = new TreeNode({ id: 1 }, 0)
 node.append((index) =>  new TreeNode({ id: 2 }, index))
 ```
 
-### 一个例子
+
+### 构建树形组件
+
+对于前端来说，通常使用派生出的Forest(森林)API来构建树相关的组件，森林和树唯一的区别在于森林拥有多个根节点。
 
 ::: demo
 render(utils/common/data-structure/tree)

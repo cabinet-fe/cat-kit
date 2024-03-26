@@ -1,14 +1,14 @@
 <template>
   <div>
     <JsonEditor v-model="data" />
-    <NodeRender v-for="node of tree.children" :node="node" />
+    <NodeRender v-for="node of forest.nodes" :node="node" />
   </div>
 </template>
 
 <script lang="tsx" setup>
-import { Tree, TreeNode } from '@cat-kit/fe'
+import { Forest, TreeNode } from '@cat-kit/fe'
 import {
-  PropType,
+  type PropType,
   computed,
   defineComponent,
   shallowReactive,
@@ -31,9 +31,9 @@ const data = shallowRef<Data[]>([
 type DataItem = (typeof data.value)[number]
 
 class CustomTreeNode<Val extends Record<string, any>> extends TreeNode<Val> {
-  override children?: CustomTreeNode<Val>[] = undefined
+  children?: CustomTreeNode<Val>[] = undefined
 
-  override parent: CustomTreeNode<Val> | null = null
+  parent: CustomTreeNode<Val> | null = null
 
   expanded = true
 
@@ -43,11 +43,19 @@ class CustomTreeNode<Val extends Record<string, any>> extends TreeNode<Val> {
     if (parent) {
       this.parent = parent
     }
+    return shallowReactive(this)
+  }
+
+  createNode<Val extends Record<string, any>>(
+    val: Val,
+    index: number
+  ): TreeNode<Val> {
+    return new CustomTreeNode(val, index)
   }
 }
 
-const tree = computed(() => {
-  return Tree.create({ id: -1, children: data.value }, (val, index, parent) =>
+const forest = computed(() => {
+  return Forest.create(data.value, (val, index, parent) =>
     shallowReactive(new CustomTreeNode(val, index, parent))
   )
 })
@@ -73,15 +81,14 @@ const NodeRender = defineComponent({
     }
 
     const append = () => {
-      props.node.append(index =>
-        shallowReactive(new CustomTreeNode({ id: Math.random() }, index))
-      )
+      props.node.append({ id: Math.random() })
     }
 
     const insert = () => {
-      props.node.addToNext(index =>
-        shallowReactive(new CustomTreeNode({ id: Math.random() }, index))
-      )
+      props.node.addToNext({ id: Math.random() })
+    }
+    const insertBefore = () => {
+      props.node.addToPrev({ id: Math.random() })
     }
 
     return () => {
@@ -91,11 +98,14 @@ const NodeRender = defineComponent({
           <div style={{ paddingLeft: (node.depth - 1) * 20 + 'px' }}>
             <span>- {node.value.id}</span>
             {!node.isLeaf ? (
-              <VButton onClick={toggleExpand}>{node.expanded ? '收起' : '展开'}</VButton>
+              <VButton onClick={toggleExpand}>
+                {node.expanded ? '收起' : '展开'}
+              </VButton>
             ) : null}
             <VButton onClick={handleDelete}>删除</VButton>
             <VButton onClick={append}>添加</VButton>
             <VButton onClick={insert}>插入到当前行下</VButton>
+            <VButton onClick={insertBefore}>插入到当前行前</VButton>
           </div>
 
           {node.expanded

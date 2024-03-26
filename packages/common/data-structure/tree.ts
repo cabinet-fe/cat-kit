@@ -1,6 +1,12 @@
 import { TreeNode } from './tree/tree-node'
 
-export const Tree = {
+export class Tree<Node extends TreeNode> {
+  readonly root: Node
+
+  constructor(root: Node) {
+    this.root = root
+  }
+
   /**
    * 生成树形结构数据
    *
@@ -9,16 +15,16 @@ export const Tree = {
    * @param childrenKey - 子节点的键名，默认为 'children'
    * @returns 生成的树形结构数据
    */
-  create<Val extends Record<string, any>, Node extends Record<string, any>>(
+  static create<Val extends Record<string, any>, Node extends TreeNode<Val>>(
     val: Val,
     createNode: (data: Val, index: number, parent?: any) => Node,
     childrenKey = 'children'
-  ): Node {
+  ): Tree<Node> {
     function generate(data: any, index: number, parent?: any) {
       const node = createNode(data, index, parent)
       const children = data[childrenKey]
       if (Array.isArray(children) && children.length) {
-        ;(node as any).children = children.map((item, index) =>
+        node.children = children.map((item, index) =>
           generate(item, index, node)
         )
       }
@@ -26,8 +32,8 @@ export const Tree = {
       return node
     }
 
-    return generate(val, 0)
-  },
+    return new Tree(generate(val, 0))
+  }
 
   /**
    * 深度优先遍历树结构，并对每个节点执行回调函数。
@@ -36,7 +42,7 @@ export const Tree = {
    * @param childrenKey - 子节点的键名。
    * @returns 返回布尔值，表示是否遇到了回调函数返回 `false` 的节点。
    */
-  dft<T extends Record<string, any>>(
+  static dft<T extends Record<string, any>>(
     data: T,
     cb: (item: T) => boolean | void,
     childrenKey = 'children'
@@ -51,7 +57,7 @@ export const Tree = {
         i++
       }
     }
-  },
+  }
 
   /**
    * 广度优先遍历树结构
@@ -59,7 +65,7 @@ export const Tree = {
    * @param cb - 遍历回调函数，返回值为false时中断遍历
    * @param childrenKey - 子节点属性名，默认为'children'
    */
-  bft<T extends Record<string, any>>(
+  static bft<T extends Record<string, any>>(
     root: T,
     cb: (item: T) => void | boolean,
     childrenKey = 'children'
@@ -81,7 +87,7 @@ export const Tree = {
         }
       }
     }
-  },
+  }
 
   /**
    * 获取节点的子节点
@@ -90,7 +96,7 @@ export const Tree = {
    * @param childrenKey 子节点键名，默认为'children'
    * @returns 符合条件的子节点数组
    */
-  getChildren<Node extends Record<string, any>>(
+  static getChildren<Node extends Record<string, any>>(
     node: Node,
     matcher: (node: Node) => boolean,
     childrenKey = 'children'
@@ -104,7 +110,7 @@ export const Tree = {
       childrenKey
     )
     return ret
-  },
+  }
 
   /**
    * 获取满足条件的第一个子节点。
@@ -114,7 +120,7 @@ export const Tree = {
    * @param childrenKey - 访问父节点中子节点的键。
    * @returns 第一个满足条件的子节点，如果没有匹配项则返回 null。
    */
-  getChild<Node extends Record<string, any>>(
+  static getChild<Node extends Record<string, any>>(
     node: Node,
     matcher: (node: Node) => boolean,
     childrenKey = 'children'
@@ -134,9 +140,52 @@ export const Tree = {
       childrenKey
     )
     return ret
-  },
+  }
 
-  flat() {}
+  /** 追加节点 */
+  append(creator: (index: number) => Node) {
+    return this.root.append(creator)
+  }
+}
+
+export class Forest<Node extends TreeNode> {
+  private virtualRoot!: Node
+
+  get nodes(): Node[] {
+    return this.virtualRoot.children! as Node[]
+  }
+
+  constructor(node: Node) {
+    this.virtualRoot = node
+  }
+
+  static create<Data extends any[], Node extends TreeNode<Data[number]>>(
+    data: Data,
+    createNode: (data: Data[number], index: number, parent?: any) => Node,
+    childrenKey = 'children'
+  ): Forest<Node> {
+    function generate(data: any, index: number, parent?: any) {
+      const node = createNode(data, index, parent)
+      const children = data[childrenKey]
+      if (Array.isArray(children) && children.length) {
+        node.children = children.map((item, index) =>
+          generate(item, index, node)
+        )
+      }
+
+      return node
+    }
+
+    const virtualRoot = createNode({}, 0)
+    const nodes = data.map((item, index) => generate(item, index, virtualRoot))
+    virtualRoot.children = nodes
+    return new Forest(virtualRoot)
+  }
+
+  /** 追加节点 */
+  append(creator: (index: number) => Node) {
+    return this.virtualRoot.append(creator)
+  }
 }
 
 export { TreeNode }
