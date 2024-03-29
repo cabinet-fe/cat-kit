@@ -5,7 +5,7 @@ class Node<Val extends Record<string, any>> extends TreeNode<Val> {
 
   override children?: Node<Val>[]
 
-  createNode<Val extends Record<string, any>>(
+  createNode(
     val: Val,
     index: number
   ): Node<Val> {

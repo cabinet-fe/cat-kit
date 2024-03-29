@@ -178,7 +178,7 @@ export abstract class TreeNode<
    * @param val 节点数据
    * @param index 节点索引
    */
-  abstract createNode<Val extends Record<string, any>>(
+  abstract createNode(
     val: Val,
     index: number
   ): TreeNode<Val>
