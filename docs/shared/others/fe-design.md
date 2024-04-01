@@ -128,8 +128,8 @@ const requestJSON =  {
     "baseInfo": {
       "id": "1234567",
       "name": "xxx项目",
-      "startDate": 1706509491317,
-      "endDate": 1707509491317,
+      "startDate": "2024-01-01",
+      "endDate": "2024-05-01",
       "amount": 25000000
     },
     "paymentPlan": [
