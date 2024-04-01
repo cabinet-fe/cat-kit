@@ -39,7 +39,6 @@ fn main() {
 
 ## 职级评定 Level
 
-
 ### 初级前端工程师 L1
 
 仅能完成简单模块和项目的开发工作，难以胜任复杂模块的开发。通常是入行不久，有1年或不到1年的工作经验。
@@ -113,6 +112,7 @@ fn main() {
 ## 前端内容体系
 
 - CSS
+
   - 框架。 tailwind, unocss, animate
   - BEM
   - Houdini
@@ -148,24 +148,30 @@ fn main() {
   - BPMN
 
 ## 前端内容体系扩展
+
 - 数据库
   - sequelize
   - prisma
   - typeorm
 - 自动化 & 机器人流程自动化 - RPA
+
   - puppeteer
   - wechaty
 
 - 云函数开发
 
 - E2E端到端测试
+
   - cypress
 
 - 单元测试
+
   - vitest
 
 - 办公
+
   - excel
+
     - sheetjs
     - luckysheet
     - xlsx-populate
@@ -178,11 +184,13 @@ fn main() {
     - PDF.js
 
 - 解压缩
+
   - jszip
   - pako
   - adm-zip
 
 - 构建编译工具
+
   - vite
   - swc
   - esbuild
@@ -191,26 +199,32 @@ fn main() {
   - turbo repo
 
 - 代理
+
   - http-proxy
   - http-proxy-middleware
 
 - 限流
+
   - rate-limiter-flexible
 
 - 序列化
+
   - protobuf
 
 - RPC
+
   - grpc-js
   - thrift
 
 - 爬虫
+
   - node-crawler
   - x-ray
   - headless-chrome-crawler
   - node-osmosis
 
 - AST抽象语法树
+
   - babel-parser
   - acorn
   - antlr
@@ -221,6 +235,7 @@ fn main() {
   - sval
 
 - 硬件
+
   - johnny-five
   - serialport
   - usb
@@ -230,13 +245,16 @@ fn main() {
   - spi-device
 
 - 机器学习和神经网络
+
   - tfjs
 
 - 自然语言处理
+
   - compromise
   - natural
 
 - GPT
+
   - chatgpt
   - @waylaidwanderer/chatgpt-api
   - open-ai
@@ -245,21 +263,3 @@ fn main() {
 - OCR
   - paddle-ocr
   - easy-ocr
-
-## 前路漫漫 大浪淘沙
-
-前端工程师如何积极应对挑战?
-
-1. 持续学习
-2. 实践出真知
-3. 寻求反馈
-4. 拓宽技能边界
-5. 积极拥抱变化
-
-## 2024到了
-
-潜龙在渊 龙战于野
-
-龙吟虎啸 龙行虎步
-
-龙争虎斗 龙腾虎跃！
