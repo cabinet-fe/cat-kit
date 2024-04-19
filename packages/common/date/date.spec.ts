@@ -1,4 +1,4 @@
-import { date } from './date'
+import { date, type Dater } from './date'
 
 describe('日期测试', () => {
   let today = new Date()
@@ -27,11 +27,11 @@ describe('日期测试', () => {
   })
 
   it('设置匹配器', () => {
-    date.setMatcher('w+', (date: Date, len: number) => {
+    date.setMatcher('w+', (date: Dater, len: number) => {
       if (len === 1) {
-        return date.getDay() + ''
+        return date.weekDay + ''
       } else {
-        return '0' + date.getDay()
+        return '0' + date.weekDay
       }
     })
     expect(date('2022-02-14').format('w')).toBe('1')
@@ -64,5 +64,10 @@ describe('日期测试', () => {
     expect(date('2022-10-05').toEndOfMonth().day).toBe(31)
   })
 
+  it('获取一个月的天数', () => {
+    expect(date('2024-04-19').getDays()).toBe(30)
+    expect(date('2024-03-01').getDays()).toBe(31)
+    expect(date('2024-04-11').getDays()).toBe(30)
+  })
 
 })

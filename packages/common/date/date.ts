@@ -15,40 +15,56 @@ class Dater {
 
   private date!: Date
 
-  private static matchers: Record<string, (date: Date, len: number) => string> =
-    {
-      yyyy: (date: Date) => date.getFullYear() + '',
-      YYYY: (date: Date) => date.getFullYear() + '',
-      'M+': (date: Date, len: number) => {
-        let month = `${date.getMonth() + 1}`
-        return len === 1 ? month : `0${month}`.slice(-2)
-      },
-      'd+': (date: Date, len: number) => {
-        let day = date.getDate() + ''
-        return len === 1 ? day : `0${day}`.slice(-2)
-      },
-      'h+': (date: Date, len: number) => {
-        let hour = date.getHours()
-        let strHour = (hour > 12 ? hour - 12 : hour) + ''
-        return len === 1 ? strHour : `0${strHour}`.slice(-2)
-      },
-      'H+': (date: Date, len: number) => {
-        let Hour = `${date.getHours()}`
-        return len === 1 ? Hour : `0${Hour}`.slice(-2)
-      },
-      'm+': (date: Date, len: number) => {
-        let mih = `${date.getMinutes()}`
-        return len === 1 ? mih : `0${mih}`.slice(-2)
-      },
-      's+': (date: Date, len: number) => {
-        let sec = `${date.getSeconds()}`
-        return len === 1 ? sec : `0${sec}`.slice(-2)
-      }
+  /** 原始日期对象 */
+  get raw() {
+    return this.date
+  }
+
+  private static matchers: Record<
+    string,
+    (date: Dater, len: number) => string
+  > = {
+    yyyy: date => `${date.year}`,
+    YYYY: date => `${date.year}`,
+    'M+': (date, len: number) => {
+      let month = date.month + ''
+      return len === 1 ? month : `0${month}`.slice(-2)
+    },
+    'd+': (date, len: number) => {
+      let day = date.day + ''
+      return len === 1 ? day : `0${day}`.slice(-2)
+    },
+    'D+': (date, len: number) => {
+      let day = date.day + ''
+      return len === 1 ? day : `0${day}`.slice(-2)
+    },
+    'h+': (date, len: number) => {
+      let hour = date.hour
+      let strHour = (hour > 12 ? hour - 12 : hour) + ''
+      return len === 1 ? strHour : `0${strHour}`.slice(-2)
+    },
+    'H+': (date, len: number) => {
+      let Hour = `${date.hour}`
+      return len === 1 ? Hour : `0${Hour}`.slice(-2)
+    },
+    'm+': (date, len: number) => {
+      let mih = `${date.minute}`
+      return len === 1 ? mih : `0${mih}`.slice(-2)
+    },
+    's+': (date, len: number) => {
+      let sec = `${date.second}`
+      return len === 1 ? sec : `0${sec}`.slice(-2)
     }
+  }
 
   /** 时间戳 */
   get timestamp() {
     return this.date.getTime()
+  }
+
+  setTime(timestamp: number) {
+    this.date.setTime(timestamp)
+    return this
   }
 
   /** 年 */
@@ -56,9 +72,37 @@ class Dater {
     return this.date.getFullYear()
   }
 
+  /**
+   * 设置年份
+   * @param year 年份
+   * @param month 月份
+   * @param date 日期
+   * @returns
+   */
+  setYear(year: number, month?: number, date?: number) {
+    this.date.setFullYear(year, month, date)
+    return this
+  }
+
   /** 月 */
   get month() {
     return this.date.getMonth() + 1
+  }
+
+  /**
+   * 设置月份
+   * @param month 月份，从1开始
+   * @param day 日期
+   * @returns
+   */
+  setMonth(month: number, day?: number) {
+    this.date.setMonth(month - 1, day)
+    return this
+  }
+
+  /** 周 */
+  get weekDay() {
+    return this.date.getDay()
   }
 
   /** 日 */
@@ -66,9 +110,31 @@ class Dater {
     return this.date.getDate()
   }
 
+  setDay(day: number) {
+    this.date.setDate(day)
+    return this
+  }
+
   /** 时 */
   get hour(): number {
     return this.date.getHours()
+  }
+  /** 时 */
+  get hours(): number {
+    return this.date.getHours()
+  }
+
+  /**
+   * 设置小时
+   * @param hours 时
+   * @param min 分
+   * @param sec 秒
+   * @param ms 毫秒
+   * @returns
+   */
+  setHours(hours: number, min?: number, sec?: number, ms?: number) {
+    this.date.setHours(hours, min, sec, ms)
+    return this
   }
 
   /** 分 */
@@ -76,12 +142,43 @@ class Dater {
     return this.date.getMinutes()
   }
 
+  /** 分 */
+  get minutes() {
+    return this.date.getMinutes()
+  }
+
+  /**
+   * 设置分
+   * @param minutes 分
+   * @param sec 秒
+   * @param ms 毫秒
+   */
+  setMinutes(minutes: number, sec?: number, ms?: number) {
+    this.date.setMinutes(minutes, sec, ms)
+  }
+
   /** 秒 */
   get second() {
     return this.date.getSeconds()
   }
+  /** 秒 */
+  get seconds() {
+    return this.date.getSeconds()
+  }
 
-  static setMatcher(reg: string, matcher: (date: Date, len: number) => string) {
+  /**
+   * 设置秒
+   * @param sec 秒
+   * @param ms 毫秒
+   */
+  setSeconds(sec: number, ms?: number) {
+    this.date.setSeconds(sec, ms)
+  }
+
+  static setMatcher(
+    reg: string,
+    matcher: (date: Dater, len: number) => string
+  ) {
     Dater.matchers[reg] = matcher
   }
 
@@ -98,7 +195,7 @@ class Dater {
   format(formatter = 'yyyy-MM-dd'): string {
     Object.keys(Dater.matchers).forEach(reg => {
       formatter = formatter.replace(new RegExp(`(${reg})`), str => {
-        return Dater.matchers[reg]!(this.date, str.length)
+        return Dater.matchers[reg]!(this, str.length)
       })
     })
     return formatter
@@ -154,12 +251,25 @@ class Dater {
     return reducer(year, month, day)
   }
 
-  /** 跳转至月尾 */
-  toEndOfMonth(month?: number) {
-    this.date.setMonth(this.month + (month || 0))
+  /**
+   * 跳转至月尾
+   * @param offsetMonth 月份偏移量，默认为0，即当月
+   */
+  toEndOfMonth(offsetMonth = 0) {
+    this.date.setMonth(this.month + offsetMonth)
     this.date.setDate(0)
 
     return this
+  }
+
+  /**
+   * 获取这个月的天数
+   */
+  getDays() {
+    const { timestamp } = this
+    const days = this.toEndOfMonth().day
+    this.setTime(timestamp)
+    return days
   }
 }
 
@@ -171,7 +281,7 @@ interface DateFactory {
    */
   use: (plugin: (dater: typeof Dater) => void) => void
   /** 获取所有的匹配器 */
-  getMatchers: () => Record<string, (date: Date, len: number) => string>
+  getMatchers: () => Record<string, (date: Dater, len: number) => string>
   /**
    * 设置匹配器，你可以新增或者覆盖原本的配器
    * @param reg 匹配器名称
@@ -179,7 +289,7 @@ interface DateFactory {
    */
   setMatcher: (
     reg: string,
-    matcher: (date: Date, len: number) => string
+    matcher: (date: Dater, len: number) => string
   ) => void
 
   /**

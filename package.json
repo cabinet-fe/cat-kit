@@ -1,6 +1,6 @@
 {
   "name": "cat-kit",
-  "version": "3.4.16",
+  "version": "3.4.17",
   "description": "前后端一体开发工具包",
   "scripts": {
     "gen-sidebar": "tsx ./cmd/gen-sidebar.ts",
@@ -44,16 +44,10 @@
   },
   "types": "fe/index.d.ts",
   "homepage": "https://github.com/cabinet-fe/cat-kit#readme",
-  "keywords": [
-    "ts开发工具包",
-    "cat-kit",
-    "技术文档"
-  ],
+  "keywords": ["ts开发工具包", "cat-kit", "技术文档"],
   "author": "Yuan He Team FE",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cabinet-fe/cat-kit/issues"
-  },
+  "bugs": { "url": "https://github.com/cabinet-fe/cat-kit/issues" },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.11.16",

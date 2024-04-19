@@ -1,11 +1,9 @@
 {
   "name": "@cat-kit/crypto",
-  "version": "3.4.13",
+  "version": "3.4.17",
   "description": "喵喵工具箱加密分包",
   "main": "index.ts",
   "author": "YH FE",
   "type": "module",
-  "dependencies": {
-    "@cat-kit/fe": "workspace:*"
-  }
+  "dependencies": { "@cat-kit/fe": "workspace:*" }
 }
