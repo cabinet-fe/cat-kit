@@ -75,12 +75,10 @@ class Dater {
   /**
    * 设置年份
    * @param year 年份
-   * @param month 月份
-   * @param date 日期
    * @returns
    */
-  setYear(year: number, month?: number, date?: number) {
-    this.date.setFullYear(year, month, date)
+  setYear(year: number) {
+    this.date.setFullYear(year)
     return this
   }
 
@@ -92,11 +90,10 @@ class Dater {
   /**
    * 设置月份
    * @param month 月份，从1开始
-   * @param day 日期
    * @returns
    */
-  setMonth(month: number, day?: number) {
-    this.date.setMonth(month - 1, day)
+  setMonth(month: number) {
+    this.date.setMonth(month - 1)
     return this
   }
 
@@ -127,13 +124,10 @@ class Dater {
   /**
    * 设置小时
    * @param hours 时
-   * @param min 分
-   * @param sec 秒
-   * @param ms 毫秒
    * @returns
    */
-  setHours(hours: number, min?: number, sec?: number, ms?: number) {
-    this.date.setHours(hours, min, sec, ms)
+  setHours(hours: number) {
+    this.date.setHours(hours)
     return this
   }
 
@@ -150,11 +144,9 @@ class Dater {
   /**
    * 设置分
    * @param minutes 分
-   * @param sec 秒
-   * @param ms 毫秒
    */
-  setMinutes(minutes: number, sec?: number, ms?: number) {
-    this.date.setMinutes(minutes, sec, ms)
+  setMinutes(minutes: number) {
+    this.date.setMinutes(minutes)
   }
 
   /** 秒 */
@@ -169,10 +161,9 @@ class Dater {
   /**
    * 设置秒
    * @param sec 秒
-   * @param ms 毫秒
    */
-  setSeconds(sec: number, ms?: number) {
-    this.date.setSeconds(sec, ms)
+  setSeconds(sec: number) {
+    this.date.setSeconds(sec)
   }
 
   static setMatcher(
