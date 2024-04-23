@@ -69,12 +69,12 @@ export interface ReadDirOptions<
    */
   recursive?: R
   /**
-   * 排除的项, 可以是字符串或者正则表达式
+   * 排除的项的名称或路径, 可以是字符串或者正则表达式
    * @default ['node_modules']
    */
   exclude?: (string | RegExp)[]
   /**
-   * 包含的项, 可以是字符串或者正则表达式
+   * 包含的项的名称或路径, 可以是字符串或者正则表达式
    * @default []
    */
   include?: (string | RegExp)[]
@@ -89,6 +89,12 @@ export interface ReadDirOptions<
    * @returns
    */
   callback?: (item: GetDirType<FileType, R>) => void
+
+  /**
+   * 过滤, 当指定此项时，exclude和include失效
+   * @param dirent 目录项
+   */
+  filter?: (dirent: Dirent) => boolean
 }
 
 const extRE = /\.[A-z\d]+$/
@@ -110,57 +116,57 @@ export function readDir<
     readType = 'all',
     callback
   } = options || {}
+  let { filter } = options || {}
 
-  const excludeStr = new Set<string>()
-  const excludeRE: RegExp[] = []
+  if (!filter) {
+    const excludeStr = new Set<string>()
+    const excludeRE: RegExp[] = []
 
-  const includeStr = new Set<string>()
-  const includeRE: RegExp[] = []
+    const includeStr = new Set<string>()
+    const includeRE: RegExp[] = []
 
-  exclude.forEach(item => {
-    if (typeof item === 'string') {
-      excludeStr.add(item)
-    } else {
-      excludeRE.push(item)
+    exclude.forEach(item => {
+      if (typeof item === 'string') {
+        excludeStr.add(item)
+      } else {
+        excludeRE.push(item)
+      }
+    })
+
+    include.forEach(item => {
+      if (typeof item === 'string') {
+        includeStr.add(item)
+      } else {
+        includeRE.push(item)
+      }
+    })
+
+    // 包含选项是否为空
+    const isIncludeEmpty = include.length === 0
+
+    filter = (dirent: Dirent) => {
+      // 排除的项
+      const excluded =
+        excludeStr.has(dirent.name) ||
+        excludeRE.some(item => item.test(join(dirent.path, dirent.name)))
+      // 如果未指定包含项
+      if (isIncludeEmpty) {
+        return !excluded
+      }
+      return (
+        !excluded &&
+        (includeStr.has(dirent.name) ||
+          includeRE.some(item => item.test(join(dirent.path, dirent.name))))
+      )
     }
-  })
-
-  include.forEach(item => {
-    if (typeof item === 'string') {
-      includeStr.add(item)
-    } else {
-      includeRE.push(item)
-    }
-  })
-
-  // 包含选项是否为空
-  const isIncludeEmpty = include.length === 0
-
-  const filter = (dirent: Dirent) => {
-
-    // 排除的项
-    const excluded =
-      excludeStr.has(dirent.name) ||
-      excludeRE.some(item => item.test(join(dirent.path, dirent.name)))
-    // 如果未指定包含项
-    if (isIncludeEmpty) {
-      return !excluded
-    }
-    return (
-      !excluded &&
-      (includeStr.has(dirent.name) ||
-        includeRE.some(item => item.test(join(dirent.path, dirent.name))))
-    )
   }
 
   const recur = async (dir: string, depth = 1) => {
-    let direntList = (
-      await readdir(dir, {
-        withFileTypes: true,
-        encoding: 'utf-8'
-      })
-    )
-   direntList = direntList.filter(filter)
+    let direntList = await readdir(dir, {
+      withFileTypes: true,
+      encoding: 'utf-8'
+    })
+    direntList = direntList.filter(filter)
 
     const dirs = await Promise.all(
       direntList.map(async dirent => {
