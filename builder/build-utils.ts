@@ -50,12 +50,16 @@ function buildJS() {
 }
 
 function buildDTS() {
-  const input = ['fe', 'canvas'].map(pkg => {
+  const input = ['fe', 'canvas', 'be'].map(pkg => {
     return path.resolve(
       fileURLToPath(new URL(`../${PKG_DIR_NAME}/${pkg}`, import.meta.url)),
       'index.ts'
     )
   })
+
+
+  // { 'fe/index': '/xxx/xxx/fe/index.ts' }
+  // ...
   return rollup({
     input: Object.fromEntries(
       input.map(file => [
@@ -70,7 +74,8 @@ function buildDTS() {
           emitDeclarationOnly: true,
           allowJs: true
         },
-        respectExternal: true
+        respectExternal: true,
+
       })
     ]
   })
