@@ -1,5 +1,6 @@
 import { getDataType, isArray, isObj, oneOf } from '@cat-kit/common'
 import type { HTTPCodeNumber } from './shared'
+import type { RequestConfig } from './type'
 
 let errMsgsMap: Record<number, any> = {
   408: '请求超时',
@@ -9,11 +10,14 @@ let errMsgsMap: Record<number, any> = {
 function parseResponseHeaders(headStr: string) {
   const trimHeadStr = headStr.trim()
   if (!trimHeadStr) return {}
-  return trimHeadStr.split(/[\r\n]+/).reduce((acc, cur) => {
-    const [key, value] = cur.split(': ')
-    acc[key!] = value
-    return acc
-  }, {} as Record<string, any>)
+  return trimHeadStr.split(/[\r\n]+/).reduce(
+    (acc, cur) => {
+      const [key, value] = cur.split(': ')
+      acc[key!] = value
+      return acc
+    },
+    {} as Record<string, any>
+  )
 }
 
 export class HttpResponse<T = any> {
@@ -29,15 +33,19 @@ export class HttpResponse<T = any> {
   /** 响应头 */
   headers: Record<string, any> = {}
 
+  requestConf!: RequestConfig
+
   constructor(
     code: HTTPCodeNumber,
     data: any,
     message: string,
+    requestConf: RequestConfig,
     headers?: Record<string, any>
   ) {
     this.code = code
     this.data = data
     this.message = message
+    this.requestConf = requestConf
     this.headers = headers || {}
   }
 
@@ -58,9 +66,18 @@ export interface ResponseConf {
   headers?: Record<string, any>
 }
 
-export function getResponse(conf: ResponseConf): HttpResponse
-export function getResponse(xhr: XMLHttpRequest): HttpResponse
-export function getResponse(xhr: XMLHttpRequest | ResponseConf) {
+export function getResponse(
+  conf: ResponseConf,
+  reqConf: RequestConfig
+): HttpResponse
+export function getResponse(
+  xhr: XMLHttpRequest,
+  reqConf: RequestConfig
+): HttpResponse
+export function getResponse(
+  xhr: XMLHttpRequest | ResponseConf,
+  reqConf: RequestConfig
+) {
   if (xhr instanceof XMLHttpRequest) {
     const { status, responseType, statusText } = xhr
 
@@ -78,10 +95,10 @@ export function getResponse(xhr: XMLHttpRequest | ResponseConf) {
     let message = data?.message || errMsgsMap[code] || statusText
 
     let headers = parseResponseHeaders(xhr.getAllResponseHeaders())
-    return new HttpResponse(code, data, message, headers)
+    return new HttpResponse(code, data, message, reqConf, headers)
   }
   const { code, data, message, headers } = xhr
-  return new HttpResponse(code, data, message, headers)
+  return new HttpResponse(code, data, message, reqConf, headers)
 }
 
 /**

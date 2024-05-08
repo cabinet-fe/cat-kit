@@ -326,7 +326,7 @@ class Requestor implements IRequestor {
    */
   private reply(xhr: XMLHttpRequest): void
   private reply(conf: any) {
-    let response = getResponse(conf)
+    let response = getResponse(conf, this.options.config)
 
     if (response.code >= 400 && response.code <= 600) {
       this.replyType = 'error'

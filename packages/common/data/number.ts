@@ -269,6 +269,40 @@ class Num {
       fn(i)
     }
   }
+  /**
+   * 大小区间
+   * @param min 最小值
+   * @param max 最大值
+   * @returns 一个在指定范围内的值
+   */
+  range(min: number, max: number): number {
+    if (min > max) {
+      ;[min, max] = [max, min]
+    }
+    if (this.v < min) return min
+    if (this.v > max) return max
+    return this.v
+  }
+
+  /**
+   * 限制最大值
+   * @param val 最大值
+   * @returns 一个不超过最大值的值
+   */
+  max(val: number) {
+    if (this.v > val) return val
+    return this.v
+  }
+
+  /**
+   * 限制最小值
+   * @param val 最小值
+   * @returns  一个不小于最小值的值
+   */
+  min(val: number) {
+    if (this.v < val) return val
+    return this.v
+  }
 }
 
 /**

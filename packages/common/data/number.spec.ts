@@ -66,4 +66,16 @@ describe('数字操作', () => {
   //   console.log(n.calc('10 + (5 / 2 + 3) / 4'))
   //   expect(n.calc('10 + (5 / 2 + 3) / 4')).toBe(10 + (5 / 2 + 3) / 4)
   // })
+
+  test('大小限制', () => {
+    expect(n(100).range(0, 50)).toBe(50)
+    expect(n(-1).range(0, 50)).toBe(0)
+    expect(n(30).range(0, 50)).toBe(30)
+
+    expect(n(50).max(10)).toBe(10)
+    expect(n(5).max(10)).toBe(5)
+
+    expect(n(50).min(10)).toBe(50)
+    expect(n(5).min(10)).toBe(10)
+  })
 })

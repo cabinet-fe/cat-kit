@@ -1,6 +1,6 @@
 {
   "name": "cat-kit",
-  "version": "3.4.20",
+  "version": "3.4.21",
   "description": "前后端一体开发工具包",
   "scripts": {
     "gen-sidebar": "tsx ./cmd/gen-sidebar.ts",
