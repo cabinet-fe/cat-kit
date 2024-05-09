@@ -5,12 +5,7 @@ class Node<Val extends Record<string, any>> extends TreeNode<Val> {
 
   override children?: Node<Val>[]
 
-  createNode(
-    val: Val,
-    index: number
-  ): Node<Val> {
-    return new Node(val, index)
-  }
+  disabled = false
 }
 
 type ChildData = { id: number; children?: ChildData[] }
@@ -22,7 +17,15 @@ describe('树', () => {
   } as {
     id: number
   }
-  const tree = Tree.create(treeData, Node)
+  const tree = Tree.create(treeData, Node, {
+    onNodeCreated(node) {
+      node.disabled = true
+    }
+  })
+
+  test('节点创建回调', () => {
+    expect(tree.root.disabled).toBeTruthy()
+  })
 
   test('深度', () => {
     expect(tree.root.children![0]!.depth).toBe(1)
