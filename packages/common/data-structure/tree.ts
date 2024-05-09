@@ -12,7 +12,7 @@ export class Tree<Node extends TreeNode> {
    *
    * @param val - 原始数据
    * @param Node - 节点类
-   * @param childrenKey - 子节点的键名，默认为 'children'
+   * @param config - 配置项
    * @returns 生成的树形结构数据
    */
   static create<Val extends Record<string, any>, Node extends TreeNode<Val>>(
@@ -20,10 +20,21 @@ export class Tree<Node extends TreeNode> {
     Node: {
       new (val: Val, index: number): Node
     },
-    childrenKey = 'children'
+    config?: {
+      /**
+       * 子节点的键名
+       * @default 'children'
+       */
+      childrenKey?: string
+      /** 节点创建后的回调 */
+      onNodeCreated?: (node: Node) => void
+    }
   ): Tree<Node> {
+    const { childrenKey = 'children', onNodeCreated } = config || {}
+
     function generate(data: any, index: number, parent?: any) {
       const node = new Node(data, index)
+      onNodeCreated?.(node)
       if (parent) {
         node.parent = parent
       }
@@ -187,17 +198,26 @@ export class Forest<Node extends TreeNode> {
    * 创建树结构
    * @param data - 树结构的根节点数据
    * @param Node - 节点类
-   * @param childrenKey - 子节点的键名，默认为'children'
+   * @param config - 配置项
    */
   static create<Data extends any[], Node extends TreeNode<Data[number]>>(
     data: Data,
     Node: {
       new (val: Data[number], index: number): Node
     },
-    childrenKey = 'children'
+    config?: {
+      /**
+       * 子节点的key
+       * @default 'children'
+       */
+      childrenKey?: string,
+      onNodeCreated?: (node: Node) => void
+    }
   ): Forest<Node> {
+    const { childrenKey = 'children', onNodeCreated } = config || {}
     function generate(data: any, index: number, parent?: any) {
       const node = new Node(data, index)
+      onNodeCreated?.(node)
       if (parent) {
         node.parent = parent
       }

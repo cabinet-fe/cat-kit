@@ -1,5 +1,9 @@
 import { omitArr } from '../../data/array'
 
+interface TreeNodeCtor<Val> {
+  new (val: Val, index: number): any
+}
+
 /**
  * 树节点
  * @example 继承 TreeNode 示例
@@ -119,7 +123,7 @@ export abstract class TreeNode<
    */
   append(val: Val): void {
     const len = this.children?.length ?? 0
-    const node = this.createNode(val, len)
+    const node = new (this.constructor as TreeNodeCtor<Val>)(val, len)
     node.parent = this
     this.children = [...(this.children || []), node]
   }
@@ -141,7 +145,7 @@ export abstract class TreeNode<
       throw new Error(`节点的索引不能大于当前节点子节点的长度${len}`)
     }
 
-    const node = this.createNode(val, index)
+    const node = new (this.constructor as TreeNodeCtor<Val>)(val, index)
 
     // 指定父级
     node.parent = this
@@ -171,15 +175,4 @@ export abstract class TreeNode<
   addToPrev(val: Val): void {
     this.parent?.insert(val, this.index)
   }
-
-  /**
-   * 创建节点方法，子类可以覆盖此方法来自定义节点的创建逻辑
-   *
-   * @param val 节点数据
-   * @param index 节点索引
-   */
-  abstract createNode(
-    val: Val,
-    index: number
-  ): TreeNode<Val>
 }

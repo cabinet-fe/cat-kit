@@ -46,13 +46,6 @@ class CustomTreeNode<Val extends Record<string, any>> extends TreeNode<Val> {
     }
     return shallowReactive(this)
   }
-
-  createNode<Val extends Record<string, any>>(
-    val: Val,
-    index: number
-  ): TreeNode<Val> {
-    return new CustomTreeNode(val, index)
-  }
 }
 
 const forest = computed(() => {
