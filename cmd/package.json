@@ -1,6 +1,6 @@
 {
   "name": "@cat-kit/cmd",
-  "version": "3.4.22",
+  "version": "3.4.23",
   "type": "module",
   "devDependencies": {
     "inquirer": "^9.2.12",
