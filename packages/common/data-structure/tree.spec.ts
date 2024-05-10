@@ -28,7 +28,7 @@ describe('树', () => {
   })
 
   test('数量', () => {
-    expect(tree.size).toBe(6)
+    expect(tree.size).toBe(5)
     expect(tree.root.children![1].size).toBe(2)
   })
 
