@@ -1,6 +1,7 @@
 <template>
   <div>
     <JsonEditor v-model="data" />
+    {{ forest.size }}
     <NodeRender v-for="node of forest.nodes" :node="node" />
   </div>
 </template>

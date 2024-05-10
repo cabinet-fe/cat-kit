@@ -166,7 +166,7 @@ export class Forest<Node extends TreeNode> {
   /** 节点数量 */
   get size(): number {
     let sum = 0
-    this.nodes.forEach(node => {
+    this.nodes?.forEach(node => {
       sum += node.size
     })
     return sum
