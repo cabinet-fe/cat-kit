@@ -58,3 +58,12 @@ export function throttle<T extends any[], R>(
     }
   }
 }
+
+/**
+ * 睡眠一定时间
+ * @param ms 毫秒数
+ * @returns
+ */
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
