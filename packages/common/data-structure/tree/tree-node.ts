@@ -1,4 +1,5 @@
 import { omitArr } from '../../data/array'
+import { bft, dft } from './helper'
 
 interface TreeNodeCtor<Val> {
   new (val: Val, index: number): any
@@ -52,6 +53,15 @@ export abstract class TreeNode<
     return depth
   }
 
+  /** 节点数量 */
+  get size(): number {
+    let s = 0
+    this.dft(() => {
+      s++
+    })
+    return s
+  }
+
   /** 是否是叶子节点 */
   get isLeaf(): boolean {
     return !this.children || this.children.length === 0
@@ -79,6 +89,29 @@ export abstract class TreeNode<
       arr[i]!.index = i + startIndex
       i++
     }
+  }
+
+  /**
+   * 深度优先遍历
+   * @param cb 递归回调
+   * @param childrenKey 子节点key
+   * @returns
+   */
+  dft(
+    cb: (item: this) => boolean | void,
+    childrenKey = 'children'
+  ): false | undefined {
+    return dft(this, cb, childrenKey)
+  }
+
+  /**
+   * 广度优先遍历
+   * @param cb 递归回调
+   * @param childrenKey 子节点key
+   * @returns
+   */
+  bft(cb: (item: this) => boolean | void, childrenKey = 'children') {
+    return bft(this, cb, childrenKey)
   }
 
   /**

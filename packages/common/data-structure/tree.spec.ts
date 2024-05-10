@@ -27,6 +27,11 @@ describe('树', () => {
     expect(tree.root.disabled).toBeTruthy()
   })
 
+  test('数量', () => {
+    expect(tree.size).toBe(6)
+    expect(tree.root.children![1].size).toBe(2)
+  })
+
   test('深度', () => {
     expect(tree.root.children![0]!.depth).toBe(1)
   })

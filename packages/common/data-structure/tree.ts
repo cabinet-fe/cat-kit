@@ -1,7 +1,13 @@
 import { TreeNode } from './tree/tree-node'
+import { bft, dft } from './tree/helper'
 
 export class Tree<Node extends TreeNode> {
   readonly root: Node
+
+  /** 节点数量 */
+  get size(): number {
+    return this.root.size
+  }
 
   constructor(root: Node) {
     this.root = root
@@ -58,22 +64,7 @@ export class Tree<Node extends TreeNode> {
    * @param childrenKey - 子节点的键名。
    * @returns 返回布尔值，表示是否遇到了回调函数返回 `false` 的节点。
    */
-  static dft<T extends Record<string, any>>(
-    data: T,
-    cb: (item: T) => boolean | void,
-    childrenKey = 'children'
-  ): false | undefined {
-    if (cb(data) === false) return false
-
-    let children = data[childrenKey]
-    if (children) {
-      let i = 0
-      while (i < children.length) {
-        if (Tree.dft(children[i], cb, childrenKey) === false) break
-        i++
-      }
-    }
-  }
+  static dft = dft
 
   /**
    * 广度优先遍历树结构
@@ -81,25 +72,7 @@ export class Tree<Node extends TreeNode> {
    * @param cb - 遍历回调函数，返回值为false时中断遍历
    * @param childrenKey - 子节点属性名，默认为'children'
    */
-  static bft<T extends Record<string, any>>(
-    root: T,
-    cb: (item: T) => void | boolean,
-    childrenKey = 'children'
-  ): void {
-    let queue: T[] = []
-
-    queue.push(root)
-
-    while (queue.length > 0) {
-      const node = queue.shift()!
-      if (cb(node) === false) break
-
-      let children = node[childrenKey]
-      if (!!children) {
-        queue = queue.concat(children)
-      }
-    }
-  }
+  static bft = bft
 
   /**
    * 获取节点的子节点
@@ -190,6 +163,15 @@ export class Forest<Node extends TreeNode> {
     return this.virtualRoot.children! as Node[]
   }
 
+  /** 节点数量 */
+  get size(): number {
+    let sum = 0
+    this.nodes.forEach(node => {
+      sum += node.size
+    })
+    return sum
+  }
+
   constructor(node: Node) {
     this.virtualRoot = node
   }
@@ -210,7 +192,7 @@ export class Forest<Node extends TreeNode> {
        * 子节点的key
        * @default 'children'
        */
-      childrenKey?: string,
+      childrenKey?: string
       onNodeCreated?: (node: Node) => void
     }
   ): Forest<Node> {
@@ -273,7 +255,7 @@ export class Forest<Node extends TreeNode> {
   ): false | undefined {
     let failed = false
     this.nodes.forEach(node => {
-      const result = Tree.dft(node, cb, childrenKey)
+      const result = dft(node, cb, childrenKey)
       if (result === false) {
         failed = true
       }
