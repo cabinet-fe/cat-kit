@@ -47,3 +47,25 @@ export function bft<T extends Record<string, any>>(
     }
   }
 }
+
+/**
+ * 完全碾平
+ * @param nodes 节点
+ * @param childrenKey 子节点字段
+ * @param result 一个用于递归传递的结果，99.9999%的情况不需要你去调用它
+ * @returns
+ */
+export function flat<T extends Record<string, any>>(
+  nodes: T[],
+  childrenKey = 'children',
+  result: T[] = []
+): T[] {
+  nodes.forEach(node => {
+    result.push(node)
+    const children = node[childrenKey]
+    if (children) {
+      result.push(...flat(children, childrenKey, result))
+    }
+  })
+  return result
+}
