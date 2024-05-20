@@ -128,8 +128,8 @@ export class Tree<Node extends TreeNode> {
   }
 
   /** 追加节点 */
-  append(creator: (index: number) => Node) {
-    return this.root.append(creator)
+  append(val: Node['value']): void {
+    return this.root.append(val)
   }
 
   /**
@@ -220,8 +220,8 @@ export class Forest<Node extends TreeNode> {
   }
 
   /** 追加节点 */
-  append(creator: (index: number) => Node) {
-    return this.virtualRoot.append(creator)
+  append(data: Node['value']): void {
+    return this.virtualRoot.append(data)
   }
 
   /**
