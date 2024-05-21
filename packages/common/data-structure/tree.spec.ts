@@ -17,7 +17,10 @@ describe('树', () => {
   } as {
     id: number
   }
-  const tree = Tree.create(treeData, Node, {
+  const tree = Tree.create(treeData, {
+    createNode(data, index) {
+      return new Node(data, index)
+    },
     onNodeCreated(node) {
       node.disabled = true
     }

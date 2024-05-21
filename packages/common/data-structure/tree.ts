@@ -1,6 +1,25 @@
 import { TreeNode } from './tree/tree-node'
 import { bft, dft } from './tree/helper'
 
+export interface TreeCreateByClassConfig<Node extends TreeNode> {
+  /**
+   * 子节点的键名
+   * @default 'children'
+   */
+  childrenKey?: string
+
+  /** 节点创建后的回调 */
+  onNodeCreated?: (node: Node) => void
+}
+
+export interface TreeCreateByFunctionConfig<
+  Val extends any,
+  Node extends TreeNode
+> extends TreeCreateByClassConfig<Node> {
+  /** 节点创建方法 */
+  createNode: (val: Val, index: number) => Node
+}
+
 export class Tree<Node extends TreeNode> {
   readonly root: Node
 
@@ -17,6 +36,18 @@ export class Tree<Node extends TreeNode> {
    * 生成树形结构数据
    *
    * @param val - 原始数据
+   * @param config - 配置项
+   * @returns 生成的树形结构数据
+   */
+  static create<Val extends Record<string, any>, Node extends TreeNode<Val>>(
+    val: Val,
+    config: TreeCreateByFunctionConfig<Val, Node>
+  ): Tree<Node>
+
+  /**
+   * 生成树形结构数据
+   *
+   * @param val - 原始数据
    * @param Node - 节点类
    * @param config - 配置项
    * @returns 生成的树形结构数据
@@ -26,20 +57,29 @@ export class Tree<Node extends TreeNode> {
     Node: {
       new (val: Val, index: number): Node
     },
-    config?: {
-      /**
-       * 子节点的键名
-       * @default 'children'
-       */
-      childrenKey?: string
-      /** 节点创建后的回调 */
-      onNodeCreated?: (node: Node) => void
-    }
+    config: TreeCreateByClassConfig<Node>
+  ): Tree<Node>
+  static create<Val extends Record<string, any>, Node extends TreeNode<Val>>(
+    val: Val,
+    Node:
+      | {
+          new (val: Val, index: number): Node
+        }
+      | TreeCreateByFunctionConfig<Val, Node>,
+    config?: TreeCreateByClassConfig<Node>
   ): Tree<Node> {
-    const { childrenKey = 'children', onNodeCreated } = config || {}
+    const { childrenKey = 'children', onNodeCreated } =
+      typeof Node === 'function' ? config || {} : Node
+
+    let createNode: (data: Val, index: number) => Node
+    if (typeof Node === 'function') {
+      createNode = (data, index) => new Node(data, index)
+    } else if (typeof Node === 'object') {
+      createNode = Node.createNode
+    }
 
     function generate(data: any, index: number, parent?: any) {
-      const node = new Node(data, index)
+      const node = createNode(data, index)
       onNodeCreated?.(node)
       if (parent) {
         node.parent = parent
@@ -177,28 +217,58 @@ export class Forest<Node extends TreeNode> {
   }
 
   /**
-   * 创建树结构
-   * @param data - 树结构的根节点数据
+   * 生成树形结构数据
+   *
+   * @param val - 原始数据
+   * @param config - 配置项
+   * @returns 生成的树形结构数据
+   */
+  static create<
+    Data extends Record<string, any>[],
+    Node extends TreeNode<Data[number]>
+  >(
+    data: Data,
+    config: TreeCreateByFunctionConfig<Data[number], Node>
+  ): Forest<Node>
+  /**
+   * 生成树形结构数据
+   *
+   * @param val - 原始数据
    * @param Node - 节点类
    * @param config - 配置项
+   * @returns 生成的树形结构数据
    */
-  static create<Data extends any[], Node extends TreeNode<Data[number]>>(
+  static create<
+    Data extends Record<string, any>[],
+    Node extends TreeNode<Data[number]>
+  >(
     data: Data,
     Node: {
       new (val: Data[number], index: number): Node
     },
-    config?: {
-      /**
-       * 子节点的key
-       * @default 'children'
-       */
-      childrenKey?: string
-      onNodeCreated?: (node: Node) => void
-    }
+    config?: TreeCreateByClassConfig<Node>
+  ): Forest<Node>
+  static create<Data extends any[], Node extends TreeNode<Data[number]>>(
+    data: Data,
+    Node:
+      | {
+          new (val: Data[number], index: number): Node
+        }
+      | TreeCreateByFunctionConfig<Data[number], Node>,
+    config?: TreeCreateByClassConfig<Node>
   ): Forest<Node> {
-    const { childrenKey = 'children', onNodeCreated } = config || {}
+    const { childrenKey = 'children', onNodeCreated } =
+      typeof Node === 'function' ? config || {} : Node
+
+    let createNode: (data: Data[number], index: number) => Node
+    if (typeof Node === 'function') {
+      createNode = (data, index) => new Node(data, index)
+    } else {
+      createNode = Node.createNode
+    }
+
     function generate(data: any, index: number, parent?: any) {
-      const node = new Node(data, index)
+      const node = createNode(data, index)
       onNodeCreated?.(node)
       if (parent) {
         node.parent = parent
@@ -213,7 +283,7 @@ export class Forest<Node extends TreeNode> {
       return node
     }
 
-    const virtualRoot = new Node({}, 0)
+    const virtualRoot = createNode({}, 0)
     const nodes = data.map((item, index) => generate(item, index, virtualRoot))
     virtualRoot.children = nodes
     return new Forest(virtualRoot)
