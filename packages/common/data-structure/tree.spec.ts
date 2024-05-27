@@ -47,7 +47,7 @@ describe('树', () => {
   test('深度优先遍历', () => {
     let arr: number[] = []
     Tree.dft(tree.root, v => {
-      arr.push(v.value.id)
+      arr.push(v.data.id)
     })
 
     expect(arr).toEqual([1, 2, 3, 4, 5])
@@ -56,7 +56,7 @@ describe('树', () => {
   test('广度优先遍历', () => {
     let arr: number[] = []
     Tree.bft(tree.root, v => {
-      arr.push(v.value.id)
+      arr.push(v.data.id)
     })
 
     expect(arr).toEqual([1, 2, 3, 5, 4])
@@ -65,24 +65,24 @@ describe('树', () => {
   test('追加节点', () => {
     tree.root.append({ id: 6 })
 
-    expect(tree.root.children![3]!.value.id).toEqual(6)
+    expect(tree.root.children![3]!.data.id).toEqual(6)
   })
 
   test('当前位置下个位置插入', () => {
     tree.root.children![0]!.addToNext({ id: 7 })
 
-    expect(tree.root.children![1]!.value.id).toEqual(7)
+    expect(tree.root.children![1]!.data.id).toEqual(7)
   })
 
   test('当前位置上个位置插入', () => {
     tree.root.children![0]!.addToPrev({ id: 8 })
 
-    expect(tree.root.children![0]!.value.id).toEqual(8)
+    expect(tree.root.children![0]!.data.id).toEqual(8)
   })
 
   test('删除节点', () => {
     Tree.bft(tree.root, v => {
-      if ([6, 7, 8].includes(v.value.id)) {
+      if ([6, 7, 8].includes(v.data.id)) {
         v.remove()
       }
     })
@@ -91,12 +91,12 @@ describe('树', () => {
   })
 
   test('获取单个子节点', () => {
-    const child = Tree.getChild(tree.root, v => v.value.id === 3)
-    expect(child?.value.id).toBe(3)
+    const child = Tree.getChild(tree.root, v => v.data.id === 3)
+    expect(child?.data.id).toBe(3)
   })
 
   test('获取多个', () => {
-    const children = Tree.getChildren(tree.root, v => v.value.id < 4)
+    const children = Tree.getChildren(tree.root, v => v.data.id < 4)
     expect(children.length).toBe(3)
   })
 
@@ -112,11 +112,11 @@ describe('树', () => {
     const dftQueue: number[] = []
 
     forest.bft(node => {
-      bftQueue.push(node.value.id)
+      bftQueue.push(node.data.id)
     })
 
     forest.dft(node => {
-      dftQueue.push(node.value.id)
+      dftQueue.push(node.data.id)
     })
 
     expect(bftQueue).toEqual([1, 5, 2, 3, 4])

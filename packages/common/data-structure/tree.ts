@@ -13,11 +13,11 @@ export interface TreeCreateByClassConfig<Node extends TreeNode> {
 }
 
 export interface TreeCreateByFunctionConfig<
-  Val extends any,
+  Data extends any,
   Node extends TreeNode
 > extends TreeCreateByClassConfig<Node> {
   /** 节点创建方法 */
-  createNode: (val: Val, index: number) => Node
+  createNode: (data: Data, index: number) => Node
 }
 
 export class Tree<Node extends TreeNode> {
@@ -35,43 +35,43 @@ export class Tree<Node extends TreeNode> {
   /**
    * 生成树形结构数据
    *
-   * @param val - 原始数据
+   * @param data - 原始数据
    * @param config - 配置项
    * @returns 生成的树形结构数据
    */
-  static create<Val extends Record<string, any>, Node extends TreeNode<Val>>(
-    val: Val,
-    config: TreeCreateByFunctionConfig<Val, Node>
+  static create<Data extends Record<string, any>, Node extends TreeNode<Data>>(
+    data: Data,
+    config: TreeCreateByFunctionConfig<Data, Node>
   ): Tree<Node>
 
   /**
    * 生成树形结构数据
    *
-   * @param val - 原始数据
+   * @param data - 原始数据
    * @param Node - 节点类
    * @param config - 配置项
    * @returns 生成的树形结构数据
    */
-  static create<Val extends Record<string, any>, Node extends TreeNode<Val>>(
-    val: Val,
+  static create<Data extends Record<string, any>, Node extends TreeNode<Data>>(
+    data: Data,
     Node: {
-      new (val: Val, index: number): Node
+      new (data: Data, index: number): Node
     },
     config: TreeCreateByClassConfig<Node>
   ): Tree<Node>
-  static create<Val extends Record<string, any>, Node extends TreeNode<Val>>(
-    val: Val,
+  static create<Data extends Record<string, any>, Node extends TreeNode<Data>>(
+    data: Data,
     Node:
       | {
-          new (val: Val, index: number): Node
+          new (data: Data, index: number): Node
         }
-      | TreeCreateByFunctionConfig<Val, Node>,
+      | TreeCreateByFunctionConfig<Data, Node>,
     config?: TreeCreateByClassConfig<Node>
   ): Tree<Node> {
     const { childrenKey = 'children', onNodeCreated } =
       typeof Node === 'function' ? config || {} : Node
 
-    let createNode: (data: Val, index: number) => Node
+    let createNode: (data: Data, index: number) => Node
     if (typeof Node === 'function') {
       createNode = (data, index) => new Node(data, index)
     } else if (typeof Node === 'object') {
@@ -94,7 +94,7 @@ export class Tree<Node extends TreeNode> {
       return node
     }
 
-    return new Tree(generate(val, 0))
+    return new Tree(generate(data, 0))
   }
 
   /**
@@ -168,8 +168,8 @@ export class Tree<Node extends TreeNode> {
   }
 
   /** 追加节点 */
-  append(val: Node['value']): void {
-    return this.root.append(val)
+  append(data: Node['data']): void {
+    return this.root.append(data)
   }
 
   /**
@@ -189,7 +189,7 @@ export class Tree<Node extends TreeNode> {
    * @returns 返回布尔值，表示是否遇到了回调函数返回 `false` 的节点。
    */
   dft(
-    cb: (item: Node) => boolean | void,
+    cb: (node: Node) => boolean | void,
     childrenKey?: string
   ): false | undefined {
     return Tree.dft(this.root, cb, childrenKey)
@@ -219,7 +219,7 @@ export class Forest<Node extends TreeNode> {
   /**
    * 生成树形结构数据
    *
-   * @param val - 原始数据
+   * @param data - 原始数据
    * @param config - 配置项
    * @returns 生成的树形结构数据
    */
@@ -233,7 +233,7 @@ export class Forest<Node extends TreeNode> {
   /**
    * 生成树形结构数据
    *
-   * @param val - 原始数据
+   * @param data - 原始数据
    * @param Node - 节点类
    * @param config - 配置项
    * @returns 生成的树形结构数据
@@ -244,7 +244,7 @@ export class Forest<Node extends TreeNode> {
   >(
     data: Data,
     Node: {
-      new (val: Data[number], index: number): Node
+      new (data: Data[number], index: number): Node
     },
     config?: TreeCreateByClassConfig<Node>
   ): Forest<Node>
@@ -252,7 +252,7 @@ export class Forest<Node extends TreeNode> {
     data: Data,
     Node:
       | {
-          new (val: Data[number], index: number): Node
+          new (data: Data[number], index: number): Node
         }
       | TreeCreateByFunctionConfig<Data[number], Node>,
     config?: TreeCreateByClassConfig<Node>
@@ -290,7 +290,7 @@ export class Forest<Node extends TreeNode> {
   }
 
   /** 追加节点 */
-  append(data: Node['value']): void {
+  append(data: Node['data']): void {
     return this.virtualRoot.append(data)
   }
 

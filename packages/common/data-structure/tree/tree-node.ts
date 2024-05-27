@@ -1,23 +1,23 @@
 import { omitArr } from '../../data/array'
 import { bft, dft } from './helper'
 
-interface TreeNodeCtor<Val> {
-  new (val: Val, index: number): any
+interface TreeNodeCtor<Data> {
+  new (data: Data, index: number): any
 }
 
 /**
  * 树节点
  * @example 继承 TreeNode 示例
  * ```
- * class CustomTreeNode<Val extends Record<string, any>> extends TreeNode<Val> {
- *    override children?: CustomTreeNode<Val>[] = undefined
+ * class CustomTreeNode<Data extends Record<string, any>> extends TreeNode<Data> {
+ *    override children?: CustomTreeNode<Data>[] = undefined
  *
- *    override parent: CustomTreeNode<Val> | null = null
+ *    override parent: CustomTreeNode<Data> | null = null
  *
  *    expanded = true
  *
- *    constructor(value: Val, index: number, parent?: CustomTreeNode<Val>) {
- *      super(value, index)
+ *    constructor(data: Data, index: number, parent?: CustomTreeNode<Data>) {
+ *      super(data, index)
  *
  *      if (parent) {
  *        this.parent = parent
@@ -27,10 +27,10 @@ interface TreeNodeCtor<Val> {
  * ```
  */
 export abstract class TreeNode<
-  Val extends Record<string, any> = Record<string, any>
+  Data extends Record<string, any> = Record<string, any>
 > {
   /** 节点数据 */
-  value: Val
+  data: Data
 
   /** 父节点 */
   abstract parent: any
@@ -44,7 +44,7 @@ export abstract class TreeNode<
   /** 树深 */
   get depth(): number {
     let depth = 0
-    let node: TreeNode<Val> = this
+    let node: TreeNode<Data> = this
     while (node?.parent) {
       depth++
       node = node.parent
@@ -67,11 +67,11 @@ export abstract class TreeNode<
     return !this.children || this.children.length === 0
   }
 
-  constructor(val: Val, index: number) {
+  constructor(data: Data, index: number) {
     if (index < 0 || !Number.isInteger(index)) {
       throw new Error(`节点的索引应当是正整数, 传入的索引为${index}`)
     }
-    this.value = val
+    this.data = data
     this.index = index
   }
 
@@ -152,11 +152,11 @@ export abstract class TreeNode<
 
   /**
    * 在当前节点的子节点最后添加一个子节点。
-   * @param val 节点数据
+   * @param data 节点数据
    */
-  append(val: Val): void {
+  append(data: Data): void {
     const len = this.children?.length ?? 0
-    const node = new (this.constructor as TreeNodeCtor<Val>)(val, len)
+    const node = new (this.constructor as TreeNodeCtor<Data>)(data, len)
     node.parent = this
     this.children = [...(this.children || []), node]
   }
@@ -167,10 +167,10 @@ export abstract class TreeNode<
    * 如果当前节点没有子节点，则将节点作为唯一子节点。
    * 如果当前节点有子节点，则将节点插入到指定索引的位置，并重新排序子节点列表。
    *
-   * @param val 要插入的节点的数据
+   * @param data 要插入的节点的数据
    * @param index 插入索引
    */
-  insert(val: Val, index: number): void {
+  insert(data: Data, index: number): void {
     const { children } = this
     const len = children?.length ?? 0
     // 检查节点的索引是否有效
@@ -178,7 +178,7 @@ export abstract class TreeNode<
       throw new Error(`节点的索引不能大于当前节点子节点的长度${len}`)
     }
 
-    const node = new (this.constructor as TreeNodeCtor<Val>)(val, index)
+    const node = new (this.constructor as TreeNodeCtor<Data>)(data, index)
 
     // 指定父级
     node.parent = this
@@ -195,17 +195,17 @@ export abstract class TreeNode<
 
   /**
    * 在当前节点的下一个位置添加一个新节点。
-   * @param val 节点数据
+   * @param data 节点数据
    */
-  addToNext(val: Val): void {
-    this.parent?.insert(val, this.index + 1)
+  addToNext(data: Data): void {
+    this.parent?.insert(data, this.index + 1)
   }
 
   /**
    * 在当前节点的上一个位置添加一个新节点。
-   * @param val 节点数据
+   * @param data 节点数据
    */
-  addToPrev(val: Val): void {
-    this.parent?.insert(val, this.index)
+  addToPrev(data: Data): void {
+    this.parent?.insert(data, this.index)
   }
 }
