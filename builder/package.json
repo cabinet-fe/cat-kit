@@ -1,6 +1,6 @@
 {
   "name": "@cat-kit/builder",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "rollup": "^4.9.1",

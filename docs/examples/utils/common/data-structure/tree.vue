@@ -89,7 +89,7 @@ const NodeRender = defineComponent({
       return (
         <>
           <div style={{ paddingLeft: (node.depth - 1) * 20 + 'px' }}>
-            <span>- {node.value.id}</span>
+            <span>- {node.data.id}</span>
             {!node.isLeaf ? (
               <VButton onClick={toggleExpand}>
                 {node.expanded ? '收起' : '展开'}

@@ -283,7 +283,7 @@ export class Forest<Node extends TreeNode> {
       return node
     }
 
-    const virtualRoot = createNode({}, 0)
+    const virtualRoot = createNode(undefined, 0)
     const nodes = data.map((item, index) => generate(item, index, virtualRoot))
     virtualRoot.children = nodes
     return new Forest(virtualRoot)
