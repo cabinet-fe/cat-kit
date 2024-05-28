@@ -9,7 +9,6 @@ export type ReadyState =
   | 'LOADING'
   | 'DONE'
 
-
 export interface IRequestor {
   readyState: number
   abort(): void
@@ -65,15 +64,22 @@ export type HTTPBeforeHandler = (
   conf: MergedConfig
 ) => MergedConfig | false | Promise<MergedConfig | false>
 
-export type ResponseReturnType = 'normal' | 'error'
+export type ResponseStatus = 'success' | 'error'
 
 export type HTTPAfterHandler = (
   /** 响应值 */
   response: HttpResponse,
-  /** 指定值以何种形式返回, 'normal' | 'error' */
-  returnBy: (type: ResponseReturnType) => void,
-  /** 当前返回值抛出的类型 */
-  returnType: ResponseReturnType
+  /**
+   * 设置返回状态（将会覆盖默认的返回状态）
+   * @example
+   * ```ts
+   * // 将成功状态改为错误状态
+   * setStatus('error')
+   * ```
+   */
+  setStatus: (type: ResponseStatus) => void,
+  /** 返回状态类型 */
+  status: ResponseStatus
 ) => HttpResponse | void | undefined
 
 export interface HttpOptions {

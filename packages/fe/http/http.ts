@@ -14,7 +14,7 @@ import type {
   IRequestor,
   MergedConfig,
   RequestConfig,
-  ResponseReturnType
+  ResponseStatus
 } from './type'
 import path from '@cat-kit/common/path/path'
 
@@ -237,8 +237,8 @@ class Requestor implements IRequestor {
 
   body?: Document | XMLHttpRequestBodyInit | null
 
-  /** 响应类型, normal普通响应, error错误响应 */
-  replyType: ResponseReturnType = 'normal'
+  /** 响应类型, success成功响应, error错误响应 */
+  replyStatus: ResponseStatus = 'success'
 
   readyState = 0
 
@@ -329,7 +329,7 @@ class Requestor implements IRequestor {
     let response = getResponse(conf, this.options.config)
 
     if (response.code >= 400 && response.code <= 600) {
-      this.replyType = 'error'
+      this.replyStatus = 'error'
     }
 
     const { onError, onSuccess, client, config } = this.options
@@ -337,13 +337,13 @@ class Requestor implements IRequestor {
     const after = config.after || client.after
     // 公用
     if (after) {
-      const setReplyType = (type: ResponseReturnType) => {
-        this.replyType = type
+      const setReplyType = (type: ResponseStatus) => {
+        this.replyStatus = type
       }
-      response = after(response, setReplyType, this.replyType) || response
+      response = after(response, setReplyType, this.replyStatus) || response
     }
 
-    if (this.replyType === 'normal') {
+    if (this.replyStatus === 'success') {
       onSuccess(response)
     } else {
       onError(response)
