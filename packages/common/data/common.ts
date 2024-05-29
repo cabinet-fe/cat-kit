@@ -23,7 +23,7 @@ export function isEmpty(val: any) {
 /**
  * 获取链式值
  * @param o 目标对象
- * @param prop 属性
+ * @param prop 链式属性
  * @param targetProp 目标属性
  */
 export function getChainValue(o: any, prop: string, targetProp?: string) {
@@ -45,6 +45,31 @@ export function getChainValue(o: any, prop: string, targetProp?: string) {
       }
     })
   return ret
+}
+
+/**
+ * 设置链式值
+ * @param o 目标对象
+ * @param prop 链式属性
+ * @param value 值
+ */
+export function setChainValue(
+  o: Record<string, any>,
+  prop: string,
+  value: any
+) {
+  const props = prop.split('.')
+  let cur = o
+  let len = props.length - 1
+  for (let i = 0; i < len; i++) {
+    let p = props[i]
+    if (!cur[p]) {
+      cur[p] = {}
+    }
+    cur = cur[p]
+  }
+  cur[props[len]] = value
+  return o
 }
 
 /**
@@ -127,10 +152,13 @@ export function merge(...args: Record<any, any>[]) {
     return o1
   }
 
-  return args.reduce((acc, cur) => {
-    mergeTwo(acc, cur)
-    return acc
-  }, {} as Record<any, any>)
+  return args.reduce(
+    (acc, cur) => {
+      mergeTwo(acc, cur)
+      return acc
+    },
+    {} as Record<any, any>
+  )
 }
 
 /**
@@ -166,17 +194,20 @@ export function serialize(obj: Record<string, any>): string {
 export function deserialize<T extends Record<string, any>>(str: string): T {
   return decodeURIComponent(str)
     .split('&')
-    .reduce((acc, cur) => {
-      let [key, val] = cur.split('=')
-      if (val) {
-        try {
-          acc[key!] = JSON.parse(val)
-        } catch {
+    .reduce(
+      (acc, cur) => {
+        let [key, val] = cur.split('=')
+        if (val) {
+          try {
+            acc[key!] = JSON.parse(val)
+          } catch {
+            acc[key!] = val
+          }
+        } else {
           acc[key!] = val
         }
-      } else {
-        acc[key!] = val
-      }
-      return acc
-    }, {} as Record<string, any>) as T
+        return acc
+      },
+      {} as Record<string, any>
+    ) as T
 }

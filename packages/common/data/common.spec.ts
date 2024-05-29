@@ -1,4 +1,14 @@
-import { isEmpty, getChainValue, oneOf, deepCopy, merge, equal, serialize, deserialize } from './common'
+import {
+  isEmpty,
+  getChainValue,
+  oneOf,
+  deepCopy,
+  merge,
+  equal,
+  serialize,
+  deserialize,
+  setChainValue
+} from './common'
 
 describe('通用数据操作测试', () => {
   it('isEmpty', () => {
@@ -7,8 +17,23 @@ describe('通用数据操作测试', () => {
   })
 
   it('getChainValue', () => {
-    expect(getChainValue({ school: { name: '清华大学' } }, 'school.name')).toBe('清华大学')
-    expect(getChainValue({ school: { name: '清华大学' } }, 'school.address')).toBeUndefined()
+    expect(getChainValue({ school: { name: '清华大学' } }, 'school.name')).toBe(
+      '清华大学'
+    )
+    expect(
+      getChainValue({ school: { name: '清华大学' } }, 'school.address')
+    ).toBeUndefined()
+  })
+
+  it('setChainValue', () => {
+    expect(
+      setChainValue({ school: { name: '清华大学' } }, 'school.name', '北京大学')
+    ).toEqual({
+      school: { name: '北京大学' }
+    })
+    expect(setChainValue({}, 'school.name', '清华大学')).toEqual({
+      school: { name: '清华大学' }
+    })
   })
 
   it('oneOf', () => {
@@ -36,9 +61,16 @@ describe('通用数据操作测试', () => {
   })
 
   it('merge', () => {
-    let baseConf = { name: 'my-config', input: 'src/main.ts', output: { file: 'file.js' } }
+    let baseConf = {
+      name: 'my-config',
+      input: 'src/main.ts',
+      output: { file: 'file.js' }
+    }
     let confA = { plugins: [{ name: '插件A' }], mode: 'dev' }
-    let confB = { plugins: [{ name: '插件B' }, { name: '插件C' }], mode: 'prod' }
+    let confB = {
+      plugins: [{ name: '插件B' }, { name: '插件C' }],
+      mode: 'prod'
+    }
 
     expect(merge(baseConf, confA)).toEqual({
       name: 'my-config',
@@ -71,16 +103,14 @@ describe('通用数据操作测试', () => {
     })
   })
 
-
   it('serialize', () => {
     expect(serialize({ a: 1 })).toBe('a=1')
   })
 
   it('deserialize', () => {
-
     expect(deserialize('a=1')).toEqual({ a: 1 })
     expect(deserialize('a=abc123')).toEqual({ a: 'abc123' })
     expect(deserialize('a={"a":1}')).toEqual({ a: { a: 1 } })
-    expect(deserialize('a={"a":"1"}')).toEqual({ a: { a: "1" } })
+    expect(deserialize('a={"a":"1"}')).toEqual({ a: { a: '1' } })
   })
 })
