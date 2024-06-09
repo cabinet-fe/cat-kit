@@ -85,8 +85,9 @@ export class Tree<Node extends TreeNode> {
         node.parent = parent
       }
       const children = data[childrenKey]
-      if (Array.isArray(children) && children.length) {
-        node.children = children.map((item, index) =>
+
+      if (children === undefined || Array.isArray(children)) {
+        node.children = children?.map((item, index) =>
           generate(item, index, node)
         )
       }
@@ -274,8 +275,8 @@ export class Forest<Node extends TreeNode> {
         node.parent = parent
       }
       const children = data[childrenKey]
-      if (Array.isArray(children) && children.length) {
-        node.children = children.map((item, index) =>
+      if (Array.isArray(children) || children === undefined) {
+        node.children = children?.map((item, index) =>
           generate(item, index, node)
         )
       }

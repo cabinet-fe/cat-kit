@@ -1,6 +1,6 @@
 {
   "name": "@cat-kit/crypto",
-  "version": "3.5.3",
+  "version": "3.5.4",
   "description": "喵喵工具箱加密分包",
   "main": "index.ts",
   "author": "YH FE",
