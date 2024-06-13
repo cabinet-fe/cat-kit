@@ -5,6 +5,7 @@ describe('数组测试', () => {
 
   it('获取数组的最后一个元素', () => {
     expect(last(_arr)).toBe(3)
+    expect(arr(_arr).last).toBe(3)
   })
 
   it('union', () => {
@@ -42,5 +43,11 @@ describe('数组测试', () => {
   it('omit', () => {
     expect(arr(_arr).omit(1)).toEqual([1, 3])
     expect(arr(_arr).omit([0, 2])).toEqual([2])
+  })
+
+  const _arr2 = [1, 2, 3, 4, 5, 6]
+  it('move', () => {
+    expect(arr(_arr2).move(1, 3)).toEqual([1, 3, 4, 2, 5, 6])
+    expect(arr(_arr2).move(5, 1)).toEqual([1, 6, 2, 3, 4, 5])
   })
 })

@@ -97,18 +97,67 @@ class Arr<T> {
     this._source = arr
   }
 
+  /**
+   * 从右往左遍历
+   * @param cb 回调
+   */
   eachRight(cb: (v: T, i: number, arr: T[]) => void): void {
     eachRight(this._source, cb)
   }
 
+  /**
+   * 丢弃元素
+   * @param index 索引
+   * @returns
+   */
   omit(index: number | number[]): T[] {
     return omitArr(this._source, index)
   }
 
+  /**
+   * 查询
+   * @param condition 查询条件
+   * @returns
+   */
   find(condition: Record<string, any>): T | undefined {
     return this._source.find(item =>
       Object.keys(condition).every(key => item[key] === condition[key])
     )
+  }
+
+  /** 最后一个元素 */
+  get last(): T | undefined {
+    return last(this._source)
+  }
+
+  /**
+   * 移动元素至某个新的位置
+   * @param from 原索引
+   * @param to 目标索引
+   * @returns
+   */
+  move(from: number, to: number): T[] {
+    const { _source } = this
+    let newItems: T[]
+    // 从前往后
+    if (to > from) {
+      newItems = [
+        ..._source.slice(0, from),
+        ..._source.slice(from + 1, to + 1),
+        _source[from]!,
+        ..._source.slice(to + 1)
+      ]
+    }
+    // 从后往前排
+    else {
+      newItems = [
+        ..._source.slice(0, to),
+        _source[from]!,
+        ..._source.slice(to, from),
+        ..._source.slice(from + 1)
+      ]
+    }
+    return newItems
   }
 }
 
