@@ -41,6 +41,7 @@ function buildJS() {
         ]
       })
     ),
+
     plugins,
 
     // crypto-js上下文需要指定为window
@@ -57,7 +58,6 @@ function buildDTS() {
     )
   })
 
-
   // { 'fe/index': '/xxx/xxx/fe/index.ts' }
   // ...
   return rollup({
@@ -72,10 +72,10 @@ function buildDTS() {
         compilerOptions: {
           moduleResolution: 100,
           emitDeclarationOnly: true,
-          allowJs: true
+          allowJs: true,
+          module: 99
         },
-        respectExternal: true,
-
+        respectExternal: true
       })
     ]
   })
