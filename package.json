@@ -1,6 +1,6 @@
 {
   "name": "cat-kit",
-  "version": "3.5.5",
+  "version": "3.6.0",
   "description": "前后端一体开发工具包",
   "scripts": {
     "gen-sidebar": "tsx ./cmd/gen-sidebar.ts",
@@ -50,19 +50,19 @@
   "bugs": { "url": "https://github.com/cabinet-fe/cat-kit/issues" },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^20.11.16",
+    "@types/node": "^20.14.2",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
     "jsdom": "^23.2.0",
-    "picocolors": "^1.0.0",
-    "prettier": "3.1.1",
-    "terser": "5.26.0",
+    "picocolors": "^1.0.1",
+    "prettier": "3.3.2",
+    "terser": "5.31.1",
     "ts-conf-base": "^2.2.0",
-    "tsx": "^4.7.1",
-    "typescript": "^5.4.2",
-    "vite": "^5.1.5",
-    "vitepress": "1.0.0-rc.45",
-    "vitest": "^1.3.1",
-    "vue": "^3.4.21"
+    "tsx": "^4.15.5",
+    "typescript": "5.4.5",
+    "vite": "5.3.1",
+    "vitepress": "1.2.3",
+    "vitest": "^1.6.0",
+    "vue": "3.4.29"
   }
 }

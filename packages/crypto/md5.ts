@@ -287,8 +287,6 @@ interface MD5Config {
   onProgress?(progress: number): void
 }
 
-
-
 function msgMD5(msg: string) {
   const hasher = new MD5HashAlgorithm()
   hasher.update(encodeUTF8ToU8A(msg))
@@ -299,8 +297,8 @@ function msgMD5(msg: string) {
 }
 
 async function fileMD5(file: Blob, cfg?: MD5Config) {
-  // 每块大小为2MB
-  const { chunkSize = 2097152, onProgress } = cfg || {}
+  // 每块大小为10MB
+  const { chunkSize = 1048576 * 10, onProgress } = cfg || {}
 
   // 创建MD5哈希算法实例
   const hasher = new MD5HashAlgorithm()

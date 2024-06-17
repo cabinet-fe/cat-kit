@@ -1,9 +1,13 @@
 {
   "name": "@cat-kit/fe",
-  "version": "3.5.5",
+  "version": "3.6.0",
   "description": "前后端开发一体包前端分包",
   "main": "index.ts",
   "author": "YH FE",
   "type": "module",
-  "dependencies": { "@cat-kit/common": "workspace:*", "jsqr": "^1.4.0" }
+  "dependencies": {
+    "@cat-kit/common": "workspace:*",
+    "@cat-kit/crypto": "workspace:*",
+    "jsqr": "^1.4.0"
+  }
 }

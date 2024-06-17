@@ -8,6 +8,6 @@ export * from './image'
 
 // export * from './db/db'
 
-export * from './worker/worker'
+export * from './worker/file-md5'
 
 export * from './web-api'
