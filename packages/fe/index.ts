@@ -11,3 +11,5 @@ export * from './image'
 export * from './worker/file-md5'
 
 export * from './web-api'
+
+export * from './nanoid/nanoid'

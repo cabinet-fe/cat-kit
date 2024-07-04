@@ -120,6 +120,7 @@ export default {
     {
       text: "画布工具",
       items: [
+        { text: "锚点", link: "/utils/canvas/anchor" },
         { text: "圆形", link: "/utils/canvas/circle" },
         { text: "概要", link: "/utils/canvas/" },
         { text: "线段", link: "/utils/canvas/line" },
@@ -158,6 +159,7 @@ export default {
         { text: "HTTP", link: "/utils/fe/http" },
         { text: "图片操作", link: "/utils/fe/image" },
         { text: "概要", link: "/utils/fe/" },
+        { text: "随机值", link: "/utils/fe/nanoid" },
         { text: "路径", link: "/utils/fe/path" },
         { text: "浏览器API", link: "/utils/fe/web-api" },
         { text: "WebWorker 工作线程", link: "/utils/fe/worker" },
