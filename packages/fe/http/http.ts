@@ -54,6 +54,11 @@ export class Http {
     }
   }
 
+  /** 设置默认配置 */
+  setDefaultConfig(options: HttpOptions) {
+    Object.assign(this.defaultConfig, options)
+  }
+
   /** 获取默认配置 */
   getDefaultConfig() {
     return this.defaultConfig
