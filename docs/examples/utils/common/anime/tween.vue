@@ -24,12 +24,14 @@
       </label>
     </div>
 
-    <div>运动时长: <input type="text" v-model.number="duration"/></div>
+    <div>运动时长: <input type="text" v-model.number="duration" /></div>
 
     <br />
 
     <div>
-      <div>数字补间: {{ n(tween.state.number).fixed({ maxPrecision: 2 }) }}</div>
+      <div>
+        数字补间: {{ n(tween.state.number).fixed({ maxPrecision: 2 }) }}
+      </div>
       <input v-once type="text" v-model.number="number" />
     </div>
     <div>
@@ -64,7 +66,10 @@ const tween = new Tween(
   }
 )
 watch(number, n =>
-  tween.to({ number: n }, { easingFunction: Tween.easing[tweenFn.value], duration: duration.value })
+  tween.to(
+    { number: n },
+    { easingFunction: Tween.easing[tweenFn.value], duration: duration.value }
+  )
 )
 
 // 物体运动
@@ -73,18 +78,37 @@ const boxRef = shallowRef<HTMLDivElement>()
 let tween2 = new Tween(
   {
     x: 0,
-    rotate: 0
+    rotate: 0,
+    radius: 0,
+    r: 255,
+    g: 0,
+    b: 0,
+    scaleY: 1
   },
   {
     onUpdate(state) {
-      boxRef.value!.style.transform = `translateX(${state.x}px) rotate(${state.rotate}deg)`
+      boxRef.value!.attributeStyleMap.set(
+        'transform',
+        `translateX(${state.x}px) rotate(${state.rotate}deg) scaleY(${state.scaleY})`
+      )
+
+      boxRef.value!.attributeStyleMap.set(
+        'border-radius',
+        `${state.radius < 0 ? 0 : state.radius}%`
+      )
+
+      boxRef.value!.attributeStyleMap.set(
+        'background-color',
+        `rgb(${Math.abs(state.r)},${Math.abs(state.g)},${Math.abs(state.b)})`
+      )
+      // boxRef.value!.style.transform = `translateX(${state.x}px) rotate(${state.rotate}deg)`
     }
   }
 )
 
 const handleStart = () => {
   tween2.to(
-    { x: 200, rotate: 360 },
+    { x: 200, rotate: 360, radius: 50, r: 0, g: 255, b: 0, scaleY: 0.3 },
     {
       duration: duration.value,
       easingFunction: Tween.easing[tweenFn.value]
@@ -92,13 +116,10 @@ const handleStart = () => {
   )
 }
 const handleBack = async () => {
-  tween2.to(
-    { x: 0, rotate: 0 },
-    {
-      duration: duration.value,
-      easingFunction: Tween.easing[tweenFn.value]
-    }
-  )
+  tween2.back({
+    duration: duration.value,
+    easingFunction: Tween.easing[tweenFn.value]
+  })
 }
 </script>
 

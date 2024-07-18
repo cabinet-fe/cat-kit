@@ -34,8 +34,11 @@ export class Tween<
 
   // private elapsed = 0
 
+  private defaultState: State
+
   constructor(state: State, config?: TweenConfig<State>) {
     this.state = state
+    this.defaultState = { ...state }
     const { duration, onUpdate, onComplete, easingFunction } = config || {}
 
     if (duration !== undefined) {
@@ -122,8 +125,7 @@ export class Tween<
       tick: progress => {
         for (const key in stateDistance) {
           const target =
-            prevState[key]! +
-            easingFunction(progress) * stateDistance[key]!
+            prevState[key]! + easingFunction(progress) * stateDistance[key]!
           // @ts-ignore
           this.state[key] = target
         }
@@ -131,6 +133,10 @@ export class Tween<
         this.onUpdate?.(this.state)
       }
     })
+  }
+
+  back(config?: AnimeConfig<State>) {
+    this.to(this.defaultState, config)
   }
 
   /** 停止动画 */
