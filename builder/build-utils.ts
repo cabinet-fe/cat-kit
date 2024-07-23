@@ -51,7 +51,7 @@ function buildJS() {
 }
 
 function buildDTS() {
-  const input = ['fe', 'canvas', 'be'].map(pkg => {
+  const input = ['fe', 'canvas', 'be', 'crypto'].map(pkg => {
     return path.resolve(
       fileURLToPath(new URL(`../${PKG_DIR_NAME}/${pkg}`, import.meta.url)),
       'index.ts'
