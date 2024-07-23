@@ -162,7 +162,6 @@ export default {
         { text: "随机值", link: "/utils/fe/nanoid" },
         { text: "路径", link: "/utils/fe/path" },
         { text: "浏览器API", link: "/utils/fe/web-api" },
-        { text: "WebWorker 工作线程", link: "/utils/fe/worker" },
       ],
     },
   ],

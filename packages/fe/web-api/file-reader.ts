@@ -26,17 +26,33 @@ const defineEventHandler = (fn: FileReadingEvent): FileReadingEvent => fn
  * @param file 读取的文件
  * @param type 指定读取后显示返回哪种类型的数据
  * @returns
+ * @deprecated 这个方法被废弃了
  */
 export function readFile(
   file: Blob,
   type: 'text' | 'dataUrl' | 'binaryString',
   options?: ReadOptions
 ): Promise<Result<string>>
+/**
+ * 读取文件
+ * @param file 读取的文件
+ * @param type 指定读取后显示返回哪种类型的数据
+ * @returns
+ * @deprecated 这个方法被废弃了
+ */
 export function readFile(
   file: Blob,
   type: 'arrayBuffer',
   options?: ReadOptions
 ): Promise<Result<ArrayBuffer>>
+/**
+ * 读取文件
+ * @deprecated 这个方法被废弃了
+ * @param file
+ * @param type
+ * @param options
+ * @returns
+ */
 export function readFile(file: Blob, type: ReadType, options?: ReadOptions) {
   return new Promise((rs, rj) => {
     const reader = new FileReader()

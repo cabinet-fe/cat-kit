@@ -1,4 +1,3 @@
-import { readFile } from '@cat-kit/fe'
 import { encodeUTF8ToU8A } from './shared/helper'
 import { HEX_CHARS } from './shared/constants'
 
@@ -296,29 +295,40 @@ function msgMD5(msg: string) {
   return result
 }
 
-async function fileMD5(file: Blob, cfg?: MD5Config) {
-  // 每块大小为10MB
-  const { chunkSize = 1048576 * 10, onProgress } = cfg || {}
+export function fileMD5(file: Blob, cfg?: MD5Config) {
+  return new Promise<string>((rs, rj) => {
+    // 每块大小为10MB
+    const { chunkSize = 1048576 * 10, onProgress } = cfg || {}
 
-  // 创建MD5哈希算法实例
-  const hasher = new MD5HashAlgorithm()
+    // 创建MD5哈希算法实例
+    const hasher = new MD5HashAlgorithm()
 
-  let i = 0
-  while (i < file.size) {
-    const { result } = await readFile(
-      file.slice(i, i + chunkSize),
-      'arrayBuffer'
-    )
+    const reader = new FileReader()
 
-    // 将ArrayBuffer转换为WordArray
-    hasher.update(result)
+    let loaded = 0
 
-    i += chunkSize
-    onProgress?.(i > file.size ? 1 : i / file.size)
-  }
-  const result = hasher.finalize()
-  hasher.destroy()
-  return result
+    reader.onload = function () {
+      const result = reader.result as ArrayBuffer
+      hasher.update(result)
+      loaded += result.byteLength
+
+      onProgress?.(Math.round((loaded / file.size) * 100))
+
+      if (loaded < file.size) {
+        reader.readAsArrayBuffer(file.slice(loaded, loaded + chunkSize))
+      } else {
+        rs(hasher.finalize()!)
+        hasher.destroy()
+      }
+    }
+
+    reader.onerror = function () {
+      rj('读取文件失败')
+      hasher.destroy()
+    }
+
+    reader.readAsArrayBuffer(file.slice(loaded, loaded + chunkSize))
+  })
 }
 
 /**

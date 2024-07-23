@@ -1,6 +1,6 @@
 {
   "name": "@cat-kit/canvas",
-  "version": "3.6.2",
+  "version": "3.6.3",
   "description": "喵喵画布",
   "type": "module",
   "main": "index.ts",
