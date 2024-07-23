@@ -49,13 +49,15 @@ export function throttle<T extends any[], R>(
   cb?: (v: R) => void
 ) {
   let start = Date.now()
+  let result: R
   return function (this: any, ...args: T) {
     let current = Date.now()
     if (current - start >= delay) {
       start = current
-      const result = fn.call(this, ...args)
+      result = fn.call(this, ...args)
       cb?.(result)
     }
+    return result
   }
 }
 
