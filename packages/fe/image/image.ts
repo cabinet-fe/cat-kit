@@ -10,7 +10,11 @@ function loadImage(imageFile: Blob) {
   })
 }
 
-function compressImageSource(img: HTMLImageElement, type: string, quality: number) {
+function compressImageSource(
+  img: HTMLImageElement,
+  type: string,
+  quality: number
+) {
   return new Promise<Blob>((rs, rj) => {
     const canvas = document.createElement('canvas')
     const { width, height } = img
@@ -19,7 +23,6 @@ function compressImageSource(img: HTMLImageElement, type: string, quality: numbe
     const ctx = canvas.getContext('2d')!
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
     canvas.toBlob(blob => (blob ? rs(blob) : rj('压缩失败')), type)
-
   })
 }
 
@@ -42,5 +45,7 @@ export async function compressImageFile(file: File, max: number) {
     result = await compressImageSource(image, file.type, quality)
   }
 
-  return new File([result], file.name)
+  return new File([result], file.name, {
+    type: file.type
+  })
 }
