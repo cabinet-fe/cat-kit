@@ -1,6 +1,6 @@
 {
   "name": "@cat-kit/fe",
-  "version": "3.6.4",
+  "version": "3.6.5",
   "description": "前后端开发一体包前端分包",
   "main": "index.ts",
   "author": "YH FE",
