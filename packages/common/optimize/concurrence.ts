@@ -24,7 +24,13 @@ type EventsCallbacks<Result> = {
 export type ConcurrenceEvent = keyof EventsCallbacks<any>
 
 interface ConcurrenceConfig<T, R> {
-  /** 并发模式, continue:并发任务中有部分失败继续执行剩余任务, end:并发任务中有1个失败立马结束所有并发, 默认end  */
+  /**
+   * 并发模式。
+   * continue: 并发任务中有部分失败继续执行剩余任务;
+   * end: 并发任务中有1个失败立马结束所有并发
+   *
+   * @default 'end'
+   */
   mode?: 'continue' | 'end'
   /** 最大并发数量, 最小且默认为1 */
   max?: number
