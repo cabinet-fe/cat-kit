@@ -50,7 +50,7 @@ export function throttle<T extends any[], R>(
 ) {
   let start = Date.now()
   let result: R
-  return function (this: any, ...args: T) {
+  return function (this: any, ...args: T): R {
     let current = Date.now()
     if (current - start >= delay) {
       start = current
