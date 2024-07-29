@@ -16,7 +16,7 @@ import type {
   RequestConfig,
   ResponseStatus
 } from './type'
-import path from '@cat-kit/common/path/path'
+import { str } from '@cat-kit/common/data/string'
 
 export type * from './type'
 
@@ -308,7 +308,7 @@ class Requestor implements IRequestor {
     if (url.startsWith('http')) {
       this.url = url
     } else {
-      this.url = getUrl(path.join(baseUrl, url), params)
+      this.url = getUrl(str.joinPath(baseUrl, url), params)
     }
 
     this.body = transformData(data, headers)
