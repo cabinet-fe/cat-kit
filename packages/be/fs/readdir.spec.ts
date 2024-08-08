@@ -63,7 +63,7 @@ describe('文件目录读取', () => {
   test('排除某些文件', async () => {
     const dirs = await readDir(target, {
       recursive: true,
-      exclude: [/dir-test\/dir/]
+      exclude: [/dir-test[\/\\]+dir/]
     })
 
     expect(dirs).toEqual([depth1File])
@@ -72,7 +72,7 @@ describe('文件目录读取', () => {
   test('仅包含某些文件', async () => {
     const dirs = await readDir(target, {
       recursive: true,
-      include: [/dir-test\/dir/]
+      include: [/dir-test[\/\\]+dir/]
     })
     expect(dirs).toEqual([
       {

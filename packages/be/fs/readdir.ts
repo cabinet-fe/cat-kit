@@ -148,7 +148,9 @@ export function readDir<
       // 排除的项
       const excluded =
         excludeStr.has(dirent.name) ||
-        excludeRE.some(item => item.test(join(dirent.path, dirent.name)))
+        excludeRE.some(item =>
+          item.test(join(dirent.parentPath ?? dirent.path, dirent.name))
+        )
       // 如果未指定包含项
       if (isIncludeEmpty) {
         return !excluded
@@ -156,7 +158,9 @@ export function readDir<
       return (
         !excluded &&
         (includeStr.has(dirent.name) ||
-          includeRE.some(item => item.test(join(dirent.path, dirent.name))))
+          includeRE.some(item =>
+            item.test(join(dirent.parentPath ?? dirent.path, dirent.name))
+          ))
       )
     }
   }
@@ -166,6 +170,7 @@ export function readDir<
       withFileTypes: true,
       encoding: 'utf-8'
     })
+
     direntList = direntList.filter(filter)
 
     const dirs = await Promise.all(

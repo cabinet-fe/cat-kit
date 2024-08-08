@@ -122,4 +122,20 @@ describe('树', () => {
     expect(bftQueue).toEqual([1, 5, 2, 3, 4])
     expect(dftQueue).toEqual([1, 2, 3, 4, 5])
   })
+
+  test('访问', () => {
+    const treeData = {
+      id: 1,
+      children: [{ id: 2 }, { id: 3, children: [{ id: 4 }] }]
+    }
+    expect(Tree.visit(treeData, [1])?.id).toBe(3)
+    expect(Tree.visit(treeData, [1, 0])?.id).toBe(4)
+    expect(Tree.visit(treeData, [1, 0, 2])?.id).toBe(undefined)
+
+    const forestData = [treeData]
+
+    expect(Forest.visit(forestData, [0, 1])?.id).toBe(3)
+    expect(Forest.visit(forestData, [0, 1, 0])?.id).toBe(4)
+    expect(Forest.visit(forestData, [0, 1, 0, 2])?.id).toBe(undefined)
+  })
 })

@@ -168,6 +168,29 @@ export class Tree<Node extends TreeNode> {
     return ret
   }
 
+  /**
+   * 通过索引路径访问子节点节点
+   * @param node 树形节点
+   * @param indexPath 索引路径。
+   * @param childrenKey 子节点key名
+   */
+  static visit(
+    node: Record<string, any>,
+    indexPath: number[],
+    childrenKey = 'children'
+  ) {
+    let result = node
+    for (let i = 0; i < indexPath.length; i++) {
+      const index = indexPath[i]
+      if (!result) {
+        console.warn('访问的路径内容不存在')
+        return undefined
+      }
+      result = result[childrenKey]?.[index]
+    }
+    return result
+  }
+
   /** 追加节点 */
   append(data: Node['data']): void {
     return this.root.append(data)
@@ -288,6 +311,30 @@ export class Forest<Node extends TreeNode> {
     const nodes = data.map((item, index) => generate(item, index, virtualRoot))
     virtualRoot.children = nodes
     return new Forest(virtualRoot)
+  }
+
+  /**
+   * 通过索引路径访问子节点节点
+   * @param nodes 森林节点
+   * @param indexPath 索引路径。
+   * @param childrenKey 子节点key名
+   */
+  static visit(
+    nodes: Record<string, any>,
+    indexPath: number[],
+    childrenKey = 'children'
+  ) {
+    let currentNodes = nodes
+    let result: Record<string, any> | undefined
+    for (let i = 0; i < indexPath.length; i++) {
+      const index = indexPath[i]
+      if (!currentNodes) {
+        return undefined
+      }
+      result = currentNodes[index]
+      currentNodes = result?.[childrenKey]
+    }
+    return result
   }
 
   /** 追加节点 */

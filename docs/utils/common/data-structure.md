@@ -26,7 +26,10 @@ const data = {
   children: [{ id: 1 }, { id: 2 }]
 }
 // 创建树
-const tree = Tree.create(data, (v, index, parent) => new TreeNode(v, index, parent))
+const tree = Tree.create(
+  data,
+  (v, index, parent) => new TreeNode(v, index, parent)
+)
 
 // 深度优先遍历
 Tree.dft(tree, node => {})
@@ -43,9 +46,13 @@ Tree.getChild(tree, node => {
 Tree.getChildren(tree, node => {
   return node.value.id > 0
 })
+
+// 通过索引访问节点(访问树形数据索引为1的子节点)
+Tree.visit(treeData, [1], 'children')
 ```
 
 ### TreeNode API
+
 TreeNode是一个树节点的类, 你可以通过继承这个类来扩展更多的属性和方法
 
 TreeNode接受2-3个参数, 第一个参数为节点数据, 第二个参数为节点的索引, 第三个参数为父节点(可选, 在使用append等方法时会自动设置父节点)
@@ -53,9 +60,8 @@ TreeNode接受2-3个参数, 第一个参数为节点数据, 第二个参数为�
 ```ts
 const node = new TreeNode({ id: 1 }, 0)
 
-node.append((index) =>  new TreeNode({ id: 2 }, index))
+node.append(index => new TreeNode({ id: 2 }, index))
 ```
-
 
 ### 构建树形组件
 
