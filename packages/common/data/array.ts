@@ -159,6 +159,23 @@ class Arr<T> {
     }
     return newItems
   }
+
+  /**
+   * 分组
+   * @param cb 分组回调
+   * @returns
+   */
+  groupBy<K extends string | number>(cb: (item: T) => K) {
+    const result: Record<K, T[]> = {} as Record<K, T[]>
+    this._source.forEach(item => {
+      const key = cb(item)
+      if (!result[key]) {
+        result[key] = []
+      }
+      result[key]!.push(item)
+    })
+    return result
+  }
 }
 
 export function arr<T>(arr: T[]) {

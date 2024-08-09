@@ -32,6 +32,15 @@ describe('数组测试', () => {
     ])
   })
 
+  it('groupBy', () => {
+    expect(
+      arr([1, 2, 3, 4, 5]).groupBy(v => (v % 2 === 0 ? '偶数' : '奇数'))
+    ).toEqual({
+      奇数: [1, 3, 5],
+      偶数: [2, 4]
+    })
+  })
+
   it('eachRight', () => {
     let reversed: number[] = []
     arr(_arr).eachRight(v => {
