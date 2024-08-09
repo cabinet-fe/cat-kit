@@ -181,7 +181,7 @@ export class Tree<Node extends TreeNode> {
   ) {
     let result = node
     for (let i = 0; i < indexPath.length; i++) {
-      const index = indexPath[i]
+      const index = indexPath[i]!
       if (!result) {
         console.warn('访问的路径内容不存在')
         return undefined
@@ -327,7 +327,7 @@ export class Forest<Node extends TreeNode> {
     let currentNodes = nodes
     let result: Record<string, any> | undefined
     for (let i = 0; i < indexPath.length; i++) {
-      const index = indexPath[i]
+      const index = indexPath[i]!
       if (!currentNodes) {
         return undefined
       }
