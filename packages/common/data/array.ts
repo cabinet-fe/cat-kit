@@ -161,9 +161,9 @@ class Arr<T> {
   }
 
   /**
-   * 分组
-   * @param cb 分组回调
-   * @returns
+   * 分组，返回一个对象，key为分组的值，value为分组的元素
+   * @param cb 分组回调, 返回值为分组的值
+   * @returns 分组后的对象
    */
   groupBy<K extends string | number>(cb: (item: T) => K) {
     const result: Record<K, T[]> = {} as Record<K, T[]>
