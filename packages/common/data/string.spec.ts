@@ -13,4 +13,11 @@ describe('字符串操作方法测试', () => {
     expect(str(ss1).camelCase()).toBe('aaBbCc')
     expect(str(ss1).camelCase('upper')).toBe('AaBbCc')
   })
+
+  it('字符串拼接', () => {
+    expect(str.joinPath('/a/', '/b', '/c')).toBe('/a/b/c')
+    expect(str.joinPath('/a/', '/b', '/c/', '/d/')).toBe('/a/b/c/d/')
+    expect(str.joinPath('a/', '/b', '/c/')).toBe('a/b/c/')
+    expect(str.joinPath('/b', '')).toBe('/b')
+  })
 })

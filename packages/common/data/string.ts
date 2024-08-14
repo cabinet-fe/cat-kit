@@ -74,8 +74,15 @@ export function str(str: string): Str {
  * str.joinPath('a/', '/b', '/c/') // '/a/b/c/'
  * ```
  */
-str.joinPath = function joinPath(firstPath: string, ...paths: string[]): string {
-  const secondPath = paths.join('/').replace(/\/{2,}/g, '/').replace(/^\//, '')
+str.joinPath = function joinPath(
+  firstPath: string,
+  ...paths: string[]
+): string {
+  const secondPath = paths
+    .filter(p => !!p)
+    .join('/')
+    .replace(/\/{2,}/g, '/')
+    .replace(/^\//, '')
 
   // URL协议需要验证URL的合法性
   if (/^(https?|ftp|file):\/\//.test(firstPath)) {
