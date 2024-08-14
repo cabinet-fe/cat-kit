@@ -78,20 +78,23 @@ str.joinPath = function joinPath(
   firstPath: string,
   ...paths: string[]
 ): string {
-  const secondPath = paths
+  let secondPath = paths
     .filter(p => !!p)
     .join('/')
     .replace(/\/{2,}/g, '/')
     .replace(/^\//, '')
 
+  if (secondPath) {
+    secondPath = `/${secondPath}`
+  }
   // URL协议需要验证URL的合法性
   if (/^(https?|ftp|file):\/\//.test(firstPath)) {
     const origin = firstPath.replace(/:\/*$/, '://')
     if (origin.endsWith('//') || !origin.includes('.')) {
       throw new Error(`无效的URL:${origin}`)
     }
-    return `${origin.replace(/\/+$/, '')}/${secondPath}`
+    return `${origin.replace(/\/+$/, '')}${secondPath}`
   }
 
-  return `${firstPath.replace(/\/+$/, '')}/${secondPath}`
+  return `${firstPath.replace(/\/+$/, '')}${secondPath}`
 }
