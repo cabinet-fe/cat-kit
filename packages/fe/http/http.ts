@@ -286,11 +286,6 @@ class Requestor implements IRequestor {
     options.config = ret
   }
 
-  /** 获取响应状态 */
-  private getReplyStatus(): ResponseStatus {
-    return this.replyStatus
-  }
-
   /** 初始化 */
   private async init() {
     const { config } = this.options
@@ -351,7 +346,8 @@ class Requestor implements IRequestor {
         this.replyStatus = type
       }
 
-      response = after(response, setReplyType, this.getReplyStatus) || response
+      response =
+        after(response, setReplyType, () => this.replyStatus) || response
     }
 
     if (this.replyStatus === 'success') {
