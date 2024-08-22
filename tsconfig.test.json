@@ -3,6 +3,7 @@
   "compilerOptions": {
     "composite": true,
     "declaration": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": ["vitest/globals"]
   },
   "include": ["packages/**/*.ts", "./vitest.config.ts"],

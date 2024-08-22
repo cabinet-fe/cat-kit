@@ -78,8 +78,8 @@ export type HTTPAfterHandler = (
    * ```
    */
   setStatus: (type: ResponseStatus) => void,
-  /** 返回状态类型 */
-  status: ResponseStatus
+  /** 获取返回状态 */
+  getStatus: () => ResponseStatus
 ) => HttpResponse | void | undefined
 
 export interface HttpOptions {
