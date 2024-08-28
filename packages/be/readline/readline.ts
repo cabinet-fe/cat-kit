@@ -1,5 +1,5 @@
-import { createReadStream, existsSync } from 'fs'
-import { createInterface } from 'readline'
+import { createReadStream, existsSync } from 'node:fs'
+import { createInterface } from 'node:readline'
 
 /**
  * 读取文件的行
@@ -8,7 +8,11 @@ import { createInterface } from 'readline'
  */
 export function readFileLine(
   filePath: string,
-  filter: (lineIndex: number, str: string, content: string[]) => boolean | undefined
+  filter: (
+    lineIndex: number,
+    str: string,
+    content: string[]
+  ) => boolean | undefined
 ) {
   return new Promise<string[]>((rs, rj) => {
     if (!existsSync(filePath)) return rj('文件不存在')
@@ -23,7 +27,7 @@ export function readFileLine(
       if (ret === true) {
         content.push(str)
         index++
-      } else if (ret === false)  {
+      } else if (ret === false) {
         rl.close()
       } else {
         index++

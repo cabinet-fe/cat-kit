@@ -35,6 +35,7 @@ function test(method: Function, index: number) {
     new ArrayBuffer(10)
   ]
   const result = data.map(item => method(item))
+
   expect(result[index]).toBeTruthy()
   result.splice(index, 1)
   expect(result.every(v => !v)).toBeTruthy()

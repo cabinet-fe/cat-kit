@@ -1,20 +1,26 @@
 {
   "name": "cat-kit",
-  "version": "3.6.8",
+  "version": "3.6.9",
   "description": "前后端一体开发工具包",
   "scripts": {
-    "gen-sidebar": "tsx ./cmd/gen-sidebar.ts",
+    "gen-sidebar": "bun ./cmd/gen-sidebar.ts",
     "docs:dev": "vitepress dev docs",
     "docs:test-server": "node docs/.vitepress/server",
     "docs:build": "vitepress build docs",
-    "kit:build": "tsx builder/index.ts",
+    "kit:build": "bun builder/index.ts",
     "test": "vitest run",
-    "kit:build-v2": "tsx build/index.ts v2",
-    "commit-lint": "tsx cmd/verify-commit.ts",
-    "release": "pnpm test && pnpm kit:build && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
-    "release:v2": "pnpm test && pnpm kit:build-v2 && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
-    "version": "tsx cmd/version.ts"
+    "kit:build-v2": "bun build/index.ts v2",
+    "commit-lint": "bun cmd/verify-commit.ts",
+    "release": "bun run test && bun kit:build && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
+    "release:v2": "bun test && bun kit:build-v2 && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
+    "version": "bun cmd/version.ts"
   },
+  "workspaces": [
+    "docs",
+    "builder",
+    "cmd",
+    "packages/*"
+  ],
   "type": "module",
   "repository": {
     "type": "git",
@@ -44,10 +50,16 @@
   },
   "types": "fe/index.d.ts",
   "homepage": "https://github.com/cabinet-fe/cat-kit#readme",
-  "keywords": ["ts开发工具包", "cat-kit", "技术文档"],
+  "keywords": [
+    "ts开发工具包",
+    "cat-kit",
+    "技术文档"
+  ],
   "author": "Yuan He Team FE",
   "license": "MIT",
-  "bugs": { "url": "https://github.com/cabinet-fe/cat-kit/issues" },
+  "bugs": {
+    "url": "https://github.com/cabinet-fe/cat-kit/issues"
+  },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.14.2",
@@ -57,12 +69,11 @@
     "picocolors": "^1.0.1",
     "prettier": "3.3.2",
     "terser": "5.31.1",
-    "ts-conf-base": "^2.2.0",
-    "tsx": "^4.15.5",
+    "ts-conf-base": "2.3.3",
     "typescript": "5.4.5",
     "vite": "5.3.1",
     "vitepress": "1.2.3",
-    "vitest": "^1.6.0",
-    "vue": "3.4.29"
+    "vitest": "2.0.5",
+    "vue": "3.4.38"
   }
 }

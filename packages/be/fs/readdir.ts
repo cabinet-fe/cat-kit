@@ -1,7 +1,7 @@
 import type { Dirent } from 'node:fs'
-import { readdir } from 'node:fs/promises'
-import { basename, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { basename, dirname, join } from 'node:path'
+import { readdir } from 'node:fs/promises'
 
 /**
  * 文件对象

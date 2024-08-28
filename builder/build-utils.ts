@@ -1,12 +1,12 @@
-import path from 'path'
+import path from 'node:path'
 import { rollup, type ModuleFormat, type InputPluginOption } from 'rollup'
 import esbuild from 'rollup-plugin-esbuild'
 import { OUTPUT, PKG_DIR_NAME } from './constants'
 import { dts } from 'rollup-plugin-dts'
-import { nodeResolve } from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import { fileURLToPath } from 'url'
 import glob from 'fast-glob'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
 import pcolor from 'picocolors'
 
 function buildJS() {
@@ -14,8 +14,8 @@ function buildJS() {
     esbuild({
       minify: false
     }),
-    nodeResolve(),
-    commonjs()
+    commonjs(),
+    nodeResolve()
   ]
 
   // packages下所有的ts文件，并忽略测试和node_modules中的文件
@@ -42,6 +42,8 @@ function buildJS() {
       })
     ),
 
+    external: [/^node:/],
+
     plugins,
 
     // crypto-js上下文需要指定为window
@@ -67,6 +69,7 @@ function buildDTS() {
         file
       ])
     ),
+    external: [/^node:/],
     plugins: [
       dts({
         compilerOptions: {

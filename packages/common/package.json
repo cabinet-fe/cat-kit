@@ -2,7 +2,7 @@
   "name": "@cat-kit/common",
   "private": true,
   "type": "module",
-  "version": "3.6.8",
+  "version": "3.6.9",
   "description": "前后端开发一体包通用分包",
   "main": "index.ts",
   "author": "YH FE",
