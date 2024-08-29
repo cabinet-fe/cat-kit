@@ -1,6 +1,6 @@
 {
   "name": "cat-kit",
-  "version": "3.6.9",
+  "version": "3.6.10",
   "description": "前后端一体开发工具包",
   "scripts": {
     "gen-sidebar": "bun ./cmd/gen-sidebar.ts",
@@ -15,12 +15,7 @@
     "release:v2": "bun test && bun kit:build-v2 && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
     "version": "bun cmd/version.ts"
   },
-  "workspaces": [
-    "docs",
-    "builder",
-    "cmd",
-    "packages/*"
-  ],
+  "workspaces": ["docs", "builder", "cmd", "packages/*"],
   "type": "module",
   "repository": {
     "type": "git",
@@ -50,16 +45,10 @@
   },
   "types": "fe/index.d.ts",
   "homepage": "https://github.com/cabinet-fe/cat-kit#readme",
-  "keywords": [
-    "ts开发工具包",
-    "cat-kit",
-    "技术文档"
-  ],
+  "keywords": ["ts开发工具包", "cat-kit", "技术文档"],
   "author": "Yuan He Team FE",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/cabinet-fe/cat-kit/issues"
-  },
+  "bugs": { "url": "https://github.com/cabinet-fe/cat-kit/issues" },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.14.2",
