@@ -20,7 +20,10 @@ type DataType =
  * @param value 值
  */
 export function getDataType(value: any) {
-  return Object.prototype.toString.call(value).slice(8, -1).toLowerCase() as DataType
+  return Object.prototype.toString
+    .call(value)
+    .slice(8, -1)
+    .toLowerCase() as DataType
 }
 
 /**
@@ -51,7 +54,7 @@ export function isString(value: any): value is string {
  * 是否是数字
  * @param value 值
  */
-export function isNumber(value: any): value is string {
+export function isNumber(value: any): value is number {
   return getDataType(value) === 'number'
 }
 
@@ -131,7 +134,7 @@ export function isPromise(value: any): value is Promise<any> {
  * 是否是ArrayBuffer
  * @param value 值
  */
-export function isArrayBuffer(value: any): value  is ArrayBuffer {
+export function isArrayBuffer(value: any): value is ArrayBuffer {
   return value instanceof ArrayBuffer
 }
 
@@ -187,6 +190,6 @@ export function isInt32Array(value: any): value is Int32Array {
  * 是否是null
  * @param value 值
  */
- export function isNull(value: any): value is null {
+export function isNull(value: any): value is null {
   return value === null
 }
