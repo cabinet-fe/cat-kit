@@ -44,7 +44,9 @@ export class EmbeddedWorker<Ctx extends Record<string, any>> {
         type: 'text/javascript'
       })
       this.#scriptURL = URL.createObjectURL(blob)
-      this.#worker = new Worker(this.#scriptURL)
+      this.#worker = new Worker(this.#scriptURL, {
+        type: 'module'
+      })
       this.#worker.addEventListener('message', e => {
         rs(e.data)
       })
