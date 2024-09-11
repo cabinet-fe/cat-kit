@@ -29,8 +29,8 @@ export class EmbeddedWorker<Ctx extends Record<string, any>> {
     }
   }
 
-  async run(fn: (ctx: Ctx) => any) {
-    return new Promise(rs => {
+  async run<R>(fn: (ctx: Ctx) => R) {
+    return new Promise<R>(rs => {
       const scriptString = `
       ${this.#fnString}
       // 在这里执行fn代码
