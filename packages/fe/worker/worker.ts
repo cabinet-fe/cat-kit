@@ -1,12 +1,11 @@
-/**
- *
- */
 export class EmbeddedWorker<Ctx extends Record<string, any>> {
   #worker?: Worker
 
   #fnString = ''
 
   #ctx?: Ctx
+
+  #scriptURL?: string
 
   /**
    * 嵌入式工作线程
@@ -44,7 +43,8 @@ export class EmbeddedWorker<Ctx extends Record<string, any>> {
       const blob = new Blob([scriptString], {
         type: 'text/javascript'
       })
-      this.#worker = new Worker(URL.createObjectURL(blob))
+      this.#scriptURL = URL.createObjectURL(blob)
+      this.#worker = new Worker(this.#scriptURL)
       this.#worker.addEventListener('message', e => {
         rs(e.data)
       })
@@ -55,5 +55,6 @@ export class EmbeddedWorker<Ctx extends Record<string, any>> {
 
   terminate() {
     this.#worker?.terminate()
+    URL.revokeObjectURL(this.#scriptURL!)
   }
 }
