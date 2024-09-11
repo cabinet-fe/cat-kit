@@ -8,7 +8,7 @@ export * from './image'
 
 // export * from './db/db'
 
-// export * from './worker/file-md5.worker'
+export * from './worker/worker'
 
 export * from './web-api'
 

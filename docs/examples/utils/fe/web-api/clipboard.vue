@@ -1,7 +1,12 @@
 <template>
   <div>
-    <input type="text" placeholder="输入" style="border: 1px solid #ccc;" v-model="text" />
-    <v-button style="cursor: pointer;" @click="copy">复制</v-button>
+    <input
+      type="text"
+      placeholder="输入"
+      style="border: 1px solid #ccc"
+      v-model="text"
+    />
+    <v-button style="cursor: pointer" @click="copy">复制</v-button>
 
     <v-button @click="handleImport">从剪切板中导入</v-button>
   </div>

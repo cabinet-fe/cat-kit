@@ -228,7 +228,7 @@ class MD5HashAlgorithm {
       tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     for (let i = 0; i < length; i += 1) {
-      tail[i >> 2] |= u8a[i]! << (i % 4 << 3)
+      tail[i >> 2]! |= u8a[i]! << (i % 4 << 3)
     }
     this.finish(tail, length)
 
@@ -259,7 +259,7 @@ class MD5HashAlgorithm {
       lo: number,
       hi: number
 
-    tail[i >> 2] |= 0x80 << (i % 4 << 3)
+    tail[i >> 2]! |= 0x80 << (i % 4 << 3)
     if (i > 55) {
       md5cycle(this._hash, tail)
       for (i = 0; i < 16; i += 1) {
