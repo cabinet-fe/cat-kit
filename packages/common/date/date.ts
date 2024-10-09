@@ -107,6 +107,11 @@ class Dater {
     return this.date.getDate()
   }
 
+  /**
+   * 设置日
+   * @param day 日, 如果为0则表示上个月的最后一天
+   * @returns
+   */
   setDay(day: number) {
     this.date.setDate(day)
     return this
