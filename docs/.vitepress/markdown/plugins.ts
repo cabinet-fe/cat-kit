@@ -3,7 +3,7 @@ import type { RenderRule } from 'markdown-it/lib/renderer'
 import type Token from 'markdown-it/lib/token'
 import path from 'path'
 import fs from 'fs'
-import { getHighlighter,  } from 'shikiji'
+import { getHighlighter } from 'shikiji'
 import MarkdownIt from 'markdown-it'
 // import { readFileLine } from '../config/readline'
 
@@ -76,7 +76,7 @@ export async function demoContainer(md: MarkdownIt) {
           })
           .join('')}</div>`
 
-          // demos在
+        // demos在
         return `
         <v-demo :demos="demos" source="${encodeURIComponent(
           lineNumberCode + highlightSourceCode

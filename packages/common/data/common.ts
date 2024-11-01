@@ -62,13 +62,13 @@ export function setChainValue(
   let cur = o
   let len = props.length - 1
   for (let i = 0; i < len; i++) {
-    let p = props[i]
+    let p = props[i]!
     if (!cur[p]) {
       cur[p] = {}
     }
     cur = cur[p]
   }
-  cur[props[len]] = value
+  cur[props[len]!] = value
   return o
 }
 

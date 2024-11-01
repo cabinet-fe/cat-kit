@@ -2,12 +2,12 @@ import { createReadStream, existsSync } from 'fs'
 import fs from 'fs-extra'
 import path from 'path'
 import { createInterface } from 'readline'
-import { DefaultTheme } from 'vitepress'
+import type { DefaultTheme } from 'vitepress'
 
 /**
  * 读取文件的行
  * @param filePath 文件的绝对路径
- * @param filter 过滤器
+ * @param filter 过滤器，返回false时终止读取
  */
 export function readFileLine(
   filePath: string,
@@ -35,8 +35,6 @@ export function readFileLine(
     })
   })
 }
-
-
 
 const docsDir = path.resolve(__dirname, '../..')
 

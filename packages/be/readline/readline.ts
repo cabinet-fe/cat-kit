@@ -4,7 +4,7 @@ import { createInterface } from 'node:readline'
 /**
  * 读取文件的行
  * @param filePath 文件的绝对路径
- * @param filter 过滤器
+ * @param filter 过滤器，返回false时终止读取
  */
 export function readFileLine(
   filePath: string,

@@ -1,3 +1,5 @@
+import { isObj } from './data-type'
+
 /**
  * 排除一个对象的某些键和值
  * @param target 目标对象
@@ -86,6 +88,53 @@ export function extend<S extends Record<string, any>>(
     }
   }
   return source
+}
+
+/**
+ * 深度继承, 返回初始对象
+ * @param original 初始对象
+ * @param sources 继承来源
+ * @returns
+ */
+export function deepExtend<S extends Record<string, any>>(
+  original: S,
+  sources: Record<string, any>[] | Record<string, any>
+) {
+  if (Array.isArray(sources)) {
+    sources.forEach(source => {
+      deepExtend(original, source)
+    })
+  } else {
+    for (const key in original) {
+      const originalVal = original[key]
+      const sourceVal = sources[key]
+
+      // 如果源对象的值为null或undefined，则直接赋值
+      if (originalVal === null || originalVal === undefined) {
+        original[key] = sourceVal
+        continue
+      }
+
+      const originalType = typeof originalVal
+      const sourceType = typeof sourceVal
+
+      if (
+        sourceVal === null ||
+        sourceVal === undefined ||
+        originalType !== sourceType
+      ) {
+        continue
+      }
+
+      if (isObj(originalVal) && isObj(sourceVal)) {
+        deepExtend(originalVal, sourceVal)
+      } else {
+        original[key] = sourceVal
+      }
+    }
+  }
+
+  return original
 }
 
 /**

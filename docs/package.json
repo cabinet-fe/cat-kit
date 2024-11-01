@@ -12,7 +12,7 @@
     "sass": "^1.69.5",
     "markdown-it-container": "^4.0.0",
     "@types/markdown-it-container": "^2.0.9",
-    "markdown-it": "^14.0.0",
+    "markdown-it": "^14.1.0",
     "shikiji": "^0.9.12",
     "fastify": "^4.25.2",
     "@fastify/multipart": "8.1.0",
