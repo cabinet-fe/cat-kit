@@ -1,12 +1,16 @@
 function loadImage(imageFile: Blob) {
   return new Promise<HTMLImageElement>(rs => {
-    let src = URL.createObjectURL(imageFile)
+    const reader = new FileReader()
     let img = new Image()
+
     img.onload = function () {
       rs(img)
-      URL.revokeObjectURL(src)
     }
-    img.src = src
+
+    reader.onload = function () {
+      img.src = reader.result as string
+    }
+    reader.readAsDataURL(imageFile)
   })
 }
 

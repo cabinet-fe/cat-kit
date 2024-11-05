@@ -9,10 +9,10 @@
     "docs:build": "vitepress build docs",
     "kit:build": "bun builder/index.ts",
     "test": "vitest run",
-    "kit:build-v2": "bun build/index.ts v2",
+    "kit:build-v2": "bun builder/index.ts v2",
     "commit-lint": "bun cmd/verify-commit.ts",
-    "release": "bun run test && bun kit:build && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
-    "release:v2": "bun test && bun kit:build-v2 && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
+    "release": "bun run test && bun run kit:build && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
+    "release:v2": "bun run test && bun run kit:build-v2 && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
     "version": "bun cmd/version.ts"
   },
   "workspaces": [
