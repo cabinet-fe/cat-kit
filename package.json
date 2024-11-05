@@ -1,6 +1,6 @@
 {
   "name": "cat-kit",
-  "version": "3.7.4",
+  "version": "3.7.7",
   "description": "前后端一体开发工具包",
   "scripts": {
     "gen-sidebar": "bun ./cmd/gen-sidebar.ts",
@@ -27,6 +27,20 @@
     "url": "git+https://github.com/cabinet-fe/cat-kit.git"
   },
   "exports": {
+    ".": {
+      "import": {
+        "node": "./es/be/index.js",
+        "default": "./es/fe/index.js"
+      },
+      "require": {
+        "node": "./cjs/be/index.js",
+        "default": "./cjs/fe/index.js"
+      },
+      "types": {
+        "node": "./cjs/be/index.d.ts",
+        "default": "./es/fe/index.d.ts"
+      }
+    },
     "./fe": {
       "import": "./es/fe/index.js",
       "require": "./cjs/fe/index.js",
@@ -48,7 +62,7 @@
       "types": "./es/crypto/index.d.ts"
     }
   },
-  "types": "fe/index.d.ts",
+  "types": "es/fe/index.d.ts",
   "homepage": "https://github.com/cabinet-fe/cat-kit#readme",
   "keywords": [
     "ts开发工具包",
