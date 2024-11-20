@@ -10,6 +10,16 @@
     <div class="result">结果: {{ fixedNum.toFixed(precision) }}</div>
     <div class="sub-title">n(num).fixed()方法</div>
     <div class="result">结果: {{ n(fixedNum).fixed(precision) }}</div>
+
+    <div class="sub-title">n(num).fixed()方法(指定最大精度)</div>
+    <div class="result">
+      结果: {{ n(fixedNum).fixed({ maxPrecision: precision }) }}
+    </div>
+
+    <div class="sub-title">n(num).fixed()方法(指定最小精度)</div>
+    <div class="result">
+      结果: {{ n(fixedNum).fixed({ minPrecision: precision }) }}
+    </div>
   </div>
 </template>
 
@@ -19,7 +29,6 @@ import { ref } from 'vue'
 
 const fixedNum = ref(1.255)
 const precision = ref(2)
-
 </script>
 
 <style scoped>

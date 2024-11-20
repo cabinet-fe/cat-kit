@@ -22,6 +22,9 @@ export type * from './type'
 
 export type { HttpResponse } from './helper'
 
+/**
+ * Http类, 用于发起请求
+ */
 export class Http {
   before: null | HTTPBeforeHandler = null
   after: null | HTTPAfterHandler = null
