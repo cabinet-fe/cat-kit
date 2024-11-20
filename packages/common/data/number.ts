@@ -9,20 +9,6 @@ type CurrencyConfig = {
   maxPrecision?: number
 }
 
-function int(numbers: number[]) {
-  const numberStrings = numbers.map(n => String(n))
-  const numStringsLen = numberStrings.map(ns => ns.split('.')[1]?.length ?? 0)
-
-  const factor = Math.pow(10, Math.max(...numStringsLen))
-
-  return {
-    /** 整数 */
-    ints: numbers.map(n => Math.round(n * factor)),
-    /** 让所有数值成为整数的最小系数 */
-    factor
-  }
-}
-
 /**
  * 将浮点数小数部分的字符串转换为目标精度的长度并遵循四舍五入
  * @param decimalPart 浮点数的小数部分
@@ -43,9 +29,10 @@ function decimalPrecision(
   const decimalNum = Math.round(
     +(decimalPart.slice(0, precision) + '.' + decimalPart.slice(precision))
   )
+
   const decimalRet = decimalNum ? String(decimalNum) : ''
 
-  if (decimalRet.length === precision) return decimalRet
+  if (!decimalRet || decimalRet.length === precision) return decimalRet
 
   // eg. 0.009保留2为小数 decimalRet此时为1, 所以需要再前面补0
   if (decimalRet.length < precision) {
@@ -349,6 +336,21 @@ n.formatter = function (options: NumberFormatterOptions) {
   })
 
   return formatter
+}
+
+/** 将浮点数转换为整数, 并返回整数和系数 */
+function int(numbers: number[]) {
+  const numberStrings = numbers.map(n => String(n))
+  const numStringsLen = numberStrings.map(ns => ns.split('.')[1]?.length ?? 0)
+
+  const factor = Math.pow(10, Math.max(...numStringsLen))
+
+  return {
+    /** 整数 */
+    ints: numbers.map(n => Math.round(n * factor)),
+    /** 让所有数值成为整数的最小系数 */
+    factor
+  }
 }
 
 /**

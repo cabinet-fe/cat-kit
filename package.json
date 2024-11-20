@@ -1,6 +1,6 @@
 {
   "name": "cat-kit",
-  "version": "3.7.7",
+  "version": "3.7.8",
   "description": "前后端一体开发工具包",
   "scripts": {
     "gen-sidebar": "bun ./cmd/gen-sidebar.ts",
