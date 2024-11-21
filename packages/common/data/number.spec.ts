@@ -7,7 +7,7 @@ describe('数字操作', () => {
     expect(n(1).fixed(2)).toBe('1.00')
     expect(n(-0.0009999999999998899).fixed({ maxPrecision: 3 })).toBe('-0.001')
     expect(n(-0.0001).fixed({ maxPrecision: 3 })).toBe('-0')
-    expect(n(2.999).fixed({ maxPrecision: 2 })).toBe('3.00')
+    expect(n(2.999).fixed({ maxPrecision: 2 })).toBe('3')
   })
   test('currency("CNY")', () => {
     expect(n(1234.03123).currency('CNY', 2)).toBe('1,234.03')
@@ -27,6 +27,17 @@ describe('数字操作', () => {
         maxPrecision: 2
       })
     ).toBe('1,234.57')
+
+    expect(
+      n(1234.0000001).currency('CNY', {
+        maxPrecision: 6
+      })
+    ).toBe('1,234')
+    expect(
+      n(1234.1200001).currency('CNY', {
+        maxPrecision: 6
+      })
+    ).toBe('1,234.12')
     expect(
       n(1234.5678).currency('CNY', {
         maxPrecision: 3,

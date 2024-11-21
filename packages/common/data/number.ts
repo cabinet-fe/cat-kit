@@ -9,38 +9,69 @@ type CurrencyConfig = {
   maxPrecision?: number
 }
 
+type DecimalResult = [DecimalPart: string, RoundUp: boolean]
+
+function getDecimalPartByPrecision(
+  raw: string,
+  precision: number
+): DecimalResult {
+  let roundUp = false
+  if (raw.length === precision) {
+  } else if (raw.length < precision) {
+    raw = raw.padEnd(precision, '0')
+  } else {
+    raw = String(
+      Math.round(+(raw.slice(0, precision) + '.' + raw.slice(precision)))
+    )
+    if (raw.length > precision) {
+      roundUp = true
+      raw = raw.slice(1)
+    } else if (raw.length < precision) {
+      raw = raw.padStart(precision, '0')
+    }
+  }
+
+  return [raw, roundUp]
+}
+
+function getDecimalPartByMinMaxPrecision(
+  raw: string,
+  config?: { minPrecision?: number; maxPrecision?: number }
+): DecimalResult {
+  let roundUp = false
+  if (!config) return [raw, roundUp]
+
+  const { minPrecision, maxPrecision } = config
+
+  if (maxPrecision && raw.length > maxPrecision) {
+    ;[raw, roundUp] = getDecimalPartByPrecision(raw, maxPrecision)
+    raw = String(+`0.${raw}`).slice(2)
+  }
+
+  if (minPrecision && raw.length < minPrecision) {
+    raw = raw.padEnd(minPrecision, '0')
+  }
+
+  return [raw, roundUp]
+}
+
 /**
- * 将浮点数小数部分的字符串转换为目标精度的长度并遵循四舍五入
- * @param decimalPart 浮点数的小数部分
- * @param precision 保留的小数位数
- * @param carry 进位方法
+ * 获取浮点数的小数部分
+ * @param raw 小数部分的原始字符串
+ * @param config 配置
  * @returns
  */
-function decimalPrecision(
-  decimalPart: string,
-  precision: number,
-  carry: () => void
-) {
-  if (decimalPart.length <= precision) {
-    return decimalPart.padEnd(precision, '0')
+function getDecimalPart(raw: string, config: CurrencyConfig) {
+  const { precision, minPrecision, maxPrecision } = config
+
+  if (precision !== undefined) {
+    return getDecimalPartByPrecision(raw, precision)
   }
-  // 使用小数点移位来避免精度丢失
-  // 首先在字符串中插入小数点并转化为数字, 随后进行四舍五入, 最后再转化为字符串
-  const decimalNum = Math.round(
-    +(decimalPart.slice(0, precision) + '.' + decimalPart.slice(precision))
-  )
 
-  const decimalRet = decimalNum ? String(decimalNum) : ''
-
-  if (!decimalRet || decimalRet.length === precision) return decimalRet
-
-  // eg. 0.009保留2为小数 decimalRet此时为1, 所以需要再前面补0
-  if (decimalRet.length < precision) {
-    return decimalRet.padStart(precision, '0')
-  }
-  // 需要进位
-  carry()
-  return '0'.repeat(precision)
+  return getDecimalPartByMinMaxPrecision(raw, {
+    maxPrecision,
+    minPrecision
+  })
 }
 
 function toFixed(
@@ -49,30 +80,16 @@ function toFixed(
 ) {
   let [int, decimal = ''] = String(v).split('.') as [string, string | undefined]
 
-  let targetPrecision: undefined | number = undefined
-  if (typeof precision === 'number') {
-    targetPrecision = precision
-  } else {
-    const { maxPrecision, minPrecision } = precision
-    if (maxPrecision !== undefined && decimal.length > maxPrecision) {
-      targetPrecision = maxPrecision
-    } else if (minPrecision !== undefined && decimal.length < minPrecision) {
-      targetPrecision = minPrecision
-    }
-  }
-  if (
-    targetPrecision !== undefined &&
-    Number.isInteger(targetPrecision) &&
-    targetPrecision >= 0
-  ) {
-    decimal = decimalPrecision(
-      decimal,
-      targetPrecision,
-      () => (int = String(+int + 1))
-    )
-  }
+  const [decimalPart, roundUp] = getDecimalPart(
+    decimal,
+    typeof precision === 'number' ? { precision } : precision
+  )
 
-  return decimal ? int + '.' + decimal : int
+  if (roundUp) {
+    int = String(+int + 1)
+  }
+  if (!decimalPart) return int
+  return int + '.' + decimalPart
 }
 
 const CN_UPPER_NUM = '零壹贰叁肆伍陆柒捌玖'
@@ -85,39 +102,18 @@ const CurrencyFormatters: Record<
   (num: number, config?: CurrencyConfig) => string
 > = {
   CNY(num, config) {
-    const { precision, minPrecision, maxPrecision } = config || {}
-
     const isNegative = num < 0
     num = Math.abs(num)
 
-    let [intPart, decimalPart = ''] = String(num).split('.') as [
+    let [intPart, decimal = ''] = String(num).split('.') as [
       string,
       string | undefined
     ]
 
-    let targetPrecision: number | undefined = undefined
-    if (precision !== undefined) {
-      targetPrecision = precision
-    } else if (
-      maxPrecision !== undefined &&
-      decimalPart.length > maxPrecision
-    ) {
-      targetPrecision = maxPrecision
-    } else if (
-      minPrecision !== undefined &&
-      decimalPart.length < minPrecision
-    ) {
-      targetPrecision = minPrecision
-    }
+    const [decimalPart, roundUp] = getDecimalPart(decimal, config || {})
 
-    if (
-      targetPrecision !== undefined &&
-      Number.isInteger(targetPrecision) &&
-      targetPrecision >= 0
-    ) {
-      decimalPart = decimalPrecision(decimalPart, targetPrecision, () => {
-        intPart = String(+intPart + 1)
-      })
+    if (roundUp) {
+      intPart = String(+intPart + 1)
     }
 
     let result = ''
