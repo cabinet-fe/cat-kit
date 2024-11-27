@@ -43,12 +43,12 @@ function getDecimalPartByMinMaxPrecision(
 
   const { minPrecision, maxPrecision } = config
 
-  if (maxPrecision && raw.length > maxPrecision) {
+  if (maxPrecision !== undefined && raw.length > maxPrecision) {
     ;[raw, roundUp] = getDecimalPartByPrecision(raw, maxPrecision)
     raw = String(+`0.${raw}`).slice(2)
   }
 
-  if (minPrecision && raw.length < minPrecision) {
+  if (minPrecision !== undefined && raw.length < minPrecision) {
     raw = raw.padEnd(minPrecision, '0')
   }
 
