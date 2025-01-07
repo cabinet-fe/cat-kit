@@ -97,10 +97,7 @@ export abstract class TreeNode<
    * @param childrenKey 子节点key
    * @returns
    */
-  dft(
-    cb: (item: this) => boolean | void,
-    childrenKey = 'children'
-  ): false | undefined {
+  dft(cb: (item: this) => boolean | void, childrenKey = 'children') {
     return dft(this, cb, childrenKey)
   }
 

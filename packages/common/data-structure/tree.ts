@@ -212,10 +212,7 @@ export class Tree<Node extends TreeNode> {
    * @param childrenKey - 子节点的键名。
    * @returns 返回布尔值，表示是否遇到了回调函数返回 `false` 的节点。
    */
-  dft(
-    cb: (node: Node) => boolean | void,
-    childrenKey?: string
-  ): false | undefined {
+  dft(cb: (node: Node) => boolean | void, childrenKey?: string) {
     return Tree.dft(this.root, cb, childrenKey)
   }
 }
@@ -365,20 +362,9 @@ export class Forest<Node extends TreeNode> {
    * 深度优先遍历树结构，并对每个节点执行回调函数。
    * @param cb - 回调函数，接收当前节点作为参数，返回值为布尔值或无返回值, 当返回值为false时停止遍历。
    * @param childrenKey - 子节点的键名。
-   * @returns 返回布尔值，表示是否遇到了回调函数返回 `false` 的节点。
    */
-  dft(
-    cb: (item: Node) => boolean | void,
-    childrenKey?: string
-  ): false | undefined {
-    let failed = false
-    this.nodes.forEach(node => {
-      const result = dft(node, cb, childrenKey)
-      if (result === false) {
-        failed = true
-      }
-    })
-    return failed ? false : undefined
+  dft(cb: (item: Node) => boolean | void, childrenKey?: string) {
+    this.nodes.forEach(node => dft(node, cb, childrenKey))
   }
 }
 

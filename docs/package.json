@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "3.7.3",
+  "version": "3.7.11",
   "description": "文档",
   "main": "index.ts",
   "type": "module",
