@@ -26,13 +26,22 @@ describe('树', () => {
     }
   })
 
+  test('深度优先遍历路径', () => {
+    const pathKeys: number[][] = []
+
+    Tree.dftWithPath(treeData, (item, nodePath) => {
+      pathKeys.push(nodePath.map(v => v.id))
+    })
+    expect(pathKeys).toEqual([[1], [1, 2], [1, 3], [1, 3, 4], [1, 5]])
+  })
+
   test('节点创建回调', () => {
     expect(tree.root.disabled).toBeTruthy()
   })
 
   test('数量', () => {
     expect(tree.size).toBe(5)
-    expect(tree.root.children![1].size).toBe(2)
+    expect(tree.root.children![1]!.size).toBe(2)
   })
 
   test('深度', () => {

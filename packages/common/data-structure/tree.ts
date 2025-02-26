@@ -1,5 +1,5 @@
 import { TreeNode } from './tree/tree-node'
-import { bft, dft } from './tree/helper'
+import { bft, dft, dftWithPath } from './tree/helper'
 
 export interface TreeCreateByClassConfig<Node extends TreeNode> {
   /**
@@ -116,6 +116,15 @@ export class Tree<Node extends TreeNode> {
   static bft = bft
 
   /**
+   * 深度优先遍历树结构，并对每个节点执行回调函数。
+   * @param data - 树结构的根节点。
+   * @param cb - 回调函数，接收当前节点和当前节点路径作为参数，返回值为布尔值或无返回值, 当返回值为false时停止遍历。
+   * @param childrenKey - 子节点的键名。
+   * @param nodePath - 当前节点路径。
+   */
+  static dftWithPath = dftWithPath
+
+  /**
    * 获取节点的子节点
    * @param node 节点
    * @param matcher 匹配函数，用于判断节点是否符合条件
@@ -215,6 +224,18 @@ export class Tree<Node extends TreeNode> {
   dft(cb: (node: Node) => boolean | void, childrenKey?: string) {
     return Tree.dft(this.root, cb, childrenKey)
   }
+
+  /**
+   * 深度优先遍历树结构，并对每个节点执行回调函数。
+   * @param cb - 回调函数，接收当前节点和当前节点路径作为参数，返回值为布尔值或无返回值, 当返回值为false时停止遍历。
+   * @param childrenKey - 子节点的键名。
+   */
+  dftWithPath(
+    cb: (node: Node, nodePath: Node[]) => boolean | void,
+    childrenKey?: string
+  ) {
+    return Tree.dftWithPath(this.root, cb, childrenKey, [])
+  }
 }
 
 export class Forest<Node extends TreeNode> {
@@ -232,6 +253,8 @@ export class Forest<Node extends TreeNode> {
     })
     return sum
   }
+
+  leafs: Node[] = []
 
   constructor(node: Node) {
     this.virtualRoot = node
@@ -295,8 +318,8 @@ export class Forest<Node extends TreeNode> {
         node.parent = parent
       }
       const children = data[childrenKey]
-      if (Array.isArray(children) || children === undefined) {
-        node.children = children?.map((item, index) =>
+      if (Array.isArray(children)) {
+        node.children = children.map((item, index) =>
           generate(item, index, node)
         )
       }
@@ -307,6 +330,7 @@ export class Forest<Node extends TreeNode> {
     const virtualRoot = createNode(undefined, 0)
     const nodes = data.map((item, index) => generate(item, index, virtualRoot))
     virtualRoot.children = nodes
+
     return new Forest(virtualRoot)
   }
 
@@ -365,6 +389,20 @@ export class Forest<Node extends TreeNode> {
    */
   dft(cb: (item: Node) => boolean | void, childrenKey?: string) {
     this.nodes.forEach(node => dft(node, cb, childrenKey))
+  }
+
+  /**
+   * 深度优先遍历树结构，并对每个节点执行回调函数。
+   * @param cb - 回调函数，接收当前节点和当前节点路径作为参数，返回值为布尔值或无返回值, 当返回值为false时停止遍历。
+   * @param childrenKey - 子节点的键名。
+   */
+  dftWithPath(
+    cb: (item: Node, nodePath: Node[]) => boolean | void,
+    childrenKey?: string
+  ) {
+    this.nodes.forEach(node => {
+      dftWithPath(node, cb, childrenKey, [])
+    })
   }
 }
 
