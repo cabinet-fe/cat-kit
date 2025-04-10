@@ -3,7 +3,7 @@ name: docs
 on:
   # push到main分支时触发
   push:
-    branches: [main]
+    branches: [v3.x]
 
 jobs:
   docs:
