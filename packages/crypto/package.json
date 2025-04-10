@@ -1,9 +1,12 @@
 {
   "name": "@cat-kit/crypto",
-  "version": "3.7.12",
-  "description": "喵喵工具箱加密分包",
-  "main": "index.ts",
-  "author": "YH FE",
   "type": "module",
-  "dependencies": { "@cat-kit/fe": "workspace:*" }
+  "version": "4.0.0",
+  "description": "加密工具包",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ]
 }

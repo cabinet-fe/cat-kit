@@ -1,8 +1,8 @@
 {
-  "name": "@cat-kit/be",
+  "name": "@cat-kit/http",
   "type": "module",
   "version": "4.0.0",
-  "description": "后端工具包",
+  "description": "HTTP 请求工具包",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,5 +11,10 @@
   ],
   "peerDependencies": {
     "@cat-kit/core": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@cat-kit/core": {
+      "optional": true
+    }
   }
 }

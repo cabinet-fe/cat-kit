@@ -1,0 +1,20 @@
+{
+  "name": "@cat-kit/core",
+  "type": "module",
+  "version": "4.0.0",
+  "description": "核心工具包",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "test": "bun test"
+  }
+}

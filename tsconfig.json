@@ -1,11 +1,14 @@
 {
   "files": [],
+  "include": [],
   "references": [
-    { "path": "./tsconfig.be.json" },
-    { "path": "./tsconfig.fe.json" },
-    { "path": "./tsconfig.vue.json" },
-    { "path": "./tsconfig.doc.json" },
-    { "path": "./tsconfig.test.json" }
-  ],
-  "include": ["./*.ts"]
+    { "path": "./packages/core" },
+    { "path": "./packages/http" },
+    { "path": "./packages/crypto" },
+    { "path": "./packages/fe" },
+    { "path": "./packages/be" },
+    { "path": "./build" },
+    { "path": "./playground/tsconfig.json" },
+    { "path": "./playground/tsconfig.node.json" }
+  ]
 }

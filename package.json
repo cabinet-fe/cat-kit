@@ -1,79 +1,18 @@
 {
   "name": "cat-kit",
-  "version": "3.7.12",
-  "description": "前后端一体开发工具包",
-  "scripts": {
-    "gen-sidebar": "bun ./cmd/gen-sidebar.ts",
-    "docs:dev": "vitepress dev docs",
-    "docs:test-server": "node docs/.vitepress/server",
-    "docs:build": "vitepress build docs",
-    "kit:build": "bun builder/index.ts",
-    "test": "vitest run",
-    "kit:build-v2": "bun builder/index.ts v2",
-    "commit-lint": "bun cmd/verify-commit.ts",
-    "release": "bun run test && bun run kit:build && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
-    "release:v2": "bun run test && bun run kit:build-v2 && cd dist && npm publish --registry=https://registry.npmjs.org --access=public",
-    "version": "bun cmd/version.ts"
-  },
-  "workspaces": ["docs", "builder", "cmd", "packages/*"],
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cabinet-fe/cat-kit.git"
-  },
-  "exports": {
-    ".": {
-      "import": { "node": "./es/be/index.js", "default": "./es/fe/index.js" },
-      "require": {
-        "node": "./cjs/be/index.js",
-        "default": "./cjs/fe/index.js"
-      },
-      "types": {
-        "node": "./cjs/be/index.d.ts",
-        "default": "./es/fe/index.d.ts"
-      }
-    },
-    "./fe": {
-      "import": "./es/fe/index.js",
-      "require": "./cjs/fe/index.js",
-      "types": "./es/fe/index.d.ts"
-    },
-    "./be": {
-      "import": "./es/be/index.js",
-      "require": "./cjs/be/index.js",
-      "types": "./es/be/index.d.ts"
-    },
-    "./canvas": {
-      "import": "./es/canvas/index.js",
-      "require": "./cjs/canvas/index.js",
-      "types": "./es/canvas/index.d.ts"
-    },
-    "./crypto": {
-      "import": "./es/crypto/index.js",
-      "require": "./cjs/crypto/index.js",
-      "types": "./es/crypto/index.d.ts"
-    }
-  },
-  "types": "es/fe/index.d.ts",
-  "homepage": "https://github.com/cabinet-fe/cat-kit#readme",
-  "keywords": ["ts开发工具包", "cat-kit", "技术文档"],
-  "author": "Yuan He Team FE",
-  "license": "MIT",
-  "bugs": { "url": "https://github.com/cabinet-fe/cat-kit/issues" },
+  "private": true,
+  "version": "4.0.0",
+  "description": "喵喵工具箱",
+  "workspaces": [
+    "packages/*",
+    "build",
+    "playground"
+  ],
   "devDependencies": {
-    "@types/fs-extra": "^11.0.4",
-    "@types/node": "^20.14.2",
-    "fast-glob": "^3.3.2",
-    "fs-extra": "^11.2.0",
-    "jsdom": "^23.2.0",
-    "picocolors": "^1.0.1",
-    "prettier": "3.3.2",
-    "terser": "5.31.1",
-    "ts-conf-base": "2.3.3",
-    "typescript": "5.4.5",
-    "vite": "5.3.1",
-    "vitepress": "1.2.3",
-    "vitest": "2.0.5",
-    "vue": "3.4.38"
+    "typescript": "^5.8.2",
+    "@types/node": "^22.14.0",
+    "@types/bun": "^1.2.8",
+    "ts-conf-base": "^2.4.2",
+    "@cat-kit/core": "workspace:*"
   }
 }

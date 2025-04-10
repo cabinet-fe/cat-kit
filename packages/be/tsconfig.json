@@ -1,0 +1,10 @@
+{
+  "extends": "ts-conf-base/tsconfig.node.json",
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts"]
+}
