@@ -1,18 +1,18 @@
 import { getDataType } from '@cat-kit/core'
 
 type Callback<T = any> = (
-  key: CacheKey<T>,
+  key: StorageKey<T>,
   value?: T,
   temp?: { value: T; exp: number }
 ) => void
 
-export interface CacheKey<T> extends String {}
+export interface StorageKey<T> extends String {}
 
-export function cacheKey<T>(str: string): CacheKey<T> {
+export function storageKey<T>(str: string): StorageKey<T> {
   return str
 }
 
-export type ExtractCacheKey<T> = T extends CacheKey<infer K> ? K : never
+export type ExtractStorageKey<T> = T extends StorageKey<infer K> ? K : never
 
 export class WebStorage {
   static enabledType: Set<string> = new Set([
@@ -41,7 +41,7 @@ export class WebStorage {
    * @param value 单个值
    * @param exp 单个值的过期时间, 单位秒
    */
-  set<T>(key: CacheKey<T>, value: T, exp = 0): WebStorage {
+  set<T>(key: StorageKey<T>, value: T, exp = 0): WebStorage {
     if (value === null) return this
 
     const valueType = typeof value
@@ -64,11 +64,11 @@ export class WebStorage {
   }
 
   // 获取对应的字段
-  get<T>(key: CacheKey<T>): T | null
-  get<T>(key: CacheKey<T>, defaultValue: T): T
+  get<T>(key: StorageKey<T>): T | null
+  get<T>(key: StorageKey<T>, defaultValue: T): T
   get<T extends [...any[]]>(
     keys: [...T]
-  ): { [I in keyof T]: ExtractCacheKey<T[I]> }
+  ): { [I in keyof T]: ExtractStorageKey<T[I]> }
   get(key: any, defaultValue: any = null) {
     let type = getDataType(key)
     if (type === 'string') {
@@ -100,7 +100,7 @@ export class WebStorage {
    * 获取字段过期时间
    * @param key 字段名
    */
-  getExpire(key: CacheKey<any>): number {
+  getExpire(key: StorageKey<any>): number {
     let stringTmp = this.storage.getItem(key as string)
     // 如果未查到此项
     if (stringTmp === null) return 0
@@ -115,12 +115,12 @@ export class WebStorage {
    * 移除一个缓存值
    * @param key 需要移除的值的键
    */
-  remove<T>(key: CacheKey<any>): WebStorage
+  remove<T>(key: StorageKey<any>): WebStorage
   /**
    * 移除多个缓存值
    * @param keys 需要移除的值的键的数组
    */
-  remove(keys: CacheKey<any>[]): WebStorage
+  remove(keys: StorageKey<any>[]): WebStorage
   /**
    * 清空缓存
    */

@@ -1,4 +1,3 @@
-import { Controller } from './controller'
 import type { HttpEngine } from './engine/engine'
 import { FetchEngine } from './engine/fetch'
 import { XHREngine } from './engine/xhr'
@@ -13,8 +12,9 @@ export class HTTPClient {
   constructor(config?: ClientConfig) {
     this.config = config || {}
 
-    if (isInBrowser() && typeof fetch === 'function') {
-      this.engine = new XHREngine()
+    if (isInBrowser()) {
+      this.engine =
+        typeof window.fetch === 'function' ? new FetchEngine() : new XHREngine()
     } else {
       this.engine = new FetchEngine()
     }
@@ -25,42 +25,61 @@ export class HTTPClient {
   }
 
   get(url: string) {
-    return this.request(url, {
+    return this.engine.request(url, {
       method: 'GET'
     })
   }
 
   post(url: string, data: any) {
-    return this.request(url, {
+    return this.engine.request(url, {
       method: 'POST',
       body: JSON.stringify(data)
     })
   }
 
-  put(url: string, data: any) {}
+  put(url: string, data: any) {
+    return this.engine.request(url, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    })
+  }
 
-  delete(url: string) {}
+  delete(url: string) {
+    return this.engine.request(url, {
+      method: 'DELETE'
+    })
+  }
 
-  patch(url: string, data: any) {}
+  patch(url: string, data: any) {
+    return this.engine.request(url, {
+      method: 'PATCH',
+      body: JSON.stringify(data)
+    })
+  }
 
-  head(url: string) {}
+  abort() {}
 
-  ctrl(prefix?: string) {
-    return new Controller(this)
+  /** */
+  group(prefix: string) {
+    return new HTTPClient({
+      ...this.config,
+      origin: this.config.origin + prefix
+    })
   }
 }
 
 const http = new HTTPClient({
-  plugins: [
-
-  ]
+  origin: '',
+  plugins: []
 })
 
-const controller = http.ctrl()
+const client = http.group('/monitor/ds')
 
-// 停止
-controller.abort()
+const service = defineService({
+  async get(id: string) {
+    const { data } = await client.get(id)
+    return data
+  }
+})
 
-
-
-
+service.get

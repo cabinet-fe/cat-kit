@@ -81,27 +81,24 @@ const http = new HTTPClient({
 })
 ```
 
-## 请求控制器
+## 分组
 
-请求控制用于挂载目前正在请求的 http，并可以通过执行专有方法来控制这些请求，例如终止请求。
+分组用于挂载正在请求的 http，并可以通过执行专有方法来控制这些请求，例如终止请求。
 
-使用请求控制器非常简单，只需要调用客户端的`ctrl`方法, 便可生成控制器，然后你可以像在客户端上请求接口一样在控制器上请求。
+使用分组非常简单，只需要调用客户端的`group`方法, 便可生成分组，然后你可以像在客户端上请求接口一样在分组上请求。
 
 ```ts
 import { HTTPClient } from '@cat-kit/http'
 
 const http = new HTTPClient()
 
-const controller = http.ctrl()
-
-controller.get('/path/1')
-controller.get('/path/2')
+const group = http.group('/group')
 
 // 停止所有正在请求中的接口
-controller.abort()
+group.abort()
 
 // 手动有条件地停止
-controller.abort(requests => {
+group.abort(requests => {
   requests.forEach(request => {
     if (request.pathname.startWith('/api')) {
       request.abort()
