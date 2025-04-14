@@ -10,7 +10,7 @@ export class ForestNode<
     this.forest = forest
   }
 
-  override remove() {
+  override remove(): void {
     const { parent, index, forest } = this
     if (parent) {
       parent.children!.splice(index, 1)
@@ -49,7 +49,7 @@ export class Forest<
     })
   }
 
-  dfs(cb: (node: Node) => void | boolean) {
+  dfs(cb: (node: Node) => void | boolean): void {
     this.roots.forEach(root => root.dfs(cb))
   }
 }

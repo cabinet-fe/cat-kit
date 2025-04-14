@@ -67,7 +67,7 @@ export class TreeNode<T extends Record<string, any> = Record<string, any>> {
   }
 
   /** 移除当前节点 */
-  remove() {
+  remove(): void {
     const { parent, index } = this
     if (!parent) return
     const children = parent.children!
@@ -132,12 +132,12 @@ export class Tree<
     })
   }
 
-  dfs(cb: Callback<Node>) {
-    this.root.dfs(cb)
+  dfs(cb: Callback<Node>): boolean | void {
+    return this.root.dfs(cb)
   }
 
-  bfs(cb: Callback<Node>) {
-    this.root.bfs(cb)
+  bfs(cb: Callback<Node>): boolean | void {
+    return this.root.bfs(cb)
   }
 
   /**

@@ -18,9 +18,9 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
   /**
    * 遍历对象
    * @param callback 回调，第一个参数是对象key，第二个参数是key对应的value
-   * @returns
+   * @returns 当前对象
    */
-  each(callback: (key: string, value: any) => void) {
+  each(callback: (key: string, value: any) => void): CatObject<O, K> {
     const { raw } = this
     for (const key in raw) {
       callback(key, raw[key])
@@ -59,7 +59,7 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @param source 继承的目标
    * @returns 当前对象
    */
-  extend(source: Record<string, any>[] | Record<string, any>) {
+  extend(source: Record<string, any>[] | Record<string, any>): O {
     const { raw } = this
     const rawKeys = Object.keys(raw)
 
@@ -93,7 +93,7 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @param source 继承的目标
    * @returns 当前对象
    */
-  deepExtend(source: Record<string, any>[] | Record<string, any>) {
+  deepExtend(source: Record<string, any>[] | Record<string, any>): O {
     const { raw } = this
     if (Array.isArray(source)) {
       source.forEach(s => this.deepExtend(s))
@@ -130,6 +130,8 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
 
       raw[key as K] = sourceVal
     })
+
+    return raw
   }
 
   /**
@@ -183,7 +185,7 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @param source 需要合并的对象
    * @returns 当前对象
    */
-  merge(source: Record<string, any>[] | Record<string, any>) {
+  merge(source: Record<string, any>[] | Record<string, any>): O {
     const { raw } = this
 
     if (Array.isArray(source)) {
@@ -224,7 +226,7 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @param value 需要设置的值
    * @returns 当前对象
    */
-  set(prop: string, value: any) {
+  set(prop: string, value: any): Record<string, any> {
     const props = prop.split('.')
     let cur = this.raw as unknown as Record<string, any>
     let len = props.length - 1
@@ -241,6 +243,6 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
   }
 }
 
-export function o<O extends Record<string, any>>(object: O) {
+export function o<O extends Record<string, any>>(object: O): CatObject<O> {
   return new CatObject(object)
 }

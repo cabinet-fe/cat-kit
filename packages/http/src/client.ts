@@ -2,7 +2,7 @@ import type { HttpEngine } from './engine/engine'
 import { FetchEngine } from './engine/fetch'
 import { XHREngine } from './engine/xhr'
 import type { ClientConfig } from './types'
-import { isInBrowser, isInNode } from '@cat-kit/core'
+import { isInBrowser, str } from '@cat-kit/core'
 
 export class HTTPClient {
   private config: ClientConfig
@@ -24,16 +24,21 @@ export class HTTPClient {
     return this.engine.request(url, options)
   }
 
-  get(url: string) {
+  /**
+   * ## 发送 GET 请求
+   * @param url 请求地址
+   * @returns Promise<Response>
+   */
+  get(url: string, options: RequestInit = {}) {
     return this.engine.request(url, {
       method: 'GET'
     })
   }
 
-  post(url: string, data: any) {
+  post(url: string, body: any, options: RequestInit = {}) {
     return this.engine.request(url, {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(body)
     })
   }
 
@@ -57,29 +62,27 @@ export class HTTPClient {
     })
   }
 
-  abort() {}
+  abort() {
+    this.engine.abort()
+  }
 
   /** */
   group(prefix: string) {
     return new HTTPClient({
       ...this.config,
-      origin: this.config.origin + prefix
+      base: str.joinUrlPath(this.config.base || '', prefix)
     })
   }
 }
 
 const http = new HTTPClient({
   origin: '',
+  base: '',
   plugins: []
 })
 
 const client = http.group('/monitor/ds')
 
-const service = defineService({
-  async get(id: string) {
-    const { data } = await client.get(id)
-    return data
-  }
-})
+client.abort()
 
-service.get
+client.get('')

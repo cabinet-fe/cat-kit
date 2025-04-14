@@ -15,7 +15,7 @@ class CatString {
    * str('hello-world').camelCase('upper') // 'HelloWorld'
    * ```
    */
-  camelCase(type: 'lower' | 'upper' = 'lower') {
+  camelCase(type: 'lower' | 'upper' = 'lower'): string {
     const camelStr = this.raw.replace(/(?:^|[-_])(\w)/g, (_, letter) =>
       letter.toUpperCase()
     )
@@ -37,7 +37,7 @@ class CatString {
    * str('helloWorld').kebabCase() // 'hello-world'
    * ```
    */
-  kebabCase() {
+  kebabCase(): string {
     return this.raw.replace(/([A-Z])/g, '-$1').toLowerCase()
   }
 }
@@ -53,45 +53,34 @@ class CatString {
  * str.kebabCase() // 'hello-world'
  * ```
  */
-export function str(str: string) {
+export function str(str: string): CatString {
   return new CatString(str)
 }
 
-/**
- * Url路径拼接，第一个路径支持带协议的路径
- * @param firstPath 第一个路径
- * @param paths 其他路径
- * @returns 拼接后的完整URL路径
- * @example
- * ```ts
- * str.joinUrlPath('https://example.com', 'path', 'to', 'resource') // 'https://example.com/path/to/resource'
- * str.joinUrlPath('path/to/resource', 'https://example.com') // throw Error('只有第一个路径支持带协议的路径')
- * str.joinUrlPath('a/', 'b/', 'c') // 'a/b/c'
- * str.joinUrlPath('a/', 'b/', 'c/') // 'a/b/c/'
- * ```
- */
-str.joinUrlPath = function (firstPath: string, ...paths: string[]) {
-  // 处理带协议的情况
-  const hasProtocol = /^(https?|ftp|file):\/\//.test(firstPath)
+export const $str = {
+  joinUrlPath(firstPath: string, ...paths: string[]): string {
+    // 处理带协议的情况
+    const hasProtocol = /^(https?|ftp|file):\/\//.test(firstPath)
 
-  if (hasProtocol) {
-    // 分离协议和路径部分
-    const [protocol, hostname] = firstPath.split('://') as [string, string]
-    const normalizedFirstPath = hostname.replace(/\/+$/, '') // 移除尾部多余斜杠
-    const joinedPaths = [normalizedFirstPath, ...paths]
-      .join('/')
-      .replace(/\/+/g, '/') // 替换连续斜杠
+    if (hasProtocol) {
+      // 分离协议和路径部分
+      const [protocol, hostname] = firstPath.split('://') as [string, string]
+      const normalizedFirstPath = hostname.replace(/\/+$/, '') // 移除尾部多余斜杠
+      const joinedPaths = [normalizedFirstPath, ...paths]
+        .join('/')
+        .replace(/\/+/g, '/') // 替换连续斜杠
 
-    return `${protocol}://${joinedPaths}`
-  } else {
-    // 不带协议的简单路径拼接
-    const joinedPaths = [firstPath, ...paths].join('/').replace(/\/+/g, '/') // 替换连续斜杠
+      return `${protocol}://${joinedPaths}`
+    } else {
+      // 不带协议的简单路径拼接
+      const joinedPaths = [firstPath, ...paths].join('/').replace(/\/+/g, '/') // 替换连续斜杠
 
-    // 保留尾部斜杠（如果原始路径最后一个参数有尾部斜杠）
-    if (paths.length > 0 && paths[paths.length - 1]!.endsWith('/')) {
-      return joinedPaths.endsWith('/') ? joinedPaths : `${joinedPaths}/`
+      // 保留尾部斜杠（如果原始路径最后一个参数有尾部斜杠）
+      if (paths.length > 0 && paths[paths.length - 1]!.endsWith('/')) {
+        return joinedPaths.endsWith('/') ? joinedPaths : `${joinedPaths}/`
+      }
+
+      return joinedPaths
     }
-
-    return joinedPaths
   }
 }

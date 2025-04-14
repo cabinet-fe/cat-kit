@@ -1,9 +1,8 @@
 import { rolldown } from 'rolldown'
 import path from 'path'
 import { readJson } from 'fs-extra'
-import { dts as DTSPlugin } from 'rollup-plugin-dts'
-import { $ } from 'execa'
-import { getBuildInput, pkgTo } from './repo-helper'
+import { dts as RolldownDTS } from 'rolldown-plugin-dts'
+import { getBuildInput, getPlugins, pkgTo } from './repo-helper'
 import type { PackageConfig, PackageOption } from './types'
 import pic from 'picocolors'
 
@@ -95,11 +94,22 @@ export class MonoRepoLib {
 
   private async buildPackage(conf: PackageConfig) {
     try {
-      const { build, output, dir } = conf
+      const { build, output } = conf
+      let { dts, plugins, ...buildOptions } = build
 
-      const { dts, ...restBuild } = build
+      const tsconfig = build.resolve?.tsconfigFilename
 
-      const bundle = await rolldown(restBuild)
+      if (dts && tsconfig) {
+        plugins = await getPlugins(plugins)
+        if (Array.isArray(plugins)) {
+          plugins.push(RolldownDTS())
+        }
+      }
+
+      const bundle = await rolldown({
+        plugins,
+        ...buildOptions
+      })
 
       console.log(pic.gray(`开始构建: ${conf.name}`))
 
@@ -107,25 +117,6 @@ export class MonoRepoLib {
         format: 'es',
         ...output
       })
-
-      const tsconfig = build.resolve?.tsconfigFilename
-
-      if (dts && tsconfig) {
-        await $({ cwd: dir })`bun tsc -p tsconfig.json`
-        // const dtsBundle = await rolldown({
-        //   input: path.resolve(output!.dir!, 'index.d.ts'),
-        //   plugins: [
-        //     DTSPlugin({
-        //       tsconfig
-        //     })
-        //   ]
-        // })
-
-        // await dtsBundle.write({
-        //   format: 'es',
-        //   file: path.resolve(output!.dir!, 'index.d.ts')
-        // })
-      }
 
       console.log(pic.green(`${conf.name} 构建完成 \n`))
     } catch (err) {

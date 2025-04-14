@@ -27,7 +27,7 @@ export class Virtualizer {
   private itemSizes: Array<number> = []
   private measureCache: Array<number> = []
 
-  updateItemSize(index: number, size: number) {
+  updateItemSize(index: number, size: number): void {
     if (index > this.options.count) {
       throw new Error('index out of range')
     }
@@ -79,7 +79,7 @@ export class Virtualizer {
    *
    * @param element 元素
    */
-  measureElement(element: HTMLElement) {
+  measureElement(element: HTMLElement): void {
     const { direction } = this.options
     const { measureCache } = this
     const index = Number(element.dataset.index!)
@@ -95,13 +95,13 @@ export class Virtualizer {
 
   private updateCb?: (virtualizer: Virtualizer) => void
 
-  on(event: 'update', callback: (virtualizer: Virtualizer) => void) {
+  on(event: 'update', callback: (virtualizer: Virtualizer) => void): void {
     if (event === 'update') {
       this.updateCb = callback
     }
   }
 
-  scrollHandler = (e: Event) => {
+  scrollHandler = (e: Event): void => {
     const { scrollContainer } = this
     if (scrollContainer && this.updateCb) {
       this.updateCb(this)
@@ -112,7 +112,7 @@ export class Virtualizer {
    * 连接可滚动元素
    * @param container 可滚动元素
    */
-  connect(container: HTMLElement) {
+  connect(container: HTMLElement): void {
     this.disconnect()
     this.scrollContainer = container
     container.addEventListener('scroll', this.scrollHandler, {
@@ -126,13 +126,13 @@ export class Virtualizer {
    * 获取总大小
    *
    */
-  getTotalSize() {
+  getTotalSize(): number {
     const { gap, count } = this.options
     // 总大小等于所有元素大小之和加上间距
     return this.totalSize + (count > 0 ? (count - 1) * gap : 0)
   }
 
-  setOptions(options: VirtualizerOptions) {
+  setOptions(options: VirtualizerOptions): void {
     const newOptions = {
       ...this.options,
       ...options
@@ -143,11 +143,11 @@ export class Virtualizer {
     this.updateCb?.(this)
   }
 
-  disconnect() {
+  disconnect(): void {
     this.scrollContainer?.removeEventListener('scroll', this.scrollHandler)
   }
 
-  getItems() {
+  getItems(): Array<{ size: number; index: number; offset: number }> {
     const { preload, count, direction } = this.options
     const { itemSizes, scrollContainer } = this
 

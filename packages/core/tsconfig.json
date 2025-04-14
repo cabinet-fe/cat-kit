@@ -6,6 +6,7 @@
     "rootDir": "./src",
     "outDir": "dist",
     "baseUrl": ".",
+    "isolatedDeclarations": true,
     "emitDeclarationOnly": true,
     "types": ["node"]
   },

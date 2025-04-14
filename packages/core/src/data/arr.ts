@@ -61,7 +61,7 @@ export function unionBy<T extends Record<string, any>>(
 export function eachRight<T>(
   arr: T[],
   cb: (v: T, i: number, arr: T[]) => void
-) {
+): void {
   let len = arr.length
 
   while (--len > -1) {
@@ -165,7 +165,7 @@ class Arr<T> {
    * @param cb 分组回调, 返回值为分组的值
    * @returns 分组后的对象
    */
-  groupBy<K extends string | number>(cb: (item: T) => K) {
+  groupBy<K extends string | number>(cb: (item: T) => K): Record<K, T[]> {
     const result: Record<K, T[]> = {} as Record<K, T[]>
     this._source.forEach(item => {
       const key = cb(item)
@@ -178,6 +178,6 @@ class Arr<T> {
   }
 }
 
-export function arr<T>(arr: T[]) {
+export function arr<T>(arr: T[]): Arr<T> {
   return new Arr(arr)
 }

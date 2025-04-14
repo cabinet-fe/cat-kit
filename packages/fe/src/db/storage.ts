@@ -176,7 +176,12 @@ export class WebStorage {
   }
 }
 
-export const storage = {
+export const storage: {
+  /** 会话存储 */
+  session: WebStorage
+  /** 本地存储 */
+  local: WebStorage
+} = {
   session: new WebStorage('session'),
   local: new WebStorage('local')
 }

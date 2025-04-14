@@ -1,6 +1,8 @@
 import { HttpEngine } from './engine'
 
 export class XHREngine extends HttpEngine {
+  private xhr: XMLHttpRequest
+
   request(url: string, options: RequestInit = {}) {
     return new Promise<any>((resolve, reject) => {
       const { method = 'GET' } = options
@@ -14,5 +16,9 @@ export class XHREngine extends HttpEngine {
 
       xhr.send()
     })
+  }
+
+  abort() {
+    this.xhr.abort()
   }
 }

@@ -239,18 +239,19 @@ class Num {
           /** 最大精度 */
           maxPrecision?: number
         }
-  ) {
+  ): string {
     return toFixed(this.v, precision)
   }
 
   /**
    * 遍历数字
    */
-  each(fn: (n: number) => void) {
+  each(fn: (n: number) => void): Num {
     const { v } = this
     for (let i = 1; i <= v; i++) {
       fn(i)
     }
+    return this
   }
   /**
    * 大小区间
@@ -272,7 +273,7 @@ class Num {
    * @param val 最大值
    * @returns 一个不超过最大值的值
    */
-  max(val: number) {
+  max(val: number): number {
     if (this.v > val) return val
     return this.v
   }
@@ -282,7 +283,7 @@ class Num {
    * @param val 最小值
    * @returns  一个不小于最小值的值
    */
-  min(val: number) {
+  min(val: number): number {
     if (this.v < val) return val
     return this.v
   }
@@ -290,19 +291,9 @@ class Num {
 
 /**
  * 包裹一个数字以方便
- * @param n 数字
  */
-const n = function n(n: number) {
+export function n(n: number): Num {
   return new Num(n)
-}
-
-/**
- * 求和
- * @param numbers 需要求和的数字
- * @returns
- */
-n.sum = function (...numbers: number[]) {
-  return n.plus(...numbers)
 }
 
 interface NumberFormatterOptions {
@@ -318,20 +309,6 @@ interface NumberFormatterOptions {
   minimumFractionDigits?: number
   /** 表现方法, standard: 标准, scientific: 科学计数法, engineering: 引擎, compact: 简洁计数   */
   notation?: Intl.NumberFormatOptions['notation']
-}
-n.formatter = function (options: NumberFormatterOptions) {
-  const formatter = new Intl.NumberFormat('zh-CN', {
-    notation: options.notation,
-    style: options.style,
-    maximumFractionDigits: options.maximumFractionDigits ?? options.precision,
-    minimumFractionDigits: options.minimumFractionDigits ?? options.precision,
-    currency:
-      options.style === 'currency'
-        ? options.currency ?? 'CNY'
-        : options.currency
-  })
-
-  return formatter
 }
 
 /** 将浮点数转换为整数, 并返回整数和系数 */
@@ -349,65 +326,85 @@ function int(numbers: number[]) {
   }
 }
 
-/**
- * 依次相加
- * @param numbers 数字
- * @returns
- */
-n.plus = function plus(...numbers: number[]) {
-  let i = 0
-  let result = 0
-  const { ints, factor } = int(numbers)
-  while (i < ints.length) {
-    result += ints[i]!
-    i++
+export const $n = {
+  formatter(options: NumberFormatterOptions): Intl.NumberFormat {
+    const formatter = new Intl.NumberFormat('zh-CN', {
+      notation: options.notation,
+      style: options.style,
+      maximumFractionDigits: options.maximumFractionDigits ?? options.precision,
+      minimumFractionDigits: options.minimumFractionDigits ?? options.precision,
+      currency:
+        options.style === 'currency'
+          ? options.currency ?? 'CNY'
+          : options.currency
+    })
+
+    return formatter
+  },
+  /**
+   * 依次相加
+   * @param numbers 数字
+   * @returns
+   */
+  plus(...numbers: number[]): number {
+    let i = 0
+    let result = 0
+    const { ints, factor } = int(numbers)
+    while (i < ints.length) {
+      result += ints[i]!
+      i++
+    }
+    return result / factor
+  },
+  /**
+   * 依次相减
+   * @param numbers 数字
+   * @returns
+   */
+  minus(...numbers: number[]): number {
+    let i = 0
+    let { ints, factor } = int(numbers)
+
+    let result = ints[0]!
+    ints = ints.slice(1)
+    while (i < ints.length) {
+      result -= ints[i]!
+      i++
+    }
+    return result / factor
+  },
+  /**
+   * 两数相乘
+   * @param num1 数字1
+   * @param num2 数字2
+   * @returns
+   */
+  mul(num1: number, num2: number): number {
+    let {
+      ints: [int1, int2],
+      factor
+    } = int([num1, num2])
+    let result = int1! * int2!
+
+    return result / (factor * factor)
+  },
+  /**
+   * 两数相除
+   * @param num1 数字1
+   * @param num2 数字2
+   * @returns
+   */
+  div(num1: number, num2: number): number {
+    const { ints } = int([num1, num2])
+    return ints[0]! / ints[1]!
+  },
+
+  /**
+   * 求和
+   * @param numbers 需要求和的数字
+   * @returns
+   */
+  sum(...numbers: number[]): number {
+    return $n.plus(...numbers)
   }
-  return result / factor
 }
-
-/**
- * 依次相减
- * @param numbers 数字
- * @returns
- */
-n.minus = function minus(...numbers: number[]) {
-  let i = 0
-  let { ints, factor } = int(numbers)
-
-  let result = ints[0]!
-  ints = ints.slice(1)
-  while (i < ints.length) {
-    result -= ints[i]!
-    i++
-  }
-  return result / factor
-}
-
-/**
- * 两数相乘
- * @param num1 数字1
- * @param num2 数字2
- * @returns
- */
-n.mul = function mul(num1: number, num2: number) {
-  let {
-    ints: [int1, int2],
-    factor
-  } = int([num1, num2])
-  let result = int1! * int2!
-
-  return result / (factor * factor)
-}
-
-/**
- * 两数相除
- * @param num1 数字1
- * @param num2 数字2
- * @returns
- */
-n.div = function div(num1: number, num2: number) {
-  const { ints } = int([num1, num2])
-  return ints[0]! / ints[1]!
-}
-
-export { n }

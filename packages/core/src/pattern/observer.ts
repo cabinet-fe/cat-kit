@@ -85,7 +85,7 @@ export class Observable<S extends object, K extends keyof S> {
    * 触发属性变更事件
    * @param prop 属性名
    */
-  trigger(prop: string | symbol) {
+  trigger(prop: string | symbol): void {
     const propHandlers = this.propsHandlers.get(prop)
     const handlersToRemove: PropHandler[] = []
 
@@ -124,7 +124,7 @@ export class Observable<S extends object, K extends keyof S> {
       [key in keyof P]: S[P[key]]
     }) => void,
     options: ObserveOptions = {}
-  ) {
+  ): () => void {
     const { propsHandlers } = this
 
     const handler: PropHandler = {
@@ -155,7 +155,7 @@ export class Observable<S extends object, K extends keyof S> {
    * 获取状态对象
    * @returns 状态对象
    */
-  getState() {
+  getState(): S {
     return this.state
   }
 
@@ -163,7 +163,7 @@ export class Observable<S extends object, K extends keyof S> {
    * 设置状态对象
    * @param state 状态对象
    */
-  setState(state: Partial<S>) {
+  setState(state: Partial<S>): Observable<S, K> {
     Object.assign(this.state, state)
     return this
   }

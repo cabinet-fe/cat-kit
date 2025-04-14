@@ -9,7 +9,7 @@ export function debounce<T extends any[]>(
   fn: (...args: T) => void,
   delay = 300,
   immediate = true
-) {
+): (this: any, ...args: T) => void {
   let timer: NodeJS.Timeout | undefined = undefined
 
   return function (this: any, ...args: T) {
@@ -66,6 +66,6 @@ export function throttle<T extends any[], R>(
  * @param ms 毫秒数
  * @returns
  */
-export function sleep(ms: number) {
+export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }

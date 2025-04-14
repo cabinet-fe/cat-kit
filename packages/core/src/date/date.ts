@@ -16,7 +16,7 @@ class Dater {
   }
 
   /** 原始日期对象 */
-  get raw() {
+  get raw(): Date {
     return this.date
   }
 
@@ -24,51 +24,51 @@ class Dater {
     string,
     (date: Dater, len: number) => string
   > = {
-    yyyy: date => `${date.year}`,
-    YYYY: date => `${date.year}`,
-    'M+': (date, len: number) => {
+    yyyy: (date: Dater): string => `${date.year}`,
+    YYYY: (date: Dater): string => `${date.year}`,
+    'M+': (date: Dater, len: number): string => {
       let month = date.month + ''
       return len === 1 ? month : `0${month}`.slice(-2)
     },
-    'd+': (date, len: number) => {
+    'd+': (date: Dater, len: number): string => {
       let day = date.day + ''
       return len === 1 ? day : `0${day}`.slice(-2)
     },
-    'D+': (date, len: number) => {
+    'D+': (date: Dater, len: number): string => {
       let day = date.day + ''
       return len === 1 ? day : `0${day}`.slice(-2)
     },
-    'h+': (date, len: number) => {
+    'h+': (date: Dater, len: number): string => {
       let hour = date.hour
       let strHour = (hour > 12 ? hour - 12 : hour) + ''
       return len === 1 ? strHour : `0${strHour}`.slice(-2)
     },
-    'H+': (date, len: number) => {
+    'H+': (date: Dater, len: number): string => {
       let Hour = `${date.hour}`
       return len === 1 ? Hour : `0${Hour}`.slice(-2)
     },
-    'm+': (date, len: number) => {
+    'm+': (date: Dater, len: number): string => {
       let mih = `${date.minute}`
       return len === 1 ? mih : `0${mih}`.slice(-2)
     },
-    's+': (date, len: number) => {
+    's+': (date: Dater, len: number): string => {
       let sec = `${date.second}`
       return len === 1 ? sec : `0${sec}`.slice(-2)
     }
   }
 
   /** 时间戳 */
-  get timestamp() {
+  get timestamp(): number {
     return this.date.getTime()
   }
 
-  setTime(timestamp: number) {
+  setTime(timestamp: number): Dater {
     this.date.setTime(timestamp)
     return this
   }
 
   /** 年 */
-  get year() {
+  get year(): number {
     return this.date.getFullYear()
   }
 
@@ -77,13 +77,13 @@ class Dater {
    * @param year 年份
    * @returns
    */
-  setYear(year: number) {
+  setYear(year: number): Dater {
     this.date.setFullYear(year)
     return this
   }
 
   /** 月 */
-  get month() {
+  get month(): number {
     return this.date.getMonth() + 1
   }
 
@@ -92,18 +92,18 @@ class Dater {
    * @param month 月份，从1开始
    * @returns
    */
-  setMonth(month: number) {
+  setMonth(month: number): Dater {
     this.date.setMonth(month - 1)
     return this
   }
 
   /** 周 */
-  get weekDay() {
+  get weekDay(): number {
     return this.date.getDay()
   }
 
   /** 日 */
-  get day() {
+  get day(): number {
     return this.date.getDate()
   }
 
@@ -112,7 +112,7 @@ class Dater {
    * @param day 日, 如果为0则表示上个月的最后一天
    * @returns
    */
-  setDay(day: number) {
+  setDay(day: number): Dater {
     this.date.setDate(day)
     return this
   }
@@ -131,18 +131,18 @@ class Dater {
    * @param hours 时
    * @returns
    */
-  setHours(hours: number) {
+  setHours(hours: number): Dater {
     this.date.setHours(hours)
     return this
   }
 
   /** 分 */
-  get minute() {
+  get minute(): number {
     return this.date.getMinutes()
   }
 
   /** 分 */
-  get minutes() {
+  get minutes(): number {
     return this.date.getMinutes()
   }
 
@@ -150,16 +150,17 @@ class Dater {
    * 设置分
    * @param minutes 分
    */
-  setMinutes(minutes: number) {
+  setMinutes(minutes: number): Dater {
     this.date.setMinutes(minutes)
+    return this
   }
 
   /** 秒 */
-  get second() {
+  get second(): number {
     return this.date.getSeconds()
   }
   /** 秒 */
-  get seconds() {
+  get seconds(): number {
     return this.date.getSeconds()
   }
 
@@ -167,30 +168,31 @@ class Dater {
    * 设置秒
    * @param sec 秒
    */
-  setSeconds(sec: number) {
+  setSeconds(sec: number): Dater {
     this.date.setSeconds(sec)
+    return this
   }
 
   static setMatcher(
     reg: string,
     matcher: (date: Dater, len: number) => string
-  ) {
+  ): void {
     Dater.matchers[reg] = matcher
   }
 
-  static use(plugin: (dater: typeof Dater) => void) {
+  static use(plugin: (dater: typeof Dater) => void): void {
     plugin(Dater)
   }
 
   /** 获取所有的匹配器 */
-  static getMatchers() {
+  static getMatchers(): Record<string, (date: Dater, len: number) => string> {
     return Dater.matchers
   }
 
   /** 格式化日期 */
   format(formatter = 'yyyy-MM-dd'): string {
-    Object.keys(Dater.matchers).forEach(reg => {
-      formatter = formatter.replace(new RegExp(`(${reg})`), str => {
+    Object.keys(Dater.matchers).forEach((reg: string) => {
+      formatter = formatter.replace(new RegExp(`(${reg})`), (str: string) => {
         return Dater.matchers[reg]!(this, str.length)
       })
     })
@@ -230,10 +232,10 @@ class Dater {
     date: string | Date | number | Dater,
     reducer: DateCompareReducer<R>
   ): R
-  compare(
+  compare<R>(
     date: string | Date | number | Dater,
-    reducer?: DateCompareReducer<any>
-  ) {
+    reducer?: DateCompareReducer<R>
+  ): number | R {
     let dater = new Dater(date)
 
     if (!reducer) {
@@ -251,7 +253,7 @@ class Dater {
    * 跳转至月尾
    * @param offsetMonth 月份偏移量，默认为0，即当月
    */
-  toEndOfMonth(offsetMonth = 0) {
+  toEndOfMonth(offsetMonth = 0): Dater {
     this.date.setMonth(this.month + offsetMonth)
     this.date.setDate(0)
 
@@ -261,7 +263,7 @@ class Dater {
   /**
    * 获取这个月的天数
    */
-  getDays() {
+  getDays(): number {
     const { timestamp } = this
     const days = this.toEndOfMonth().day
     this.setTime(timestamp)
@@ -297,9 +299,11 @@ interface DateFactory {
   from: (dateStr: string, formatter?: string) => Dater
 }
 
-export const date = <DateFactory>function (date) {
-  return new Dater(date ?? new Date())
-}
+export const date = <DateFactory>(
+  function (date?: number | string | Date): Dater {
+    return new Dater(date ?? new Date())
+  }
+)
 
 date.use = Dater.use
 
@@ -316,7 +320,7 @@ const getDateTypeStr = (str: string, formatter: string, re: RegExp): string => {
   return ''
 }
 
-date.from = function (dateStr: string, formatter = 'yyyy-MM-dd') {
+date.from = function (dateStr: string, formatter = 'yyyy-MM-dd'): Dater {
   if (dateStr.length !== formatter.length) {
     console.warn('dateStr与formatter的格式不一致')
     return new Dater(dateStr)

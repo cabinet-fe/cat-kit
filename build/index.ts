@@ -36,7 +36,35 @@ const lib = new MonoRepoLib([
       dir: 'dist',
       sourcemap: true
     }
+  },
+  {
+    dir: pkg('test'),
+    deps: ['@cat-kit/core'],
+
+    build: {
+      input: 'src/index.ts'
+    },
+
+    output: {
+      dir: 'dist',
+      sourcemap: true
+    }
   }
+  // {
+  //   dir: pkg('http'),
+  //   deps: ['@cat-kit/core'],
+
+  //   build: {
+  //     input: 'src/index.ts',
+  //     dts: true,
+  //     external: ['@cat-kit/core']
+  //   },
+
+  //   output: {
+  //     dir: 'dist',
+  //     sourcemap: true
+  //   }
+  // }
 ])
 
 await lib.build()

@@ -1,0 +1,19 @@
+{
+  "name": "@cat-kit/test",
+  "version": "4.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "@cat-kit/core": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@cat-kit/core": {
+      "optional": true
+    }
+  }
+}

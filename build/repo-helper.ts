@@ -1,5 +1,5 @@
 import p from 'node:path'
-import type { InputOption } from 'rolldown'
+import type { InputOption, RolldownPluginOption } from 'rolldown'
 
 export function pkgTo(pkgDir: string, targetPath: string) {
   if (p.isAbsolute(targetPath)) {
@@ -26,4 +26,22 @@ export function getBuildInput(dir: string, input: InputOption): InputOption {
   return Object.fromEntries(
     Object.entries(input).map(([k, v]) => [k, getBuildInput(dir, v) as string])
   )
+}
+
+export async function getPlugins(
+  plugins: RolldownPluginOption
+): Promise<RolldownPluginOption[]> {
+  if (plugins instanceof Promise) {
+    plugins = await plugins
+  }
+
+  if (Array.isArray(plugins)) {
+    return plugins
+  }
+
+  if (!plugins) {
+    return []
+  }
+
+  return [plugins]
 }
