@@ -111,14 +111,18 @@ export class MonoRepoLib {
         ...buildOptions
       })
 
-      console.log(pic.gray(`开始构建: ${conf.name}`))
+      const start = Date.now()
 
       await bundle.write({
         format: 'es',
         ...output
       })
 
-      console.log(pic.green(`${conf.name} 构建完成 \n`))
+      console.log(
+        pic.cyan(`${conf.name}`) +
+          pic.gray(' finished in') +
+          pic.green(` ${Date.now() - start}ms`)
+      )
     } catch (err) {
       console.error(pic.red(`${conf.name} 构建失败`))
       console.error(err)

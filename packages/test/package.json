@@ -8,6 +8,9 @@
   "files": [
     "dist"
   ],
+  "devDependencies": {
+    "@cat-kit/core": "workspace:*"
+  },
   "peerDependencies": {
     "@cat-kit/core": ">=4.0.0"
   },

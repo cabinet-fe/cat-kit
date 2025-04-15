@@ -1,8 +1,8 @@
 import { isDate } from '../data/type'
 
-type DateCompareReducer<R> = (year: number, month: number, day: number) => R
+type DateCompareReducer<R> = (timeDiff: number) => R
 
-class Dater {
+export class Dater {
   private date!: Date
 
   constructor(date: number | string | Date | Dater) {
@@ -39,20 +39,20 @@ class Dater {
       return len === 1 ? day : `0${day}`.slice(-2)
     },
     'h+': (date: Dater, len: number): string => {
-      let hour = date.hour
+      let hour = date.hours
       let strHour = (hour > 12 ? hour - 12 : hour) + ''
       return len === 1 ? strHour : `0${strHour}`.slice(-2)
     },
     'H+': (date: Dater, len: number): string => {
-      let Hour = `${date.hour}`
+      let Hour = `${date.hours}`
       return len === 1 ? Hour : `0${Hour}`.slice(-2)
     },
     'm+': (date: Dater, len: number): string => {
-      let mih = `${date.minute}`
+      let mih = `${date.minutes}`
       return len === 1 ? mih : `0${mih}`.slice(-2)
     },
     's+': (date: Dater, len: number): string => {
-      let sec = `${date.second}`
+      let sec = `${date.seconds}`
       return len === 1 ? sec : `0${sec}`.slice(-2)
     }
   }
@@ -118,10 +118,6 @@ class Dater {
   }
 
   /** 时 */
-  get hour(): number {
-    return this.date.getHours()
-  }
-  /** 时 */
   get hours(): number {
     return this.date.getHours()
   }
@@ -134,11 +130,6 @@ class Dater {
   setHours(hours: number): Dater {
     this.date.setHours(hours)
     return this
-  }
-
-  /** 分 */
-  get minute(): number {
-    return this.date.getMinutes()
   }
 
   /** 分 */
@@ -156,10 +147,6 @@ class Dater {
   }
 
   /** 秒 */
-  get second(): number {
-    return this.date.getSeconds()
-  }
-  /** 秒 */
   get seconds(): number {
     return this.date.getSeconds()
   }
@@ -171,22 +158,6 @@ class Dater {
   setSeconds(sec: number): Dater {
     this.date.setSeconds(sec)
     return this
-  }
-
-  static setMatcher(
-    reg: string,
-    matcher: (date: Dater, len: number) => string
-  ): void {
-    Dater.matchers[reg] = matcher
-  }
-
-  static use(plugin: (dater: typeof Dater) => void): void {
-    plugin(Dater)
-  }
-
-  /** 获取所有的匹配器 */
-  static getMatchers(): Record<string, (date: Dater, len: number) => string> {
-    return Dater.matchers
   }
 
   /** 格式化日期 */
@@ -222,12 +193,17 @@ class Dater {
   }
 
   /**
-   *
+   * 比较日期, 并返回天数差
    * @param date 日期
-   * @param reducer 处理器
-   * @returns
+   * @returns 天数差
    */
   compare(date: string | Date | number | Dater): number
+  /**
+   * 比较日期, 返回自定义结果
+   * @param date 日期
+   * @param reducer 处理器
+   * @returns 自定义结果
+   */
   compare<R>(
     date: string | Date | number | Dater,
     reducer: DateCompareReducer<R>
@@ -238,15 +214,14 @@ class Dater {
   ): number | R {
     let dater = new Dater(date)
 
+    // 计算时间差（毫秒）
+    const timeDiff = this.timestamp - dater.timestamp
+
     if (!reducer) {
-      return Math.ceil(Math.abs(this.timestamp - dater.timestamp) / 86400000)
+      return Math.ceil(timeDiff / 86400000)
     }
 
-    const year = Math.abs(this.year - dater.year)
-    const month = Math.abs(this.month - dater.month)
-    const day = Math.abs(this.day - dater.day)
-
-    return reducer(year, month, day)
+    return reducer(timeDiff)
   }
 
   /**
@@ -271,76 +246,7 @@ class Dater {
   }
 }
 
-interface DateFactory {
-  (date?: number | string | Date): Dater
-  /**
-   * 虽然可以直接操作Dater的api，但可以使用插件机制来更好的组织你的代码
-   * @param plugin 插件
-   */
-  use: (plugin: (dater: typeof Dater) => void) => void
-  /** 获取所有的匹配器 */
-  getMatchers: () => Record<string, (date: Dater, len: number) => string>
-  /**
-   * 设置匹配器，你可以新增或者覆盖原本的配器
-   * @param reg 匹配器名称
-   * @param matcher 匹配器
-   */
-  setMatcher: (
-    reg: string,
-    matcher: (date: Dater, len: number) => string
-  ) => void
-
-  /**
-   * 根据格式化日期字符串得到日期
-   * @param dateStr 格式化后的日期字符串
-   * @param formatter 格式化字符串
-   * @returns
-   */
-  from: (dateStr: string, formatter?: string) => Dater
+/** 日期 */
+export function date(d?: number | string | Date | Dater): Dater {
+  return new Dater(d ?? new Date())
 }
-
-export const date = <DateFactory>(
-  function (date?: number | string | Date): Dater {
-    return new Dater(date ?? new Date())
-  }
-)
-
-date.use = Dater.use
-
-date.getMatchers = Dater.getMatchers
-
-date.setMatcher = Dater.setMatcher
-
-const getDateTypeStr = (str: string, formatter: string, re: RegExp): string => {
-  let matched = formatter.match(re)
-
-  if (matched) {
-    return str.slice(matched.index!, matched.index! + matched[0].length)
-  }
-  return ''
-}
-
-date.from = function (dateStr: string, formatter = 'yyyy-MM-dd'): Dater {
-  if (dateStr.length !== formatter.length) {
-    console.warn('dateStr与formatter的格式不一致')
-    return new Dater(dateStr)
-  }
-
-  // 年月日
-  const YMD = [/(y|Y)+/, /M+/, /d+/]
-    .map(re => getDateTypeStr(dateStr, formatter, re))
-    .filter(item => !!item)
-    .join('-')
-
-  // 时分秒
-  const HMS = [/(h|H)+/, /m+/, /s+/]
-    .map(re => getDateTypeStr(dateStr, formatter, re))
-    .filter(item => !!item)
-    .join(':')
-
-  dateStr = YMD + (HMS ? ` ${HMS}` : '')
-
-  return new Dater(dateStr)
-}
-
-export type { Dater }

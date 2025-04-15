@@ -14,7 +14,7 @@ export class FetchEngine extends HttpEngine {
     })
   }
 
-  abort() {
+  abort(): void {
     this.ctrl.abort()
   }
 }

@@ -1,6 +1,5 @@
 {
   "name": "playground",
-  "private": true,
   "devDependencies": {
     "@cat-kit/core": "workspace:*",
     "@cat-kit/fe": "workspace:*",

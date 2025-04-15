@@ -9,9 +9,9 @@
     "playground"
   ],
   "devDependencies": {
-    "typescript": "^5.8.2",
-    "@types/node": "^22.14.0",
-    "@types/bun": "^1.2.8",
+    "typescript": "^5.8.3",
+    "@types/node": "^22.14.1",
+    "@types/bun": "^1.2.9",
     "ts-conf-base": "^2.4.2",
     "@cat-kit/core": "workspace:*"
   }

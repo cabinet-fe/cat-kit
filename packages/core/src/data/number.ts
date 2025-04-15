@@ -311,7 +311,9 @@ interface NumberFormatterOptions {
   notation?: Intl.NumberFormatOptions['notation']
 }
 
-/** 将浮点数转换为整数, 并返回整数和系数 */
+/**
+ * 将浮点数转换为整数, 并返回对齐后的整数和系数
+ */
 function int(numbers: number[]) {
   const numberStrings = numbers.map(n => String(n))
   const numStringsLen = numberStrings.map(ns => ns.split('.')[1]?.length ?? 0)

@@ -47,16 +47,29 @@ tables.find({
   name: 'aaa'
 })
 
-// 更新
-tables.update('', {})
+// 查询所有匹配的数据
+tables.findMany({
+  name: 'aaa'
+})
 
-tables.put({
+// 更新
+tables.update('key', {
+  name: 'xxx'
+})
+
+// 数据替换
+tables.put('key', {
   name: 'aaa',
   configs: {}
 })
 
 // 删除
 tables.delete({
+  name: 'aaa'
+})
+
+// 删除多个
+tables.deleteMany({
   name: 'aaa'
 })
 

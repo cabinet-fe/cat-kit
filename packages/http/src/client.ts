@@ -2,7 +2,7 @@ import type { HttpEngine } from './engine/engine'
 import { FetchEngine } from './engine/fetch'
 import { XHREngine } from './engine/xhr'
 import type { ClientConfig } from './types'
-import { isInBrowser, str } from '@cat-kit/core'
+import { $str, isInBrowser, str } from '@cat-kit/core'
 
 export class HTTPClient {
   private config: ClientConfig
@@ -70,7 +70,7 @@ export class HTTPClient {
   group(prefix: string) {
     return new HTTPClient({
       ...this.config,
-      base: str.joinUrlPath(this.config.base || '', prefix)
+      base: $str.joinUrlPath(this.config.base || '', prefix)
     })
   }
 }
