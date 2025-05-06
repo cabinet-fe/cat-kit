@@ -1,8 +1,8 @@
 import type { HttpEngine } from './engine/engine'
 import { FetchEngine } from './engine/fetch'
 import { XHREngine } from './engine/xhr'
-import type { ClientConfig } from './types'
-import { $str, isInBrowser, str } from '@cat-kit/core'
+import type { ClientConfig, RequestOptions } from './types'
+import { $str, isInBrowser } from '@cat-kit/core'
 
 export class HTTPClient {
   private config: ClientConfig
@@ -20,7 +20,7 @@ export class HTTPClient {
     }
   }
 
-  request(url: string, options: RequestInit) {
+  request(url: string, options: RequestOptions): Promise<Response> {
     return this.engine.request(url, options)
   }
 
@@ -29,23 +29,34 @@ export class HTTPClient {
    * @param url 请求地址
    * @returns Promise<Response>
    */
-  get(url: string, options: RequestInit = {}) {
+  get(url: string, options: Omit<RequestOptions, 'method'> = {}) {
     return this.engine.request(url, {
-      method: 'GET'
+      method: 'GET',
+      ...options
     })
   }
 
-  post(url: string, body: any, options: RequestInit = {}) {
+  post(
+    url: string,
+    body: RequestOptions['body'],
+    options: Omit<RequestOptions, 'method' | 'body'> = {}
+  ) {
     return this.engine.request(url, {
       method: 'POST',
-      body: JSON.stringify(body)
+      body,
+      ...options
     })
   }
 
-  put(url: string, data: any) {
+  put(
+    url: string,
+    data: RequestOptions['body'],
+    options: Omit<RequestOptions, 'method' | 'body'> = {}
+  ) {
     return this.engine.request(url, {
       method: 'PUT',
-      body: JSON.stringify(data)
+      body: data,
+      ...options
     })
   }
 
@@ -62,27 +73,19 @@ export class HTTPClient {
     })
   }
 
-  abort() {
+  abort(): void {
     this.engine.abort()
   }
 
-  /** */
-  group(prefix: string) {
+  /**
+   * ## 创建分组
+   * @param prefix 分组前缀
+   * @returns HTTPClient
+   */
+  group(prefix: string): HTTPClient {
     return new HTTPClient({
       ...this.config,
       base: $str.joinUrlPath(this.config.base || '', prefix)
     })
   }
 }
-
-const http = new HTTPClient({
-  origin: '',
-  base: '',
-  plugins: []
-})
-
-const client = http.group('/monitor/ds')
-
-client.abort()
-
-client.get('')

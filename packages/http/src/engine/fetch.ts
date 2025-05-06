@@ -1,4 +1,5 @@
 import { HttpEngine } from './engine'
+import type { HTTPResponse, RequestOptions } from '../types'
 
 export class FetchEngine extends HttpEngine {
   private ctrl: AbortController
@@ -8,10 +9,18 @@ export class FetchEngine extends HttpEngine {
     this.ctrl = new AbortController()
   }
 
-  request(url: string, options: RequestInit = {}) {
-    return fetch(url, {
-      signal: this.ctrl.signal
+  async request(url: string, options: RequestOptions): Promise<HTTPResponse> {
+    const { body, ...rest } = options
+    const response = await fetch(url, {
+      signal: this.ctrl.signal,
+      ...rest
     })
+
+    return {
+      data: await response.json(),
+      code: response.status,
+      headers: Object.fromEntries(response.headers.entries())
+    }
   }
 
   abort(): void {
