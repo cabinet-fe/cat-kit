@@ -14,10 +14,5 @@
   },
   "peerDependencies": {
     "@cat-kit/core": ">=4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@cat-kit/core": {
-      "optional": true
-    }
   }
 }

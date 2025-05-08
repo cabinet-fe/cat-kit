@@ -42,6 +42,12 @@
     "packages/crypto": {
       "name": "@cat-kit/crypto",
       "version": "4.0.0",
+      "devDependencies": {
+        "@cat-kit/core": "workspace:*",
+      },
+      "peerDependencies": {
+        "@cat-kit/core": ">=4.0.0",
+      },
     },
     "packages/fe": {
       "name": "@cat-kit/fe",

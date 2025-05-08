@@ -1,69 +1,43 @@
-# @cat-kit/crypto 加解密
+# @cat-kit/crypto 加密库
 
-按照[要求](#要求)帮我编写这个库。
+该文件是加密库的设计文件。
 
-## 要求
+## 依赖
 
-- 这是 cat-kit 下的一个加密库。本项目中的 src 目录中已经创建好文件，base 文件是算法的基础部分，导出算法的基类，该类提供了一些通用的基础方法，例如分组计算等等。
+依赖 `@cat-kit/core` 包。
 
-- 本库要同时支持浏览器端和 node 端。浏览器端要求判断是否为 https 环境，如果不是 https 环境，则不能使用 crypto.subtle 模块实现算法而是单独实现具体的算法。
+## 全局要求
 
-- 本库一定要注意模块化，以便于构建工具可以对加密库进行 treeshaking 优化，例如 aes 加密的模式，我们可以导入模式和 AES 算法核心组合，这样没有用到的模式最终就没必要打包到构建物中去了。
+- 同时支持浏览器(现代浏览器)端和 nodejs(版本大于 22)端。
+- 代码要足够模块化，以便于构建工具可以进行 tree-shaking 优化。
+- 代码要足够简单，不要引入额外的依赖。
+- 代码要足够性能，不要存在性能问题。
+- 代码要足够可读，不要存在可读性问题。
+- 加密和摘要算法要能够计算超大文件，不能出现 OOM 问题。
 
-- 其他的请根据具体算法要求。
+## 现代浏览器问题
 
-### aes 算法
+现代浏览器已经实现了相当多的加密算法，不过需要在 HTTPS 环境下才能使用。因此加密算法需要考虑三种情况：
 
-- aes 算法实现 gcm 和 cbc 模式加密，并且根据传入的密钥自动判断使用多少位加密(128, 192, 256)。
+1. 浏览器环境，HTTPS 环境。此时可以使用浏览器的加密算法。
+2. 浏览器环境，HTTP 环境。此时不能使用浏览器的加密算法，需要使用纯 JS 实现。
+3. Node 环境。此时可以使用 Node 的加密算法。
 
-- AES 要将模式和填充模块单独抽取出来，具体的代码放在 aes 目录下。
+## 代码复用
 
-填充模块
+加密和摘要算法的底层都是基于二进制实现的，因此可以将底层的二进制操作抽离出来，供上层算法使用。
 
-实现
+## 代码结构
 
-使用示例:
+- src/base。基础模块，包含二进制操作等基础功能。
+- src/symmetric/block-cipher。对称加密基础类。
+- src/symmetric/aes。AES 加密算法。
+- src/hash/hasher。摘要算法基础类。
+- src/hash/md5。MD5 摘要算法。
+- src/hash/sha。SHA 摘要算法, 主要包含 SHA256 和 SHA512。
+- src/id。id 生成器。
 
-```ts
-import { AES, AES_CBC, AES_GCM, AESPadding } from '@cat-kit/crypto'
+## 具体设计文件
 
-const aes = new AES({
-  // 模式的具体实现类
-  mode: AESMode.CBC,
-  // 填充，如果需要
-  padding: AESPadding.PKCS7
-})
-
-const key = 'xxxxxxxxxxxxxxxx'
-const iv = 'xxxxxxxxxxxxxxxx'
-const ciphertext = aes.encode('message', {
-  // 可以是Int8Array或者字符串
-  key,
-  // 可以是Int8Array或者字符串
-  iv,
-  // hex / buffer
-  output: 'hex'
-})
-
-aes.decode(ciphertext, { key, iv })
-```
-
-### md5
-
-使用示例
-
-```ts
-import { MD5 } from '@cat-kit/crypto'
-
-const md5 = new MD5()
-
-// 获取字符串摘要
-md5.hash('string')
-
-// 获取文件摘要，支持超过2g的大文件
-md5.hash(file)
-```
-
-## 测试验证环节
-
-test.ts 文件是对算法进行正确性校验的脚本，本机安装了 bun 环境，可以使用 bun 直接执行此文件。因此不需要对该库进行构建操作，也不需要写单独的单元测试了。
+[AES](./aes.design.md)
+[MD5](./md5.design.md)
