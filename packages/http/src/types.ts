@@ -1,4 +1,11 @@
-export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD'
+export type RequestMethod =
+  | 'GET'
+  | 'POST'
+  | 'PUT'
+  | 'DELETE'
+  | 'PATCH'
+  | 'HEAD'
+  | 'OPTIONS'
 
 /** 请求客户端配置 */
 export interface ClientConfig {
@@ -78,19 +85,61 @@ export interface RequestOptions {
   timeout?: number
   /** 请求是否携带凭证, 在浏览器环境下有效 */
   credentials?: boolean
+  /**
+   * 响应类型
+   * - 'json': 解析为 JSON (默认)
+   * - 'text': 解析为文本
+   * - 'blob': 解析为 Blob
+   * - 'arraybuffer': 解析为 ArrayBuffer
+   * @default 'json'
+   */
+  responseType?: 'json' | 'text' | 'blob' | 'arraybuffer'
 }
 
-export interface HTTPResponse {
+export interface HTTPResponse<T = any> {
   /** 响应的数据 */
-  data: any
+  data: T
   /** HTTP状态码 */
   code: number
   /** 响应标头 */
   headers: Record<string, string>
+  /** 原始响应对象 (浏览器环境下为 Response，Node.js 环境下为 IncomingMessage) */
+  raw?: Response | any
+}
+
+/**
+ * 插件钩子返回类型
+ */
+export interface PluginHookResult {
+  /** 修改后的 URL */
+  url?: string
+  /** 修改后的请求选项 */
+  options?: RequestOptions
 }
 
 /** 请求客户端插件 */
 export interface ClientPlugin {
-  beforeRequest(): any
-  afterRespond(): any
+  /**
+   * 请求前钩子
+   * @param url 请求 URL
+   * @param options 请求选项
+   * @returns 修改后的 URL 和请求选项
+   */
+  beforeRequest?(
+    url: string,
+    options: RequestOptions
+  ): Promise<PluginHookResult | void> | PluginHookResult | void
+
+  /**
+   * 响应后钩子
+   * @param response 响应对象
+   * @param url 请求 URL
+   * @param options 请求选项
+   * @returns 修改后的响应对象
+   */
+  afterRespond?(
+    response: HTTPResponse,
+    url: string,
+    options: RequestOptions
+  ): Promise<HTTPResponse | void> | HTTPResponse | void
 }
