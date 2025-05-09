@@ -48,40 +48,6 @@ export class AES extends BlockCipher {
   }
 
   /**
-   * 加密数据
-   * @param data 明文数据
-   * @param options 加密选项
-   * @returns 加密后的数据
-   */
-  async encode(
-    data: BinaryInput,
-    options: {
-      key: BinaryInput
-      iv?: BinaryInput
-      output?: BinaryOutputFormat
-    }
-  ): Promise<string | Uint8Array> {
-    return this.encrypt(data, options)
-  }
-
-  /**
-   * 解密数据
-   * @param data 密文数据
-   * @param options 解密选项
-   * @returns 解密后的数据
-   */
-  async decode(
-    data: BinaryInput,
-    options: {
-      key: BinaryInput
-      iv?: BinaryInput
-      output?: BinaryOutputFormat
-    }
-  ): Promise<string | Uint8Array> {
-    return this.decrypt(data, options)
-  }
-
-  /**
    * 静态加密方法
    * @param data 明文数据
    * @param options 加密选项

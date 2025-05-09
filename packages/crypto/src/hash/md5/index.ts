@@ -34,6 +34,7 @@ export class MD5 extends Hasher {
       window.crypto?.subtle
     ) {
       try {
+        window.crypto.subtle.digest('a', new Uint8Array())
         return await window.crypto.subtle.digest('MD5', new Uint8Array())
       } catch (error) {
         // 如果浏览器不支持MD5，则使用自定义实现
