@@ -1,5 +1,5 @@
 import { HttpEngine } from './engine'
-import type { RequestOptions, HTTPResponse } from '../types'
+import type { RequestConfig, HTTPResponse } from '../types'
 import { getDataType } from '@cat-kit/core'
 
 export class XHREngine extends HttpEngine {
@@ -8,19 +8,15 @@ export class XHREngine extends HttpEngine {
 
   request<T = any>(
     url: string,
-    options: RequestOptions
+    config: RequestConfig
   ): Promise<HTTPResponse<T>> {
     return new Promise<HTTPResponse<T>>((resolve, reject) => {
-      const { method = 'GET', timeout = 0 } = options
+      const { method = 'GET', timeout = 0 } = config
 
       const xhr = new XMLHttpRequest()
 
       // 将 XHR 实例添加到集合中，以便可以中止请求
       this.xhrSets.add(xhr)
-
-      if (method === 'GET') {
-        url = this.buildURL(url, options)
-      }
 
       xhr.timeout = timeout
       xhr.responseType = 'json'
@@ -52,7 +48,7 @@ export class XHREngine extends HttpEngine {
 
       xhr.open(method, url, true)
 
-      this.sendHeaders(xhr, options)
+      this.sendHeaders(xhr, config)
 
       // 从集合中移除已完成的请求
       xhr.onloadend = () => {
@@ -62,7 +58,7 @@ export class XHREngine extends HttpEngine {
       if (method === 'GET' || method === 'HEAD') {
         xhr.send(null)
       } else {
-        const { body } = options
+        const { body } = config
         if (body) {
           if (getDataType(body) === 'object' || getDataType(body) === 'array') {
             xhr.setRequestHeader('Content-Type', 'application/json')
@@ -100,7 +96,7 @@ export class XHREngine extends HttpEngine {
     return headers
   }
 
-  sendHeaders(xhr: XMLHttpRequest, options: RequestOptions): void {
+  sendHeaders(xhr: XMLHttpRequest, options: RequestConfig): void {
     const { headers, credentials } = options
 
     if (credentials !== false) {

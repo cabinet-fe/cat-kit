@@ -2,7 +2,7 @@ import type {
   ClientPlugin,
   PluginHookResult,
   RequestMethod,
-  RequestOptions
+  RequestConfig
 } from '../types'
 
 /**
@@ -43,8 +43,8 @@ export function MethodOverridePlugin(
     options
 
   return {
-    beforeRequest(_url: string, options: RequestOptions): PluginHookResult {
-      const { method } = options
+    beforeRequest(_url: string, config: RequestConfig): PluginHookResult {
+      const { method } = config
 
       // 如果没有指定方法或者方法不需要被重写，不做任何处理
       if (!method || !methods.includes(method as RequestMethod)) {
@@ -52,15 +52,15 @@ export function MethodOverridePlugin(
       }
 
       // 创建新的请求头对象
-      const headers = { ...(options.headers || {}) }
+      const headers = { ...(config.headers || {}) }
 
       // 添加原始方法到请求头
       headers['X-HTTP-Method-Override'] = method
 
       // 返回修改后的请求选项
       return {
-        options: {
-          ...options,
+        config: {
+          ...config,
           method: overrideMethod,
           headers
         }

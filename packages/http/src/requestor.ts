@@ -1,5 +1,5 @@
 export class Requestor {
-  abort() {}
+  abort(): void {}
 
   constructor() {}
 }

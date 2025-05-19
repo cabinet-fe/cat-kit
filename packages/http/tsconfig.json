@@ -6,7 +6,7 @@
     "isolatedDeclarations": true,
     "rootDir": "./src",
     "outDir": "./dist",
-    "types": ["node"]
+    "types": []
   },
   "include": ["src/**/*.ts"]
 }

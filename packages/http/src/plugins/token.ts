@@ -1,4 +1,4 @@
-import type { ClientPlugin, PluginHookResult, RequestOptions } from '../types'
+import type { ClientPlugin, PluginHookResult, RequestConfig } from '../types'
 
 /**
  * Token 插件配置
@@ -119,7 +119,7 @@ export function TokenPlugin(options: TokenPluginOptions): ClientPlugin {
   return {
     async beforeRequest(
       url: string,
-      options: RequestOptions
+      config: RequestConfig
     ): Promise<PluginHookResult> {
       const token = await getToken()
 
@@ -129,15 +129,15 @@ export function TokenPlugin(options: TokenPluginOptions): ClientPlugin {
       }
 
       // 创建新的请求头对象
-      const headers = { ...(options.headers || {}) }
+      const headers = { ...(config.headers || {}) }
 
       // 添加令牌到请求头
       headers['Authorization'] = formatToken(token)
 
       // 返回修改后的请求选项
       return {
-        options: {
-          ...options,
+        config: {
+          ...config,
           headers
         }
       }

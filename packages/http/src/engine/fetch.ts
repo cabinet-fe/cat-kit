@@ -1,5 +1,5 @@
 import { HttpEngine } from './engine'
-import type { HTTPResponse, RequestOptions } from '../types'
+import type { HTTPResponse, RequestConfig } from '../types'
 import { getDataType } from '@cat-kit/core'
 
 export class FetchEngine extends HttpEngine {
@@ -11,16 +11,16 @@ export class FetchEngine extends HttpEngine {
 
   async request<T = any>(
     url: string,
-    options: RequestOptions
+    config: RequestConfig
   ): Promise<HTTPResponse<T>> {
-    const { method = 'GET', body, timeout, ...rest } = options
+    const { method = 'GET', body, timeout, credentials, ...rest } = config
 
     // 创建新的 AbortController 实例用于此次请求
     const controller = new AbortController()
     this.controllers.add(controller)
 
     // 处理超时
-    let timeoutId: NodeJS.Timeout | undefined
+    let timeoutId: number | undefined = undefined
     if (timeout && timeout > 0) {
       timeoutId = setTimeout(() => {
         controller.abort()
@@ -28,20 +28,12 @@ export class FetchEngine extends HttpEngine {
     }
 
     try {
-      // 处理 GET 请求的 URL 参数
-      if (method === 'GET') {
-        url = this.buildURL(url, options)
-      }
-
       // 准备请求配置
       const fetchOptions: RequestInit = {
         method,
         signal: controller.signal,
-        credentials:
-          options.credentials === false
-            ? ('omit' as const)
-            : ('include' as const),
-        headers: options.headers || {},
+        credentials: config.credentials === false ? 'omit' : 'include',
+        headers: config.headers || {},
         ...rest
       }
 

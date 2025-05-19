@@ -10,8 +10,8 @@
   ],
   "devDependencies": {
     "typescript": "^5.8.3",
-    "@types/node": "^22.15.9",
-    "@types/bun": "^1.2.12",
+    "@types/node": "^22.15.19",
+    "@types/bun": "^1.2.13",
     "ts-conf-base": "^2.4.2",
     "@cat-kit/core": "workspace:*"
   }

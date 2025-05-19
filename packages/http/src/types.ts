@@ -12,35 +12,23 @@ export interface ClientConfig {
   /**
    * 源
    * - 由协议、主机名（域名）和端口定义。
-   * - 在浏览器环境下，如果未指定，会自动从当前页面获取。
-   * - 在 Node.js 环境下，必须指定。
+   * - 如果未指定，默认为当前页面的`location.href`。
+   * - 如果 `url` 已经是一个完整的[URL](https://developer.mozilla.org/zh-CN/docs/Web/API/URL) ，则会忽略此配置。
    */
   origin?: string
 
   /**
-   * 请求基础路径
-   * @example
-   * ```ts
-   * const client = new HTTPClient({
-   *   base: '/api'
-   * })
-   *
-   * client.get('/user')
-   * // GET /api/user
-   * ```
-   */
-  base?: string
-
-  /**
    * 请求超时时间 (单位：ms)
+   * - 默认为0，即不超时
    * - 设置超时时间后，请求会在指定时间后自动终止，并抛出408错误。
    * - 除了上传下载文件，通常情况下，你的普通请求不应该很长。
    */
   timeout?: number
 
   /**
-   * HTTP请求头
-   * - 这里指定的是实例请求头，里面的任意标头都可以在请求时被覆盖。
+   * HTTP默认请求头
+   * - 这里指定的是实例请求头配置。
+   * - 如果在请求配置中传入了`headers`，则header会被合并，相同的header会被请求配置覆盖。
    */
   headers?: Record<string, string>
 
@@ -48,18 +36,18 @@ export interface ClientConfig {
    * 控制`浏览器`是否发送凭证
    * - 默认发送，即在同源请求时发送凭证。
    * - 如果设置为`false`，则在任何请求时都不会发送凭证。
-   * - Node.js 环境下，此配置无效。
    * @default true
    */
   credentials?: boolean
 
   /**
    * 插件
+   * - 插件是一种扩展机制，可以用于修改请求和响应。
    */
   plugins?: ClientPlugin[]
 }
 
-export interface RequestOptions {
+export interface RequestConfig {
   /**
    * 请求方法
    * - 默认`GET`
@@ -79,11 +67,9 @@ export interface RequestOptions {
   query?: Record<string, any>
   /** 请求头 */
   headers?: Record<string, string>
-  /** 请求基础路径 */
-  base?: string
   /** 请求超时时间 */
   timeout?: number
-  /** 请求是否携带凭证, 在浏览器环境下有效 */
+  /** 请求是否携带凭证 */
   credentials?: boolean
   /**
    * 响应类型
@@ -96,6 +82,8 @@ export interface RequestOptions {
   responseType?: 'json' | 'text' | 'blob' | 'arraybuffer'
 }
 
+export type AliasRequestConfig = Omit<RequestConfig, 'method'>
+
 export interface HTTPResponse<T = any> {
   /** 响应的数据 */
   data: T
@@ -103,7 +91,7 @@ export interface HTTPResponse<T = any> {
   code: number
   /** 响应标头 */
   headers: Record<string, string>
-  /** 原始响应对象 (浏览器环境下为 Response，Node.js 环境下为 IncomingMessage) */
+  /** 原始响应对象 */
   raw?: Response | any
 }
 
@@ -113,8 +101,8 @@ export interface HTTPResponse<T = any> {
 export interface PluginHookResult {
   /** 修改后的 URL */
   url?: string
-  /** 修改后的请求选项 */
-  options?: RequestOptions
+  /** 修改后的请求配置 */
+  config?: RequestConfig
 }
 
 /** 请求客户端插件 */
@@ -122,24 +110,24 @@ export interface ClientPlugin {
   /**
    * 请求前钩子
    * @param url 请求 URL
-   * @param options 请求选项
+   * @param config 请求配置
    * @returns 修改后的 URL 和请求选项
    */
   beforeRequest?(
     url: string,
-    options: RequestOptions
+    config: RequestConfig
   ): Promise<PluginHookResult | void> | PluginHookResult | void
 
   /**
    * 响应后钩子
    * @param response 响应对象
    * @param url 请求 URL
-   * @param options 请求选项
+   * @param config 请求配置
    * @returns 修改后的响应对象
    */
   afterRespond?(
     response: HTTPResponse,
     url: string,
-    options: RequestOptions
+    config: RequestConfig
   ): Promise<HTTPResponse | void> | HTTPResponse | void
 }

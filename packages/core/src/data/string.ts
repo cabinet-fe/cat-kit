@@ -92,19 +92,5 @@ export const $str = {
 
       return joinedPaths
     }
-  },
-
-  /**
-   * 获取URL或接口路径中的查询字符串
-   * @param url 需要获取查询字符串的URL
-   * @returns 查询字符串
-   * @example
-   * ```ts
-   * $str.getQueryString('https://example.com/path/to/resource?param1=value1&param2=value2') // 'param1=value1&param2=value2'
-   * ```
-   */
-  getQueryString(url: string): string {
-    const [, query] = url.split('?')
-    return query ?? ''
   }
 }
