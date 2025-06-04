@@ -47,12 +47,6 @@ export class HTTPClient {
   private engine: HttpEngine
 
   /**
-   * 活跃的请求组
-   * 用于跟踪当前正在进行的请求，可以通过 group 方法创建分组
-   */
-  private activeRequests: Set<HTTPClient> = new Set()
-
-  /**
    * 创建 HTTP 客户端实例
    * @param prefix 请求前缀
    * @param config 客户端配置
@@ -240,13 +234,6 @@ export class HTTPClient {
   abort(): void {
     // 中止当前引擎的所有请求
     this.engine.abort()
-
-    // 中止所有活跃的请求组
-    for (const group of this.activeRequests) {
-      group.abort()
-    }
-
-    this.activeRequests.clear()
   }
 
   /**
@@ -271,9 +258,6 @@ export class HTTPClient {
       $str.joinUrlPath(this.prefix, prefix),
       this.config
     )
-
-    // 将新创建的分组添加到活跃请求组中
-    this.activeRequests.add(group)
 
     return group
   }

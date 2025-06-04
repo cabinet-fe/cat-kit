@@ -9,6 +9,7 @@
     "@types/fs-extra": "^11.0.4",
     "execa": "^9.5.3",
     "rolldown-plugin-dts": "^0.13.2",
-    "picocolors": "^1.1.1"
+    "picocolors": "^1.1.1",
+    "tsdown": "^0.12.5"
   }
 }

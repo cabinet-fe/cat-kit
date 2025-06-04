@@ -65,7 +65,10 @@ export interface RequestConfig {
    * - 查询参数会被自动转换为`key=value`的形式
    */
   query?: Record<string, any>
-  /** 请求头 */
+  /**
+   * 请求头
+   * @link [查看](https://developer.mozilla.org/zh-CN/docs/Glossary/Request_header)
+   */
   headers?: Record<string, string>
   /** 请求超时时间 */
   timeout?: number

@@ -5,6 +5,7 @@ import { dts as RolldownDTS } from 'rolldown-plugin-dts'
 import { getBuildInput, getPlugins, pkgTo } from './repo-helper'
 import type { PackageConfig, PackageOption } from './types'
 import pic from 'picocolors'
+import { build } from 'tsdown'
 
 export class MonoRepoLib {
   private packages: PackageOption[]
@@ -72,6 +73,7 @@ export class MonoRepoLib {
 
     // 构建结束的包
     const buildedPackages = new Set<string>()
+    // 获取待构建包：排除构建结束的且依赖全部构建完成的
     function getPkgsToBuild(pkg: PackageConfig) {
       return (
         !buildedPackages.has(pkg.name) &&
@@ -128,4 +130,13 @@ export class MonoRepoLib {
       console.error(err)
     }
   }
+}
+
+export class Package {
+  /**
+   * 包
+   * @param pkgDir 包目录
+   * @param option 包配置
+   */
+  constructor(pkgDir: string, option: PackageOption) {}
 }

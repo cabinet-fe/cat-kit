@@ -11,7 +11,12 @@ export class XHREngine extends HttpEngine {
     config: RequestConfig
   ): Promise<HTTPResponse<T>> {
     return new Promise<HTTPResponse<T>>((resolve, reject) => {
-      const { method = 'GET', timeout = 0 } = config
+      const {
+        method = 'GET',
+        timeout = 0,
+        responseType = 'json',
+        credentials = false
+      } = config
 
       const xhr = new XMLHttpRequest()
 
@@ -19,7 +24,8 @@ export class XHREngine extends HttpEngine {
       this.xhrSets.add(xhr)
 
       xhr.timeout = timeout
-      xhr.responseType = 'json'
+      xhr.responseType = responseType
+      xhr.withCredentials = credentials
 
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
