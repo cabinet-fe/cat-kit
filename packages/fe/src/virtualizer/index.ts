@@ -1,223 +1,314 @@
-import { Observable } from '@cat-kit/core'
+// 高虚拟化器
+// 功能：
+// 1. 支持数据追加，不重新刷新状态
+// 2. 高效的虚拟滚动实现
 
-export interface VirtualizerOptions {
-  /** 元素数量 */
-  count: number
-  /** 元素预估大小 */
-  estimateSize: (index: number) => number
-  /** 元素间的间距 */
-  gap?: number
-  /**
-   * 预加载数, 用于防止虚拟化时出现白屏现象
-   */
-  preload?: number
-  /** 滚动方向 */
-  direction?: 'vertical' | 'horizontal'
+type EstimateSize = (index: number) => number
+
+type VirtualizerChange = (ctx: {
+  items: VirtualItem[]
+  totalSize: number
+}) => void
+
+interface VirtualizerOption {
+  /** 长度 */
+  length?: number
+  /** 缓冲数量 */
+  buffer?: number
+  /** 推断每项高度 */
+  estimateSize?: EstimateSize
+  /** 数据变更 */
+  onChange?: VirtualizerChange
+}
+
+type UpdateOption = Pick<VirtualizerOption, 'length' | 'buffer'> & {
+  /** 容器尺寸 */
+  containerSize?: number
+  /** 偏移量 */
+  offsetSize?: number
+}
+
+interface VirtualItem {
+  index: number
+  start: number
+  size: number
 }
 
 export class Virtualizer {
-  private options: Required<VirtualizerOptions>
-  private optionsProxy: Observable<
-    Required<VirtualizerOptions>,
-    keyof Required<VirtualizerOptions>
-  >
+  private length = 0
+  private buffer = 5
+  private estimateSize: EstimateSize = () => 36
+  private onChange?: VirtualizerChange
 
-  private scrollContainer?: HTMLElement
   private totalSize = 0
-  private itemSizes: Array<number> = []
-  private measureCache: Array<number> = []
+  private itemSizeDict: Record<number, number> = {}
+  private itemStartCache: Record<number, number> = {}
 
-  updateItemSize(index: number, size: number): void {
-    if (index > this.options.count) {
-      throw new Error('index out of range')
-    }
-    const oldSize = this.itemSizes[index]!
-    this.itemSizes[index] = size
-    // 惰性计算totalSize
-    this.totalSize += size - oldSize
-  }
+  private containerSize = 0
+  private offsetSize = 0
 
-  constructor(options: VirtualizerOptions) {
-    this.optionsProxy = new Observable({
-      preload: 3,
-      gap: 0,
-      direction: 'vertical',
-      ...options
-    })
-    this.options = this.optionsProxy.getState()
-
-    this.init()
-  }
-
-  /** 状态重置 */
-  private reset() {
-    this.itemSizes = new Array(this.options.count)
-  }
-
-  /** 初始化 */
-  private init() {
-    const { optionsProxy, options } = this
-
-    this.itemSizes = Array(options.count).fill(0)
-    this.measureCache = Array(options.count)
-    for (let i = 0; i < options.count; i++) {
-      this.updateItemSize(i, options.estimateSize(i))
-    }
-
-    // 监听方向变化
-    optionsProxy.observe(['direction'], ([direction]) => {
-      this.reset()
+  constructor(option: VirtualizerOption) {
+    Object.keys(option).forEach(key => {
+      const optionVal = option[key]
+      if (optionVal !== undefined) {
+        this[key] = option[key]
+      }
     })
 
-    optionsProxy.observe(['count'], ([preload]) => {
-      this.reset()
-    })
-  }
-
-  /**
-   * 测量元素大小
-   *
-   * @param element 元素
-   */
-  measureElement(element: HTMLElement): void {
-    const { direction } = this.options
-    const { measureCache } = this
-    const index = Number(element.dataset.index!)
-
-    // 已测量跳过
-    if (measureCache[index] !== undefined) {
-      return
-    }
-    const rect = element.getBoundingClientRect()
-    measureCache[index] = direction === 'vertical' ? rect.height : rect.width
-    this.updateItemSize(index, measureCache[index]!)
-  }
-
-  private updateCb?: (virtualizer: Virtualizer) => void
-
-  on(event: 'update', callback: (virtualizer: Virtualizer) => void): void {
-    if (event === 'update') {
-      this.updateCb = callback
+    if (this.length) {
+      this.calcTotalSize()
     }
   }
 
-  scrollHandler = (e: Event): void => {
-    const { scrollContainer } = this
-    if (scrollContainer && this.updateCb) {
-      this.updateCb(this)
+  private getItemSize(index: number): number {
+    return this.itemSizeDict[index] ?? this.estimateSize(index)
+  }
+
+  private getItemStart(index: number): number {
+    if (index === 0) return 0
+
+    // 检查缓存
+    if (this.itemStartCache[index] !== undefined) {
+      return this.itemStartCache[index]
     }
-  }
 
-  /**
-   * 连接可滚动元素
-   * @param container 可滚动元素
-   */
-  connect(container: HTMLElement): void {
-    this.disconnect()
-    this.scrollContainer = container
-    container.addEventListener('scroll', this.scrollHandler, {
-      passive: true
-    })
-    // 初始化时触发一次更新
-    this.updateCb?.(this)
-  }
-
-  /**
-   * 获取总大小
-   *
-   */
-  getTotalSize(): number {
-    const { gap, count } = this.options
-    // 总大小等于所有元素大小之和加上间距
-    return this.totalSize + (count > 0 ? (count - 1) * gap : 0)
-  }
-
-  setOptions(options: VirtualizerOptions): void {
-    const newOptions = {
-      ...this.options,
-      ...options
+    let start = 0
+    for (let i = 0; i < index; i++) {
+      start += this.getItemSize(i)
     }
-    Object.assign(this.optionsProxy.getState(), newOptions)
-    this.options = this.optionsProxy.getState()
-    this.init()
-    this.updateCb?.(this)
+
+    // 缓存结果
+    this.itemStartCache[index] = start
+    return start
   }
 
-  disconnect(): void {
-    this.scrollContainer?.removeEventListener('scroll', this.scrollHandler)
-  }
+  private getItems(): VirtualItem[] {
+    const { containerSize, offsetSize, buffer, length } = this
 
-  getItems(): Array<{ size: number; index: number; offset: number }> {
-    const { preload, count, direction } = this.options
-    const { itemSizes, scrollContainer } = this
+    if (!containerSize || !length) return []
 
-    if (!scrollContainer) {
-      return Array.from({ length: count }).map((_, i) => {
-        return {
-          size: itemSizes[i]!,
-          index: i,
-          offset: this.getItemOffset(i)
-        }
+    // 找到开始索引
+    let startIndex = 0
+    let currentOffset = 0
+
+    for (let i = 0; i < length; i++) {
+      const itemSize = this.getItemSize(i)
+      if (currentOffset + itemSize > offsetSize) {
+        startIndex = Math.max(0, i - buffer)
+        break
+      }
+      currentOffset += itemSize
+    }
+
+    // 找到结束索引
+    let endIndex = startIndex
+    let visibleSize = 0
+
+    for (let i = startIndex; i < length; i++) {
+      const itemSize = this.getItemSize(i)
+      visibleSize += itemSize
+      endIndex = i
+
+      if (visibleSize >= containerSize) {
+        // 向下滚动时也添加缓冲
+        endIndex = Math.min(length - 1, endIndex + buffer)
+        break
+      }
+    }
+
+    // 生成虚拟项
+    const items: VirtualItem[] = []
+    for (let i = startIndex; i <= Math.min(endIndex, length - 1); i++) {
+      items.push({
+        index: i,
+        start: this.getItemStart(i),
+        size: this.getItemSize(i)
       })
     }
 
-    const viewportSize =
-      direction === 'vertical'
-        ? scrollContainer.clientHeight
-        : scrollContainer.clientWidth
+    return items
+  }
 
-    const scrollOffset =
-      direction === 'vertical'
-        ? scrollContainer.scrollTop
-        : scrollContainer.scrollLeft
+  /** 更新长度并重新计算尺寸 */
+  private updateLength(length: number) {
+    this.length = length
+    this.calcTotalSize()
+  }
 
-    // 计算起始项和结束项
-    let startIndex = this.findNearestItemIndex(scrollOffset)
-    let endIndex = this.findNearestItemIndex(scrollOffset + viewportSize)
+  /** 更新选项 */
+  update(option: UpdateOption): void {
+    const { length, ...rest } = option
+    if (length !== undefined) {
+      this.updateLength(length)
+    }
 
-    // 应用预加载
-    startIndex = Math.max(0, startIndex - preload)
-    endIndex = Math.min(count - 1, endIndex + preload)
-
-    return Array.from({ length: endIndex - startIndex + 1 }).map((_, i) => {
-      const index = startIndex + i
-      return {
-        size: itemSizes[index]!,
-        index,
-        offset: this.getItemOffset(index)
+    Object.keys(rest).forEach(key => {
+      const optionVal = rest[key]
+      if (optionVal !== undefined) {
+        this[key] = optionVal
       }
+    })
+
+    this.onChange?.({
+      items: this.getItems(),
+      totalSize: this.totalSize
     })
   }
 
-  /**
-   * 获取指定索引元素的偏移量
-   */
-  private getItemOffset(index: number): number {
-    const { gap } = this.options
-    let offset = 0
-    for (let i = 0; i < index; i++) {
-      offset += this.itemSizes[i]! + gap
+  private calcTotalSize(): void {
+    let totalSize = 0
+    for (let i = 0; i < this.length; i++) {
+      totalSize += this.getItemSize(i)
     }
-    return offset
+    this.totalSize = totalSize
   }
 
   /**
-   * 找到最接近指定偏移量的元素索引
+   * 更新虚拟项尺寸
+   * @param index 元素索引
+   * @param size 尺寸
    */
-  private findNearestItemIndex(offset: number): number {
-    const { gap, count } = this.options
-    let currentOffset = 0
+  updateItemSize(index: number, size: number): void {
+    const oldSize = this.getItemSize(index)
+    const diff = size - oldSize
+    this.itemSizeDict[index] = size
+    this.totalSize += diff
 
-    for (let i = 0; i < count; i++) {
-      const size = this.itemSizes[i]!
-      // 如果偏移量在当前元素范围内，返回当前索引
-      if (currentOffset <= offset && offset <= currentOffset + size) {
-        return i
-      }
-      currentOffset += size + gap
+    // 清除受影响的缓存
+    this.clearStartCacheFrom(index + 1)
+
+    // 触发更新
+    this.onChange?.({
+      items: this.getItems(),
+      totalSize: this.totalSize
+    })
+  }
+
+  private clearStartCacheFrom(index: number): void {
+    for (let i = index; i < this.length; i++) {
+      delete this.itemStartCache[i]
+    }
+  }
+
+  /** 重置虚拟状态 */
+  reset(): void {
+    this.itemSizeDict = {}
+    this.itemStartCache = {}
+    this.offsetSize = 0
+    this.calcTotalSize()
+    this.onChange?.({
+      items: this.getItems(),
+      totalSize: this.totalSize
+    })
+  }
+
+  /** 获取总尺寸 */
+  getTotalSize(): number {
+    return this.totalSize
+  }
+
+  /** 获取当前可见项 */
+  getVisibleItems(): VirtualItem[] {
+    return this.getItems()
+  }
+}
+
+export class VirtualContainer {
+  private horizontal?: Virtualizer
+  private vertical?: Virtualizer
+
+  private container: HTMLElement | null = null
+  private scrollDistance = 0
+  private resizeObserver?: ResizeObserver
+
+  constructor(option?: { horizontal?: Virtualizer; vertical?: Virtualizer }) {
+    if (option) {
+      Object.keys(option).forEach(key => {
+        this[key] = option[key]
+      })
+    }
+  }
+
+  private handleScroll = (e: Event) => {
+    const target = e.target as HTMLElement
+    this.scrollDistance = target.scrollTop
+
+    // 更新垂直虚拟化器的偏移量
+    this.vertical?.update({
+      offsetSize: this.scrollDistance
+    })
+
+    // 更新水平虚拟化器的偏移量（如果存在）
+    if (this.horizontal) {
+      this.horizontal.update({
+        offsetSize: target.scrollLeft
+      })
+    }
+  }
+
+  private watchContainerSize() {
+    if (!this.container) return
+
+    this.resizeObserver = new ResizeObserver(([entry]) => {
+      const boxSize = entry?.contentBoxSize?.[0]
+      if (!boxSize) return
+
+      this.vertical?.update({
+        containerSize: boxSize.blockSize
+      })
+      this.horizontal?.update({
+        containerSize: boxSize.inlineSize
+      })
+    })
+
+    this.resizeObserver.observe(this.container)
+  }
+
+  connect(el: string | HTMLElement): void {
+    if (typeof el === 'string') {
+      el = document.querySelector(el) as HTMLElement
+    }
+    if (!el) return
+
+    // 清理之前的连接
+    this.disconnect()
+
+    this.container = el
+
+    this.watchContainerSize()
+
+    this.container.addEventListener('scroll', this.handleScroll, {
+      passive: true
+    })
+  }
+
+  disconnect(): void {
+    if (this.container) {
+      this.container.removeEventListener('scroll', this.handleScroll)
+      this.container = null
     }
 
-    // 如果偏移量超出全部元素，返回最后一个索引
-    return count - 1
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect()
+      this.resizeObserver = undefined
+    }
+  }
+
+  /** 滚动到指定位置 */
+  scrollTo(offset: number): void {
+    if (this.container) {
+      this.container.scrollTop = offset
+    }
+  }
+
+  /** 滚动到指定索引 */
+  scrollToIndex(index: number): void {
+    if (this.vertical) {
+      const items = this.vertical.getVisibleItems()
+      const targetItem = items.find(item => item.index === index)
+      if (targetItem) {
+        this.scrollTo(targetItem.start)
+      }
+    }
   }
 }

@@ -15,6 +15,6 @@
     }
   },
   "scripts": {
-    "test": "bun test"
+    "test": "bun run test"
   }
 }

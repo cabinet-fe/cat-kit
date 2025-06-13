@@ -13,6 +13,9 @@
     "@types/node": "^22.15.29",
     "@types/bun": "^1.2.15",
     "ts-conf-base": "^2.4.2",
-    "@cat-kit/core": "workspace:*"
+    "@cat-kit/core": "workspace:*",
+    "@cat-kit/fe": "workspace:*",
+    "@cat-kit/crypto": "workspace:*",
+    "vitest": "^3.2.3"
   }
 }
