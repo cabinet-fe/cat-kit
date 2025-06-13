@@ -4,9 +4,10 @@
     "composite": true,
     "declaration": true,
     "isolatedDeclarations": true,
-    "rootDir": "./src",
+    "rootDir": ".",
+    "baseUrl": ".",
     "outDir": "./dist",
     "types": []
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/*.test.ts"]
 }

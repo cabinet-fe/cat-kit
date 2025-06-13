@@ -9,6 +9,9 @@
   "files": [
     "dist"
   ],
+  "scripts": {
+    "test": "bun run test"
+  },
   "devDependencies": {
     "@cat-kit/core": "workspace:*"
   },

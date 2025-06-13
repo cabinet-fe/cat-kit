@@ -3,9 +3,10 @@
   "compilerOptions": {
     "composite": true,
     "declaration": true,
-    "rootDir": "./src",
+    "rootDir": ".",
+    "isolatedDeclarations": true,
     "outDir": "./dist",
     "types": ["node"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/*.test.ts"]
 }
