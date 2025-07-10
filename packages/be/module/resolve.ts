@@ -1,7 +1,6 @@
 import { createRequire } from 'node:module'
-import { cwd } from 'node:process'
 
-const require = createRequire(cwd())
+const require = createRequire(import.meta.url)
 
 /**
  * 获取模块路径
