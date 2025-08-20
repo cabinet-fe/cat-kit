@@ -10,7 +10,7 @@
 import { date } from '@cat-kit/fe'
 
 // 可以使用第二个参数来达到更加个性化的需求
-const dis = date('2022-02-14').compare('2025-03-10', (y, m, d) => {
+const dis = date('2025-09-30').compare('2026-04-28', (y, m, d) => {
   return `${y}年${m}个月${d}天`
 })
 </script>

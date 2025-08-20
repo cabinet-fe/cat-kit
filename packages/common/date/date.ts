@@ -24,38 +24,38 @@ class Dater {
     string,
     (date: Dater, len: number) => string
   > = {
-    yyyy: date => `${date.year}`,
-    YYYY: date => `${date.year}`,
-    'M+': (date, len: number) => {
-      let month = date.month + ''
-      return len === 1 ? month : `0${month}`.slice(-2)
-    },
-    'd+': (date, len: number) => {
-      let day = date.day + ''
-      return len === 1 ? day : `0${day}`.slice(-2)
-    },
-    'D+': (date, len: number) => {
-      let day = date.day + ''
-      return len === 1 ? day : `0${day}`.slice(-2)
-    },
-    'h+': (date, len: number) => {
-      let hour = date.hour
-      let strHour = (hour > 12 ? hour - 12 : hour) + ''
-      return len === 1 ? strHour : `0${strHour}`.slice(-2)
-    },
-    'H+': (date, len: number) => {
-      let Hour = `${date.hour}`
-      return len === 1 ? Hour : `0${Hour}`.slice(-2)
-    },
-    'm+': (date, len: number) => {
-      let mih = `${date.minute}`
-      return len === 1 ? mih : `0${mih}`.slice(-2)
-    },
-    's+': (date, len: number) => {
-      let sec = `${date.second}`
-      return len === 1 ? sec : `0${sec}`.slice(-2)
+      yyyy: date => `${date.year}`,
+      YYYY: date => `${date.year}`,
+      'M+': (date, len: number) => {
+        let month = date.month + ''
+        return len === 1 ? month : `0${month}`.slice(-2)
+      },
+      'd+': (date, len: number) => {
+        let day = date.day + ''
+        return len === 1 ? day : `0${day}`.slice(-2)
+      },
+      'D+': (date, len: number) => {
+        let day = date.day + ''
+        return len === 1 ? day : `0${day}`.slice(-2)
+      },
+      'h+': (date, len: number) => {
+        let hour = date.hour
+        let strHour = (hour > 12 ? hour - 12 : hour) + ''
+        return len === 1 ? strHour : `0${strHour}`.slice(-2)
+      },
+      'H+': (date, len: number) => {
+        let Hour = `${date.hour}`
+        return len === 1 ? Hour : `0${Hour}`.slice(-2)
+      },
+      'm+': (date, len: number) => {
+        let mih = `${date.minute}`
+        return len === 1 ? mih : `0${mih}`.slice(-2)
+      },
+      's+': (date, len: number) => {
+        let sec = `${date.second}`
+        return len === 1 ? sec : `0${sec}`.slice(-2)
+      }
     }
-  }
 
   /** 时间戳 */
   get timestamp() {
@@ -234,15 +234,33 @@ class Dater {
     date: string | Date | number | Dater,
     reducer?: DateCompareReducer<any>
   ) {
-    let dater = new Dater(date)
+    let dater: Dater = new Dater(date)
 
-    if (!reducer) {
-      return Math.ceil(Math.abs(this.timestamp - dater.timestamp) / 86400000)
+    let start: Dater = this, end: Dater = dater
+
+    if (start.timestamp > end.timestamp) {
+      start = dater
+      end = this
     }
 
-    const year = Math.abs(this.year - dater.year)
-    const month = Math.abs(this.month - dater.month)
-    const day = Math.abs(this.day - dater.day)
+    if (!reducer) {
+      return Math.ceil(Math.abs(end.timestamp - start.timestamp) / 86400000)
+    }
+
+    let year = end.year - start.year
+    let month = end.month - start.month
+    let day = end.day - start.day
+
+    if (month < 0) {
+      year--
+      month += 12
+    }
+
+    if (day < 0) {
+      month--
+      const daysInLastMonth = new Date(start.year, start.month, 0).getDate()
+      day += daysInLastMonth
+    }
 
     return reducer(year, month, day)
   }
