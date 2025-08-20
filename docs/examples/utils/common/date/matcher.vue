@@ -9,9 +9,9 @@ import { date } from '@cat-kit/fe'
 // 这是一个增加了周几替换的匹配器
 date.setMatcher('w+', (date: Date, len: number) => {
   if (len === 1) {
-    return '' + date.getDays()
+    return '' + date.getDay()
   } else {
-    return '0' + date.getDays()
+    return '0' + date.getDay()
   }
 })
 </script>
