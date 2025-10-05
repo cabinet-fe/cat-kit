@@ -1,0 +1,123 @@
+/**
+ * 自定义样式
+ */
+
+/* 品牌颜色 */
+:root {
+  --vp-c-brand-1: #5f67ee;
+  --vp-c-brand-2: #7c84f5;
+  --vp-c-brand-3: #989ef8;
+  --vp-c-brand-soft: rgba(95, 103, 238, 0.14);
+
+  /* 首页特性卡片 */
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(
+    135deg,
+    #5f67ee 0%,
+    #7c84f5 50%,
+    #989ef8 100%
+  );
+}
+
+.dark {
+  --vp-c-brand-1: #7c84f5;
+  --vp-c-brand-2: #989ef8;
+  --vp-c-brand-3: #b3b8fa;
+  --vp-c-brand-soft: rgba(124, 132, 245, 0.16);
+}
+
+/* 首页样式优化 */
+.VPHome {
+  padding-bottom: 3rem;
+}
+
+.VPFeature {
+  transition: all 0.3s ease;
+}
+
+.VPFeature:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* 代码块样式优化 */
+.vp-doc div[class*='language-'] {
+  margin: 1rem 0;
+  border-radius: 8px;
+  transition: box-shadow 0.25s;
+}
+
+.vp-doc div[class*='language-']:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* API 表格样式 */
+.vp-doc table {
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.vp-doc th {
+  background-color: var(--vp-c-bg-soft);
+  font-weight: 600;
+}
+
+.vp-doc tr:hover {
+  background-color: var(--vp-c-bg-soft);
+}
+
+/* 提示框样式优化 */
+.vp-doc .tip,
+.vp-doc .warning,
+.vp-doc .danger {
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+/* Badge 样式 */
+.vp-doc .vp-badge {
+  margin-left: 0.5rem;
+}
+
+/* 自定义类 */
+.api-signature {
+  background-color: var(--vp-c-bg-soft);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.9em;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.feature-card {
+  padding: 1.5rem;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.feature-card:hover {
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 4px 12px rgba(95, 103, 238, 0.15);
+  transform: translateY(-2px);
+}
+
+.feature-card h3 {
+  margin-top: 0;
+  color: var(--vp-c-brand-1);
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}

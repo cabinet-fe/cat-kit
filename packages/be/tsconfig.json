@@ -1,12 +1,14 @@
 {
   "extends": "ts-conf-base/tsconfig.node.json",
   "compilerOptions": {
-    "composite": true,
     "declaration": true,
     "rootDir": ".",
     "baseUrl": ".",
     "isolatedDeclarations": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "skipLibCheck": true,
+    "incremental": true
   },
-  "include": ["src/**/*.ts", "tests/*.test.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "tests"]
 }

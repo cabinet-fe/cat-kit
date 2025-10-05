@@ -1,14 +1,10 @@
 {
-  "files": [],
+  "extends": "ts-conf-base/tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo"
+  },
   "include": [],
-  "references": [
-    { "path": "./packages/core" },
-    { "path": "./packages/http" },
-    { "path": "./packages/crypto" },
-    { "path": "./packages/fe" },
-    { "path": "./packages/be" },
-    { "path": "./build" },
-    { "path": "./playground/tsconfig.json" },
-    { "path": "./playground/tsconfig.node.json" }
-  ]
+  "exclude": ["node_modules", "dist", "**/dist", "**/node_modules"]
 }

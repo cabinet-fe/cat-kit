@@ -3,14 +3,32 @@
   "type": "module",
   "version": "4.0.0",
   "description": "加密工具包",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./key-gen": {
+      "import": "./dist/key-gen/index.js",
+      "types": "./dist/key-gen/index.d.ts"
+    },
+    "./digest": {
+      "import": "./dist/digest/index.js",
+      "types": "./dist/digest/index.d.ts"
+    },
+    "./symmetric": {
+      "import": "./dist/symmetric/index.js",
+      "types": "./dist/symmetric/index.d.ts"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "test": "bun run test"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@cat-kit/core": "workspace:*"

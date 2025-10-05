@@ -49,23 +49,6 @@ const lib = new MonoRepoLib([
       dir: 'dist',
       sourcemap: true
     }
-  },
-  {
-    dir: pkg('test'),
-    deps: ['@cat-kit/core'],
-
-    build: {
-      input: 'src/index.ts',
-      treeshake: {
-        annotations: true
-      }
-    },
-
-    output: {
-      dir: 'dist',
-
-      sourcemap: true
-    }
   }
 ])
 

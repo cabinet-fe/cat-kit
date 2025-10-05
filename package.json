@@ -6,8 +6,17 @@
   "workspaces": [
     "packages/*",
     "build",
-    "playground"
+    "playground",
+    "docs"
   ],
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "docs:dev": "cd docs && bun run dev",
+    "docs:build": "cd docs && bun run build",
+    "docs:preview": "cd docs && bun run preview"
+  },
   "devDependencies": {
     "typescript": "^5.8.3",
     "@types/node": "^22.15.29",
@@ -16,6 +25,7 @@
     "@cat-kit/core": "workspace:*",
     "@cat-kit/fe": "workspace:*",
     "@cat-kit/crypto": "workspace:*",
-    "vitest": "^3.2.3"
+    "vitest": "^3.2.3",
+    "@vitest/ui": "^3.2.3"
   }
 }
