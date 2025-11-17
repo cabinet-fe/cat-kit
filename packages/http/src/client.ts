@@ -262,7 +262,3 @@ export class HTTPClient {
     return group
   }
 }
-
-const c = new HTTPClient('http://localhost/aaa/bbb', {
-  origin: ''
-})

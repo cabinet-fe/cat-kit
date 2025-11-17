@@ -10,12 +10,11 @@
   },
   "dependencies": {
     "@cat-kit/core": "workspace:*",
-    "@cat-kit/crypto": "workspace:*",
     "@cat-kit/fe": "workspace:*",
     "@cat-kit/http": "workspace:*"
   },
   "devDependencies": {
-    "vitepress": "^1.5.0",
+    "vitepress": "latest",
     "vue": "^3.5.13"
   }
 }

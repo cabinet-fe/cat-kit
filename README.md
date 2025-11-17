@@ -10,6 +10,6 @@
 
 - @cat-kit/core。核心工具包。
 - @cat-kit/http。http 请求工具包。
-- @cat-kit/crypto。加密工具包。
+
 - @cat-kit/fe。前端工具包。
 - @cat-kit/be。后端工具包。

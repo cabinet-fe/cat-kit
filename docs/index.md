@@ -12,9 +12,7 @@ hero:
     - theme: brand
       text: 快速开始
       link: /guide/getting-started
-    - theme: alt
-      text: 浏览工具
-      link: /core/data/array
+
     - theme: alt
       text: GitHub
       link: https://github.com/cabinet-fe/cat-kit
