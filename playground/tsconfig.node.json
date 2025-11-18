@@ -2,7 +2,11 @@
   "extends": "ts-conf-base/tsconfig.node.json",
   "compilerOptions": {
     "declaration": true,
-    "composite": true
+    "composite": true,
+    "incremental": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo"
   },
   "include": ["vite.config.ts"],
   "exclude": ["node_modules", "dist"]

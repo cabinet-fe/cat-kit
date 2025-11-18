@@ -1,7 +1,11 @@
 {
   "extends": "ts-conf-base/tsconfig.vue.json",
   "compilerOptions": {
-    "composite": true
+    "composite": true,
+    "incremental": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo"
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "*.ts"]
 }
