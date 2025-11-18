@@ -18,13 +18,18 @@
     "docs:preview": "cd docs && bun run preview"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
-    "@types/node": "^22.15.29",
-    "@types/bun": "^1.2.15",
-    "ts-conf-base": "^2.4.2",
     "@cat-kit/core": "workspace:*",
     "@cat-kit/fe": "workspace:*",
-    "vitest": "^3.2.3",
-    "@vitest/ui": "^3.2.3"
+    "@types/bun": "^1.3.2",
+    "@types/node": "^24.10.1",
+    "@vitest/ui": "^4.0.9",
+    "oxlint": "^1.28.0",
+    "picocolors": "^1.1.1",
+    "rimraf": "^6.1.0",
+    "ts-conf-base": "^2.4.2",
+    "typescript": "^5.9.3",
+    "vitepress": "^1.6.4",
+    "vitepress-theme-teek": "^1.5.2",
+    "vitest": "^4.0.9"
   }
 }

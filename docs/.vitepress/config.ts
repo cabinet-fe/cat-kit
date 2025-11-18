@@ -23,6 +23,73 @@ export default defineConfig({
   themeConfig: {
     logo: '/logo.svg',
 
+    nav: [
+      { text: '首页', link: '/' },
+      { text: '指南', link: '/guide/getting-started' },
+      {
+        text: '包',
+        items: [
+          { text: 'Core 核心', link: '/packages/core/' },
+          { text: 'HTTP 请求', link: '/packages/http/' },
+          { text: 'FE 前端', link: '/packages/fe/' },
+          { text: 'BE 后端', link: '/packages/be/' }
+        ]
+      }
+    ],
+
+    sidebar: {
+      '/guide/': [
+        {
+          text: '开始',
+          items: [
+            { text: '快速开始', link: '/guide/getting-started' },
+            { text: '安装', link: '/guide/installation' }
+          ]
+        }
+      ],
+      '/packages/': [
+        {
+          text: 'Core 核心包',
+          collapsed: false,
+          items: [
+            { text: '概览', link: '/packages/core/' },
+            { text: '数据处理', link: '/packages/core/data' },
+            { text: '数据结构', link: '/packages/core/data-structure' },
+            { text: '日期处理', link: '/packages/core/date' },
+            { text: '环境检测', link: '/packages/core/env' },
+            { text: '性能优化', link: '/packages/core/optimize' },
+            { text: '设计模式', link: '/packages/core/pattern' }
+          ]
+        },
+        {
+          text: 'HTTP 请求包',
+          collapsed: false,
+          items: [
+            { text: '概览', link: '/packages/http/' },
+            { text: 'HTTP 客户端', link: '/packages/http/client' },
+            { text: '插件系统', link: '/packages/http/plugins' },
+            { text: '类型定义', link: '/packages/http/types' }
+          ]
+        },
+        {
+          text: 'FE 前端包',
+          collapsed: false,
+          items: [
+            { text: '概览', link: '/packages/fe/' },
+            { text: '文件操作', link: '/packages/fe/file' },
+            { text: '存储', link: '/packages/fe/storage' },
+            { text: '虚拟化', link: '/packages/fe/virtualizer' },
+            { text: 'Web API', link: '/packages/fe/web-api' }
+          ]
+        },
+        {
+          text: 'BE 后端包',
+          collapsed: false,
+          items: [{ text: '概览', link: '/packages/be/' }]
+        }
+      ]
+    },
+
     socialLinks: [
       { icon: 'github', link: 'https://github.com/cabinet-fe/cat-kit' }
     ],

@@ -1,13 +1,8 @@
 {
   "extends": "ts-conf-base/tsconfig.node.json",
   "compilerOptions": {
-    "declaration": true,
-    "strictNullChecks": true,
-    "skipLibCheck": true,
-    "incremental": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler"
+    "composite": true,
+    "types": ["bun"]
   },
-  "include": ["*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["*.ts"]
 }

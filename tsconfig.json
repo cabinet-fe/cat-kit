@@ -1,10 +1,13 @@
 {
-  "extends": "ts-conf-base/tsconfig.json",
-  "compilerOptions": {
-    "skipLibCheck": true,
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo"
-  },
-  "include": [],
-  "exclude": ["node_modules", "dist", "**/dist", "**/node_modules"]
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  "files": [],
+  "references": [
+    { "path": "./playground/tsconfig.json" },
+    { "path": "./packages/core/tsconfig.json" },
+    { "path": "./packages/fe/tsconfig.json" },
+    { "path": "./packages/be/tsconfig.json" },
+    { "path": "./packages/http/tsconfig.json" },
+    { "path": "./build/tsconfig.json" }
+  ]
 }

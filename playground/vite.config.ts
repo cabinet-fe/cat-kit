@@ -1,8 +1,10 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type UserConfig } from 'vite'
 
-export default defineConfig({
+const config: UserConfig = defineConfig({
   plugins: [],
   server: {
     port: 3333
   }
 })
+
+export default config

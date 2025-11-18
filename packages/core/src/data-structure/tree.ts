@@ -54,7 +54,7 @@ export class TreeNode<T extends Record<string, any> = Record<string, any>> {
   /** 是否叶子节点 */
   isLeaf = false
   /** 在树中的索引 */
-  index: number
+  index: number = 0
 
   constructor(public data: T) {}
 

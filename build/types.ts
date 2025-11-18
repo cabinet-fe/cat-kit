@@ -1,10 +1,3 @@
-import type {
-  BuildOptions,
-  InputOption,
-  InputOptions,
-  OutputOptions
-} from 'rolldown'
-
 export type PackageOption = {
   /**
    * 包目录，必须是一个绝对路径
@@ -19,24 +12,22 @@ export type PackageOption = {
    * 包的构建配置
    */
   build: {
-    input: InputOption
+    /** 入口文件路径，相对于 dir */
+    input: string
+    /** 是否生成 d.ts 文件，默认 true */
     dts?: boolean
-    resolve?: {
-      /**
-       * 指定tsconfig文件，如果未指定，则默认使用 `dir` 目录下的 `tsconfig.json` 文件。
-       */
-      tsconfigFilename?: string
-    } & Omit<BuildOptions['resolve'], 'tsconfigFilename'>
-  } & Omit<InputOptions, 'input' | 'resolve'>
+    /** 外部依赖，不打包进产物 */
+    external?: string[]
+  }
 
   /**
    * 包的输出配置
    */
-  output?: OutputOptions & {
-    /**
-     * 是否生成d.ts文件
-     */
-    dts?: boolean
+  output?: {
+    /** 输出目录，默认 dist */
+    dir?: string
+    /** 是否生成 sourcemap，默认 true */
+    sourcemap?: boolean
   }
 }
 
@@ -48,11 +39,17 @@ export interface PackageConfig {
   /** 包依赖 */
   deps?: string[]
   /** 包构建配置 */
-  build: InputOptions & { dts?: boolean }
+  build: {
+    input: string
+    dts?: boolean
+    external?: string[]
+  }
   /** 包输出配置 */
-  output: OutputOptions
+  output?: {
+    dir?: string
+    sourcemap?: boolean
+  }
 }
-
 export interface MonoRepoLibOptions {
   /** 需要构建的包 */
   packages: PackageOption[]

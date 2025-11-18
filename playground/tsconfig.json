@@ -1,12 +1,7 @@
 {
   "extends": "ts-conf-base/tsconfig.vue.json",
   "compilerOptions": {
-    "declaration": true,
-    "baseUrl": ".",
-    "emitDeclarationOnly": true,
-    "skipLibCheck": true,
-    "incremental": true
+    "composite": true
   },
-  "include": ["src/**/*.ts", "src/**/*.vue"],
-  "exclude": ["node_modules", "dist", "vite.config.ts"]
+  "include": ["src/**/*.ts", "src/**/*.vue", "*.ts"]
 }

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://oxc.rs/schema/oxlintrc.json",
+  "rules": {
+    "typescript": {
+      "no-explicit-any": "warn",
+      "no-unused-vars": "warn"
+    },
+    "import": {
+      "no-duplicates": "error"
+    }
+  },
+  "globals": {
+    "NodeJS": true,
+    "console": true
+  }
+}

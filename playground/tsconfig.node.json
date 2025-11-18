@@ -2,10 +2,7 @@
   "extends": "ts-conf-base/tsconfig.node.json",
   "compilerOptions": {
     "declaration": true,
-    "emitDeclarationOnly": true,
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler"
+    "composite": true
   },
   "include": ["vite.config.ts"],
   "exclude": ["node_modules", "dist"]

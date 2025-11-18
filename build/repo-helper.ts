@@ -1,7 +1,7 @@
 import p from 'node:path'
 import type { InputOption, RolldownPluginOption } from 'rolldown'
 
-export function pkgTo(pkgDir: string, targetPath: string) {
+export function pkgTo(pkgDir: string, targetPath: string): string {
   if (p.isAbsolute(targetPath)) {
     throw new Error('targetPath 不能是一个绝对路径')
   }

@@ -7,7 +7,7 @@ import type {
   HTTPResponse,
   AliasRequestConfig
 } from './types'
-import { $str, isInBrowser, o } from '@cat-kit/core'
+import { $str, isInBrowser } from '@cat-kit/core'
 
 /**
  * HTTP 请求客户端
@@ -51,9 +51,9 @@ export class HTTPClient {
    * @param prefix 请求前缀
    * @param config 客户端配置
    */
-  constructor(prefix: string, config?: ClientConfig) {
+  constructor(prefix: string = '', config: ClientConfig = {}) {
     this.prefix = prefix
-    this.config = config || {}
+    this.config = config
 
     if (!isInBrowser()) {
       throw new Error('HTTPClient不支持在非浏览器环境下使用')
@@ -63,16 +63,34 @@ export class HTTPClient {
   }
 
   private getRequestUrl(url: string, config: RequestConfig): string {
+    // 解码URL
     url = decodeURIComponent(url)
 
-    if (URL.parse(url)) {
+    // 如果已经是完整URL，直接返回
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return this.appendQueryParams(url, config)
     }
 
+    // 拼接前缀
     url = $str.joinUrlPath(this.prefix, url)
-    // GET请求要将查询参数拼接到url上
-    if (config.method === 'GET') {
-      url = $str.joinUrlPath(url, $str.getQueryString(url))
-      config.query = undefined
+
+    return this.appendQueryParams(url, config)
+  }
+
+  private appendQueryParams(url: string, config: RequestConfig): string {
+    // GET请求处理查询参数
+    if (config.method === 'GET' && config.query) {
+      const queryString = new URLSearchParams(
+        Object.entries(config.query).reduce((acc, [key, value]) => {
+          acc[key] =
+            typeof value === 'object' ? JSON.stringify(value) : String(value)
+          return acc
+        }, {} as Record<string, string>)
+      ).toString()
+
+      url = url.includes('?')
+        ? `${url}&${queryString}`
+        : `${url}?${queryString}`
     }
 
     return url
@@ -85,9 +103,12 @@ export class HTTPClient {
    */
   private getRequestConfig(config: RequestConfig): RequestConfig {
     return {
-      headers: Object.assign({}, this.config.headers, config.headers),
-      ...o(this.config).omit(['headers']),
-      ...o(config).omit(['headers'])
+      ...this.config,
+      ...config,
+      headers: {
+        ...this.config.headers,
+        ...config.headers
+      }
     }
   }
 
@@ -97,14 +118,46 @@ export class HTTPClient {
    * @param config 请求配置
    * @returns Promise<HTTPResponse>
    */
-  request<T = any>(
+  async request<T = any>(
     url: string,
     config: RequestConfig = {}
   ): Promise<HTTPResponse<T>> {
-    return this.engine.request<T>(
-      this.getRequestUrl(url, config),
-      this.getRequestConfig(config)
-    )
+    let finalUrl = this.getRequestUrl(url, config)
+    let finalConfig = this.getRequestConfig(config)
+
+    // 执行插件的 beforeRequest 钩子
+    if (this.config.plugins?.length) {
+      for (const plugin of this.config.plugins) {
+        if (plugin.beforeRequest) {
+          const result = await plugin.beforeRequest(finalUrl, finalConfig)
+          if (result) {
+            if (result.url) finalUrl = result.url
+            if (result.config)
+              finalConfig = { ...finalConfig, ...result.config }
+          }
+        }
+      }
+    }
+
+    let response = await this.engine.request<T>(finalUrl, finalConfig)
+
+    // 执行插件的 afterRespond 钩子
+    if (this.config.plugins?.length) {
+      for (const plugin of this.config.plugins) {
+        if (plugin.afterRespond) {
+          const result = await plugin.afterRespond(
+            response,
+            finalUrl,
+            finalConfig
+          )
+          if (result) {
+            response = result
+          }
+        }
+      }
+    }
+
+    return response
   }
 
   /**
@@ -117,10 +170,7 @@ export class HTTPClient {
     url: string,
     config: AliasRequestConfig = {}
   ): Promise<HTTPResponse<T>> {
-    return this.engine.request<T>(url, {
-      method: 'GET',
-      ...config
-    })
+    return this.request<T>(url, { ...config, method: 'GET' })
   }
 
   /**
@@ -135,11 +185,7 @@ export class HTTPClient {
     body?: RequestConfig['body'],
     config: Omit<RequestConfig, 'method' | 'body'> = {}
   ): Promise<HTTPResponse<T>> {
-    return this.engine.request<T>(url, {
-      method: 'POST',
-      body,
-      ...config
-    })
+    return this.request<T>(url, { ...config, method: 'POST', body })
   }
 
   /**
@@ -154,11 +200,7 @@ export class HTTPClient {
     body?: RequestConfig['body'],
     config: Omit<RequestConfig, 'method' | 'body'> = {}
   ): Promise<HTTPResponse<T>> {
-    return this.engine.request<T>(url, {
-      method: 'PUT',
-      body,
-      ...config
-    })
+    return this.request<T>(url, { ...config, method: 'PUT', body })
   }
 
   /**
@@ -171,10 +213,7 @@ export class HTTPClient {
     url: string,
     config: Omit<RequestConfig, 'method'> = {}
   ): Promise<HTTPResponse<T>> {
-    return this.engine.request<T>(url, {
-      method: 'DELETE',
-      ...config
-    })
+    return this.request<T>(url, { ...config, method: 'DELETE' })
   }
 
   /**
@@ -189,11 +228,7 @@ export class HTTPClient {
     body?: RequestConfig['body'],
     config: Omit<RequestConfig, 'method' | 'body'> = {}
   ): Promise<HTTPResponse<T>> {
-    return this.engine.request<T>(url, {
-      method: 'PATCH',
-      body,
-      ...config
-    })
+    return this.request<T>(url, { ...config, method: 'PATCH', body })
   }
 
   /**
@@ -206,14 +241,11 @@ export class HTTPClient {
     url: string,
     config: Omit<RequestConfig, 'method'> = {}
   ): Promise<HTTPResponse<T>> {
-    return this.engine.request<T>(url, {
-      method: 'HEAD',
-      ...config
-    })
+    return this.request<T>(url, { ...config, method: 'HEAD' })
   }
 
   /**
-   * 发送 options 请求
+   * 发送 OPTIONS 请求
    * @param url 请求地址
    * @param config 请求选项
    * @returns Promise<HTTPResponse>
@@ -222,10 +254,7 @@ export class HTTPClient {
     url: string,
     config: Omit<RequestConfig, 'method'> = {}
   ): Promise<HTTPResponse<T>> {
-    return this.engine.request<T>(url, {
-      method: 'OPTIONS',
-      ...config
-    })
+    return this.request<T>(url, { ...config, method: 'OPTIONS' })
   }
 
   /**

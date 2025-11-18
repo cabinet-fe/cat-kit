@@ -1,8 +1,5 @@
-import { rolldown } from 'rolldown'
 import path from 'path'
 import { readJson } from 'fs-extra'
-import { dts as RolldownDTS } from 'rolldown-plugin-dts'
-import { getBuildInput, getPlugins, pkgTo } from './repo-helper'
 import type { PackageConfig, PackageOption } from './types'
 import pic from 'picocolors'
 import { build } from 'tsdown'
@@ -25,41 +22,18 @@ export class MonoRepoLib {
     // 生成构建配置
     this.packagesConfigs = await Promise.all(
       packages.map(async pkg => {
-        const { dir, build, output, deps } = pkg
+        const { dir, build: buildOpt, output, deps } = pkg
         const pkgJson = await readJson(path.resolve(dir, 'package.json'))
         if (!pkgJson.name) {
           throw new Error(`package.json 中缺少 name 字段`)
         }
 
-        // 生成构建配置映射
-        const { resolve, input, dts, ...restBuild } = build
-        const { tsconfigFilename = 'tsconfig.json', ...restResolve } =
-          resolve || {}
-
-        const {
-          dir: outputDir = 'dist',
-          file: outputFile,
-          ...restOutput
-        } = output || {}
-
         return {
           dir,
           deps,
           name: pkgJson.name,
-          build: {
-            dts,
-            input: getBuildInput(dir, input),
-            resolve: {
-              ...restResolve,
-              tsconfigFilename: pkgTo(dir, tsconfigFilename)
-            },
-            ...restBuild
-          },
-          output: {
-            dir: pkgTo(dir, outputDir),
-            file: outputFile ? pkgTo(dir, outputFile) : undefined,
-            ...restOutput
-          }
+          build: buildOpt,
+          output
         }
       })
     )
@@ -68,7 +42,7 @@ export class MonoRepoLib {
   }
 
   /** 构建所有包 */
-  async build() {
+  async build(): Promise<void> {
     await this.initPackages()
 
     // 构建结束的包
@@ -96,47 +70,31 @@ export class MonoRepoLib {
 
   private async buildPackage(conf: PackageConfig) {
     try {
-      const { build, output } = conf
-      let { dts, plugins, ...buildOptions } = build
-
-      const tsconfig = build.resolve?.tsconfigFilename
-
-      if (dts && tsconfig) {
-        plugins = await getPlugins(plugins)
-        if (Array.isArray(plugins)) {
-          plugins.push(RolldownDTS())
-        }
-      }
-
-      const bundle = await rolldown({
-        plugins,
-        ...buildOptions
-      })
-
       const start = Date.now()
+      const { dir, build: buildOpt, output } = conf
 
-      await bundle.write({
-        format: 'es',
-        ...output
+      await build({
+        entry: buildOpt.input as string,
+        cwd: dir,
+        outDir: output?.dir || 'dist',
+        format: ['esm', 'cjs'],
+        dts: buildOpt.dts !== false,
+        sourcemap: output?.sourcemap !== false,
+        external: buildOpt.external,
+        treeshake: true,
+        minify: false,
+        clean: true
       })
 
       console.log(
         pic.cyan(`${conf.name}`) +
-          pic.gray(' finished in') +
-          pic.green(` ${Date.now() - start}ms`)
+          pic.gray(' finished in ') +
+          pic.green(`${Date.now() - start}ms`)
       )
     } catch (err) {
       console.error(pic.red(`${conf.name} 构建失败`))
       console.error(err)
+      throw err
     }
   }
-}
-
-export class Package {
-  /**
-   * 包
-   * @param pkgDir 包目录
-   * @param option 包配置
-   */
-  constructor(pkgDir: string, option: PackageOption) {}
 }
