@@ -50,7 +50,3 @@ export interface PackageConfig {
     sourcemap?: boolean
   }
 }
-export interface MonoRepoLibOptions {
-  /** 需要构建的包 */
-  packages: PackageOption[]
-}

@@ -7,13 +7,8 @@
     "dev": "vitepress dev",
     "build": "vitepress build"
   },
-  "dependencies": {
-    "@cat-kit/core": "workspace:*",
-    "@cat-kit/fe": "workspace:*",
-    "@cat-kit/http": "workspace:*"
-  },
   "devDependencies": {
-    "vitepress": "^2.0.0-alpha.13",
+    "vitepress": "^1.6.4",
     "vue": "^3.5.24"
   }
 }

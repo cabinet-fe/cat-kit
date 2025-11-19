@@ -12,12 +12,7 @@ const lib = new MonoRepoLib([
   {
     dir: pkg('core'),
     build: {
-      input: 'src/index.ts',
-      dts: true
-    },
-    output: {
-      dir: 'dist',
-      sourcemap: true
+      input: 'src/index.ts'
     }
   },
   {
@@ -25,12 +20,7 @@ const lib = new MonoRepoLib([
     deps: ['@cat-kit/core'],
     build: {
       input: 'src/index.ts',
-      dts: true,
       external: ['@cat-kit/core']
-    },
-    output: {
-      dir: 'dist',
-      sourcemap: true
     }
   },
   {
@@ -38,12 +28,7 @@ const lib = new MonoRepoLib([
     deps: ['@cat-kit/core'],
     build: {
       input: 'src/index.ts',
-      dts: true,
       external: ['@cat-kit/core']
-    },
-    output: {
-      dir: 'dist',
-      sourcemap: true
     }
   },
   {
@@ -51,12 +36,7 @@ const lib = new MonoRepoLib([
     deps: ['@cat-kit/core'],
     build: {
       input: 'src/index.ts',
-      dts: true,
       external: ['@cat-kit/core']
-    },
-    output: {
-      dir: 'dist',
-      sourcemap: true
     }
   }
 ])

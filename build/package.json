@@ -4,12 +4,9 @@
     "build": "bun index.ts"
   },
   "devDependencies": {
-    "rolldown": "^1.0.0-beta.9",
-    "fs-extra": "^11.3.0",
+    "fs-extra": "^11.3.2",
     "@types/fs-extra": "^11.0.4",
-    "execa": "^9.5.3",
-    "rolldown-plugin-dts": "^0.13.2",
     "picocolors": "^1.1.1",
-    "tsdown": "^0.12.5"
+    "tsdown": "^0.16.5"
   }
 }
