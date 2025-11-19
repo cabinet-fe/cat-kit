@@ -13,7 +13,9 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "docs:dev": "cd docs && bun run dev",
-    "docs:build": "cd docs && bun run build"
+    "docs:build": "cd docs && bun run build",
+    "build": "cd build && bun run build",
+    "analyze": "cd build && bun run analyze"
   },
   "devDependencies": {
     "@types/bun": "^1.3.2",

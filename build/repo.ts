@@ -3,6 +3,7 @@ import { readJson } from 'fs-extra'
 import type { PackageConfig, PackageOption } from './types'
 import pic from 'picocolors'
 import { build } from 'tsdown'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 export class MonoRepoLib {
   private packagesConfigs: PackageConfig[] = []
@@ -98,6 +99,18 @@ export class MonoRepoLib {
     console.log(
       pic.bold(pic.green(`✨ 总耗时: ${Date.now() - start}ms `)) + totalStats
     )
+
+    // 如果有成功构建的包，提示查看分析报告
+    if (totalSuccess > 0) {
+      console.log(
+        '\n' +
+          pic.bold(pic.cyan('📊 Bundle 分析报告已生成')) +
+          '\n' +
+          pic.dim('  运行 ') +
+          pic.cyan('bun run analyze') +
+          pic.dim(' 启动服务查看可视化分析\n')
+      )
+    }
   }
 
   private async buildPackage(conf: PackageConfig): Promise<boolean> {
@@ -105,17 +118,28 @@ export class MonoRepoLib {
     const { dir, build: buildOpt, output } = conf
 
     try {
+      const outDir = output?.dir || 'dist'
+
       await build({
         entry: buildOpt.input,
         cwd: dir,
-        outDir: output?.dir || 'dist',
+        outDir,
         dts: buildOpt.dts !== false,
         sourcemap: output?.sourcemap !== false,
         external: buildOpt.external,
         treeshake: true,
         minify: false,
         clean: true,
-        silent: true
+        silent: true,
+        plugins: [
+          visualizer({
+            filename: path.resolve(dir, outDir, 'stats.html'),
+            open: false,
+            gzipSize: true,
+            brotliSize: true,
+            template: 'treemap'
+          })
+        ]
       })
 
       console.log(

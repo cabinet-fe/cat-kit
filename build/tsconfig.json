@@ -6,7 +6,8 @@
     "incremental": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo"
+    "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo",
+    "jsx": "react-jsx"
   },
-  "include": ["*.ts"]
+  "include": ["*.ts", "stats.tsx"]
 }

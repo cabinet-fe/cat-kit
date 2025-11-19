@@ -1,0 +1,24 @@
+{
+  "name": "@cat-kit/excel",
+  "type": "module",
+  "version": "4.0.0",
+  "description": "excel处理库",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    }
+  },
+  "dependencies": {
+    "@cat-kit/core": "workspace:*"
+  },
+  "devDependencies": {
+    "fflate": "^0.8.2",
+    "fast-xml-parser": "^5.3.2"
+  }
+}

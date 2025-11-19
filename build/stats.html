@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cat-Kit Bundle 分析报告</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        width: 100%;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 60px;
+        animation: fadeInDown 0.6s ease-out;
+      }
+
+      h1 {
+        font-size: 3rem;
+        color: white;
+        margin-bottom: 10px;
+        font-weight: 700;
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 300;
+      }
+
+      .emoji {
+        display: inline-block;
+        animation: bounce 2s infinite;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .packages-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+      }
+
+      .package-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out backwards;
+      }
+
+      .package-card:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+      .package-card:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .package-card:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      .package-card:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+      .package-card:nth-child(5) {
+        animation-delay: 0.5s;
+      }
+
+      .package-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+      }
+
+      .package-card:hover::before {
+        transform: scaleX(1);
+      }
+
+      .package-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+      }
+
+      .package-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+      }
+
+      .package-name {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .package-description {
+        font-size: 0.95rem;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .package-stats {
+        display: flex;
+        gap: 15px;
+        margin-top: auto;
+      }
+
+      .stat {
+        flex: 1;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+      }
+
+      .stat-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #667eea;
+      }
+
+      .view-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        margin-top: 15px;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .view-button:hover {
+        transform: translateX(5px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      footer {
+        text-align: center;
+        color: white;
+        margin-top: 40px;
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .build-info {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px 16px;
+        border-radius: 20px;
+        margin-top: 10px;
+        backdrop-filter: blur(10px);
+      }
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 2rem;
+        }
+
+        .subtitle {
+          font-size: 1rem;
+        }
+
+        .packages-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1><span class="emoji">📊</span> Bundle 分析报告</h1>
+        <p class="subtitle">Cat-Kit 工具箱 - 模块大小与依赖分析</p>
+      </header>
+
+      <div class="packages-grid">
+        <div class="package-card" onclick="window.location.href='packages/core/dist/stats.html'">
+          <div class="package-icon">🎯</div>
+          <div class="package-name">@cat-kit/core</div>
+          <div class="package-description">
+            核心工具库，提供数据处理、日期工具、设计模式等基础功能
+          </div>
+          <div class="package-stats">
+            <div class="stat">
+              <div class="stat-label">类型</div>
+              <div class="stat-value">Core</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">依赖</div>
+              <div class="stat-value">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">报告大小</div>
+              <div class="stat-value">168.6 KB</div>
+            </div>
+          </div>
+          <a href="packages/core/dist/stats.html" class="view-button" onclick="event.stopPropagation()">
+            查看分析
+            <span>→</span>
+          </a>
+        </div>
+        <div class="package-card" onclick="window.location.href='packages/fe/dist/stats.html'">
+          <div class="package-icon">🌐</div>
+          <div class="package-name">@cat-kit/fe</div>
+          <div class="package-description">
+            前端工具库，包含文件处理、存储、虚拟化列表、Web API 等功能
+          </div>
+          <div class="package-stats">
+            <div class="stat">
+              <div class="stat-label">类型</div>
+              <div class="stat-value">Frontend</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">依赖</div>
+              <div class="stat-value">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">报告大小</div>
+              <div class="stat-value">162.2 KB</div>
+            </div>
+          </div>
+          <a href="packages/fe/dist/stats.html" class="view-button" onclick="event.stopPropagation()">
+            查看分析
+            <span>→</span>
+          </a>
+        </div>
+        <div class="package-card" onclick="window.location.href='packages/http/dist/stats.html'">
+          <div class="package-icon">🌍</div>
+          <div class="package-name">@cat-kit/http</div>
+          <div class="package-description">
+            HTTP 客户端库，支持插件系统、请求拦截、多种请求引擎
+          </div>
+          <div class="package-stats">
+            <div class="stat">
+              <div class="stat-label">类型</div>
+              <div class="stat-value">HTTP</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">依赖</div>
+              <div class="stat-value">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">报告大小</div>
+              <div class="stat-value">162.0 KB</div>
+            </div>
+          </div>
+          <a href="packages/http/dist/stats.html" class="view-button" onclick="event.stopPropagation()">
+            查看分析
+            <span>→</span>
+          </a>
+        </div>
+        <div class="package-card" onclick="window.location.href='packages/be/dist/stats.html'">
+          <div class="package-icon">⚙️</div>
+          <div class="package-name">@cat-kit/be</div>
+          <div class="package-description">
+            后端工具库，提供服务端开发所需的各类实用工具
+          </div>
+          <div class="package-stats">
+            <div class="stat">
+              <div class="stat-label">类型</div>
+              <div class="stat-value">Backend</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">依赖</div>
+              <div class="stat-value">0</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">报告大小</div>
+              <div class="stat-value">158.0 KB</div>
+            </div>
+          </div>
+          <a href="packages/be/dist/stats.html" class="view-button" onclick="event.stopPropagation()">
+            查看分析
+            <span>→</span>
+          </a>
+        </div>
+        <div class="package-card" onclick="window.location.href='packages/excel/dist/stats.html'">
+          <div class="package-icon">📑</div>
+          <div class="package-name">@cat-kit/excel</div>
+          <div class="package-description">
+            Excel 处理库，支持读取和写入 xlsx 文件，提供完整的表格操作功能
+          </div>
+          <div class="package-stats">
+            <div class="stat">
+              <div class="stat-label">类型</div>
+              <div class="stat-value">Excel</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">依赖</div>
+              <div class="stat-value">1</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">报告大小</div>
+              <div class="stat-value">169.6 KB</div>
+            </div>
+          </div>
+          <a href="packages/excel/dist/stats.html" class="view-button" onclick="event.stopPropagation()">
+            查看分析
+            <span>→</span>
+          </a>
+        </div>
+      </div>
+
+      <footer>
+        <p>💡 提示：点击卡片即可查看对应包的详细 Bundle 分析报告</p>
+        <div class="build-info">
+          <span>🕐</span>
+          <span>构建于 2025/11/19 16:24:13</span>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

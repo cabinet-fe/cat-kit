@@ -38,6 +38,14 @@ const lib = new MonoRepoLib([
       input: 'src/index.ts',
       external: ['@cat-kit/core']
     }
+  },
+  {
+    dir: pkg('excel'),
+    deps: ['@cat-kit/core'],
+    build: {
+      input: 'src/index.ts',
+      external: ['@cat-kit/core']
+    }
   }
 ])
 
