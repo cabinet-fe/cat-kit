@@ -12,10 +12,8 @@
   "scripts": {
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
     "docs:dev": "cd docs && bun run dev",
-    "docs:build": "cd docs && bun run build",
-    "docs:preview": "cd docs && bun run preview"
+    "docs:build": "cd docs && bun run build"
   },
   "devDependencies": {
     "@cat-kit/core": "workspace:*",

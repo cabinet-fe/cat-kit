@@ -6,7 +6,7 @@ describe('Dater', () => {
 
   beforeEach(() => {
     // 使用固定日期确保测试的稳定性
-    testDate = new Dater(new Date('2024-01-15 10:30:45'))
+    testDate = new Dater('2024-01-15 10:30:45')
   })
 
   describe('构造函数', () => {
@@ -226,7 +226,7 @@ describe('Dater', () => {
     })
 
     it('应该支持自定义减少器', () => {
-      const laterDate = new Date('2024-01-20')
+      const laterDate = new Date('2024-01-20 10:30:45') // 使用相同的时间避免部分小时差异
       const hoursDiff = testDate.compare(laterDate, timeDiff =>
         Math.floor(timeDiff / (1000 * 60 * 60))
       )

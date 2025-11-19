@@ -13,10 +13,5 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
-  },
-  "scripts": {
-    "build": "bun run --cwd ../../build build",
-    "typecheck": "tsc --noEmit",
-    "test": "bun test"
   }
 }

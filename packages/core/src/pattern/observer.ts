@@ -39,8 +39,8 @@ export class Observable<S extends object, K extends keyof S> {
   /** 是否正在等待微任务执行 */
   private waitingMicrotask = false
 
-  /** 微任务集合 */
-  private microtasks: Set<PropHandler> = new Set()
+  /** 微任务队列 */
+  private microtasks: Array<() => void | Promise<void>> = []
 
   /** 是否暂停观察 */
   private paused = false
@@ -68,17 +68,18 @@ export class Observable<S extends object, K extends keyof S> {
    * 执行微任务
    */
   private async runMicrotasks() {
-    try {
-      await Promise.all(
-        Array.from(this.microtasks).map(task => {
-          return task.callback(task.params.map(p => Reflect.get(this.state, p)))
-        })
-      )
-    } catch (error) {
-      console.error(error)
-    }
-    this.microtasks.clear()
+    const tasks = this.microtasks.slice()
+    this.microtasks = []
     this.waitingMicrotask = false
+
+    // 独立执行每个任务，避免一个任务的错误影响其他任务
+    for (const task of tasks) {
+      try {
+        await task()
+      } catch (error) {
+        console.error(error)
+      }
+    }
   }
 
   /**
@@ -87,27 +88,33 @@ export class Observable<S extends object, K extends keyof S> {
    */
   trigger(prop: string | symbol): void {
     const propHandlers = this.propsHandlers.get(prop)
-    const handlersToRemove: PropHandler[] = []
+    if (!propHandlers) return
 
-    propHandlers?.forEach(handler => {
-      if (handler.once) {
-        handlersToRemove.push(handler)
-      }
+    const handlersSnapshot = Array.from(propHandlers)
+
+    handlersSnapshot.forEach(handler => {
+      // 立即捕获当前状态值
+      const currentValues = handler.params.map(p => Reflect.get(this.state, p))
 
       if (handler.sync) {
-        handler.callback(handler.params.map(p => Reflect.get(this.state, p)))
+        handler.callback(currentValues)
+        if (handler.once) {
+          this.unobserveHandler(handler)
+        }
       } else {
-        this.microtasks.add(handler)
+        // 如果是 once，先移除handler再添加任务，防止后续变更再次触发
+        if (handler.once) {
+          this.unobserveHandler(handler)
+        }
+
+        // 为每次触发创建一个新的任务，使用捕获的值
+        this.microtasks.push(() => handler.callback(currentValues))
+
         if (!this.waitingMicrotask) {
           this.waitingMicrotask = true
           queueMicrotask(() => this.runMicrotasks())
         }
       }
-    })
-
-    // 移除一次性处理器
-    handlersToRemove.forEach(handler => {
-      this.unobserveHandler(handler)
     })
   }
 
@@ -173,8 +180,6 @@ export class Observable<S extends object, K extends keyof S> {
    * @param handler 要取消的处理器
    */
   unobserveHandler(handler: PropHandler): void {
-    this.microtasks.delete(handler)
-
     for (const [prop, handlers] of this.propsHandlers.entries()) {
       handlers.delete(handler)
       if (handlers.size === 0) {
@@ -207,6 +212,6 @@ export class Observable<S extends object, K extends keyof S> {
    */
   destroyAll(): void {
     this.propsHandlers.clear()
-    this.microtasks.clear()
+    this.microtasks = []
   }
 }

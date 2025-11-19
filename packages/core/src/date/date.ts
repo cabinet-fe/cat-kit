@@ -175,21 +175,27 @@ export class Dater {
    * @param timeStep 计算的日期, 负数表示之前的日期, 正数表示之后的日期
    * @param type 时间步长类别, 默认以天为单位
    */
-  calc(timeStep: number, type?: 'days' | 'weeks' | 'months' | 'years'): Dater {
+  calc(
+    timeStep: number,
+    type: 'days' | 'weeks' | 'months' | 'years' = 'days'
+  ): Dater {
     let { date } = this
+
     if (type === 'days') {
       return new Dater(this.timestamp + timeStep * 86400000)
-    } else if (type === 'weeks') {
+    }
+    if (type === 'weeks') {
       return new Dater(this.timestamp + timeStep * 604800000)
-    } else if (type === 'months') {
+    }
+    if (type === 'months') {
       date = new Date(date.getTime())
       date.setMonth(timeStep + date.getMonth())
       return new Dater(date)
-    } else {
-      date = new Date(date.getTime())
-      date.setFullYear(timeStep + date.getFullYear())
-      return new Dater(date)
     }
+
+    date = new Date(date.getTime())
+    date.setFullYear(timeStep + date.getFullYear())
+    return new Dater(date)
   }
 
   /**
@@ -218,7 +224,7 @@ export class Dater {
     const timeDiff = this.timestamp - dater.timestamp
 
     if (!reducer) {
-      return Math.ceil(timeDiff / 86400000)
+      return Math.round(timeDiff / 86400000)
     }
 
     return reducer(timeDiff)

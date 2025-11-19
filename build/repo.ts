@@ -74,10 +74,10 @@ export class MonoRepoLib {
       const { dir, build: buildOpt, output } = conf
 
       await build({
-        entry: buildOpt.input as string,
+        entry: buildOpt.input,
         cwd: dir,
         outDir: output?.dir || 'dist',
-        format: ['esm', 'cjs'],
+
         dts: buildOpt.dts !== false,
         sourcemap: output?.sourcemap !== false,
         external: buildOpt.external,
