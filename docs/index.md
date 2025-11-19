@@ -6,7 +6,7 @@ hero:
   text: '喵喵工具箱'
   tagline: 基于 TS 的全环境开发工具包。现代 API，高性能，类型安全，前后端一致。
   image:
-    src: /logo.svg
+    src: /banner.png
     alt: CatKit
   actions:
     - theme: brand
