@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { renderToString } from 'react-dom/server'
+import { pkgs } from './pkgs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..')
@@ -14,18 +15,14 @@ interface Package {
 
 // 动态扫描 packages 目录
 async function getPackages(): Promise<Package[]> {
-  const packagesDir = path.join(rootDir, 'packages')
-
-  const entries = await fs.readdir(packagesDir, { withFileTypes: true })
   const packages = await Promise.all(
-    entries.map(async entry => {
-      const packageJson = await import(
-        path.join(packagesDir, entry.name, 'package.json')
-      )
+    pkgs.map(async pkg => {
+      const packageJson = await import(path.join(pkg.dir, 'package.json'))
+      const name = path.basename(pkg.dir)
       return {
         name: packageJson.default.name,
         description: packageJson.default.description,
-        path: `/packages/${entry.name}/dist/stats.html`
+        path: path.join('/packages', name, 'dist/stats.html')
       }
     })
   )
@@ -259,22 +256,12 @@ const server = Bun.serve({
     // 首页
     if (url.pathname === '/') {
       const packages = await getCachedPackages()
+
       const html = renderToString(<HomePage packages={packages} />)
 
       return new Response('<!DOCTYPE html>' + html, {
         headers: { 'Content-Type': 'text/html; charset=utf-8' }
       })
-    }
-
-    // 刷新包列表
-    if (url.pathname === '/api/refresh') {
-      cachedPackages = await getPackages()
-      return new Response(
-        JSON.stringify({ success: true, count: cachedPackages.length }),
-        {
-          headers: { 'Content-Type': 'application/json' }
-        }
-      )
     }
 
     // 静态文件服务
@@ -305,6 +292,3 @@ const server = Bun.serve({
 
 console.log('\n📊 Bundle 分析服务已启动')
 console.log(`🌐 访问地址: \x1b[36mhttp://localhost:${server.port}\x1b[0m`)
-console.log(
-  `🔄 刷新列表: \x1b[36mhttp://localhost:${server.port}/api/refresh\x1b[0m\n`
-)

@@ -127,20 +127,16 @@ export class MonoRepoLib {
         dts: buildOpt.dts !== false,
         sourcemap: output?.sourcemap !== false,
         external: buildOpt.external,
-        outExtensions: ({ format }) => {
-          return {
-            js: '.js',
-            dts: '.d.ts'
-          }
-        },
-
-        minify: false,
-
+        outExtensions: () => ({
+          js: '.js',
+          dts: '.d.ts'
+        }),
+        minify: true,
         logLevel: 'warn',
         plugins: [
           visualizer({
             filename: path.resolve(dir, outDir, 'stats.html'),
-
+            title: 'Cat-Kit Bundle 分析',
             template: 'flamegraph'
           })
         ]

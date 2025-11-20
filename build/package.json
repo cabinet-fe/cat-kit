@@ -13,6 +13,6 @@
   },
   "scripts": {
     "build": "bun index.ts",
-    "analyze": "bun stats.tsx"
+    "analyze": "bun  --watch stats.tsx"
   }
 }
