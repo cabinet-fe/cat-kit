@@ -1,7 +1,7 @@
 {
   "extends": "ts-conf-base/tsconfig.json",
   "compilerOptions": {
-    "types": ["vitest/globals"],
+    "types": ["vitest/globals", "node"],
     "composite": true,
     "incremental": true,
     "skipLibCheck": true,

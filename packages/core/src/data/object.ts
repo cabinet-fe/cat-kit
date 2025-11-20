@@ -120,11 +120,12 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
       const originalValType = getDataType(originalVal)
       const sourceValType = getDataType(sourceVal)
 
-      if (originalValType !== sourceValType)
+      if (originalValType !== sourceValType) {
         return console.warn(`${key}类型不一致`)
+      }
 
       if (originalValType === 'object' && sourceValType === 'object') {
-        this.deepExtend(sourceVal)
+        new CatObject(originalVal).deepExtend(sourceVal)
         return
       }
 
@@ -146,7 +147,7 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
   private static merge(
     target: Record<string, any>,
     source: Record<string, any>
-  ) {
+  ): Record<string, any> {
     Object.keys(source).forEach(key => {
       const sourceVal = source[key]
 
@@ -178,6 +179,8 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
       // 其他情况直接覆盖
       target[key] = sourceVal
     })
+
+    return target
   }
 
   /**

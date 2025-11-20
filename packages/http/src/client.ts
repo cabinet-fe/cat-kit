@@ -55,11 +55,8 @@ export class HTTPClient {
     this.prefix = prefix
     this.config = config
 
-    if (!isInBrowser()) {
-      throw new Error('HTTPClient不支持在非浏览器环境下使用')
-    }
     this.engine =
-      typeof window.fetch === 'undefined' ? new XHREngine() : new FetchEngine()
+      typeof fetch === 'undefined' ? new XHREngine() : new FetchEngine()
   }
 
   private getRequestUrl(url: string, config: RequestConfig): string {
@@ -291,3 +288,5 @@ export class HTTPClient {
     return group
   }
 }
+
+const base = new HTTPClient(undefined, {})

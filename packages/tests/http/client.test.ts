@@ -6,11 +6,12 @@ const mockFetch = vi.fn()
 
 // Mock window 对象（模拟浏览器环境）
 if (typeof window === 'undefined') {
-  (global as any).window = {
+  // @ts-ignore
+  global.window = {
     fetch: mockFetch
   }
 } else {
-  (window as any).fetch = mockFetch
+  window.fetch = mockFetch
 }
 
 global.fetch = mockFetch
@@ -95,10 +96,7 @@ describe('HTTPClient', () => {
       const client = new HTTPClient('/api')
       await client.get('/users')
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/api/users',
-        expect.any(Object)
-      )
+      expect(mockFetch).toHaveBeenCalledWith('/api/users', expect.any(Object))
     })
 
     it('应该能处理完整的 URL', async () => {
@@ -146,9 +144,13 @@ describe('HTTPClient', () => {
 
     it('应该能添加自定义头部', async () => {
       const client = new HTTPClient()
-      await client.post('/users', { name: 'test' }, {
-        headers: { 'X-Custom-Header': 'value' }
-      })
+      await client.post(
+        '/users',
+        { name: 'test' },
+        {
+          headers: { 'X-Custom-Header': 'value' }
+        }
+      )
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/users',
@@ -339,7 +341,7 @@ describe('HTTPClient', () => {
     })
 
     it('应该能执行 afterRespond 钩子', async () => {
-      const afterRespond = vi.fn(async (response) => {
+      const afterRespond = vi.fn(async response => {
         return {
           ...response,
           data: { ...response.data, modified: true }
@@ -390,21 +392,14 @@ describe('HTTPClient', () => {
 
       await client.get(encodedUrl)
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/users/张三',
-        expect.any(Object)
-      )
+      expect(mockFetch).toHaveBeenCalledWith('/users/张三', expect.any(Object))
     })
 
     it('应该能正确拼接路径', async () => {
       const client = new HTTPClient('/api/')
       await client.get('/users')
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/api/users',
-        expect.any(Object)
-      )
+      expect(mockFetch).toHaveBeenCalledWith('/api/users', expect.any(Object))
     })
   })
 })
-

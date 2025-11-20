@@ -10,7 +10,7 @@ export function debounce<T extends any[]>(
   delay = 300,
   immediate = true
 ): (this: any, ...args: T) => void {
-  let timer: NodeJS.Timeout | undefined = undefined
+  let timer: NodeJS.Timeout | number | undefined = undefined
 
   return function (this: any, ...args: T) {
     timer !== undefined && clearTimeout(timer)
@@ -48,11 +48,11 @@ export function throttle<T extends any[], R>(
   delay = 300,
   cb?: (v: R) => void
 ) {
-  let start = Date.now()
+  let start = 0
   let result: R
   return function (this: any, ...args: T): R {
     let current = Date.now()
-    if (current - start >= delay) {
+    if (start === 0 || current - start >= delay) {
       start = current
       result = fn.call(this, ...args)
       cb?.(result)
