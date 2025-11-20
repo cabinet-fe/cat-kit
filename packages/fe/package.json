@@ -3,11 +3,20 @@
   "type": "module",
   "version": "4.0.0",
   "description": "前端工具包",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./src": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
   "devDependencies": {
     "@cat-kit/core": "workspace:*"
   },

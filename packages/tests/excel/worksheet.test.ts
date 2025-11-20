@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { Worksheet } from '../src/core/worksheet'
-import { Row } from '../src/core/row'
-import { Cell } from '../src/core/cell'
-import type { TableData, TableColumn } from '../src/core/worksheet'
-import type { CellStyle } from '../src/core/types'
+import { Worksheet, Row, Cell } from '@cat-kit/excel/src'
+import type { TableData, TableColumn, CellStyle } from '@cat-kit/excel/src'
 
 describe('Worksheet', () => {
   describe('构造函数', () => {

@@ -24,7 +24,7 @@ export class FetchEngine extends HttpEngine {
     if (timeout && timeout > 0) {
       timeoutId = setTimeout(() => {
         controller.abort()
-      }, timeout)
+      }, timeout) as unknown as number
     }
 
     try {

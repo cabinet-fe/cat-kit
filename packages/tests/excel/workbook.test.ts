@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { Workbook } from '../src/core/workbook'
-import { Worksheet } from '../src/core/worksheet'
-import type { WorkbookMetadata } from '../src/core/types'
+import { Workbook, Worksheet } from '@cat-kit/excel/src'
+import type { WorkbookMetadata } from '@cat-kit/excel/src'
 
 describe('Workbook', () => {
   describe('构造函数', () => {

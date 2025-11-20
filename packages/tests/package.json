@@ -1,0 +1,19 @@
+{
+  "name": "@cat-kit/tests",
+  "private": true,
+  "version": "4.0.0",
+  "description": "喵喵工具箱测试",
+  "main": "index.ts",
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "devDependencies": {
+    "@cat-kit/core": "workspace:*",
+    "@cat-kit/fe": "workspace:*",
+    "@cat-kit/be": "workspace:*",
+    "@cat-kit/http": "workspace:*",
+    "@cat-kit/excel": "workspace:*",
+    "vitest": "^4.0.10"
+  }
+}

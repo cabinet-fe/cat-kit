@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { Cell } from '../src/core/cell'
-import type { CellStyle } from '../src/core/types'
+import { Cell } from '@cat-kit/excel/src'
+import type { CellStyle } from '@cat-kit/excel/src'
 
 describe('Cell', () => {
   describe('构造函数', () => {

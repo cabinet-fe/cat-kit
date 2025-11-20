@@ -3,15 +3,18 @@
   "type": "module",
   "version": "4.0.0",
   "description": "核心工具包",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.mts",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.d.mts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./src": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
     }
   }
 }

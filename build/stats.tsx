@@ -8,7 +8,6 @@ const rootDir = path.resolve(__dirname, '..')
 
 interface Package {
   name: string
-  icon: string
   description: string
   path: string
 }
@@ -18,14 +17,13 @@ async function getPackages(): Promise<Package[]> {
   const packagesDir = path.join(rootDir, 'packages')
 
   const entries = await fs.readdir(packagesDir, { withFileTypes: true })
-  const packages = Promise.all(
+  const packages = await Promise.all(
     entries.map(async entry => {
       const packageJson = await import(
         path.join(packagesDir, entry.name, 'package.json')
       )
       return {
         name: packageJson.default.name,
-        icon: '📦',
         description: packageJson.default.description,
         path: `/packages/${entry.name}/dist/stats.html`
       }
@@ -54,106 +52,80 @@ function HomePage({ packages }: { packages: Package[] }) {
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
               'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #f8f9fb;
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 24px 24px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 40px 20px;
-            color: #333;
+            color: #111827;
           }
 
           .container {
-            max-width: 1100px;
+            max-width: 1000px;
             width: 100%;
+            position: relative;
           }
 
           header {
-            text-align: center;
-            margin-bottom: 40px;
-            animation: fadeInDown 0.6s ease-out;
+            text-align: left;
+            margin-bottom: 48px;
+            padding-left: 4px;
           }
 
           h1 {
-            font-size: 3rem;
-            color: white;
-            margin-bottom: 10px;
+            font-size: 2.25rem;
+            color: #111827;
+            margin-bottom: 8px;
             font-weight: 700;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+            letter-spacing: -0.025em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+          }
+
+          h1::before {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 32px;
+            background: #2563eb;
+            border-radius: 4px;
           }
 
           .subtitle {
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 300;
-          }
-
-          .emoji {
-            display: inline-block;
-            animation: bounce 2s infinite;
-          }
-
-          @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            font-size: 1rem;
+            color: #6b7280;
+            font-weight: 400;
+            padding-left: 20px;
           }
 
           .packages-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 16px;
-            animation: fadeInUp 0.6s ease-out;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
           }
 
           .package-item {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            text-align: center;
             text-decoration: none;
             color: inherit;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-          }
-
-          .package-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-          }
-
-          .package-item:hover::before {
-            transform: scaleX(1);
+            transition: all 0.2s ease;
+            height: 100%;
           }
 
           .package-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-          }
-
-          .package-icon {
-            font-size: 2rem;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            border-radius: 10px;
-            margin-bottom: 12px;
-            flex-shrink: 0;
+            border-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.15);
           }
 
           .package-info {
@@ -161,97 +133,69 @@ function HomePage({ packages }: { packages: Package[] }) {
           }
 
           .package-name {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 600;
-            color: #333;
-            margin-bottom: 6px;
-            word-break: break-word;
+            color: #111827;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+
+          .package-name::after {
+            content: '→';
+            font-size: 1.1rem;
+            color: #9ca3af;
+            transition: transform 0.2s ease, color 0.2s ease;
+          }
+
+          .package-item:hover .package-name::after {
+            transform: translateX(4px);
+            color: #2563eb;
           }
 
           .package-description {
-            font-size: 0.8rem;
-            color: #888;
-            line-height: 1.4;
+            font-size: 0.875rem;
+            color: #6b7280;
+            line-height: 1.5;
           }
 
           footer {
             text-align: center;
-            color: white;
-            margin-top: 30px;
-            font-size: 0.85rem;
-            opacity: 0.8;
+            color: #9ca3af;
+            margin-top: 60px;
+            font-size: 0.875rem;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 24px;
           }
 
           .empty-state {
             text-align: center;
-            color: white;
-            padding: 60px 20px;
-            animation: fadeInUp 0.6s ease-out;
+            color: #6b7280;
+            padding: 80px 20px;
+            background: white;
+            border: 1px dashed #e5e7eb;
+            border-radius: 8px;
           }
 
           .empty-state h2 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-          }
-
-          .empty-state p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-          }
-
-          @keyframes fadeInDown {
-            from {
-              opacity: 0;
-              transform: translateY(-30px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(30px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
+            font-size: 1.25rem;
+            color: #374151;
+            margin-bottom: 8px;
+            font-weight: 600;
           }
 
           @media (max-width: 768px) {
             h1 {
-              font-size: 2rem;
+              font-size: 1.75rem;
             }
 
             .subtitle {
-              font-size: 1rem;
-            }
-
-            .packages-list {
-              grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-              gap: 12px;
+              padding-left: 0;
             }
 
             .package-item {
-              padding: 16px;
-            }
-
-            .package-icon {
-              font-size: 1.6rem;
-              width: 40px;
-              height: 40px;
-              margin-bottom: 10px;
-            }
-
-            .package-name {
-              font-size: 0.95rem;
-            }
-
-            .package-description {
-              font-size: 0.75rem;
+              padding: 20px;
             }
           }
         `
@@ -261,10 +205,8 @@ function HomePage({ packages }: { packages: Package[] }) {
       <body>
         <div className='container'>
           <header>
-            <h1>
-              <span className='emoji'>📊</span> Bundle 分析
-            </h1>
-            <p className='subtitle'>选择要查看的包</p>
+            <h1>Bundle Analysis</h1>
+            <p className='subtitle'>构建产物与依赖可视化分析</p>
           </header>
 
           {packages.length > 0 ? (
@@ -272,7 +214,6 @@ function HomePage({ packages }: { packages: Package[] }) {
               <div className='packages-list'>
                 {packages.map(pkg => (
                   <a key={pkg.name} href={pkg.path} className='package-item'>
-                    <div className='package-icon'>{pkg.icon}</div>
                     <div className='package-info'>
                       <div className='package-name'>{pkg.name}</div>
                       <div className='package-description'>
@@ -284,13 +225,13 @@ function HomePage({ packages }: { packages: Package[] }) {
               </div>
 
               <footer>
-                <p>💡 点击任意包查看详细的 Bundle 分析报告</p>
+                <p>Generated by Cat-Kit Build Tools</p>
               </footer>
             </>
           ) : (
             <div className='empty-state'>
-              <h2>📦 暂无可用的分析报告</h2>
-              <p>请先运行 bun run build 生成分析报告</p>
+              <h2>No analysis reports found</h2>
+              <p>Please run "bun run build" first to generate reports.</p>
             </div>
           )}
         </div>

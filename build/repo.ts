@@ -127,17 +127,21 @@ export class MonoRepoLib {
         dts: buildOpt.dts !== false,
         sourcemap: output?.sourcemap !== false,
         external: buildOpt.external,
-        treeshake: true,
+        outExtensions: ({ format }) => {
+          return {
+            js: '.js',
+            dts: '.d.ts'
+          }
+        },
+
         minify: false,
-        clean: true,
-        silent: true,
+
+        logLevel: 'warn',
         plugins: [
           visualizer({
             filename: path.resolve(dir, outDir, 'stats.html'),
-            open: false,
-            gzipSize: true,
-            brotliSize: true,
-            template: 'treemap'
+
+            template: 'flamegraph'
           })
         ]
       })

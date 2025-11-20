@@ -8,7 +8,7 @@ import {
   formatRange,
   pixelsToExcelWidth,
   excelWidthToPixels
-} from '../src/helpers/address'
+} from '@cat-kit/excel/src'
 
 describe('地址辅助函数', () => {
   describe('columnLetterToIndex', () => {
