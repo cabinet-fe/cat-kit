@@ -15,7 +15,11 @@ function getDecimalPartByPrecision(
   raw: string,
   precision: number
 ): DecimalResult {
+  if (precision === 0) {
+    return ['', Math.round(+`.${raw}`) > 0]
+  }
   let roundUp = false
+
   if (raw.length === precision) {
   } else if (raw.length < precision) {
     raw = raw.padEnd(precision, '0')

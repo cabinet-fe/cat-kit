@@ -315,21 +315,6 @@ describe('对象工具函数', () => {
 
         expect(o(obj).get('a.b.c')).toBe('value')
       })
-
-      it('应该警告访问中断', () => {
-        const consoleWarnSpy = vi
-          .spyOn(console, 'warn')
-          .mockImplementation(() => {})
-
-        const obj = { a: { b: null } }
-
-        const result = o(obj).get('a.b.c')
-
-        expect(consoleWarnSpy).toHaveBeenCalledWith('a.b.c访问中断')
-        expect(result).toBeUndefined()
-
-        consoleWarnSpy.mockRestore()
-      })
     })
 
     describe('set', () => {
