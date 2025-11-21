@@ -7,7 +7,7 @@ import type {
   HTTPResponse,
   AliasRequestConfig
 } from './types'
-import { $str, isInBrowser } from '@cat-kit/core'
+import { $str } from '@cat-kit/core'
 
 /**
  * HTTP 请求客户端
@@ -71,12 +71,19 @@ export class HTTPClient {
     // 拼接前缀
     url = $str.joinUrlPath(this.prefix, url)
 
+    // 如果配置了 origin，拼接到 URL 前面
+    if (this.config.origin) {
+      // 移除 origin 末尾的斜杠
+      const origin = this.config.origin.replace(/\/$/, '')
+      url = origin + url
+    }
+
     return this.appendQueryParams(url, config)
   }
 
   private appendQueryParams(url: string, config: RequestConfig): string {
-    // GET请求处理查询参数
-    if (config.method === 'GET' && config.query) {
+    // 处理查询参数（对所有请求方法都有效）
+    if (config.query) {
       const queryString = new URLSearchParams(
         Object.entries(config.query).reduce((acc, [key, value]) => {
           acc[key] =
@@ -85,9 +92,11 @@ export class HTTPClient {
         }, {} as Record<string, string>)
       ).toString()
 
-      url = url.includes('?')
-        ? `${url}&${queryString}`
-        : `${url}?${queryString}`
+      if (queryString) {
+        url = url.includes('?')
+          ? `${url}&${queryString}`
+          : `${url}?${queryString}`
+      }
     }
 
     return url
@@ -288,5 +297,3 @@ export class HTTPClient {
     return group
   }
 }
-
-const base = new HTTPClient(undefined, {})

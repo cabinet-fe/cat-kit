@@ -72,7 +72,7 @@ export function TokenPlugin(options: TokenPluginOptions): ClientPlugin {
     if (authType === 'Custom') {
       return formatter?.(token) ?? token
     }
-    return `${authType}`
+    return `${authType} ${token}`
   }
 
   return {

@@ -15,7 +15,7 @@ export class XHREngine extends HttpEngine {
         method = 'GET',
         timeout = 0,
         responseType = 'json',
-        credentials = false
+        credentials = true
       } = config
 
       const xhr = new XMLHttpRequest()
@@ -24,7 +24,8 @@ export class XHREngine extends HttpEngine {
       this.xhrSets.add(xhr)
 
       xhr.timeout = timeout
-      xhr.responseType = responseType
+      // 将 responseType 转换为 XMLHttpRequest 支持的类型
+      xhr.responseType = responseType as XMLHttpRequestResponseType
       xhr.withCredentials = credentials
 
       xhr.onload = () => {

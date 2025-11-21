@@ -24,7 +24,9 @@ describe('TokenPlugin', () => {
 
       expect(result).toBeDefined()
       expect(result?.config?.headers).toBeDefined()
-      expect(result?.config?.headers?.['Authorization']).toBe('Bearer')
+      expect(result?.config?.headers?.['Authorization']).toBe(
+        'Bearer test-token'
+      )
     })
 
     it('应该支持异步 getter', async () => {
@@ -39,7 +41,9 @@ describe('TokenPlugin', () => {
       const config: RequestConfig = { method: 'GET' }
       const result = await plugin.beforeRequest?.('/api/users', config)
 
-      expect(result?.config?.headers?.['Authorization']).toBe('Bearer')
+      expect(result?.config?.headers?.['Authorization']).toBe(
+        'Bearer async-token'
+      )
     })
 
     it('当 getter 返回 null 时不应添加 token', async () => {
@@ -75,7 +79,7 @@ describe('TokenPlugin', () => {
       const config: RequestConfig = { method: 'GET' }
       const result = await plugin.beforeRequest?.('/api/users', config)
 
-      expect(result?.config?.headers?.['Authorization']).toBe('Bearer')
+      expect(result?.config?.headers?.['Authorization']).toBe('Bearer my-token')
     })
 
     it('应该支持 Basic 授权', async () => {
@@ -87,14 +91,14 @@ describe('TokenPlugin', () => {
       const config: RequestConfig = { method: 'GET' }
       const result = await plugin.beforeRequest?.('/api/users', config)
 
-      expect(result?.config?.headers?.['Authorization']).toBe('Basic')
+      expect(result?.config?.headers?.['Authorization']).toBe('Basic my-token')
     })
 
     it('应该支持自定义授权类型', async () => {
       const plugin = TokenPlugin({
         getter: () => 'my-token',
         authType: 'Custom',
-        formatter: (token) => `Custom ${token}`
+        formatter: token => `Custom ${token}`
       })
 
       const config: RequestConfig = { method: 'GET' }
@@ -115,7 +119,9 @@ describe('TokenPlugin', () => {
       const config: RequestConfig = { method: 'GET' }
       const result = await plugin.beforeRequest?.('/api/users', config)
 
-      expect(result?.config?.headers?.['X-Auth-Token']).toBe('Bearer')
+      expect(result?.config?.headers?.['X-Auth-Token']).toBe(
+        'Bearer test-token'
+      )
       expect(result?.config?.headers?.['Authorization']).toBeUndefined()
     })
   })
@@ -140,7 +146,7 @@ describe('TokenPlugin', () => {
       expect(result?.config?.headers).toMatchObject({
         'X-Custom': 'value',
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer'
+        Authorization: 'Bearer test-token'
       })
     })
   })
@@ -158,7 +164,9 @@ describe('TokenPlugin', () => {
       const config: RequestConfig = { method: 'GET' }
       const result = await plugin.beforeRequest?.('/api/users', config)
 
-      expect(result?.config?.headers?.['Authorization']).toBe('Bearer')
+      expect(result?.config?.headers?.['Authorization']).toBe(
+        'Bearer stored-token'
+      )
     })
 
     it('应该能模拟从异步 API 获取 token', async () => {
@@ -175,7 +183,9 @@ describe('TokenPlugin', () => {
       const config: RequestConfig = { method: 'GET' }
       const result = await plugin.beforeRequest?.('/api/users', config)
 
-      expect(result?.config?.headers?.['Authorization']).toBe('Bearer')
+      expect(result?.config?.headers?.['Authorization']).toBe(
+        'Bearer api-token'
+      )
     })
   })
 })
@@ -189,77 +199,80 @@ describe('MethodOverridePlugin', () => {
       expect(typeof plugin.beforeRequest).toBe('function')
     })
 
-    it('应该重写 DELETE 方法', () => {
+    it('应该重写 DELETE 方法', async () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = { method: 'DELETE' }
-      const result = plugin.beforeRequest?.('/api/users/1', config)
+      const result = await plugin.beforeRequest!('/api/users/1', config)
 
       expect(result?.config?.method).toBe('POST')
       expect(result?.config?.headers?.['X-HTTP-Method-Override']).toBe('DELETE')
     })
 
-    it('应该重写 PUT 方法', () => {
+    it('应该重写 PUT 方法', async () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = { method: 'PUT' }
-      const result = plugin.beforeRequest?.('/api/users/1', config)
+      const result = await plugin.beforeRequest!('/api/users/1', config)
 
       expect(result?.config?.method).toBe('POST')
       expect(result?.config?.headers?.['X-HTTP-Method-Override']).toBe('PUT')
     })
 
-    it('应该重写 PATCH 方法', () => {
+    it('应该重写 PATCH 方法', async () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = { method: 'PATCH' }
-      const result = plugin.beforeRequest?.('/api/users/1', config)
+      const result = await plugin.beforeRequest!('/api/users/1', config)
 
       expect(result?.config?.method).toBe('POST')
       expect(result?.config?.headers?.['X-HTTP-Method-Override']).toBe('PATCH')
     })
 
-    it('不应该重写 GET 方法', () => {
+    it('不应该重写 GET 方法', async () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = { method: 'GET' }
-      const result = plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest!('/api/users', config)
 
       expect(result).toEqual({})
     })
 
-    it('不应该重写 POST 方法', () => {
+    it('不应该重写 POST 方法', async () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = { method: 'POST' }
-      const result = plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest!('/api/users', config)
 
       expect(result).toEqual({})
     })
   })
 
   describe('自定义配置', () => {
-    it('应该能自定义需要重写的方法', () => {
+    it('应该能自定义需要重写的方法', async () => {
       const plugin = MethodOverridePlugin({
         methods: ['DELETE']
       })
 
       const deleteConfig: RequestConfig = { method: 'DELETE' }
-      const deleteResult = plugin.beforeRequest?.('/api/users/1', deleteConfig)
+      const deleteResult = await plugin.beforeRequest!(
+        '/api/users/1',
+        deleteConfig
+      )
       expect(deleteResult?.config?.method).toBe('POST')
 
       const putConfig: RequestConfig = { method: 'PUT' }
-      const putResult = plugin.beforeRequest?.('/api/users/1', putConfig)
+      const putResult = await plugin.beforeRequest!('/api/users/1', putConfig)
       expect(putResult).toEqual({})
     })
 
-    it('应该能自定义重写后的方法', () => {
+    it('应该能自定义重写后的方法', async () => {
       const plugin = MethodOverridePlugin({
         overrideMethod: 'GET'
       })
 
       const config: RequestConfig = { method: 'DELETE' }
-      const result = plugin.beforeRequest?.('/api/users/1', config)
+      const result = await plugin.beforeRequest!('/api/users/1', config)
 
       expect(result?.config?.method).toBe('GET')
       expect(result?.config?.headers?.['X-HTTP-Method-Override']).toBe('DELETE')
@@ -267,7 +280,7 @@ describe('MethodOverridePlugin', () => {
   })
 
   describe('保留现有头部', () => {
-    it('应该保留现有的请求头', () => {
+    it('应该保留现有的请求头', async () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = {
@@ -278,7 +291,7 @@ describe('MethodOverridePlugin', () => {
         }
       }
 
-      const result = plugin.beforeRequest?.('/api/users/1', config)
+      const result = await plugin.beforeRequest!('/api/users/1', config)
 
       expect(result?.config?.headers).toMatchObject({
         'X-Custom': 'value',
@@ -289,7 +302,7 @@ describe('MethodOverridePlugin', () => {
   })
 
   describe('实际使用场景', () => {
-    it('应该能绕过服务器对 DELETE 的限制', () => {
+    it('应该能绕过服务器对 DELETE 的限制', async () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = {
@@ -297,14 +310,14 @@ describe('MethodOverridePlugin', () => {
         headers: { 'Content-Type': 'application/json' }
       }
 
-      const result = plugin.beforeRequest?.('/api/users/1', config)
+      const result = await plugin.beforeRequest!('/api/users/1', config)
 
       // 服务器会收到 POST 请求，但通过 X-HTTP-Method-Override 知道这是 DELETE
       expect(result?.config?.method).toBe('POST')
       expect(result?.config?.headers?.['X-HTTP-Method-Override']).toBe('DELETE')
     })
 
-    it('应该能处理复杂的 RESTful API 场景', () => {
+    it('应该能处理复杂的 RESTful API 场景', async () => {
       const plugin = MethodOverridePlugin({
         methods: ['PUT', 'PATCH', 'DELETE']
       })
@@ -314,7 +327,7 @@ describe('MethodOverridePlugin', () => {
         method: 'PUT',
         body: { name: 'updated' }
       }
-      const putResult = plugin.beforeRequest?.('/api/users/1', putConfig)
+      const putResult = await plugin.beforeRequest!('/api/users/1', putConfig)
       expect(putResult?.config?.method).toBe('POST')
 
       // 部分更新资源
@@ -322,18 +335,24 @@ describe('MethodOverridePlugin', () => {
         method: 'PATCH',
         body: { age: 26 }
       }
-      const patchResult = plugin.beforeRequest?.('/api/users/1', patchConfig)
+      const patchResult = await plugin.beforeRequest!(
+        '/api/users/1',
+        patchConfig
+      )
       expect(patchResult?.config?.method).toBe('POST')
 
       // 删除资源
       const deleteConfig: RequestConfig = { method: 'DELETE' }
-      const deleteResult = plugin.beforeRequest?.('/api/users/1', deleteConfig)
+      const deleteResult = await plugin.beforeRequest!(
+        '/api/users/1',
+        deleteConfig
+      )
       expect(deleteResult?.config?.method).toBe('POST')
     })
   })
 
   describe('边缘情况', () => {
-    it('应该处理未指定方法的情况', () => {
+    it('应该处理未指定方法的情况', async () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = {}
@@ -354,4 +373,3 @@ describe('MethodOverridePlugin', () => {
     })
   })
 })
-

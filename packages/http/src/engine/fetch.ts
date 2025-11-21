@@ -56,17 +56,31 @@ export class FetchEngine extends HttpEngine {
 
       // 处理响应
       let data: T
-      const contentType = response.headers.get('content-type')
-      if (contentType && contentType.includes('application/json')) {
+      const responseType = config.responseType || 'json'
+
+      // 根据 responseType 处理响应数据
+      if (responseType === 'json') {
         data = (await response.json()) as T
-      } else if (contentType && contentType.includes('text/')) {
+      } else if (responseType === 'text') {
         data = (await response.text()) as unknown as T
+      } else if (responseType === 'blob') {
+        data = (await response.blob()) as unknown as T
+      } else if (responseType === 'arraybuffer') {
+        data = (await response.arrayBuffer()) as unknown as T
       } else {
-        // 尝试解析为 JSON，如果失败则返回文本
-        try {
+        // 如果未指定或不识别，尝试根据 Content-Type 判断
+        const contentType = response.headers.get('content-type')
+        if (contentType && contentType.includes('application/json')) {
           data = (await response.json()) as T
-        } catch (e) {
+        } else if (contentType && contentType.includes('text/')) {
           data = (await response.text()) as unknown as T
+        } else {
+          // 尝试解析为 JSON，如果失败则返回文本
+          try {
+            data = (await response.json()) as T
+          } catch (e) {
+            data = (await response.text()) as unknown as T
+          }
         }
       }
 

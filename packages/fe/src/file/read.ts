@@ -68,3 +68,7 @@ export async function readFile(
     readChunk()
   })
 }
+
+// for await (const chunk of res.body) {
+
+// }
