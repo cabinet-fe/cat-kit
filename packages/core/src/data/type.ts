@@ -64,7 +64,7 @@ export function isNumber(value: any): value is number {
  * @param value 值
  */
 export function isBlob(value: any): value is Blob {
-  return getDataType(value) === 'blob'
+  return value instanceof Blob
 }
 
 /**
