@@ -138,8 +138,7 @@ export class MonoRepoLib {
         plugins: [
           visualizer({
             filename: path.resolve(dir, outDir, 'stats.html'),
-            title: 'Cat-Kit Bundle 分析',
-            template: 'flamegraph'
+            title: 'Cat-Kit Bundle 分析'
           })
         ]
       })
