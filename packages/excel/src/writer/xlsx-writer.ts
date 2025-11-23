@@ -8,7 +8,10 @@ import { strToU8, zipSync } from 'fflate'
 import type { Workbook } from '../core/workbook'
 import type { Worksheet } from '../core/worksheet'
 import type { Cell } from '../core/cell'
-import type { CellStyle } from '../core/types'
+import type { CellStyle, WorkbookMetadata } from '../core/types'
+import { isCellFormula, isCellError } from '../core/types'
+import { columnIndexToLetter } from '../helpers/address'
+import { dateToExcelNumber } from '../helpers/date'
 import { isString, isNumber, isDate } from '@cat-kit/core'
 
 /**
@@ -23,6 +26,7 @@ export async function writeWorkbook(workbook: Workbook): Promise<Blob> {
   })
 
   // 转换为 Blob
+  // @ts-ignore - fflate zipSync 返回的 Uint8Array 兼容 Blob 构造函数
   return new Blob([compressed], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
   })
@@ -61,6 +65,14 @@ function generateXLSXFiles(workbook: Workbook): Record<string, Uint8Array> {
     )
   })
 
+  // 元数据文件
+  if (workbook.metadata) {
+    files['docProps/core.xml'] = strToU8(
+      generateCorePropsXML(workbook.metadata)
+    )
+    files['docProps/app.xml'] = strToU8(generateAppPropsXML(workbook))
+  }
+
   return files
 }
 
@@ -69,10 +81,18 @@ function generateXLSXFiles(workbook: Workbook): Record<string, Uint8Array> {
  */
 function generateContentTypes(workbook: Workbook): string {
   const sheetOverrides = workbook.sheets
-    .map((_, i) =>
-      `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`
+    .map(
+      (_, i) =>
+        `<Override PartName="/xl/worksheets/sheet${
+          i + 1
+        }.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`
     )
     .join('\n  ')
+
+  const metadataOverrides = workbook.metadata
+    ? `<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
+  <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>`
+    : ''
 
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
@@ -82,7 +102,7 @@ function generateContentTypes(workbook: Workbook): string {
   <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
   <Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>
   ${sheetOverrides}
-</Types>`
+  ${metadataOverrides ? metadataOverrides + '\n  ' : ''}</Types>`
 }
 
 /**
@@ -92,6 +112,8 @@ function generateRootRels(): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
 </Relationships>`
 }
 
@@ -100,8 +122,13 @@ function generateRootRels(): string {
  */
 function generateWorkbookRels(workbook: Workbook): string {
   const sheetRels = workbook.sheets
-    .map((_, i) =>
-      `<Relationship Id="rId${i + 3}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`
+    .map(
+      (_, i) =>
+        `<Relationship Id="rId${
+          i + 3
+        }" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${
+          i + 1
+        }.xml"/>`
     )
     .join('\n  ')
 
@@ -118,8 +145,11 @@ function generateWorkbookRels(workbook: Workbook): string {
  */
 function generateWorkbookXML(workbook: Workbook): string {
   const sheets = workbook.sheets
-    .map((sheet, i) =>
-      `<sheet name="${escapeXML(sheet.name)}" sheetId="${i + 1}" r:id="rId${i + 3}"/>`
+    .map(
+      (sheet, i) =>
+        `<sheet name="${escapeXML(sheet.name)}" sheetId="${i + 1}" r:id="rId${
+          i + 3
+        }"/>`
     )
     .join('\n    ')
 
@@ -138,8 +168,10 @@ class StyleManager {
   private fonts: CellStyle['font'][] = []
   private fills: CellStyle['fill'][] = []
   private borders: CellStyle['border'][] = []
+  private numFmts: Array<{ id: number; code: string }> = []
   private cellXfs: string[] = []
   private styleCache = new Map<string, number>()
+  private customNumFmtId = 164 // Excel 自定义格式从 164 开始
 
   constructor() {
     // 添加默认字体
@@ -195,9 +227,11 @@ class StyleManager {
     // 创建 cellXf
     const xf = `<xf numFmtId="${numFmtId}" fontId="${fontId}" fillId="${fillId}" borderId="${borderId}"${
       fontId > 0 ? ' applyFont="1"' : ''
-    }${fillId > 0 ? ' applyFill="1"' : ''}${borderId > 0 ? ' applyBorder="1"' : ''}${
-      numFmtId > 0 ? ' applyNumberFormat="1"' : ''
-    }${alignmentXml ? ' applyAlignment="1"' : ''}>${alignmentXml}</xf>`
+    }${fillId > 0 ? ' applyFill="1"' : ''}${
+      borderId > 0 ? ' applyBorder="1"' : ''
+    }${numFmtId > 0 ? ' applyNumberFormat="1"' : ''}${
+      alignmentXml ? ' applyAlignment="1"' : ''
+    }>${alignmentXml}</xf>`
 
     const styleId = this.cellXfs.length
     this.cellXfs.push(xf)
@@ -275,11 +309,25 @@ class StyleManager {
       'h:mm': 20,
       'h:mm:ss': 21,
       'm/d/yy h:mm': 22,
-      '¥#,##0;¥-#,##0': 164,
-      '¥#,##0.00;¥-#,##0.00': 165
+      'yyyy-mm-dd': 14, // 映射到标准日期格式
+      'yyyy-mm-dd hh:mm:ss': 22 // 映射到标准日期时间格式
     }
 
-    return builtInFormats[numFmt] || 0
+    // 检查是否为内置格式
+    if (builtInFormats[numFmt]) {
+      return builtInFormats[numFmt]
+    }
+
+    // 检查是否已经注册为自定义格式
+    const existing = this.numFmts.find(f => f.code === numFmt)
+    if (existing) {
+      return existing.id
+    }
+
+    // 注册新的自定义格式
+    const id = this.customNumFmtId++
+    this.numFmts.push({ id, code: numFmt })
+    return id
   }
 
   private getAlignmentXml(alignment?: CellStyle['alignment']): string {
@@ -303,6 +351,19 @@ class StyleManager {
    * 生成 styles.xml
    */
   generateXml(): string {
+    // 生成自定义数字格式
+    const numFmtsXml =
+      this.numFmts.length > 0
+        ? `<numFmts count="${this.numFmts.length}">
+    ${this.numFmts
+      .map(
+        fmt =>
+          `<numFmt numFmtId="${fmt.id}" formatCode="${escapeXML(fmt.code)}"/>`
+      )
+      .join('\n    ')}
+  </numFmts>`
+        : ''
+
     const fontsXml = this.fonts
       .map(font => {
         const parts: string[] = []
@@ -331,7 +392,9 @@ class StyleManager {
         const bgColor = fill.bgColor
           ? `<bgColor rgb="${this.normalizeColor(fill.bgColor)}"/>`
           : ''
-        return `<fill><patternFill patternType="${fill.patternType || 'solid'}">${fgColor}${bgColor}</patternFill></fill>`
+        return `<fill><patternFill patternType="${
+          fill.patternType || 'solid'
+        }">${fgColor}${bgColor}</patternFill></fill>`
       })
       .join('\n    ')
 
@@ -350,7 +413,7 @@ class StyleManager {
 
     return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-  <fonts count="${this.fonts.length}">
+  ${numFmtsXml ? numFmtsXml + '\n  ' : ''}<fonts count="${this.fonts.length}">
     ${fontsXml}
   </fonts>
   <fills count="${this.fills.length}">
@@ -467,7 +530,9 @@ function generateWorksheetXML(
   const rowsXML = sheet.rows
     .map((row, rowIndex) => {
       const cellsXML = row.cells
-        .map((cell, colIndex) => generateCellXML(cell, rowIndex, colIndex, stringMap, styleManager))
+        .map((cell, colIndex) =>
+          generateCellXML(cell, rowIndex, colIndex, stringMap, styleManager)
+        )
         .filter(xml => xml !== '')
         .join('\n        ')
 
@@ -541,6 +606,32 @@ function generateCellXML(
   const styleId = cell.style ? styleManager.registerStyle(cell.style) : 0
   const styleAttr = styleId > 0 ? ` s="${styleId}"` : ''
 
+  // 公式类型
+  if (isCellFormula(value)) {
+    const formulaXml = `<f>${escapeXML(value.formula)}</f>`
+    const cachedValue = value.value
+    let valueXml = ''
+    if (cachedValue !== undefined && cachedValue !== null) {
+      if (isString(cachedValue)) {
+        valueXml = `<v>${escapeXML(cachedValue)}</v>`
+      } else if (isNumber(cachedValue)) {
+        valueXml = `<v>${cachedValue}</v>`
+      } else if (typeof cachedValue === 'boolean') {
+        valueXml = `<v>${cachedValue ? 1 : 0}</v>`
+      } else if (isDate(cachedValue)) {
+        valueXml = `<v>${dateToExcelNumber(cachedValue)}</v>`
+      }
+    }
+    return `<c r="${cellRef}"${styleAttr}>${formulaXml}${valueXml}</c>`
+  }
+
+  // 错误值类型
+  if (isCellError(value)) {
+    return `<c r="${cellRef}" t="e"${styleAttr}><v>${escapeXML(
+      value.error
+    )}</v></c>`
+  }
+
   // 字符串类型
   if (isString(value)) {
     const strIndex = stringMap.get(value)
@@ -579,8 +670,10 @@ function generateMergeCellsXML(sheet: Worksheet): string {
 
   const mergeElements = sheet.mergedCells
     .map(merge => {
-      const startCell = columnIndexToLetter(merge.start.column) + (merge.start.row + 1)
-      const endCell = columnIndexToLetter(merge.end.column) + (merge.end.row + 1)
+      const startCell =
+        columnIndexToLetter(merge.start.column) + (merge.start.row + 1)
+      const endCell =
+        columnIndexToLetter(merge.end.column) + (merge.end.row + 1)
       return `<mergeCell ref="${startCell}:${endCell}"/>`
     })
     .join('\n    ')
@@ -591,28 +684,63 @@ function generateMergeCellsXML(sheet: Worksheet): string {
 }
 
 /**
- * 将列索引转换为字母（0 -> A, 25 -> Z, 26 -> AA）
+ * 生成 docProps/core.xml（核心属性）
  */
-function columnIndexToLetter(index: number): string {
-  let result = ''
-  let num = index
+function generateCorePropsXML(metadata: WorkbookMetadata): string {
+  const creator = escapeXML(metadata.creator || 'cat-kit/excel')
+  const lastModifiedBy = escapeXML(
+    metadata.lastModifiedBy || metadata.creator || 'cat-kit/excel'
+  )
+  const created = metadata.created
+    ? metadata.created.toISOString()
+    : new Date().toISOString()
+  const modified = metadata.modified
+    ? metadata.modified.toISOString()
+    : new Date().toISOString()
 
-  while (num >= 0) {
-    result = String.fromCharCode((num % 26) + 65) + result
-    num = Math.floor(num / 26) - 1
-  }
-
-  return result
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <dc:creator>${creator}</dc:creator>
+  <cp:lastModifiedBy>${lastModifiedBy}</cp:lastModifiedBy>
+  <dcterms:created xsi:type="dcterms:W3CDTF">${created}</dcterms:created>
+  <dcterms:modified xsi:type="dcterms:W3CDTF">${modified}</dcterms:modified>
+</cp:coreProperties>`
 }
 
 /**
- * 将 Date 转换为 Excel 日期数字
+ * 生成 docProps/app.xml（应用程序属性）
  */
-function dateToExcelNumber(date: Date): number {
-  // Excel 日期从 1900-01-01 开始计数
-  const epoch = new Date(1900, 0, 1).getTime()
-  const days = (date.getTime() - epoch) / (24 * 60 * 60 * 1000)
-  return days + 2 // Excel 的日期偏移
+function generateAppPropsXML(workbook: Workbook): string {
+  const sheetNames = workbook.sheets
+    .map(sheet => `<vt:lpstr>${escapeXML(sheet.name)}</vt:lpstr>`)
+    .join('\n        ')
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+  <Application>cat-kit/excel</Application>
+  <DocSecurity>0</DocSecurity>
+  <ScaleCrop>false</ScaleCrop>
+  <HeadingPairs>
+    <vt:vector size="2" baseType="variant">
+      <vt:variant>
+        <vt:lpstr>工作表</vt:lpstr>
+      </vt:variant>
+      <vt:variant>
+        <vt:i4>${workbook.sheets.length}</vt:i4>
+      </vt:variant>
+    </vt:vector>
+  </HeadingPairs>
+  <TitlesOfParts>
+    <vt:vector size="${workbook.sheets.length}" baseType="lpstr">
+      ${sheetNames}
+    </vt:vector>
+  </TitlesOfParts>
+  <Company></Company>
+  <LinksUpToDate>false</LinksUpToDate>
+  <SharedDoc>false</SharedDoc>
+  <HyperlinksChanged>false</HyperlinksChanged>
+  <AppVersion>16.0300</AppVersion>
+</Properties>`
 }
 
 /**
@@ -626,4 +754,3 @@ function escapeXML(str: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;')
 }
-

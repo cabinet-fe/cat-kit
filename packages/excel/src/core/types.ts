@@ -1,7 +1,45 @@
 /**
- * 单元格值类型
+ * 单元格公式
  */
-export type CellValue = string | number | Date | boolean | null
+export interface CellFormula {
+  /** 公式类型标识 */
+  type: 'formula'
+  /** 公式字符串（不包含等号） */
+  formula: string
+  /** 缓存的计算值 */
+  value?: string | number | Date | boolean | null
+}
+
+/**
+ * 单元格错误值
+ */
+export interface CellError {
+  /** 错误类型标识 */
+  type: 'error'
+  /** 错误代码，如 #DIV/0!, #N/A, #VALUE!, #REF!, #NAME?, #NUM!, #NULL! */
+  error: string
+}
+
+/**
+ * 单元格值类型
+ *
+ * 支持的类型：
+ * - string: 文本
+ * - number: 数字
+ * - Date: 日期时间
+ * - boolean: 布尔值
+ * - null: 空值
+ * - CellFormula: 公式
+ * - CellError: 错误值
+ */
+export type CellValue =
+  | string
+  | number
+  | Date
+  | boolean
+  | null
+  | CellFormula
+  | CellError
 
 /**
  * 字体样式
@@ -106,4 +144,28 @@ export interface CellAddress {
 export interface CellRange {
   start: CellAddress
   end: CellAddress
+}
+
+/**
+ * 类型守卫：判断是否为公式
+ */
+export function isCellFormula(value: CellValue): value is CellFormula {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    value.type === 'formula'
+  )
+}
+
+/**
+ * 类型守卫：判断是否为错误值
+ */
+export function isCellError(value: CellValue): value is CellError {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    value.type === 'error'
+  )
 }

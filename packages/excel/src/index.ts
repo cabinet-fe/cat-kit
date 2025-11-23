@@ -13,9 +13,25 @@ export { Workbook } from './core/workbook'
 // 读取功能
 export { readWorkbook } from './reader/xlsx-reader'
 
+// 流式读取
+export {
+  readWorkbookStream,
+  type SheetRowData,
+  type StreamReadOptions
+} from './reader/stream-reader'
+
+// 流式写入
+export {
+  StreamWorkbookWriter,
+  createStreamWriter,
+  type StreamWriterOptions
+} from './writer/stream-writer'
+
 // 类型
 export type {
   CellValue,
+  CellFormula,
+  CellError,
   CellStyle,
   CellFont,
   CellBorder,
@@ -27,11 +43,10 @@ export type {
   CellRange
 } from './core/types'
 
-export type {
-  TableColumn,
-  TableData,
-  WorksheetOptions
-} from './core/worksheet'
+// 类型守卫
+export { isCellFormula, isCellError } from './core/types'
+
+export type { TableColumn, TableData, WorksheetOptions } from './core/worksheet'
 
 // 错误类
 export {
@@ -55,3 +70,10 @@ export {
   excelWidthToPixels
 } from './helpers/address'
 
+export {
+  dateToExcelNumber,
+  excelNumberToDate,
+  isDateFormat,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATETIME_FORMAT
+} from './helpers/date'

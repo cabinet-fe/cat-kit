@@ -1,8 +1,16 @@
 {
   "name": "playground",
+  "type": "module",
   "devDependencies": {
     "vue": "^3.5.24",
-    "vite": "^7.2.2"
+    "@vitejs/plugin-vue": "^6.0.2",
+    "vite": "^7.2.2",
+    "@cat-kit/core": "workspace:*",
+    "@cat-kit/fe": "workspace:*",
+    "@cat-kit/be": "workspace:*",
+    "@cat-kit/http": "workspace:*",
+    "@cat-kit/excel": "workspace:*",
+    "@cat-kit/tests": "workspace:*"
   },
   "scripts": {
     "play": "vite"

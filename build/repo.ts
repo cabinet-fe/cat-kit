@@ -131,6 +131,8 @@ export class MonoRepoLib {
           js: '.js',
           dts: '.d.ts'
         }),
+        format: 'es',
+        platform: 'neutral',
         minify: true,
         logLevel: 'warn',
         plugins: [
