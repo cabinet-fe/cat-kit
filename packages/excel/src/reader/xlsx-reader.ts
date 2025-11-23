@@ -57,7 +57,7 @@ export async function readWorkbook(
 ): Promise<Workbook> {
   // 转换为 Uint8Array
   let bytes: Uint8Array
-  console.log(data)
+
   if (isBlob(data)) {
     const buffer = await data.arrayBuffer()
     bytes = new Uint8Array(buffer)
