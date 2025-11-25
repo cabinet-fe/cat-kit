@@ -255,5 +255,42 @@ describe('数字工具函数', () => {
         expect($n.sum(...numbers)).toBe($n.plus(...numbers))
       })
     })
+
+    describe('calc', () => {
+      it('应该支持基本算术运算', () => {
+        expect($n.calc('1 + 1')).toBe(2)
+        expect($n.calc('10 - 2')).toBe(8)
+        expect($n.calc('3 * 4')).toBe(12)
+        expect($n.calc('10 / 2')).toBe(5)
+      })
+
+      it('应该支持运算符优先级', () => {
+        expect($n.calc('1 + 2 * 3')).toBe(7)
+        expect($n.calc('10 / 2 * 5')).toBe(25) // 从左到右
+        expect($n.calc('2 * 3 + 4 * 5')).toBe(26)
+      })
+
+      it('应该支持括号', () => {
+        expect($n.calc('(1 + 2) * 3')).toBe(9)
+        expect($n.calc('1 + 3 * (4 / 2)')).toBe(7)
+        expect($n.calc('((1 + 2) * (3 + 4)) / 7')).toBe(3)
+      })
+
+      it('应该处理小数精度', () => {
+        expect($n.calc('0.1 + 0.2')).toBe(0.3)
+        expect($n.calc('1.0 - 0.9')).toBe(0.1)
+        expect($n.calc('19.9 * 100')).toBe(1990)
+        expect($n.calc('0.3 / 0.1')).toBe(3)
+      })
+
+      it('应该处理科学计数法', () => {
+        expect($n.calc('1e-7 + 2e-7')).toBe(3e-7)
+        expect($n.calc('1.2e3 + 3.4e2')).toBe(1540)
+      })
+
+      it('应该忽略空格', () => {
+        expect($n.calc(' 1 +   2 ')).toBe(3)
+      })
+    })
   })
 })

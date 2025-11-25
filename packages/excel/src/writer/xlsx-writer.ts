@@ -4,7 +4,7 @@
  * 这是一个轻量级的 XLSX 写入实现，使用 fflate 替代 JSZip
  */
 
-import { strToU8, zipSync } from 'fflate'
+import { strToU8 } from 'fflate'
 import type { Workbook } from '../core/workbook'
 import type { Worksheet } from '../core/worksheet'
 import type { Cell } from '../core/cell'
@@ -20,15 +20,22 @@ import { isString, isNumber, isDate } from '@cat-kit/core'
 export async function writeWorkbook(workbook: Workbook): Promise<Blob> {
   const files = generateXLSXFiles(workbook)
 
-  // 使用 fflate 压缩
-  const compressed = zipSync(files, {
-    level: 6 // 默认压缩级别
-  })
-
-  // 转换为 Blob
-  // @ts-ignore - fflate zipSync 返回的 Uint8Array 兼容 Blob 构造函数
-  return new Blob([compressed], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  // 使用 fflate 异步压缩
+  return new Promise((resolve, reject) => {
+    import('fflate').then(({ zip }) => {
+      zip(files, { level: 6 }, (err, data) => {
+        if (err) {
+          reject(err)
+          return
+        }
+        // 转换为 Blob
+        resolve(
+          new Blob([data as any], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          })
+        )
+      })
+    })
   })
 }
 

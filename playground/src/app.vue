@@ -42,6 +42,11 @@
       <input type="file" @change="handleFileUpload" accept=".xlsx" />
     </div>
 
+    <div class="section">
+      <h2>Worker 测试</h2>
+      <button @click="workerTest">Worker 读取测试</button>
+    </div>
+
     <div v-if="message" class="message">{{ message }}</div>
   </div>
 </template>
@@ -468,6 +473,40 @@ async function handleFileUpload(event: Event) {
     }
   } catch (error) {
     showMessage(`文件读取失败: ${error}`)
+    console.error(error)
+  }
+}
+
+// 13. Worker 测试
+async function workerTest() {
+  // 注意：在 Playground 中直接使用 Worker 可能需要 Vite 的特殊配置
+  // 这里我们尝试使用 import.meta.url
+  try {
+    const workerUrl = new URL(
+      '../../packages/excel/src/worker.ts',
+      import.meta.url
+    )
+    const { ExcelWorkerClient } = await import('@cat-kit/excel/src')
+
+    const client = new ExcelWorkerClient(workerUrl)
+
+    // 创建一个简单的 Excel 文件用于测试
+    const sheet = new Worksheet('Worker测试', {
+      rows: [['Worker', '测试', '数据']]
+    })
+    const workbook = new Workbook('Worker测试', { sheets: [sheet] })
+    const blob = await workbook.write()
+
+    // 使用 Worker 读取
+    showMessage('正在使用 Worker 读取...')
+    const result = await client.readWorkbook(blob)
+
+    console.log('Worker 读取结果:', result)
+    showMessage(`Worker 读取成功！\n工作簿: ${result.name}\n工作表数: ${result.sheets.length}`)
+
+    client.terminate()
+  } catch (error) {
+    showMessage(`Worker 测试失败: ${error}`)
     console.error(error)
   }
 }

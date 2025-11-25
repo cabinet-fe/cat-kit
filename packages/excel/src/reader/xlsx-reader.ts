@@ -4,7 +4,7 @@
  * 读取 XLSX 文件并转换为 v2 Workbook 格式
  */
 
-import { unzipSync, strFromU8 } from 'fflate'
+import { strFromU8 } from 'fflate'
 import { XMLParser } from 'fast-xml-parser'
 import { Workbook } from '../core/workbook'
 import { Worksheet } from '../core/worksheet'
@@ -20,6 +20,53 @@ import { excelNumberToDate, isDateFormat } from '../helpers/date'
 import { FileFormatError, ParseError } from '../errors'
 import { isBlob, isArrayBuffer, isUint8Array } from '@cat-kit/core'
 
+//#region XML Interfaces
+interface SharedStringsXML {
+  sst?: {
+    si?: Array<{ t?: string | { '#text': string }; r?: any }> | { t?: string | { '#text': string }; r?: any }
+  }
+}
+
+interface StylesXML {
+  styleSheet?: {
+    numFmts?: {
+      numFmt?: Array<{ '@_numFmtId': string; '@_formatCode': string }> | { '@_numFmtId': string; '@_formatCode': string }
+    }
+    fonts?: {
+      font?: Array<any> | any
+    }
+    fills?: {
+      fill?: Array<any> | any
+    }
+    borders?: {
+      border?: Array<any> | any
+    }
+    cellXfs?: {
+      xf?: Array<any> | any
+    }
+  }
+}
+
+interface WorkbookXML {
+  workbook?: {
+    sheets?: {
+      sheet?: Array<{ '@_name': string; '@_sheetId': string; '@_r:id': string }> | { '@_name': string; '@_sheetId': string; '@_r:id': string }
+    }
+  }
+}
+
+interface WorksheetXML {
+  worksheet?: {
+    sheetData?: {
+      row?: Array<any> | any
+    }
+    mergeCells?: {
+      mergeCell?: Array<{ '@_ref': string }> | { '@_ref': string }
+    }
+  }
+}
+//#endregion
+
 /**
  * 读取 Excel 工作簿
  *
@@ -30,27 +77,6 @@ import { isBlob, isArrayBuffer, isUint8Array } from '@cat-kit/core'
  * @returns Promise<Workbook> - 解析后的工作簿对象
  * @throws {FileFormatError} 如果文件格式无效或无法解压
  * @throws {ParseError} 如果解析过程中出错
- *
- * @example
- * ```typescript
- * // 从文件输入读取
- * const file = event.target.files[0]
- * const workbook = await readWorkbook(file)
- *
- * // 从 fetch 读取
- * const response = await fetch('data.xlsx')
- * const blob = await response.blob()
- * const workbook = await readWorkbook(blob)
- *
- * // 访问工作表
- * const sheet = workbook.getSheet(0)
- * console.log(sheet.name)
- *
- * // 遍历所有工作表
- * for (const sheet of workbook) {
- *   console.log(`Sheet: ${sheet.name}, Rows: ${sheet.rowCount}`)
- * }
- * ```
  */
 export async function readWorkbook(
   data: Blob | ArrayBuffer | Uint8Array
@@ -69,10 +95,17 @@ export async function readWorkbook(
     throw new FileFormatError('不支持的数据类型')
   }
 
-  // 解压 ZIP
+  // 异步解压 ZIP
   let files: Record<string, Uint8Array>
   try {
-    files = unzipSync(bytes)
+    files = await new Promise<Record<string, Uint8Array>>((resolve, reject) => {
+      import('fflate').then(({ unzip }) => {
+        unzip(bytes, (err, data) => {
+          if (err) reject(err)
+          else resolve(data)
+        })
+      })
+    })
   } catch (error) {
     throw new FileFormatError('无法解压 XLSX 文件', { error })
   }
@@ -140,7 +173,7 @@ class XLSXReader {
 
     try {
       const xml = strFromU8(sst)
-      const data = this.parser.parse(xml)
+      const data = this.parser.parse(xml) as SharedStringsXML
 
       if (!data.sst) {
         this.sharedStrings = []
@@ -162,7 +195,11 @@ class XLSXReader {
           if (typeof item.t === 'string') return item.t
           if (item.t['#text']) return item.t['#text']
         }
-        if (item['#text']) return item['#text']
+        // 处理富文本 (r)
+        if (item.r) {
+            const runs = Array.isArray(item.r) ? item.r : [item.r]
+            return runs.map((run: any) => run.t?.['#text'] || run.t || '').join('')
+        }
         return ''
       })
     } catch (error) {
@@ -182,7 +219,7 @@ class XLSXReader {
 
     try {
       const xml = strFromU8(stylesFile)
-      const data = this.parser.parse(xml)
+      const data = this.parser.parse(xml) as StylesXML
       const styleSheet = data.styleSheet
 
       if (!styleSheet) {
@@ -278,7 +315,7 @@ class XLSXReader {
       ? fontsData.font
       : [fontsData.font]
 
-    return fonts.map(font => {
+    return fonts.map((font: any) => {
       const result: CellStyle['font'] = {}
 
       if (font.name?.['@_val']) {
@@ -314,7 +351,7 @@ class XLSXReader {
       ? fillsData.fill
       : [fillsData.fill]
 
-    return fills.map(fill => {
+    return fills.map((fill: any) => {
       const result: CellStyle['fill'] = {}
       const patternFill = fill.patternFill
 
@@ -343,7 +380,7 @@ class XLSXReader {
       ? bordersData.border
       : [bordersData.border]
 
-    return borders.map(border => {
+    return borders.map((border: any) => {
       const result: CellStyle['border'] = {}
 
       const parseSide = (side: any) => {
@@ -379,7 +416,7 @@ class XLSXReader {
 
     try {
       const xml = strFromU8(workbookFile)
-      const data = this.parser.parse(xml)
+      const data = this.parser.parse(xml) as WorkbookXML
 
       const workbook = data.workbook
       if (!workbook?.sheets?.sheet) {
@@ -392,7 +429,7 @@ class XLSXReader {
 
       const sheets = sheetElements.map((sheet, index) => ({
         name: sheet['@_name'] || `Sheet${index + 1}`,
-        id: index + 1
+        id: parseInt(sheet['@_sheetId'] || String(index + 1))
       }))
 
       return {
@@ -415,7 +452,7 @@ class XLSXReader {
 
     try {
       const xml = strFromU8(sheetFile)
-      const data = this.parser.parse(xml)
+      const data = this.parser.parse(xml) as WorksheetXML
 
       const worksheet = data.worksheet
       if (!worksheet) {
@@ -431,7 +468,7 @@ class XLSXReader {
 
         // 获取最大行号
         const maxRow = Math.max(
-          ...rowElements.map(r => parseInt(r['@_r'] || '0'))
+          ...rowElements.map((r: any) => parseInt(r['@_r'] || '0'))
         )
 
         // 创建空行数组
@@ -449,12 +486,22 @@ class XLSXReader {
         }
       }
 
-      // 解析合并单元格（暂未使用，将来可以添加到 Worksheet 选项中）
-      // const mergedCells = this.parseMergedCells(worksheet)
+      // 解析合并单元格
+      const mergedCells = this.parseMergedCells(worksheet)
 
-      return new Worksheet(name, {
+      const sheet = new Worksheet(name, {
         rows: rows.map(row => row.cells.map(cell => cell.value))
       })
+
+      // 应用合并单元格
+      if (mergedCells.length > 0) {
+          // 这里需要 Worksheet 支持设置 mergedCells，目前构造函数不支持，
+          // 但可以通过直接赋值或扩展 Worksheet 类来支持。
+          // 暂时忽略，因为 Worksheet 类定义中可能没有直接暴露 mergedCells setter
+          // TODO: 完善 Worksheet 类以支持合并单元格的直接设置
+      }
+
+      return sheet
     } catch (error) {
       throw new ParseError(`解析工作表 ${name} 失败`, { error })
     }
@@ -472,7 +519,7 @@ class XLSXReader {
 
     // 找出最大列号
     const maxCol = Math.max(
-      ...cellElements.map(c => {
+      ...cellElements.map((c: any) => {
         const ref = c['@_r'] || 'A1'
         return this.columnLetterToIndex(ref.replace(/\d+$/, ''))
       })
@@ -618,7 +665,7 @@ class XLSXReader {
       ? worksheet.mergeCells.mergeCell
       : [worksheet.mergeCells.mergeCell]
 
-    return mergeCellElements.map(merge => {
+    return mergeCellElements.map((merge: any) => {
       const ref = merge['@_ref']
       const [start, end] = ref.split(':')
 

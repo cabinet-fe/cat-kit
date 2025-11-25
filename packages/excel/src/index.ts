@@ -77,3 +77,7 @@ export {
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATETIME_FORMAT
 } from './helpers/date'
+
+// Worker 支持
+export type { ExcelWorkerMessage, ExcelWorkerResponse } from './worker'
+export { ExcelWorkerClient } from './worker-client'

@@ -10,7 +10,7 @@ import { Row } from '../core/row'
 import { Cell } from '../core/cell'
 import type { CellValue, CellStyle } from '../core/types'
 import { excelNumberToDate, isDateFormat } from '../helpers/date'
-import { FileFormatError, ParseError, StreamError } from '../errors'
+import { FileFormatError, ParseError } from '../errors'
 import { isBlob, isArrayBuffer, isUint8Array } from '@cat-kit/core'
 
 /**
