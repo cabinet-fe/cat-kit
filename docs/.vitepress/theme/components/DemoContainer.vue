@@ -53,7 +53,7 @@ const toggleSource = () => {
         </span>
         <span>Demo 文件不存在: <code>examples/{{ path }}</code></span>
       </div>
-      <component :is="is" v-else />
+      <component v-else :is="is" />
     </div>
 
     <!-- 代码区域 -->
@@ -104,7 +104,7 @@ const toggleSource = () => {
 
 /* 预览区域 */
 .demo-preview {
-  padding: 24px;
+  padding: 12px;
   border-radius: 8px 8px 0 0;
 }
 

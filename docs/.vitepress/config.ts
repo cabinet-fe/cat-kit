@@ -39,6 +39,7 @@ export default defineConfig({
           { text: 'Core 核心', link: '/packages/core/' },
           { text: 'HTTP 请求', link: '/packages/http/' },
           { text: 'FE 前端', link: '/packages/fe/' },
+          { text: 'Excel 表格', link: '/packages/excel/' },
           { text: 'BE 后端', link: '/packages/be/' }
         ]
       }
@@ -90,6 +91,11 @@ export default defineConfig({
             { text: '虚拟化', link: '/packages/fe/virtualizer' },
             { text: 'Web API', link: '/packages/fe/web-api' }
           ]
+        },
+        {
+          text: 'Excel 表格包',
+          collapsed: false,
+          items: [{ text: '概览', link: '/packages/excel/' }]
         },
         {
           text: 'BE 后端包',
@@ -170,6 +176,9 @@ export default defineConfig({
   },
 
   vite: {
+    ssr: {
+      noExternal: ['@varlet/ui']
+    },
     plugins: [
       llmstxt(),
       importExamples(),

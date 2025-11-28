@@ -172,14 +172,4 @@ export class WebStorage {
   }
 }
 
-export interface EasyStorage {
-  /** 会话存储 */
-  session: WebStorage
-  /** 本地存储 */
-  local: WebStorage
-}
 
-export const storage: EasyStorage = {
-  session: new WebStorage(sessionStorage),
-  local: new WebStorage(localStorage)
-}
