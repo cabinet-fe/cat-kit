@@ -20,7 +20,7 @@ async function getHighlighter() {
   return highlighter
 }
 
-export const demoPlugin = async (md: MarkdownRenderer) => {
+export const demoContainer = async (md: MarkdownRenderer) => {
   const hl = await getHighlighter()
 
   md.use(mdContainer, 'demo', {
