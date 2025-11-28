@@ -81,7 +81,63 @@ cd docs
 bun run preview
 ```
 
-文档使用 VitePress，包含交互式示例。
+文档使用 VitePress v2.0，包含交互式示例和代码演示。
+
+**文档目录结构：**
+- `docs/` - VitePress 文档根目录
+  - `index.md` - 首页
+  - `guide/` - 指南文档（快速开始、安装等）
+  - `packages/` - 各包的 API 文档
+    - `core/` - Core 包文档
+    - `fe/` - FE 包文档
+    - `http/` - HTTP 包文档
+    - `be/` - BE 包文档
+  - `examples/` - Vue 组件示例文件
+  - `.vitepress/` - VitePress 配置
+    - `config.ts` - VitePress 主配置
+    - `shared.ts` - 共享配置和常量
+    - `theme/` - 自定义主题
+      - `components/DemoContainer.vue` - 示例容器组件
+      - `styles/custom.css` - 自定义样式
+      - `index.ts` - 主题入口
+    - `markdown/` - Markdown 插件
+      - `demo-container.ts` - Demo 容器 Markdown 插件
+    - `plugins/` - Vite 插件
+      - `import-examples.ts` - 自动导入示例组件
+  - `public/` - 静态资源
+
+**核心功能：**
+
+1. **交互式示例：** 使用 `DemoContainer.vue` 组件展示可运行的 Vue 示例
+   - 支持代码高亮（使用 Shiki）
+   - 支持明暗主题切换
+   - 提供代码复制功能
+   - 可展开/收起源码
+
+2. **示例语法：** 在 Markdown 中使用自定义容器语法
+   ```markdown
+   ::: demo fe/storage/basic.vue
+   :::
+   ```
+   - 示例文件路径相对于 `docs/examples/` 目录
+   - 自动导入和注册组件（通过 `import-examples.ts` 插件）
+   - 自动提取代码并进行语法高亮（通过 `demo-container.ts` 插件）
+
+3. **依赖包：**
+   - `vitepress` - 文档框架
+   - `vitepress-plugin-llms` - LLM 友好的插件（支持复制为 Markdown）
+   - `markdown-it-container` - 自定义容器插件
+   - `shiki` - 代码语法高亮
+   - `@varlet/ui` - UI 组件库（用于示例）
+   - `unplugin-auto-import` - 自动导入
+   - `unplugin-vue-components` - 组件自动注册
+
+4. **主题配置：**
+   - 中文界面
+   - 支持明暗主题
+   - 本地搜索
+   - 移动端适配
+   - GitHub 编辑链接
 
 ### 代码检查
 
@@ -187,7 +243,35 @@ oxlint
 
 ### 文档更新
 
-文档文件位于 `docs/packages/<package-name>/`。文档包括：
-- 使用 `DemoContainer.vue` 的交互式示例
-- 自定义 markdown-it 插件（在 `docs/.vitepress/plugins/` 中）
-- `docs/.vitepress/shared.ts` 中的共享配置
+文档文件位于 `docs/packages/<package-name>/`。添加或更新文档时：
+
+1. **添加新的文档页面：**
+   - 在 `docs/packages/<package-name>/` 下创建 `.md` 文件
+   - 在 `docs/.vitepress/config.ts` 的 `sidebar` 配置中添加导航链接
+
+2. **添加交互式示例：**
+   - 在 `docs/examples/<package-name>/` 下创建 `.vue` 示例文件
+   - 在文档中使用自定义容器语法引用示例：
+     ```markdown
+     ::: demo <package-name>/<example-name>.vue
+     :::
+     ```
+   - 示例组件会被自动导入和注册
+   - 示例代码会被自动提取并高亮显示
+
+3. **示例组件要求：**
+   - 使用 Vue 3 单文件组件（SFC）格式
+   - 可以导入项目中的任何包（`@cat-kit/*`）
+   - 可以使用 `@varlet/ui` 组件库
+   - 组件会在文档页面中直接运行
+
+4. **自定义主题和样式：**
+   - 全局样式：`docs/.vitepress/theme/styles/custom.css`
+   - 主题组件：`docs/.vitepress/theme/components/`
+   - 主题入口：`docs/.vitepress/theme/index.ts`
+
+5. **相关文件：**
+   - 文档主配置：`docs/.vitepress/config.ts`
+   - 共享常量：`docs/.vitepress/shared.ts`
+   - Demo 容器 Markdown 插件：`docs/.vitepress/markdown/demo-container.ts`
+   - 示例导入 Vite 插件：`docs/.vitepress/plugins/import-examples.ts`
