@@ -21,11 +21,12 @@ bun add @cat-kit/fe
 ### 存储操作
 
 ```typescript
-import { storage, cookie } from '@cat-kit/fe'
+import { WebStorage, cookie } from '@cat-kit/fe'
 
 // LocalStorage 操作
-storage.local.set('token', 'abc123', 3600) // 1小时后过期
-const token = storage.local.get('token')
+const local = new WebStorage(localStorage)
+local.set('token', 'abc123', 3600) // 1小时后过期
+const token = local.get('token')
 
 // Cookie 操作
 cookie.set('user', 'admin', { expires: 7 * 24 * 3600 }) // 7天

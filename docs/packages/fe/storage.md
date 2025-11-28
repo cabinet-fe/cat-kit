@@ -25,57 +25,66 @@ interface User {
 const USER_KEY = storageKey<User>('user')
 const TOKEN_KEY = storageKey<string>('token')
 
+// 初始化
+const session = new WebStorage(sessionStorage)
+
 // 设置时会进行类型检查
-storage.session.set(USER_KEY, { id: 1, name: 'admin' })
-storage.session.set(TOKEN_KEY, 'abc123')
+session.set(USER_KEY, { id: 1, name: 'admin' })
+session.set(TOKEN_KEY, 'abc123')
 
 // 获取时也有类型提示
-const user = storage.session.get(USER_KEY)
-const token = storage.session.get(TOKEN_KEY)
+const user = session.get(USER_KEY)
+const token = session.get(TOKEN_KEY)
 ```
 
 ### 过期时间
 
 ```typescript
-import { storage } from '@cat-kit/fe'
+import { WebStorage } from '@cat-kit/fe'
+
+const local = new WebStorage(localStorage)
 
 // 设置 10 分钟过期
-storage.local.set('otp', '123456', 10 * 60)
+local.set('otp', '123456', 10 * 60)
 
 // 获取过期时间戳
-const expireTime = storage.local.getExpire('otp')
+const expireTime = local.getExpire('otp')
 console.log(new Date(expireTime)) // 过期时间
 
 // 过期后获取会返回 null
 setTimeout(() => {
-  const otp = storage.local.get('otp') // null
+  const otp = local.get('otp') // null
 }, 10 * 60 * 1000)
 ```
 
 ### 变更监听
 
 ```typescript
-import { storage } from '@cat-kit/fe'
+import { WebStorage } from '@cat-kit/fe'
+
+const local = new WebStorage(localStorage)
 
 // 监听某个键的变更
-storage.local.on('token', (key, value, temp) => {
+local.on('token', (key, value, temp) => {
   console.log('Token 已更新:', value)
   console.log('过期时间:', temp?.exp)
 })
 
 // 更新会触发监听
-storage.local.set('token', 'new-token', 3600)
+local.set('token', 'new-token', 3600)
 ```
 
 ### SessionStorage
 
-使用方式与 LocalStorage 完全相同：
+使用方式与 LocalStorage 完全相同，只需传入 `sessionStorage`：
 
 ```typescript
-import { storage } from '@cat-kit/fe'
+import { WebStorage } from '@cat-kit/fe'
 
-storage.session.set('temp', 'data')
-const temp = storage.session.get('temp')
+const session = new WebStorage(sessionStorage)
+
+session.set('temp', 'data')
+const temp = session.get('temp')
 ```
 
 ## Cookie
