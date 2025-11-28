@@ -146,7 +146,10 @@ export default defineConfig({
 
     search: {
       provider: 'local',
+
+
       options: {
+
         translations: {
           button: {
             buttonText: '搜索文档',

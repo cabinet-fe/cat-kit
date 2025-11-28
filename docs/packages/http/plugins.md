@@ -161,6 +161,11 @@ TokenPlugin({
 })
 ```
 
+#### 交互示例
+
+::: demo http/token.vue
+:::
+
 ### MethodOverridePlugin
 
 方法重写插件用于绕过某些环境对特定 HTTP 方法的限制。
@@ -286,6 +291,69 @@ function TimestampPlugin(): ClientPlugin {
   }
 }
 ```
+
+### UI 交互插件
+
+创建加载状态插件：
+
+```typescript
+import { Snackbar } from '@varlet/ui'
+
+function LoadingPlugin(): ClientPlugin {
+  let requestCount = 0
+
+  return {
+    beforeRequest() {
+      if (requestCount === 0) {
+        Snackbar.loading('请求中...')
+      }
+      requestCount++
+    },
+    afterRespond(response) {
+      requestCount--
+      if (requestCount === 0) {
+        Snackbar.clear()
+      }
+      return response
+    }
+  }
+}
+```
+
+#### 交互示例
+
+::: demo http/loading.vue
+:::
+
+### 交互式拦截
+
+创建删除确认插件：
+
+```typescript
+import { Dialog } from '@varlet/ui'
+
+function ConfirmDeletePlugin(): ClientPlugin {
+  return {
+    async beforeRequest(url, config) {
+      if (config.method === 'DELETE') {
+        try {
+          await Dialog({
+            title: '确认删除',
+            message: '确定要删除该项吗？此操作不可恢复。'
+          })
+        } catch {
+          throw new Error('用户取消操作')
+        }
+      }
+    }
+  }
+}
+```
+
+#### 交互示例
+
+::: demo http/confirm.vue
+:::
 
 ### 修改响应
 
