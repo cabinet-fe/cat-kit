@@ -1,8 +1,11 @@
 <template>
   <div>
-    <a @click="setInfo">设置信息</a> <br />
-    <a @click="getInfo">获取信息</a> <br />
-    <a @click="removeInfo">删除信息</a>
+    查看控制台
+  </div>
+  <div>
+    <var-button type="primary" @click="setInfo">设置信息</var-button>
+    <var-button type="primary" @click="getInfo">获取信息</var-button>
+    <var-button type="primary" @click="removeInfo">删除信息</var-button>
   </div>
 </template>
 

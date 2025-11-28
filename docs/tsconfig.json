@@ -8,5 +8,11 @@
     "types": ["vite/client"],
     "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo"
   },
-  "include": [".vitepress/**/*.ts", ".vitepress/**/*.vue"]
+  "include": [
+    ".vitepress/**/*.ts",
+    ".vitepress/**/*.vue",
+    "examples/**/*.vue",
+    "examples/**/*.ts",
+    "*.d.ts"
+  ]
 }

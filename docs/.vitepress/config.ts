@@ -1,10 +1,10 @@
 import { defineConfig } from 'vitepress'
 import { demoContainer } from './markdown/demo-container'
-import path from 'node:path'
-import { str } from '@cat-kit/core'
-import { EXAMPLES_DIR } from './shared'
 import llmstxt, { copyOrDownloadAsMarkdownButtons } from 'vitepress-plugin-llms'
 import { importExamples } from './plugins/import-examples'
+import components from 'unplugin-vue-components/vite'
+import autoImport from 'unplugin-auto-import/vite'
+import { VarletImportResolver } from '@varlet/import-resolver'
 
 export default defineConfig({
   title: 'CatKit',
@@ -43,6 +43,8 @@ export default defineConfig({
         ]
       }
     ],
+
+
 
     sidebar: {
       '/guide/': [
@@ -168,6 +170,15 @@ export default defineConfig({
   },
 
   vite: {
-    plugins: [llmstxt(), importExamples()]
+    plugins: [
+      llmstxt(),
+      importExamples(),
+      components({
+        resolvers: [VarletImportResolver()]
+      }),
+      autoImport({
+        resolvers: [VarletImportResolver({ autoImport: true })]
+      })
+    ]
   }
 })
