@@ -1,116 +1,322 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, type DefineComponent } from 'vue'
+import { clipboard } from '@cat-kit/fe'
 
-defineProps<{
-  title?: string
+const props = defineProps<{
+  is?: DefineComponent
+  path: string
+  highlightCode?: string
+  code?: string
+  lineCount?: number
 }>()
 
-const showCode = ref(false)
+const showSource = ref(false)
+const copied = ref(false)
+
+const decodedCode = computed(() => (props.code ? decodeURIComponent(props.code) : ''))
+const decodedHighlightCode = computed(() =>
+  props.highlightCode ? decodeURIComponent(props.highlightCode) : ''
+)
+
+const copyCode = async () => {
+  try {
+    await clipboard.copy(decodedCode.value)
+    copied.value = true
+    setTimeout(() => (copied.value = false), 2000)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+// 生成行号数组
+const lineNumbers = computed(() => {
+  const count = props.lineCount || 1
+  return Array.from({ length: count }, (_, i) => i + 1)
+})
+
+const toggleSource = () => {
+  showSource.value = !showSource.value
+}
 </script>
 
 <template>
   <div class="demo-container">
-    <div v-if="title" class="demo-title">{{ title }}</div>
-
+    <!-- 预览区域 -->
     <div class="demo-preview">
-      <slot name="demo"></slot>
+      <div v-if="!is" class="demo-error">
+        <span class="error-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </span>
+        <span>Demo 文件不存在: <code>examples/{{ path }}</code></span>
+      </div>
+      <component :is="is" v-else />
     </div>
 
+    <!-- 代码区域 -->
+    <div v-show="showSource" class="demo-source-wrapper">
+      <div class="demo-source language-vue line-numbers-mode">
+        <!-- 行号 -->
+        <div class="line-numbers-wrapper" aria-hidden="true">
+          <span v-for="n in lineNumbers" :key="n" class="line-number">{{ n }}</span>
+        </div>
+        <!-- 代码内容 -->
+        <div class="code-content" v-html="decodedHighlightCode"></div>
+      </div>
+      <!-- 底部折叠栏 -->
+      <div class="collapse-bar">
+        <button class="collapse-btn" @click="showSource = false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+          <span>收起代码</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 操作栏 -->
     <div class="demo-actions">
-      <button class="toggle-code-btn" @click="showCode = !showCode" :aria-label="showCode ? '隐藏代码' : '显示代码'">
-        <span v-if="!showCode">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <span class="demo-lang">vue</span>
+      <div class="demo-btns">
+        <button class="demo-btn" :class="{ copied }" @click="copyCode"
+          :title="copied ? '已复制' : '复制代码'">
+          <svg v-if="copied" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        <button class="demo-btn" :class="{ active: showSource }" @click="toggleSource"
+          :title="showSource ? '收起源码' : '查看源码'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
             <polyline points="16 18 22 12 16 6"></polyline>
             <polyline points="8 6 2 12 8 18"></polyline>
           </svg>
-          查看代码
-        </span>
-        <span v-else>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="18 15 12 9 6 15"></polyline>
-          </svg>
-          隐藏代码
-        </span>
-      </button>
-    </div>
-
-    <div v-show="showCode" class="demo-code">
-      <slot name="code"></slot>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .demo-container {
-  margin: 1.5rem 0;
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
+  margin: 16px 0;
   overflow: hidden;
-  transition: box-shadow 0.25s;
-}
-
-.demo-container:hover {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-}
-
-.demo-title {
-  padding: 1rem 1.25rem;
-  font-weight: 600;
-  font-size: 1rem;
-  border-bottom: 1px solid var(--vp-c-divider);
-  background-color: var(--vp-c-bg-soft);
-}
-
-.demo-preview {
-  padding: 1.5rem 1.25rem;
   background-color: var(--vp-c-bg);
 }
 
-.demo-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.75rem 1.25rem;
-  border-top: 1px solid var(--vp-c-divider);
-  background-color: var(--vp-c-bg-soft);
+/* 预览区域 */
+.demo-preview {
+  padding: 24px;
 }
 
-.toggle-code-btn {
+.demo-error {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.75rem;
-  font-size: 0.875rem;
-  color: var(--vp-c-brand-1);
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: var(--vp-c-danger-soft);
+  border-radius: 6px;
+  color: var(--vp-c-danger-1);
+  font-size: 14px;
+}
+
+.demo-error code {
+  padding: 2px 6px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 13px;
+}
+
+.error-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* 代码区域包装器 */
+.demo-source-wrapper {
+  border-top: 1px solid var(--vp-c-divider);
+  background-color: var(--vp-code-block-bg);
+}
+
+/* 代码区域 - 完全模仿 VitePress 的 div[class*='language-'].line-numbers-mode */
+.demo-source {
+  position: relative;
+  max-height: 400px;
+  overflow-x: auto;
+  overflow-y: auto;
+  background-color: var(--vp-code-block-bg);
+  padding-left: 32px;  /* 为行号留出空间 - 关键！ */
+}
+
+/* 行号 - 完全模仿 VitePress 的 .line-numbers-wrapper */
+.line-numbers-wrapper {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  border-right: 1px solid var(--vp-code-block-divider-color);
+  padding-top: 20px;
+  width: 32px;
+  text-align: center;
+  font-family: var(--vp-font-family-mono);
+  line-height: var(--vp-code-line-height);
+  font-size: var(--vp-code-font-size);
+  color: var(--vp-code-line-number-color);
+  user-select: none;
+}
+
+.line-numbers-wrapper .line-number {
+  display: block;
+  line-height: var(--vp-code-line-height);
+}
+
+/* 代码内容 - 完全模仿 VitePress */
+.code-content :deep(pre) {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 20px 0;
   background: transparent;
-  border: 1px solid var(--vp-c-brand-1);
+  overflow-x: auto;
+}
+
+.code-content :deep(code) {
+  display: block;
+  padding: 0 24px;
+  width: fit-content;
+  min-width: 100%;
+  line-height: var(--vp-code-line-height);
+  font-size: var(--vp-code-font-size);
+  color: var(--vp-code-block-color);
+}
+
+/* 不要设置 .line 的样式，让它保持默认 */
+.code-content :deep(.shiki) {
+  background: transparent !important;
+}
+
+/* 底部折叠栏 */
+.collapse-bar {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+.collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--vp-c-text-2);
+  background-color: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.25s;
+  transition: all 0.2s;
 }
 
-.toggle-code-btn:hover {
-  color: var(--vp-c-brand-2);
-  border-color: var(--vp-c-brand-2);
-  background-color: var(--vp-c-brand-soft);
+.collapse-btn:hover {
+  color: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
 }
 
-.toggle-code-btn svg {
-  display: block;
-}
-
-.demo-code {
+/* 操作栏 */
+.demo-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: var(--vp-code-block-bg);
   border-top: 1px solid var(--vp-c-divider);
-  background-color: var(--vp-c-bg-alt);
 }
 
-.demo-code :deep(div[class*="language-"]) {
-  margin: 0;
-  border-radius: 0;
+.demo-lang {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--vp-code-lang-color);
+  text-transform: uppercase;
+  user-select: none;
 }
 
-.demo-code :deep(.vp-code-group) {
-  margin: 0;
+.demo-btns {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.demo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--vp-c-text-2);
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.demo-btn:hover {
+  color: var(--vp-c-text-1);
+  background-color: var(--vp-c-default-soft);
+}
+
+.demo-btn.active {
+  color: var(--vp-c-brand-1);
+}
+
+.demo-btn.copied {
+  color: var(--vp-c-green-1);
+}
+
+/* 响应式 */
+@media (max-width: 640px) {
+  .demo-preview {
+    padding: 16px;
+  }
+
+  .demo-source {
+    max-height: 300px;
+    padding-left: 28px;
+  }
+
+  .line-numbers-wrapper {
+    width: 28px;
+    padding-top: 16px;
+  }
+
+  .code-content :deep(pre) {
+    padding: 16px 0;
+  }
+
+  .code-content :deep(code) {
+    padding: 0 16px;
+  }
 }
 </style>

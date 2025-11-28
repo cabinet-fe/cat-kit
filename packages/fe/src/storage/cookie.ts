@@ -158,3 +158,5 @@ export const cookie = {
     Object.keys(cookies).forEach(key => this.remove(key))
   }
 }
+
+

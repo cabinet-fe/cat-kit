@@ -5,12 +5,12 @@
 
 interface FieldDefinition {
   type:
-    | StringConstructor
-    | NumberConstructor
-    | ObjectConstructor
-    | ArrayConstructor
-    | BooleanConstructor
-    | DateConstructor
+  | StringConstructor
+  | NumberConstructor
+  | ObjectConstructor
+  | ArrayConstructor
+  | BooleanConstructor
+  | DateConstructor
   required?: boolean
   primary?: boolean
   autoIncrement?: boolean
@@ -23,14 +23,18 @@ interface StoreDefinition {
 
 interface IDBConfig {
   version: number
-  stores: Store[]
+  stores: Store<Record<string, FieldDefinition>>[]
 }
 
 interface Query {
   [key: string]: any
 }
 
-class Store {
+
+
+class Store<T extends StoreDefinition, Data = {
+  [key in keyof T]: InstanceType<T[key]['type']>
+}> {
   private name: string
   private schema: StoreDefinition
   private db: IDBDatabase | null = null
@@ -41,7 +45,7 @@ class Store {
    * @param name 存储对象名称
    * @param schema 字段定义
    */
-  constructor(name: string, schema: StoreDefinition) {
+  constructor(name: string, schema: T) {
     this.name = name
     this.schema = schema
 
@@ -179,7 +183,7 @@ class Store {
    * @param data 数据对象
    * @returns 新增数据的键值
    */
-  async add(data: any): Promise<IDBValidKey> {
+  async add(data: Data): Promise<IDBValidKey> {
     return new Promise((resolve, reject) => {
       try {
         const validatedData = this.validateData(data)
@@ -464,7 +468,7 @@ export class IDB {
    * @param schema 字段定义
    * @returns 存储对象
    */
-  static defineStore(name: string, schema: StoreDefinition): Store {
+  static defineStore<T extends StoreDefinition>(name: string, schema: T): Store<T> {
     return new Store(name, schema)
   }
 
@@ -569,3 +573,9 @@ export class IDB {
     })
   }
 }
+
+
+
+
+
+

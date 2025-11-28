@@ -6,7 +6,7 @@ type Callback<T = any> = (
   temp?: { value: T; exp: number }
 ) => void
 
-export interface StorageKey<T> extends String {}
+export interface StorageKey<T> extends String { }
 
 export function storageKey<T>(str: string): StorageKey<T> {
   return str
@@ -27,12 +27,8 @@ export class WebStorage {
 
   callbacks: { [key: string]: Callback[] } = {}
 
-  constructor(storageType: 'local' | 'session') {
-    if (storageType === 'local') {
-      this.storage = localStorage
-    } else {
-      this.storage = sessionStorage
-    }
+  constructor(storage: Storage) {
+    this.storage = storage
   }
 
   /**
@@ -176,12 +172,14 @@ export class WebStorage {
   }
 }
 
-export const storage: {
+export interface EasyStorage {
   /** 会话存储 */
   session: WebStorage
   /** 本地存储 */
   local: WebStorage
-} = {
-  session: new WebStorage('session'),
-  local: new WebStorage('local')
+}
+
+export const storage: EasyStorage = {
+  session: new WebStorage(sessionStorage),
+  local: new WebStorage(localStorage)
 }

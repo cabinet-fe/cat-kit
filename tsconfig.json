@@ -3,12 +3,12 @@
 
   "files": [],
   "references": [
-    { "path": "./playground/tsconfig.json" },
     { "path": "./packages/core/tsconfig.json" },
     { "path": "./packages/fe/tsconfig.json" },
     { "path": "./packages/be/tsconfig.json" },
     { "path": "./packages/http/tsconfig.json" },
     { "path": "./packages/tests/tsconfig.json" },
-    { "path": "./build/tsconfig.json" }
+    { "path": "./build/tsconfig.json" },
+    { "path": "./docs/tsconfig.json" }
   ]
 }

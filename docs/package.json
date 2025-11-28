@@ -4,11 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vitepress preview",
-    "build": "vitepress build"
+    "dev": "vitepress dev .",
+    "preview": "vitepress preview .",
+    "build": "vitepress build ."
   },
   "devDependencies": {
-    "vitepress": "^1.6.4",
+    "@cat-kit/be": "workspace:*",
+    "@cat-kit/core": "workspace:*",
+    "@cat-kit/excel": "workspace:*",
+    "@cat-kit/fe": "workspace:*",
+    "@cat-kit/http": "workspace:*",
+    "@types/markdown-it-container": "^2.0.10",
+    "markdown-it-container": "^4.0.0",
+    "shiki": "^3.17.0",
+    "vitepress": "^2.0.0-alpha.15",
     "vue": "^3.5.24"
   }
 }

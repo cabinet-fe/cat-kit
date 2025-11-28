@@ -6,60 +6,32 @@
 
 对 LocalStorage 和 SessionStorage 的类型安全封装，支持过期时间和变更监听。
 
-### 基本用法
+### 示例
 
-```typescript
-import { storage, storageKey } from '@cat-kit/fe'
-
-// 设置数据（永不过期）
-storage.local.set('username', 'admin')
-
-// 设置数据（带过期时间，单位：秒）
-storage.local.set('token', 'abc123', 3600) // 1小时后过期
-
-// 获取数据
-const username = storage.local.get('username')
-const token = storage.local.get('token')
-
-// 获取数据（带默认值）
-const theme = storage.local.get('theme', 'light')
-
-// 获取多个数据
-const [user, token2] = storage.local.get(['username', 'token'])
-
-// 删除数据
-storage.local.remove('username')
-
-// 删除多个数据
-storage.local.remove(['username', 'token'])
-
-// 清空所有数据
-storage.local.remove()
-```
+::: demo fe/storage/basic.vue
+:::
 
 ### 类型安全的键
 
 使用 `storageKey` 创建类型安全的存储键：
 
-```typescript
-import { storage, storageKey, type StorageKey } from '@cat-kit/fe'
-
+```ts
 interface User {
   id: number
   name: string
 }
 
 // 定义类型安全的键
-const USER_KEY: StorageKey<User> = storageKey('user')
-const TOKEN_KEY: StorageKey<string> = storageKey('token')
+const USER_KEY = storageKey<User>('user')
+const TOKEN_KEY = storageKey<string>('token')
 
 // 设置时会进行类型检查
-storage.local.set(USER_KEY, { id: 1, name: 'admin' })
-storage.local.set(TOKEN_KEY, 'abc123')
+storage.session.set(USER_KEY, { id: 1, name: 'admin' })
+storage.session.set(TOKEN_KEY, 'abc123')
 
 // 获取时也有类型提示
-const user: User | null = storage.local.get(USER_KEY)
-const token: string | null = storage.local.get(TOKEN_KEY)
+const user = storage.session.get(USER_KEY)
+const token = storage.session.get(TOKEN_KEY)
 ```
 
 ### 过期时间
