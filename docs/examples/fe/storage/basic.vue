@@ -1,8 +1,8 @@
 <template>
   <div>
-    <button @click="setInfo">设置信息</button>
-    <button @click="getInfo">获取信息</button>
-    <button @click="removeInfo">删除信息</button>
+    <a @click="setInfo">设置信息</a> <br />
+    <a @click="getInfo">获取信息</a> <br />
+    <a @click="removeInfo">删除信息</a>
   </div>
 </template>
 

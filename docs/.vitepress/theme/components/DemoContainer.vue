@@ -18,6 +18,11 @@ const decodedHighlightCode = computed(() =>
   props.highlightCode ? decodeURIComponent(props.highlightCode) : ''
 )
 
+const lineNumbers = computed(() => {
+  const count = props.lineCount || 1
+  return Array.from({ length: count }, (_, i) => i + 1)
+})
+
 const copyCode = async () => {
   try {
     await clipboard.copy(decodedCode.value)
@@ -27,12 +32,6 @@ const copyCode = async () => {
     console.error(e)
   }
 }
-
-// 生成行号数组
-const lineNumbers = computed(() => {
-  const count = props.lineCount || 1
-  return Array.from({ length: count }, (_, i) => i + 1)
-})
 
 const toggleSource = () => {
   showSource.value = !showSource.value
@@ -45,9 +44,8 @@ const toggleSource = () => {
     <div class="demo-preview">
       <div v-if="!is" class="demo-error">
         <span class="error-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="8" x2="12" y2="12"></line>
             <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -60,24 +58,11 @@ const toggleSource = () => {
 
     <!-- 代码区域 -->
     <div v-show="showSource" class="demo-source-wrapper">
-      <div class="demo-source language-vue line-numbers-mode">
-        <!-- 行号 -->
+      <div class="demo-source">
         <div class="line-numbers-wrapper" aria-hidden="true">
           <span v-for="n in lineNumbers" :key="n" class="line-number">{{ n }}</span>
         </div>
-        <!-- 代码内容 -->
         <div class="code-content" v-html="decodedHighlightCode"></div>
-      </div>
-      <!-- 底部折叠栏 -->
-      <div class="collapse-bar">
-        <button class="collapse-btn" @click="showSource = false">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
-            <polyline points="18 15 12 9 6 15"></polyline>
-          </svg>
-          <span>收起代码</span>
-        </button>
       </div>
     </div>
 
@@ -85,25 +70,21 @@ const toggleSource = () => {
     <div class="demo-actions">
       <span class="demo-lang">vue</span>
       <div class="demo-btns">
-        <button class="demo-btn" :class="{ copied }" @click="copyCode"
-          :title="copied ? '已复制' : '复制代码'">
-          <svg v-if="copied" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+        <button class="demo-btn" :class="{ copied }" @click="copyCode" :title="copied ? '已复制' : '复制代码'">
+          <svg v-if="copied" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
         </button>
         <button class="demo-btn" :class="{ active: showSource }" @click="toggleSource"
           :title="showSource ? '收起源码' : '查看源码'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="16 18 22 12 16 6"></polyline>
             <polyline points="8 6 2 12 8 18"></polyline>
           </svg>
@@ -118,13 +99,13 @@ const toggleSource = () => {
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
   margin: 16px 0;
-  overflow: hidden;
   background-color: var(--vp-c-bg);
 }
 
 /* 预览区域 */
 .demo-preview {
   padding: 24px;
+  border-radius: 8px 8px 0 0;
 }
 
 .demo-error {
@@ -152,46 +133,41 @@ const toggleSource = () => {
   flex-shrink: 0;
 }
 
-/* 代码区域包装器 */
+/* 代码区域 */
 .demo-source-wrapper {
-  border-top: 1px solid var(--vp-c-divider);
   background-color: var(--vp-code-block-bg);
 }
 
-/* 代码区域 - 完全模仿 VitePress 的 div[class*='language-'].line-numbers-mode */
 .demo-source {
   position: relative;
-  max-height: 400px;
-  overflow-x: auto;
-  overflow-y: auto;
+  /* max-height: 400px; */
+  overflow: auto;
+  padding-left: 32px;
   background-color: var(--vp-code-block-bg);
-  padding-left: 32px;  /* 为行号留出空间 - 关键！ */
 }
 
-/* 行号 - 完全模仿 VitePress 的 .line-numbers-wrapper */
 .line-numbers-wrapper {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
   z-index: 3;
-  border-right: 1px solid var(--vp-code-block-divider-color);
-  padding-top: 20px;
   width: 32px;
+  padding-top: 20px;
   text-align: center;
   font-family: var(--vp-font-family-mono);
   line-height: var(--vp-code-line-height);
   font-size: var(--vp-code-font-size);
   color: var(--vp-code-line-number-color);
+  border-right: 1px solid var(--vp-code-block-divider-color);
   user-select: none;
 }
 
-.line-numbers-wrapper .line-number {
+.line-number {
   display: block;
   line-height: var(--vp-code-line-height);
 }
 
-/* 代码内容 - 完全模仿 VitePress */
 .code-content :deep(pre) {
   position: relative;
   z-index: 1;
@@ -211,47 +187,22 @@ const toggleSource = () => {
   color: var(--vp-code-block-color);
 }
 
-/* 不要设置 .line 的样式，让它保持默认 */
 .code-content :deep(.shiki) {
   background: transparent !important;
 }
 
-/* 底部折叠栏 */
-.collapse-bar {
-  display: flex;
-  justify-content: center;
-  padding: 8px;
-  border-top: 1px solid var(--vp-c-divider);
-}
-
-.collapse-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--vp-c-text-2);
-  background-color: var(--vp-c-bg);
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.collapse-btn:hover {
-  color: var(--vp-c-brand-1);
-  border-color: var(--vp-c-brand-1);
-}
-
-/* 操作栏 */
+/* 操作栏 - 添加粘性定位 */
 .demo-actions {
+  position: sticky;
+  bottom: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
   background-color: var(--vp-code-block-bg);
   border-top: 1px solid var(--vp-c-divider);
+  border-radius: 0 0 8px 8px;
+  z-index: 10;
 }
 
 .demo-lang {
