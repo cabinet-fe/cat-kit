@@ -86,9 +86,222 @@ Cat-Kit（喵喵工具箱）是一个基于 monorepo 的 TypeScript 工具库，
 ### TypeScript 约定
 
 - **类型优先**：始终使用显式类型声明
-- **不可变性**：优先使用不可变数据结构和函数式编程
 - **纯函数**：工具函数应该是纯函数，无副作用
 - **模块化**：每个功能模块独立，职责单一
+- **Tree-shaking 友好**：代码结构支持 tree-shaking 优化
+
+### 类型安全规范
+
+所有函数必须有明确的类型签名：
+
+```typescript
+// ✅ 正确：类型安全，使用泛型
+export function map<T, U>(
+  array: T[],
+  fn: (item: T, index: number) => U
+): U[] {
+  return array.map(fn)
+}
+
+// ✅ 正确：完整的类型定义
+export function updateObject<T extends object>(
+  obj: T,
+  updates: Partial<T>
+): T {
+  return { ...obj, ...updates }
+}
+
+// ❌ 错误：缺少类型
+export function addItem(array, item) {
+  array.push(item)
+  return array
+}
+```
+
+### Tree-shaking 友好规范
+
+编写支持 tree-shaking 的代码，减小最终打包体积：
+
+**1. 使用具名导出，避免默认导出**：
+```typescript
+// ✅ 正确：具名导出，支持 tree-shaking
+export function add(a: number, b: number): number {
+  return a + b
+}
+
+export function subtract(a: number, b: number): number {
+  return a - b
+}
+
+// ❌ 错误：默认导出对象，无法 tree-shake
+export default {
+  add: (a: number, b: number) => a + b,
+  subtract: (a: number, b: number) => a - b
+}
+```
+
+**2. 避免副作用，使用纯函数**：
+```typescript
+// ✅ 正确：纯函数，无副作用
+export function formatDate(date: Date): string {
+  return date.toISOString()
+}
+
+// ❌ 错误：有副作用，可能影响 tree-shaking
+let cache = {}
+export function formatDate(date: Date): string {
+  cache[date.getTime()] = date.toISOString()
+  return cache[date.getTime()]
+}
+```
+
+**3. 拆分大型工具类，独立导出函数**：
+```typescript
+// ✅ 正确：独立函数，可按需引入
+// utils/string/capitalize.ts
+export function capitalize(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+// utils/string/trim.ts
+export function trim(str: string): string {
+  return str.trim()
+}
+
+// ❌ 错误：大型工具类，难以 tree-shake
+export class StringUtils {
+  static capitalize(str: string): string { ... }
+  static trim(str: string): string { ... }
+  static padLeft(str: string, length: number): string { ... }
+  // ... 更多方法
+}
+```
+
+**4. 避免循环依赖**：
+```typescript
+// ✅ 正确：清晰的依赖关系
+// a.ts
+export function funcA() { ... }
+
+// b.ts
+import { funcA } from './a'
+export function funcB() {
+  return funcA()
+}
+
+// ❌ 错误：循环依赖，影响 tree-shaking
+// a.ts
+import { funcB } from './b'
+export function funcA() { return funcB() }
+
+// b.ts
+import { funcA } from './a'
+export function funcB() { return funcA() }
+```
+
+**5. 使用 `/*#__PURE__*/` 注释标记纯调用**：
+```typescript
+// ✅ 正确：标记纯函数调用
+export const config = /*#__PURE__*/ Object.freeze({
+  apiUrl: 'https://api.example.com',
+  timeout: 5000
+})
+
+// 对于复杂的工厂函数
+export const logger = /*#__PURE__*/ createLogger({
+  level: 'info'
+})
+```
+
+### 文档注释规范
+
+所有公共 API 必须有完整的 JSDoc 注释：
+
+```typescript
+/**
+ * 过滤数组中的元素
+ * @param array - 源数组
+ * @param predicate - 过滤条件函数
+ * @returns 过滤后的新数组
+ * @throws {ValidationError} 当参数无效时
+ * @example
+ * ```ts
+ * const result = filter([1, 2, 3, 4], x => x > 2)
+ * // result: [3, 4]
+ * ```
+ */
+export function filter<T>(
+  array: T[],
+  predicate: (item: T, index: number) => boolean
+): T[] {
+  return array.filter(predicate)
+}
+```
+
+**文档注释要求**：
+- 简洁描述功能
+- 使用 `@param` 描述所有参数
+- 使用 `@returns` 描述返回值
+- 使用 `@throws` 说明可能抛出的错误
+- 提供 `@example` 代码示例
+
+### 错误处理规范
+
+**自定义错误类**：
+
+```typescript
+// ✅ 正确：创建自定义错误类
+export class ConfigError extends Error {
+  constructor(
+    message: string,
+    public readonly configPath: string,
+    public readonly originalError?: unknown
+  ) {
+    super(message)
+    this.name = 'ConfigError'
+  }
+}
+
+// 使用自定义错误
+export async function loadConfig(path: string): Promise<Config> {
+  try {
+    const content = await readFile(path, 'utf-8')
+    return JSON.parse(content)
+  } catch (error) {
+    throw new ConfigError(
+      `Failed to load config from ${path}`,
+      path,
+      error
+    )
+  }
+}
+```
+
+**错误处理原则**：
+- 提供清晰的错误信息
+- 保留原始错误信息（使用 `originalError` 或 `cause`）
+- 使用有意义的错误类名（如 `ValidationError`、`NetworkError`）
+
+### 性能考虑
+
+**通用原则**：
+- 避免不必要的循环和复杂度
+- 在文档中说明性能特征（时间复杂度、空间复杂度）
+- 对于大数据集，考虑使用生成器或流式处理
+- 避免在循环中创建不必要的对象
+
+**示例**：
+```typescript
+/**
+ * 数组去重
+ * @param array - 源数组
+ * @returns 去重后的新数组
+ * @complexity 时间复杂度 O(n)，空间复杂度 O(n)
+ */
+export function unique<T>(array: T[]): T[] {
+  return [...new Set(array)]
+}
+```
 
 ### 导出模式
 
@@ -112,6 +325,11 @@ Cat-Kit（喵喵工具箱）是一个基于 monorepo 的 TypeScript 工具库，
 - 开发时直接使用源代码（`@cat-kit/core/src`）
 - 生产环境使用编译后的代码（`@cat-kit/core`）
 
+**导出策略**：
+- 所有公共 API 都通过 `src/index.ts` 统一导出
+- 模块级导出通过模块的 `index.ts` 管理
+- 避免导出内部实现细节
+
 ### 代码组织
 
 - 按功能领域组织代码（如 `data/`、`storage/`、`web-api/`）
@@ -126,6 +344,114 @@ Cat-Kit（喵喵工具箱）是一个基于 monorepo 的 TypeScript 工具库，
 - **类型/接口**：PascalCase（如 `StorageAdapter`）
 - **函数/变量**：camelCase（如 `getItem`）
 - **常量**：UPPER_SNAKE_CASE（如 `DEFAULT_TIMEOUT`）
+
+## 测试规范
+
+### 测试组织
+
+测试文件位于 `packages/tests/` 目录,按包组织:
+
+```
+packages/core/src/data/array.ts → packages/tests/core/data/array.test.ts
+packages/fe/src/storage/cookie.ts → packages/tests/fe/storage/cookie.test.ts
+```
+
+### 测试文件命名
+
+- 测试文件必须以 `.test.ts` 结尾
+- 测试文件名应与被测试文件名对应
+- 测试套件名称使用 `describe` 描述模块/函数
+- 测试用例名称使用 `it` 描述具体行为
+
+### AAA 模式
+
+遵循 Arrange-Act-Assert 模式:
+
+```typescript
+it('should format date correctly', () => {
+  // Arrange - 准备测试数据
+  const date = new Date('2024-01-01')
+
+  // Act - 执行被测试的操作
+  const result = formatDate(date, 'YYYY-MM-DD')
+
+  // Assert - 验证结果
+  expect(result).toBe('2024-01-01')
+})
+```
+
+### 测试最佳实践
+
+**1. 测试边界情况**:
+```typescript
+describe('divide', () => {
+  it('should divide positive numbers', () => {
+    expect(divide(10, 2)).toBe(5)
+  })
+
+  it('should handle division by zero', () => {
+    expect(() => divide(10, 0)).toThrow('Division by zero')
+  })
+
+  it('should handle negative numbers', () => {
+    expect(divide(-10, 2)).toBe(-5)
+  })
+})
+```
+
+**2. 测试隔离** - 每个测试应该独立:
+```typescript
+// ✅ 正确：每个测试独立
+describe('Calculator', () => {
+  it('should add numbers', () => {
+    const calc = new Calculator()
+    expect(calc.add(1, 2)).toBe(3)
+  })
+})
+
+// ❌ 错误：测试之间有依赖
+describe('Calculator', () => {
+  const calc = new Calculator()
+
+  it('should add numbers', () => {
+    calc.add(1, 2) // 修改了共享状态
+  })
+})
+```
+
+**3. 描述性测试名称**:
+```typescript
+// ✅ 正确：清晰描述行为
+it('should return empty array when input is empty', () => {})
+it('should throw error when value is negative', () => {})
+
+// ❌ 错误：不清晰
+it('test1', () => {})
+it('works', () => {})
+```
+
+**4. 避免测试实现细节**:
+```typescript
+// ✅ 正确：测试公共 API 行为
+it('should filter even numbers', () => {
+  const result = filterEven([1, 2, 3, 4])
+  expect(result).toEqual([2, 4])
+})
+
+// ❌ 错误：测试内部实现
+it('should call Array.filter internally', () => {
+  const spy = vi.spyOn(Array.prototype, 'filter')
+  filterEven([1, 2, 3, 4])
+  expect(spy).toHaveBeenCalled()
+})
+```
+
+### 测试覆盖率目标
+
+- **语句覆盖率**：≥ 80%
+- **分支覆盖率**：≥ 75%
+- **函数覆盖率**：≥ 80%
+- **行覆盖率**：≥ 80%
 
 ## 通用开发命令
 

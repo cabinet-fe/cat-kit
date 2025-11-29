@@ -100,72 +100,14 @@ packages/fe/src/
 
 ## 编码规范
 
-### 浏览器环境检测
+> **📌 通用编码规范请参考根目录的 `AGENTS.md` 文件**
 
-所有代码必须在浏览器环境中运行。如果某个功能需要特定 API，应该进行检测：
+### FE 包特有规范
 
-```typescript
-// ✅ 正确：检测 API 可用性
-export function copyToClipboard(text: string): Promise<void> {
-  if (!navigator.clipboard) {
-    return Promise.reject(new Error('Clipboard API not available'))
-  }
-  return navigator.clipboard.writeText(text)
-}
-```
+- **浏览器环境检测**：使用 API 前检测可用性
+- **Promise 优先**：所有异步操作使用 Promise
+- **类型安全的 DOM 操作**：确保 DOM 类型安全
 
-### Promise 优先
-
-所有异步操作使用 Promise：
-
-```typescript
-// ✅ 正确：使用 Promise
-export async function readFile(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(reader.error)
-    reader.readAsText(file)
-  })
-}
-```
-
-### 类型安全的 DOM 操作
-
-处理 DOM 时，确保类型安全：
-
-```typescript
-// ✅ 正确：类型安全
-export function scrollToElement(element: HTMLElement): void {
-  element.scrollIntoView({ behavior: 'smooth' })
-}
-
-// ❌ 错误：类型不安全
-export function scrollToElement(element: any): void {
-  element.scrollIntoView()
-}
-```
-
-### 错误处理
-
-提供清晰的错误信息和降级方案：
-
-```typescript
-// ✅ 正确：完善的错误处理
-export async function requestNotificationPermission(): Promise<boolean> {
-  if (!('Notification' in window)) {
-    throw new Error('Notification API not supported')
-  }
-
-  try {
-    const permission = await Notification.requestPermission()
-    return permission === 'granted'
-  } catch (error) {
-    console.error('Failed to request notification permission:', error)
-    return false
-  }
-}
-```
 
 ## 存储模块开发指南
 
@@ -307,62 +249,28 @@ export function readAsText(file: File): Promise<string> {
 
 ## 测试规范
 
-### 浏览器环境测试
+> **📌 通用测试规范请参考根目录的 `AGENTS.md` 文件**
 
-测试文件位于 `packages/tests/fe/` 目录。由于需要浏览器 API，可能需要使用 jsdom 或其他浏览器环境模拟：
+测试位置：`packages/tests/fe/`
 
-```typescript
-// packages/tests/fe/storage/cookie.test.ts
-import { describe, it, expect, beforeEach } from 'vitest'
-import { setCookie, getCookie } from '@cat-kit/fe/src'
-
-describe('cookie', () => {
-  beforeEach(() => {
-    // 清理 cookies
-    document.cookie.split(';').forEach(cookie => {
-      const [name] = cookie.split('=')
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT`
-    })
-  })
-
-  it('should set and get cookie', () => {
-    setCookie('test', 'value')
-    expect(getCookie('test')).toBe('value')
-  })
-})
-```
-
-## 添加新功能
-
-### 步骤
-
-1. **确定模块**：根据功能确定应该放在哪个模块（`storage/`、`web-api/` 等）
-2. **检查浏览器兼容性**：确认目标 API 的浏览器支持情况
-3. **实现功能**：编写代码，添加类型和文档
-4. **处理降级**：为不支持的浏览器提供降级方案或清晰的错误信息
-5. **导出**：在模块的 `index.ts` 和 `src/index.ts` 中导出
-6. **添加测试**：在 `packages/tests/fe/` 下添加测试
-7. **构建验证**：运行 `cd build && bun run build` 验证构建
+浏览器 API 测试需要使用 jsdom 环境模拟。
 
 ## 性能考虑
 
-- 虚拟滚动应避免频繁的 DOM 操作
-- 使用 `requestAnimationFrame` 优化动画和滚动
-- 大量数据操作考虑使用 Web Worker
-- IndexedDB 操作应批量处理
+> **📌 通用性能考虑请参考根目录的 `AGENTS.md` 文件**
+
+FE 包特有要求：
+- 虚拟滚动避免频繁 DOM 操作
+- 使用 `requestAnimationFrame` 优化动画
+- 大量数据考虑使用 Web Worker
+- IndexedDB 操作批量处理
 
 ## 导出策略
 
-所有公共 API 都通过 `src/index.ts` 统一导出：
+> **📌 通用导出策略请参考根目录的 `AGENTS.md` 文件**
 
-```typescript
-export * from './virtualizer'
-export * from './storage'
-export * from './web-api/permission'
-export * from './web-api/clipboard'
-export * from './file/saver'
-export * from './file/read'
-```
+所有公共 API 通过 `src/index.ts` 统一导出。
+
 
 ## 构建配置
 

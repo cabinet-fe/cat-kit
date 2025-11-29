@@ -119,64 +119,14 @@ export class HttpClient {
 
 ## 架构设计原则
 
-### 插件优先
+> **📌 通用编码规范请参考根目录的 `AGENTS.md` 文件**
 
-所有横切关注点都应该通过插件实现，而不是硬编码在客户端中：
+### HTTP 包特有原则
 
-```typescript
-// ✅ 正确：使用插件
-const client = new HttpClient()
-client.use(tokenPlugin({ getToken: () => localStorage.getItem('token') }))
+- **插件优先**：横切关注点通过插件实现
+- **引擎抽象**：引擎可替换，客户端不依赖特定引擎
+- **不可变配置**：插件返回新配置而不是修改原配置
 
-// ❌ 错误：硬编码在客户端
-class HttpClient {
-  request() {
-    const token = localStorage.getItem('token')
-    // ...
-  }
-}
-```
-
-### 引擎抽象
-
-引擎应该是可替换的，客户端不应依赖特定引擎的实现细节：
-
-```typescript
-// ✅ 正确：通过配置选择引擎
-const client = new HttpClient({
-  engine: new FetchEngine()
-})
-
-// ❌ 错误：硬编码引擎
-class HttpClient {
-  async request() {
-    return fetch(url) // 直接使用 fetch
-  }
-}
-```
-
-### 不可变配置
-
-请求配置应该是不可变的，插件返回新配置而不是修改原配置：
-
-```typescript
-// ✅ 正确：返回新配置
-onRequest(config: RequestConfig): RequestConfig {
-  return {
-    ...config,
-    headers: {
-      ...config.headers,
-      'Authorization': `Bearer ${token}`
-    }
-  }
-}
-
-// ❌ 错误：修改原配置
-onRequest(config: RequestConfig): RequestConfig {
-  config.headers['Authorization'] = `Bearer ${token}`
-  return config
-}
-```
 
 ## 开发插件
 
@@ -425,34 +375,10 @@ await client.delete('/users/123')
 
 ## 测试规范
 
-测试文件位于 `packages/tests/http/` 目录：
+> **📌 通用测试规范请参考根目录的 `AGENTS.md` 文件**
 
-```typescript
-// packages/tests/http/client.test.ts
-import { describe, it, expect, vi } from 'vitest'
-import { HttpClient, type HttpPlugin } from '@cat-kit/http/src'
+测试位置：`packages/tests/http/`
 
-describe('HttpClient', () => {
-  it('should execute GET request', async () => {
-    const client = new HttpClient()
-    const response = await client.get('/test')
-    expect(response.status).toBe(200)
-  })
-
-  it('should apply plugin', async () => {
-    const plugin: HttpPlugin = {
-      name: 'test-plugin',
-      onRequest: vi.fn(config => config)
-    }
-
-    const client = new HttpClient()
-    client.use(plugin)
-
-    await client.get('/test')
-    expect(plugin.onRequest).toHaveBeenCalled()
-  })
-})
-```
 
 ## 添加新功能
 

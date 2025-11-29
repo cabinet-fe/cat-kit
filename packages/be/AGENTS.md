@@ -32,77 +32,16 @@ packages/be/src/
 
 **注意**：当前此包还处于早期阶段，主要结构等待添加功能模块时建立。
 
-## 设计原则
+## 编码规范
 
-### Node.js 环境专用
+> **📌 通用编码规范请参考根目录的 `AGENTS.md` 文件**
 
-所有代码必须在 Node.js 环境中运行，可以使用 Node.js 特有的 API：
+### BE 包特有规范
 
-```typescript
-// ✅ 正确：使用 Node.js API
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+- **Node.js 环境专用**：可使用 Node.js 特有 API
+- **异步优先**：使用 Promise/async/await，避免回调
+- **使用 `node:` 协议**：导入内置模块时使用 `node:` 前缀
 
-export async function loadConfig(configPath: string): Promise<any> {
-  const fullPath = join(process.cwd(), configPath)
-  const content = await readFile(fullPath, 'utf-8')
-  return JSON.parse(content)
-}
-```
-
-### 异步优先
-
-优先使用 Promise 和 async/await，避免回调风格：
-
-```typescript
-// ✅ 正确：使用 Promise
-import { readFile } from 'node:fs/promises'
-
-export async function readJSON(filePath: string): Promise<any> {
-  const content = await readFile(filePath, 'utf-8')
-  return JSON.parse(content)
-}
-
-// ❌ 错误：使用回调
-import { readFile } from 'node:fs'
-
-export function readJSON(filePath: string, callback: (err: any, data: any) => void): void {
-  readFile(filePath, 'utf-8', (err, content) => {
-    if (err) return callback(err, null)
-    callback(null, JSON.parse(content))
-  })
-}
-```
-
-### 错误处理
-
-提供清晰的错误信息和适当的错误类型：
-
-```typescript
-export class ConfigError extends Error {
-  constructor(
-    message: string,
-    public readonly configPath: string,
-    public readonly originalError?: unknown
-  ) {
-    super(message)
-    this.name = 'ConfigError'
-  }
-}
-
-export async function loadConfig(configPath: string): Promise<any> {
-  try {
-    const content = await readFile(configPath, 'utf-8')
-    return JSON.parse(content)
-  } catch (error) {
-    throw new ConfigError(
-      `Failed to load config from ${configPath}`,
-      configPath,
-      error
-    )
-  }
-}
-```
 
 ## 建议的模块方向
 
@@ -213,68 +152,12 @@ import { readFile } from 'fs/promises'
 import { join } from 'path'
 ```
 
-### 类型安全
-
-为所有公共 API 提供完整的类型定义：
-
-```typescript
-export interface ReadOptions {
-  encoding?: BufferEncoding
-  flag?: string
-}
-
-export async function readTextFile(
-  filePath: string,
-  options?: ReadOptions
-): Promise<string> {
-  // 实现
-}
-```
-
-### 文档注释
-
-所有公共 API 必须有 JSDoc 注释：
-
-```typescript
-/**
- * 读取并解析 JSON 文件
- * @param filePath - JSON 文件路径
- * @returns 解析后的 JSON 对象
- * @throws {ConfigError} 当文件不存在或 JSON 格式错误时
- * @example
- * ```ts
- * const config = await readJSONFile('./config.json')
- * console.log(config)
- * ```
- */
-export async function readJSONFile<T = any>(filePath: string): Promise<T> {
-  // 实现
-}
-```
-
 ## 测试规范
 
-测试文件位于 `packages/tests/be/` 目录：
+> **📌 通用测试规范请参考根目录的 `AGENTS.md` 文件**
 
-```typescript
-// packages/tests/be/fs/read.test.ts
-import { describe, it, expect } from 'vitest'
-import { readTextFile } from '@cat-kit/be/src'
-import { join } from 'node:path'
+测试位置：`packages/tests/be/`
 
-describe('readTextFile', () => {
-  it('should read text file', async () => {
-    const content = await readTextFile(join(__dirname, 'fixtures', 'test.txt'))
-    expect(content).toBe('test content')
-  })
-
-  it('should throw error for non-existent file', async () => {
-    await expect(
-      readTextFile('non-existent.txt')
-    ).rejects.toThrow()
-  })
-})
-```
 
 ## 添加新功能
 

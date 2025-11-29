@@ -82,81 +82,13 @@ packages/core/src/
 
 ## 编码规范
 
-### 纯函数优先
+> **📌 通用编码规范请参考根目录的 `AGENTS.md` 文件**
 
-所有工具函数都应该是**纯函数**：
-- 无副作用
-- 相同输入产生相同输出
-- 不修改输入参数
+### Core 包特有规范
 
-```typescript
-// ✅ 正确：纯函数
-export function addItem<T>(array: readonly T[], item: T): T[] {
-  return [...array, item]
-}
+- **纯函数要求**：所有工具函数必须是纯函数（无副作用）
+- **独立函数导出**：每个工具函数独立导出，支持按需引入
 
-// ❌ 错误：有副作用
-export function addItem<T>(array: T[], item: T): T[] {
-  array.push(item) // 修改了输入参数
-  return array
-}
-```
-
-### 类型安全
-
-- 所有函数必须有明确的类型签名
-- 使用泛型提供类型灵活性
-- 优先使用 `readonly` 修饰不会被修改的参数
-
-```typescript
-// ✅ 正确：类型安全
-export function map<T, U>(
-  array: readonly T[],
-  fn: (item: T, index: number) => U
-): U[] {
-  return array.map(fn)
-}
-```
-
-### 不可变性
-
-- 优先使用不可变操作
-- 返回新对象而不是修改原对象
-- 使用 `readonly` 类型标记不可变数据
-
-```typescript
-// ✅ 正确：不可变操作
-export function updateObject<T extends object>(
-  obj: Readonly<T>,
-  updates: Partial<T>
-): T {
-  return { ...obj, ...updates }
-}
-```
-
-### 文档注释
-
-所有公共 API 必须有 JSDoc 注释：
-
-```typescript
-/**
- * 过滤数组中的元素
- * @param array - 源数组
- * @param predicate - 过滤条件函数
- * @returns 过滤后的新数组
- * @example
- * ```ts
- * const result = filter([1, 2, 3, 4], x => x > 2)
- * // result: [3, 4]
- * ```
- */
-export function filter<T>(
-  array: readonly T[],
-  predicate: (item: T, index: number) => boolean
-): T[] {
-  return array.filter(predicate)
-}
-```
 
 ## 添加新工具
 
@@ -192,43 +124,24 @@ export * from './array'
 
 ## 测试规范
 
-- 每个工具函数都应该有对应的测试
-- 测试文件位于 `packages/tests/core/` 目录
-- 使用 Vitest 编写测试
+> **📌 通用测试规范请参考根目录的 `AGENTS.md` 文件**
 
-```typescript
-// packages/tests/core/data/array.test.ts
-import { describe, it, expect } from 'vitest'
-import { unique } from '@cat-kit/core/src'
-
-describe('unique', () => {
-  it('should remove duplicates', () => {
-    const result = unique([1, 2, 2, 3, 3, 3])
-    expect(result).toEqual([1, 2, 3])
-  })
-})
-```
+测试位置：`packages/tests/core/`
 
 ## 性能考虑
 
-- 避免不必要的循环和复杂度
-- 对于大数据集，考虑使用生成器或流式处理
-- 在文档中说明性能特征（时间复杂度）
+> **📌 通用性能考虑请参考根目录的 `AGENTS.md` 文件**
+
+Core 包特有要求：
+- 对于大数据集，考虑使用生成器
+- 在文档中标注时间复杂度
 
 ## 导出策略
 
-所有公共 API 都通过 `src/index.ts` 统一导出：
+> **📌 通用导出策略请参考根目录的 `AGENTS.md` 文件**
 
-```typescript
-export * from './data'
-export * from './date/date'
-export * from './env/env'
-export * from './optimize/parallel'
-export * from './optimize/timer'
-export * from './optimize/safe'
-export * from './pattern/observer'
-export * from './data-structure'
-```
+所有公共 API 通过 `src/index.ts` 统一导出。
+
 
 ## 依赖约束
 

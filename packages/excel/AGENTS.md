@@ -391,61 +391,14 @@ try {
 
 ## 编码规范
 
-### 不可变性
+> **📌 通用编码规范请参考根目录的 `AGENTS.md` 文件**
 
-所有核心类必须保持不可变：
+### Excel 包特有规范
 
-```typescript
-// ✅ 正确：返回新实例
-export class Cell {
-  setValue(value: CellValue): Cell {
-    return new Cell({ ...this.toJSON(), value })
-  }
-}
+- **不可变数据结构**：核心类（Cell、Row、Worksheet、Workbook）使用不可变模式
+- **流式处理优先**：大数据量使用流式 API
+- **类型守卫**：使用类型守卫函数处理不同数据类型
 
-// ❌ 错误：修改自身
-export class Cell {
-  setValue(value: CellValue): void {
-    this.value = value // 违反不可变性
-  }
-}
-```
-
-### 流式处理优先
-
-对于大数据量，优先使用流式 API：
-
-```typescript
-// ✅ 正确：流式处理大文件
-async function processLargeFile(file: File) {
-  const stream = await readWorkbookStream(file)
-  for await (const { row } of stream) {
-    // 逐行处理
-  }
-}
-
-// ❌ 错误：一次性加载大文件到内存
-async function processLargeFile(file: File) {
-  const workbook = await readWorkbook(file) // 可能导致内存溢出
-  // ...
-}
-```
-
-### 类型安全
-
-使用类型守卫：
-
-```typescript
-import { isCellFormula, isCellError } from '@cat-kit/excel'
-
-if (isCellFormula(cell.value)) {
-  console.log(cell.value.formula)
-}
-
-if (isCellError(cell.value)) {
-  console.log(cell.value.error)
-}
-```
 
 ## 性能优化
 
@@ -488,27 +441,10 @@ for (const user of users) {
 
 ## 测试规范
 
-测试文件位于 `packages/tests/excel/` 目录：
+> **📌 通用测试规范请参考根目录的 `AGENTS.md` 文件**
 
-```typescript
-// packages/tests/excel/core/cell.test.ts
-import { describe, it, expect } from 'vitest'
-import { Cell } from '@cat-kit/excel/src'
+测试位置：`packages/tests/excel/`
 
-describe('Cell', () => {
-  it('should create cell with value', () => {
-    const cell = new Cell({ value: 'test' })
-    expect(cell.value).toBe('test')
-  })
-
-  it('should be immutable', () => {
-    const cell1 = new Cell({ value: 'a' })
-    const cell2 = cell1.setValue('b')
-    expect(cell1.value).toBe('a')
-    expect(cell2.value).toBe('b')
-  })
-})
-```
 
 ## 添加新功能
 
