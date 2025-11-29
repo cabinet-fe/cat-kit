@@ -1,13 +1,16 @@
 {
   "name": "cat-kit",
   "private": true,
-  "version": "4.0.0",
+  "version": "1.0.0-alpha.1",
   "description": "喵喵工具箱",
   "workspaces": [
     "packages/*",
     "build",
     "docs"
   ],
+  "scripts": {
+    "release": "bun run build/release.ts"
+  },
   "devDependencies": {
     "@types/bun": "^1.3.3",
     "@types/node": "^24.10.1",

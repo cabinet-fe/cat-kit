@@ -89,7 +89,8 @@ export default defineConfig({
             { text: '文件操作', link: '/packages/fe/file' },
             { text: '存储', link: '/packages/fe/storage' },
             { text: '虚拟化', link: '/packages/fe/virtualizer' },
-            { text: 'Web API', link: '/packages/fe/web-api' }
+            { text: 'Web API', link: '/packages/fe/web-api' },
+            { text: '测试', link: '/packages/fe/tests' }
           ]
         },
         {

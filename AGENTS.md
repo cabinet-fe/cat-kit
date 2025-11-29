@@ -1,38 +1,138 @@
 # AGENTS.md
 
-本文件为智能体提供在此代码库工作时的指导。
-
-**重要提示：在与此项目交互时，请始终使用中文进行交流。**
+本文件为智能体提供在此代码库工作时的项目级别的指导。
 
 ## 项目概述
 
 Cat-Kit（喵喵工具箱）是一个基于 monorepo 的 TypeScript 工具库，为浏览器和 Node.js 环境提供实用工具。项目使用 Bun 作为运行时和包管理器。
 
-## Monorepo 结构
+## Monorepo 架构
 
-这是一个基于工作区的 monorepo，包含以下包：
+这是一个基于工作区的 monorepo，包含以下工作空间：
 
-- `@cat-kit/core` - 核心工具包（数据结构、日期处理、性能优化、设计模式）
-- `@cat-kit/fe` - 前端工具包（存储、虚拟滚动、Web API、文件处理）
-- `@cat-kit/http` - HTTP 请求工具包（带插件系统）
-- `@cat-kit/be` - 后端工具包
-- `@cat-kit/excel` - Excel 文件处理库（支持流式处理）
-- `@cat-kit/tests` - 所有包的集中测试套件
+### 核心包
+
+- `packages/core` - 核心工具包（无外部依赖的基础包）
+- `packages/fe` - 前端工具包（依赖 core）
+- `packages/http` - HTTP 请求工具包（依赖 core）
+- `packages/be` - 后端工具包（依赖 core）
+- `packages/excel` - Excel 文件处理库（依赖 core）
+
+### 支持工作空间
+
+- `packages/tests` - 所有包的集中测试套件
 - `build` - 自定义构建系统
 - `docs` - VitePress 文档站点
 
-### 包依赖关系
+### 依赖关系图
 
-依赖关系图：
-- `@cat-kit/core` - 无依赖（基础包）
-- `@cat-kit/fe`、`@cat-kit/http`、`@cat-kit/be`、`@cat-kit/excel` - 都依赖于 `@cat-kit/core`
+```
+@cat-kit/core (基础包，无依赖)
+    ↑
+    ├── @cat-kit/fe
+    ├── @cat-kit/http
+    ├── @cat-kit/be
+    └── @cat-kit/excel
+```
 
-## 开发命令
+## 工作流程指导
+
+### 智能体工作流
+
+当你开始处理任务时，请遵循以下流程：
+
+1. **识别工作空间**
+
+   - 根据用户的请求，识别需要操作的工作空间（如 `packages/core`、`packages/fe` 等）
+   - 如果不确定，请询问用户
+
+2. **读取工作空间指导文件**
+
+   - 每个工作空间都有自己的 `AGENTS.md` 文件
+   - **必须先阅读目标工作空间的 `AGENTS.md` 文件**，路径格式为：`<workspace-dir>/AGENTS.md`
+   - 例如：`packages/core/AGENTS.md`、`docs/AGENTS.md`
+
+3. **处理依赖关系**
+
+   - 如果工作空间依赖其他包（如 `fe`、`http`、`be`、`excel` 依赖 `core`）
+   - **也需要读取依赖包的 `AGENTS.md` 文件**以了解相关 API 和约定
+
+4. **执行任务**
+   - 基于工作空间的具体指导文件执行编码任务
+   - 遵循该工作空间的编码规范和架构模式
+
+### 示例工作流
+
+**示例 1：修改前端存储功能**
+
+```
+用户请求 → 识别为 packages/fe → 读取 packages/fe/AGENTS.md → 读取 packages/core/AGENTS.md（依赖） → 执行任务
+```
+
+**示例 2：修改构建系统**
+
+```
+用户请求 → 识别为 build → 读取 build/AGENTS.md → 执行任务
+```
+
+**示例 3：添加文档**
+
+```
+用户请求 → 识别为 docs → 读取 docs/AGENTS.md → 执行任务
+```
+
+## 编码规范
+
+### TypeScript 约定
+
+- **类型优先**：始终使用显式类型声明
+- **不可变性**：优先使用不可变数据结构和函数式编程
+- **纯函数**：工具函数应该是纯函数，无副作用
+- **模块化**：每个功能模块独立，职责单一
+
+### 导出模式
+
+所有包都遵循双导出模式：
+
+```json
+{
+  ".": {
+    "import": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
+  "./src": {
+    "import": "./src/index.ts",
+    "types": "./src/index.ts"
+  }
+}
+```
+
+这允许：
+
+- 开发时直接使用源代码（`@cat-kit/core/src`）
+- 生产环境使用编译后的代码（`@cat-kit/core`）
+
+### 代码组织
+
+- 按功能领域组织代码（如 `data/`、`storage/`、`web-api/`）
+- 每个模块包含：
+  - 实现文件（`.ts`）
+  - 类型定义（通常在同一文件中）
+  - 导出通过 `index.ts` 统一管理
+
+### 命名约定
+
+- **文件名**：kebab-case（如 `array-utils.ts`）
+- **类型/接口**：PascalCase（如 `StorageAdapter`）
+- **函数/变量**：camelCase（如 `getItem`）
+- **常量**：UPPER_SNAKE_CASE（如 `DEFAULT_TIMEOUT`）
+
+## 通用开发命令
 
 ### 构建
 
 ```bash
-# 构建所有包（自动处理依赖顺序，分批并行构建）
+# 构建所有包（自动处理依赖顺序）
 cd build
 bun run build
 
@@ -40,12 +140,6 @@ bun run build
 cd build
 bun run analyze
 ```
-
-构建系统（`build/repo.ts`）会自动：
-- 按依赖顺序构建包
-- 在每个批次内并行构建
-- 使用 tsdown 进行打包和压缩
-- 生成 bundle 分析报告（每个包的 dist 文件夹中的 stats.html）
 
 ### 测试
 
@@ -63,82 +157,6 @@ cd packages/tests
 bun run test <test-file-pattern>
 ```
 
-测试使用 Vitest，位于 `packages/tests/` 目录下，按包组织（如 `core/`、`http/`、`excel/`）。
-
-### 文档
-
-```bash
-# 启动开发服务器
-cd docs
-bun run dev
-
-# 构建文档
-cd docs
-bun run build
-
-# 预览构建的文档
-cd docs
-bun run preview
-```
-
-文档使用 VitePress v2.0，包含交互式示例和代码演示。
-
-**文档目录结构：**
-- `docs/` - VitePress 文档根目录
-  - `index.md` - 首页
-  - `guide/` - 指南文档（快速开始、安装等）
-  - `packages/` - 各包的 API 文档
-    - `core/` - Core 包文档
-    - `fe/` - FE 包文档
-    - `http/` - HTTP 包文档
-    - `be/` - BE 包文档
-  - `examples/` - Vue 组件示例文件
-  - `.vitepress/` - VitePress 配置
-    - `config.ts` - VitePress 主配置
-    - `shared.ts` - 共享配置和常量
-    - `theme/` - 自定义主题
-      - `components/DemoContainer.vue` - 示例容器组件
-      - `styles/custom.css` - 自定义样式
-      - `index.ts` - 主题入口
-    - `markdown/` - Markdown 插件
-      - `demo-container.ts` - Demo 容器 Markdown 插件
-    - `plugins/` - Vite 插件
-      - `import-examples.ts` - 自动导入示例组件
-  - `public/` - 静态资源
-
-**核心功能：**
-
-1. **交互式示例：** 使用 `DemoContainer.vue` 组件展示可运行的 Vue 示例
-   - 支持代码高亮（使用 Shiki）
-   - 支持明暗主题切换
-   - 提供代码复制功能
-   - 可展开/收起源码
-
-2. **示例语法：** 在 Markdown 中使用自定义容器语法
-   ```markdown
-   ::: demo fe/storage/basic.vue
-   :::
-   ```
-   - 示例文件路径相对于 `docs/examples/` 目录
-   - 自动导入和注册组件（通过 `import-examples.ts` 插件）
-   - 自动提取代码并进行语法高亮（通过 `demo-container.ts` 插件）
-
-3. **依赖包：**
-   - `vitepress` - 文档框架
-   - `vitepress-plugin-llms` - LLM 友好的插件（支持复制为 Markdown）
-   - `markdown-it-container` - 自定义容器插件
-   - `shiki` - 代码语法高亮
-   - `@varlet/ui` - UI 组件库（用于示例）
-   - `unplugin-auto-import` - 自动导入
-   - `unplugin-vue-components` - 组件自动注册
-
-4. **主题配置：**
-   - 中文界面
-   - 支持明暗主题
-   - 本地搜索
-   - 移动端适配
-   - GitHub 编辑链接
-
 ### 代码检查
 
 ```bash
@@ -146,132 +164,30 @@ bun run preview
 oxlint
 ```
 
-## 构建系统架构
+### 文档
 
-自定义构建系统（`build/`）使用 tsdown 并按依赖感知的批次处理包：
+```bash
+# 启动文档开发服务器
+cd docs
+bun run dev
 
-1. **包配置**（`build/pkgs.ts`）：定义所有包及其构建配置
-2. **构建编排**（`build/repo.ts`）：
-   - 读取 package.json 文件
-   - 解析依赖图
-   - 分批构建（依赖已满足的包并行构建）
-   - 生成统计信息和 bundle 可视化
-
-输出格式：
-- 仅 ES 模块（`.js` 扩展名）
-- TypeScript 类型声明（`.d.ts`）
-- 默认启用 sourcemap
-- 压缩的生产构建
-
-## 包导出模式
-
-所有包都遵循双导出模式：
-```json
-{
-  ".": {
-    "import": "./dist/index.js",
-    "types": "./dist/index.d.ts"
-  },
-  "./src": {
-    "import": "./src/index.ts",
-    "types": "./src/index.ts"
-  }
-}
+# 构建文档
+cd docs
+bun run build
 ```
-
-这允许在开发时直接使用源代码，在生产环境使用编译后的代码。
-
-## 主要包功能
-
-### @cat-kit/core
-包含按类别组织的基础工具：
-- `data/` - 数组、字符串、对象、数字、类型工具、验证器、转换器
-- `data-structure/` - 树、森林实现
-- `date/` - 日期操作
-- `env/` - 环境检测
-- `optimize/` - 并行执行、安全包装器、定时器
-- `pattern/` - 观察者模式实现
-
-### @cat-kit/fe
-前端专用工具：
-- `storage/` - Cookie、IndexedDB 和统一存储 API
-- `virtualizer/` - 虚拟滚动实现
-- `web-api/` - 剪贴板、权限
-- `file/` - 文件读取和保存工具
-
-### @cat-kit/http
-带插件架构的 HTTP 客户端：
-- 引擎抽象（XHR、Fetch）
-- 横切关注点的插件系统
-- 内置插件：token 管理、方法覆盖
-
-### @cat-kit/excel
-支持流式处理的现代 Excel 库：
-- 不可变数据结构（Cell、Row、Worksheet、Workbook）
-- 基于流的读取（`readWorkbookStream`）和写入（`StreamWorkbookWriter`）
-- 用于小文件的非流式 API
-- 通过 `ExcelWorkerClient` 支持 Web Worker
-- 地址、日期和转换的辅助函数
 
 ## TypeScript 配置
 
 项目使用 TypeScript 项目引用（在根 `tsconfig.json` 中定义）。每个包都有自己的 `tsconfig.json`，继承自 `ts-conf-base`。
 
-## 在此代码库中工作
+## 工作空间 AGENTS.md 文件位置
 
-### 添加新工具
+位于工作空间根目录下(`<workspace-dir>/AGENTS.md`), 工作空间的定义位于 `package.json` 文件的`workspace`属性中.
 
-1. 将源代码添加到相应包的 `src/` 目录
-2. 从包的 `src/index.ts` 导出
-3. 在 `packages/tests/<package-name>/` 添加测试
-4. 使用 `cd build && bun run build` 构建并验证
+## 重要提醒
 
-### 修改构建配置
-
-编辑 `build/pkgs.ts` 以：
-- 向构建流程添加新包
-- 修改外部依赖
-- 更改构建输入文件
-
-### 跨包依赖
-
-在包之间添加依赖时：
-1. 使用工作区依赖更新 `package.json`：`"@cat-kit/core": "workspace:*"`
-2. 如果合适，添加到 `peerDependencies`
-3. 更新 `build/pkgs.ts` 中的 deps 数组
-4. 在构建配置中添加到 `external` 数组
-
-### 文档更新
-
-文档文件位于 `docs/packages/<package-name>/`。添加或更新文档时：
-
-1. **添加新的文档页面：**
-   - 在 `docs/packages/<package-name>/` 下创建 `.md` 文件
-   - 在 `docs/.vitepress/config.ts` 的 `sidebar` 配置中添加导航链接
-
-2. **添加交互式示例：**
-   - 在 `docs/examples/<package-name>/` 下创建 `.vue` 示例文件
-   - 在文档中使用自定义容器语法引用示例：
-     ```markdown
-     ::: demo <package-name>/<example-name>.vue
-     :::
-     ```
-   - 示例组件会被自动导入和注册
-   - 示例代码会被自动提取并高亮显示
-
-3. **示例组件要求：**
-   - 使用 Vue 3 单文件组件（SFC）格式
-   - 可以导入项目中的任何包（`@cat-kit/*`）, 并优先使用这些包来演示任何示例
-   - 可以使用 `@varlet/ui` 组件库
-   - 组件会在文档页面中直接运行
-
-4. **自定义主题和样式：**
-   - 全局样式：`docs/.vitepress/theme/styles/custom.css`
-   - 主题组件：`docs/.vitepress/theme/components/`
-   - 主题入口：`docs/.vitepress/theme/index.ts`
-
-5. **相关文件：**
-   - 文档主配置：`docs/.vitepress/config.ts`
-   - 共享常量：`docs/.vitepress/shared.ts`
-   - Demo 容器 Markdown 插件：`docs/.vitepress/markdown/demo-container.ts`
-   - 示例导入 Vite 插件：`docs/.vitepress/plugins/import-examples.ts`
+1. **始终先读取工作空间的 AGENTS.md 文件**再开始编码
+2. **关注依赖关系**，如果工作空间依赖其他包，也要读取依赖包的指导文件
+3. **遵循各工作空间的特定规范**，不要假设通用做法
+4. **如果不确定目标工作空间，先询问用户**
+5. **优先使用简单直接的解决方案**，避免过度工程化

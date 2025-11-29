@@ -1,7 +1,7 @@
 {
   "name": "@cat-kit/tests",
   "private": true,
-  "version": "4.0.0",
+  "version": "1.0.0-alpha.1",
   "description": "喵喵工具箱测试",
   "main": "index.ts",
   "scripts": {
