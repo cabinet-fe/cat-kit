@@ -28,7 +28,7 @@
     },
     "docs": {
       "name": "@cat-kit/docs",
-      "version": "4.0.0",
+      "version": "1.0.0-alpha.1",
       "devDependencies": {
         "@cat-kit/be": "workspace:*",
         "@cat-kit/core": "workspace:*",
@@ -49,12 +49,12 @@
     },
     "packages/be": {
       "name": "@cat-kit/be",
-      "version": "4.0.0",
+      "version": "1.0.0-alpha.1",
       "devDependencies": {
         "@cat-kit/core": "workspace:*",
       },
       "peerDependencies": {
-        "@cat-kit/core": ">=4.0.0",
+        "@cat-kit/core": ">=1.0.0-alpha.1",
       },
       "optionalPeers": [
         "@cat-kit/core",
@@ -62,11 +62,11 @@
     },
     "packages/core": {
       "name": "@cat-kit/core",
-      "version": "4.0.0",
+      "version": "1.0.0-alpha.1",
     },
     "packages/excel": {
       "name": "@cat-kit/excel",
-      "version": "4.0.0",
+      "version": "1.0.0-alpha.1",
       "dependencies": {
         "@cat-kit/core": "workspace:*",
       },
@@ -77,12 +77,12 @@
     },
     "packages/fe": {
       "name": "@cat-kit/fe",
-      "version": "4.0.0",
+      "version": "1.0.0-alpha.1",
       "devDependencies": {
         "@cat-kit/core": "workspace:*",
       },
       "peerDependencies": {
-        "@cat-kit/core": ">=4.0.0",
+        "@cat-kit/core": ">=1.0.0-alpha.1",
       },
       "optionalPeers": [
         "@cat-kit/core",
@@ -90,17 +90,17 @@
     },
     "packages/http": {
       "name": "@cat-kit/http",
-      "version": "4.0.0",
+      "version": "1.0.0-alpha.1",
       "devDependencies": {
         "@cat-kit/core": "workspace:*",
       },
       "peerDependencies": {
-        "@cat-kit/core": ">=4.0.0",
+        "@cat-kit/core": ">=1.0.0-alpha.1",
       },
     },
     "packages/tests": {
       "name": "@cat-kit/tests",
-      "version": "4.0.0",
+      "version": "1.0.0-alpha.1",
       "devDependencies": {
         "@cat-kit/be": "workspace:*",
         "@cat-kit/core": "workspace:*",
