@@ -36,10 +36,9 @@ function getDecimalPartByPrecision(
   }
   let roundUp = false
 
-  if (raw.length === precision) {
-  } else if (raw.length < precision) {
+  if (raw.length < precision) {
     raw = raw.padEnd(precision, '0')
-  } else {
+  } else if (raw.length > precision) {
     raw = String(
       Math.round(+(raw.slice(0, precision) + '.' + raw.slice(precision)))
     )
@@ -70,7 +69,8 @@ function getDecimalPartByMinMaxPrecision(
 
   if (maxPrecision !== undefined && raw.length > maxPrecision) {
     ;[raw, roundUp] = getDecimalPartByPrecision(raw, maxPrecision)
-    raw = String(+`0.${raw}`).slice(2)
+    // 移除尾部多余的零
+    raw = raw.replace(/0+$/, '')
   }
 
   if (minPrecision !== undefined && raw.length < minPrecision) {
@@ -99,6 +99,7 @@ function getDecimalPart(raw: string, config: CurrencyConfig) {
   })
 }
 
+// 0.35, 1 ->
 /**
  * 将数字格式化为指定精度的字符串
  * @param v 数字
@@ -119,6 +120,7 @@ function toFixed(
     int = String(+int + 1)
   }
   if (!decimalPart) return int
+
   return int + '.' + decimalPart
 }
 
@@ -244,7 +246,7 @@ const CurrencyFormatters: Record<
  * 数字包装类, 提供链式调用
  */
 class Num {
-  private v!: number
+  private v: number
 
   constructor(n: number) {
     this.v = n
@@ -485,6 +487,7 @@ export const $n = {
    * @example $n.div(0.3, 0.1) // 3
    */
   div(num1: number, num2: number): number {
+    if (num2 === 0) return num1 >= 0 ? Infinity : -Infinity
     const { ints } = int([num1, num2])
     return ints[0]! / ints[1]!
   },
@@ -501,9 +504,14 @@ export const $n = {
   /**
    * 计算表达式
    * @param expr 表达式字符串, 如 '1 + 3 * (4 / 2)'
+   * @throws {Error} 如果表达式为空
    */
   calc(expr: string): number {
-    const tokens = tokenize(expr)
+    const trimmed = expr.trim()
+    if (!trimmed) {
+      throw new Error('Empty expression')
+    }
+    const tokens = tokenize(trimmed)
     return parse(tokens)
   }
 }
@@ -537,7 +545,8 @@ function tokenize(expr: string): Token[] {
           i++
         } else if (
           (c === 'e' || c === 'E') &&
-          (i + 1 < expr.length && /[0-9+-]/.test(expr[i + 1]!))
+          i + 1 < expr.length &&
+          /[0-9+-]/.test(expr[i + 1]!)
         ) {
           num += c
           i++
@@ -573,6 +582,14 @@ function tokenize(expr: string): Token[] {
   return tokens
 }
 
+/** 运算符优先级 */
+const PRECEDENCE: Record<string, number> = {
+  '+': 1,
+  '-': 1,
+  '*': 2,
+  '/': 2
+}
+
 /**
  * 解析并计算词法单元数组
  * 使用双栈法（操作数栈和操作符栈）进行计算
@@ -581,14 +598,6 @@ function tokenize(expr: string): Token[] {
 function parse(tokens: Token[]): number {
   const values: number[] = []
   const ops: string[] = []
-
-  /** 运算符优先级 */
-  const precedence: Record<string, number> = {
-    '+': 1,
-    '-': 1,
-    '*': 2,
-    '/': 2
-  }
 
   /**
    * 应用栈顶运算符
@@ -629,7 +638,7 @@ function parse(tokens: Token[]): number {
       while (
         ops.length &&
         ops[ops.length - 1] !== '(' &&
-        precedence[ops[ops.length - 1]!]! >= precedence[token.value]!
+        PRECEDENCE[ops[ops.length - 1]!]! >= PRECEDENCE[token.value]!
       ) {
         applyOp()
       }

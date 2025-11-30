@@ -5,7 +5,8 @@
       "Bash(bun add:*)",
       "Bash(bun run dev)",
       "Bash(timeout /t 3)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(bun test:*)"
     ],
     "deny": [],
     "ask": []
