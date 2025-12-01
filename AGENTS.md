@@ -96,18 +96,12 @@ Cat-Kit（喵喵工具箱）是一个基于 monorepo 的 TypeScript 工具库，
 
 ```typescript
 // ✅ 正确：类型安全，使用泛型
-export function map<T, U>(
-  array: T[],
-  fn: (item: T, index: number) => U
-): U[] {
+export function map<T, U>(array: T[], fn: (item: T, index: number) => U): U[] {
   return array.map(fn)
 }
 
 // ✅ 正确：完整的类型定义
-export function updateObject<T extends object>(
-  obj: T,
-  updates: Partial<T>
-): T {
+export function updateObject<T extends object>(obj: T, updates: Partial<T>): T {
   return { ...obj, ...updates }
 }
 
@@ -123,6 +117,7 @@ export function addItem(array, item) {
 编写支持 tree-shaking 的代码，减小最终打包体积：
 
 **1. 使用具名导出，避免默认导出**：
+
 ```typescript
 // ✅ 正确：具名导出，支持 tree-shaking
 export function add(a: number, b: number): number {
@@ -141,6 +136,7 @@ export default {
 ```
 
 **2. 避免副作用，使用纯函数**：
+
 ```typescript
 // ✅ 正确：纯函数，无副作用
 export function formatDate(date: Date): string {
@@ -156,6 +152,7 @@ export function formatDate(date: Date): string {
 ```
 
 **3. 拆分大型工具类，独立导出函数**：
+
 ```typescript
 // ✅ 正确：独立函数，可按需引入
 // utils/string/capitalize.ts
@@ -178,6 +175,7 @@ export class StringUtils {
 ```
 
 **4. 避免循环依赖**：
+
 ```typescript
 // ✅ 正确：清晰的依赖关系
 // a.ts
@@ -200,6 +198,7 @@ export function funcB() { return funcA() }
 ```
 
 **5. 使用 `/*#__PURE__*/` 注释标记纯调用**：
+
 ```typescript
 // ✅ 正确：标记纯函数调用
 export const config = /*#__PURE__*/ Object.freeze({
@@ -217,7 +216,7 @@ export const logger = /*#__PURE__*/ createLogger({
 
 所有公共 API 必须有完整的 JSDoc 注释：
 
-```typescript
+````typescript
 /**
  * 过滤数组中的元素
  * @param array - 源数组
@@ -236,9 +235,10 @@ export function filter<T>(
 ): T[] {
   return array.filter(predicate)
 }
-```
+````
 
 **文档注释要求**：
+
 - 简洁描述功能
 - 使用 `@param` 描述所有参数
 - 使用 `@returns` 描述返回值
@@ -268,16 +268,13 @@ export async function loadConfig(path: string): Promise<Config> {
     const content = await readFile(path, 'utf-8')
     return JSON.parse(content)
   } catch (error) {
-    throw new ConfigError(
-      `Failed to load config from ${path}`,
-      path,
-      error
-    )
+    throw new ConfigError(`Failed to load config from ${path}`, path, error)
   }
 }
 ```
 
 **错误处理原则**：
+
 - 提供清晰的错误信息
 - 保留原始错误信息（使用 `originalError` 或 `cause`）
 - 使用有意义的错误类名（如 `ValidationError`、`NetworkError`）
@@ -285,12 +282,14 @@ export async function loadConfig(path: string): Promise<Config> {
 ### 性能考虑
 
 **通用原则**：
+
 - 避免不必要的循环和复杂度
 - 在文档中说明性能特征（时间复杂度、空间复杂度）
 - 对于大数据集，考虑使用生成器或流式处理
 - 避免在循环中创建不必要的对象
 
 **示例**：
+
 ```typescript
 /**
  * 数组去重
@@ -326,6 +325,7 @@ export function unique<T>(array: T[]): T[] {
 - 生产环境使用编译后的代码（`@cat-kit/core`）
 
 **导出策略**：
+
 - 所有公共 API 都通过 `src/index.ts` 统一导出
 - 模块级导出通过模块的 `index.ts` 管理
 - 避免导出内部实现细节
@@ -383,6 +383,7 @@ it('should format date correctly', () => {
 ### 测试最佳实践
 
 **1. 测试边界情况**:
+
 ```typescript
 describe('divide', () => {
   it('should divide positive numbers', () => {
@@ -400,6 +401,7 @@ describe('divide', () => {
 ```
 
 **2. 测试隔离** - 每个测试应该独立:
+
 ```typescript
 // ✅ 正确：每个测试独立
 describe('Calculator', () => {
@@ -420,6 +422,7 @@ describe('Calculator', () => {
 ```
 
 **3. 描述性测试名称**:
+
 ```typescript
 // ✅ 正确：清晰描述行为
 it('should return empty array when input is empty', () => {})
@@ -431,6 +434,7 @@ it('works', () => {})
 ```
 
 **4. 避免测试实现细节**:
+
 ```typescript
 // ✅ 正确：测试公共 API 行为
 it('should filter even numbers', () => {
@@ -504,7 +508,7 @@ bun run build
 
 ## TypeScript 配置
 
-项目使用 TypeScript 项目引用（在根 `tsconfig.json` 中定义）。每个包都有自己的 `tsconfig.json`，继承自 `ts-conf-base`。
+项目使用 TypeScript 项目引用（在根 `tsconfig.json` 中定义）。每个包都有自己的 `tsconfig.json`，继承自 `@cat-kit/tsconfig`。
 
 ## 工作空间 AGENTS.md 文件位置
 
