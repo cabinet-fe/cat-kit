@@ -52,7 +52,7 @@ export interface TableData<T = any> {
  */
 export interface WorksheetOptions {
   /** 直接提供行数据 */
-  rows?: CellValue[][]
+  rows?: Array<Row | ReadonlyArray<CellValue | Cell>>
   /** 表格数据（语法糖） */
   table?: TableData
   /** 合并单元格 */
@@ -81,11 +81,19 @@ export class Worksheet {
       this.rows = result.rows
       this.columnWidths = result.columnWidths
     } else if (options?.rows) {
-      // 从行数据初始化
-      this.rows = options.rows.map(rowData => new Row(rowData))
+      // 从行数据初始化，支持 Row 或值数组
+      this.rows = options.rows.map(rowData => this.normalizeRow(rowData))
     } else {
       this.rows = []
     }
+  }
+
+  /**
+   * 将多种行输入形式规范化为 Row
+   */
+  private normalizeRow(row: Row | ReadonlyArray<CellValue | Cell>): Row {
+    if (row instanceof Row) return row
+    return new Row(row)
   }
 
   /**
@@ -181,7 +189,7 @@ export class Worksheet {
    */
   withName(newName: string): Worksheet {
     return new Worksheet(newName, {
-      rows: this.rows.map(row => row.getValues()),
+      rows: [...this.rows],
       mergedCells: [...this.mergedCells],
       columnWidths: { ...this.columnWidths }
     })
@@ -192,7 +200,7 @@ export class Worksheet {
    */
   appendRow(row: Row): Worksheet {
     return new Worksheet(this.name, {
-      rows: [...this.rows, row].map(r => r.getValues()),
+      rows: [...this.rows, row],
       mergedCells: [...this.mergedCells],
       columnWidths: { ...this.columnWidths }
     })
@@ -203,7 +211,7 @@ export class Worksheet {
    */
   appendRows(rows: Row[]): Worksheet {
     return new Worksheet(this.name, {
-      rows: [...this.rows, ...rows].map(r => r.getValues()),
+      rows: [...this.rows, ...rows],
       mergedCells: [...this.mergedCells],
       columnWidths: { ...this.columnWidths }
     })
@@ -246,7 +254,7 @@ export class Worksheet {
    */
   withColumnWidth(columnIndex: number, width: number): Worksheet {
     return new Worksheet(this.name, {
-      rows: this.rows.map(row => row.getValues()),
+      rows: [...this.rows],
       mergedCells: [...this.mergedCells],
       columnWidths: { ...this.columnWidths, [columnIndex]: width }
     })
@@ -257,7 +265,7 @@ export class Worksheet {
    */
   withMergedCell(range: MergedCellRange): Worksheet {
     return new Worksheet(this.name, {
-      rows: this.rows.map(row => row.getValues()),
+      rows: [...this.rows],
       mergedCells: [...this.mergedCells, range],
       columnWidths: { ...this.columnWidths }
     })
@@ -297,7 +305,7 @@ export class Worksheet {
     ]
 
     return new Worksheet(this.name, {
-      rows: newRows.map(r => r.getValues()),
+      rows: newRows,
       mergedCells: [...this.mergedCells],
       columnWidths: { ...this.columnWidths }
     })
@@ -322,7 +330,7 @@ export class Worksheet {
     ]
 
     return new Worksheet(this.name, {
-      rows: newRows.map(r => r.getValues()),
+      rows: newRows,
       mergedCells: [...this.mergedCells],
       columnWidths: { ...this.columnWidths }
     })
@@ -345,7 +353,7 @@ export class Worksheet {
     ]
 
     return new Worksheet(this.name, {
-      rows: newRows.map(r => r.getValues()),
+      rows: newRows,
       mergedCells: [...this.mergedCells],
       columnWidths: { ...this.columnWidths }
     })
@@ -372,7 +380,7 @@ export class Worksheet {
     ]
 
     return new Worksheet(this.name, {
-      rows: newRows.map(r => r.getValues()),
+      rows: newRows,
       mergedCells: [...this.mergedCells],
       columnWidths: { ...this.columnWidths }
     })
@@ -410,7 +418,7 @@ export class Worksheet {
     }
 
     return new Worksheet(this.name, {
-      rows: newRows.map(r => r.getValues()),
+      rows: newRows,
       mergedCells: [...this.mergedCells],
       columnWidths: newColumnWidths
     })
@@ -455,7 +463,7 @@ export class Worksheet {
     }
 
     return new Worksheet(this.name, {
-      rows: newRows.map(r => r.getValues()),
+      rows: newRows,
       mergedCells: [...this.mergedCells],
       columnWidths: newColumnWidths
     })
@@ -498,7 +506,7 @@ export class Worksheet {
     }
 
     return new Worksheet(this.name, {
-      rows: newRows.map(r => r.getValues()),
+      rows: newRows,
       mergedCells: [...this.mergedCells],
       columnWidths: newColumnWidths
     })
@@ -545,7 +553,7 @@ export class Worksheet {
     }
 
     return new Worksheet(this.name, {
-      rows: newRows.map(r => r.getValues()),
+      rows: newRows,
       mergedCells: [...this.mergedCells],
       columnWidths: newColumnWidths
     })
@@ -603,7 +611,7 @@ export class Worksheet {
     newRows[rowIndex] = newRow
 
     return new Worksheet(this.name, {
-      rows: newRows.map(r => r.getValues()),
+      rows: newRows,
       mergedCells: [...this.mergedCells],
       columnWidths: { ...this.columnWidths }
     })
@@ -689,7 +697,7 @@ export class Worksheet {
     newRows[rowIndex] = newRow
 
     return new Worksheet(this.name, {
-      rows: newRows.map(r => r.getValues()),
+      rows: newRows,
       mergedCells: [...this.mergedCells],
       columnWidths: { ...this.columnWidths }
     })
@@ -722,7 +730,7 @@ export class Worksheet {
     })
 
     return new Worksheet(this.name, {
-      rows: newRows.map(r => r.getValues()),
+      rows: newRows,
       mergedCells: [...this.mergedCells],
       columnWidths: { ...this.columnWidths }
     })

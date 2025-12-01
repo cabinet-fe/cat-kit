@@ -72,13 +72,9 @@ function generateXLSXFiles(workbook: Workbook): Record<string, Uint8Array> {
     )
   })
 
-  // 元数据文件
-  if (workbook.metadata) {
-    files['docProps/core.xml'] = strToU8(
-      generateCorePropsXML(workbook.metadata)
-    )
-    files['docProps/app.xml'] = strToU8(generateAppPropsXML(workbook))
-  }
+  // 元数据文件（始终生成，保持部件完整性）
+  files['docProps/core.xml'] = strToU8(generateCorePropsXML(workbook.metadata))
+  files['docProps/app.xml'] = strToU8(generateAppPropsXML(workbook))
 
   return files
 }
@@ -96,11 +92,6 @@ function generateContentTypes(workbook: Workbook): string {
     )
     .join('\n  ')
 
-  const metadataOverrides = workbook.metadata
-    ? `<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
-  <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>`
-    : ''
-
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
@@ -108,8 +99,10 @@ function generateContentTypes(workbook: Workbook): string {
   <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
   <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
   <Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>
+  <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
+  <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
   ${sheetOverrides}
-  ${metadataOverrides ? metadataOverrides + '\n  ' : ''}</Types>`
+  </Types>`
 }
 
 /**
@@ -693,17 +686,13 @@ function generateMergeCellsXML(sheet: Worksheet): string {
 /**
  * 生成 docProps/core.xml（核心属性）
  */
-function generateCorePropsXML(metadata: WorkbookMetadata): string {
-  const creator = escapeXML(metadata.creator || 'cat-kit/excel')
+function generateCorePropsXML(metadata?: WorkbookMetadata): string {
+  const creator = escapeXML(metadata?.creator || 'cat-kit/excel')
   const lastModifiedBy = escapeXML(
-    metadata.lastModifiedBy || metadata.creator || 'cat-kit/excel'
+    metadata?.lastModifiedBy || metadata?.creator || 'cat-kit/excel'
   )
-  const created = metadata.created
-    ? metadata.created.toISOString()
-    : new Date().toISOString()
-  const modified = metadata.modified
-    ? metadata.modified.toISOString()
-    : new Date().toISOString()
+  const created = (metadata?.created || new Date()).toISOString()
+  const modified = (metadata?.modified || new Date()).toISOString()
 
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">

@@ -14,7 +14,8 @@ import type {
   CellValue,
   CellStyle,
   CellFormula,
-  CellError
+  CellError,
+  MergedCellRange
 } from '../core/types'
 import { excelNumberToDate, isDateFormat } from '../helpers/date'
 import { FileFormatError, ParseError } from '../errors'
@@ -155,7 +156,7 @@ class XLSXReader {
 
     // 5. 读取所有工作表
     const sheets = workbookData.sheets.map(sheetInfo =>
-      this.parseWorksheet(sheetInfo.name, sheetInfo.id)
+      this.parseWorksheet(sheetInfo.name, sheetInfo.path)
     )
 
     return new Workbook(workbookData.name || '工作簿', { sheets, metadata })
@@ -407,7 +408,7 @@ class XLSXReader {
    */
   private parseWorkbookStructure(): {
     name: string
-    sheets: Array<{ name: string; id: number }>
+    sheets: Array<{ name: string; path: string }>
   } {
     const workbookFile = this.getFile('xl/workbook.xml')
     if (!workbookFile) {
@@ -427,10 +428,15 @@ class XLSXReader {
         ? workbook.sheets.sheet
         : [workbook.sheets.sheet]
 
-      const sheets = sheetElements.map((sheet, index) => ({
-        name: sheet['@_name'] || `Sheet${index + 1}`,
-        id: parseInt(sheet['@_sheetId'] || String(index + 1))
-      }))
+      const rels = this.parseWorkbookRels()
+
+      const sheets = sheetElements.map((sheet, index) => {
+        const sheetName = sheet['@_name'] || `Sheet${index + 1}`
+        const sheetId = parseInt(sheet['@_sheetId'] || String(index + 1))
+        const relId = sheet['@_r:id'] as string | undefined
+        const path = this.resolveSheetPath(relId, sheetId, rels)
+        return { name: sheetName, path }
+      })
 
       return {
         name: '工作簿',
@@ -442,12 +448,61 @@ class XLSXReader {
   }
 
   /**
+   * 解析 workbook 关系，获取 r:id -> sheet 路径映射
+   */
+  private parseWorkbookRels(): Map<string, string> {
+    const relsFile = this.getFile('xl/_rels/workbook.xml.rels')
+    const rels = new Map<string, string>()
+
+    if (!relsFile) return rels
+
+    try {
+      const xml = strFromU8(relsFile)
+      const data = this.parser.parse(xml) as any
+      const relationships = data.Relationships?.Relationship
+      if (!relationships) return rels
+
+      const relArray = Array.isArray(relationships)
+        ? relationships
+        : [relationships]
+
+      for (const rel of relArray) {
+        const id = rel['@_Id']
+        const target = rel['@_Target']
+        if (id && target) {
+          rels.set(id, target)
+        }
+      }
+    } catch (error) {
+      console.warn('解析 workbook 关系失败:', error)
+    }
+
+    return rels
+  }
+
+  /**
+   * 根据关系或 sheetId 解析工作表文件路径
+   */
+  private resolveSheetPath(
+    relId: string | undefined,
+    sheetId: number,
+    rels: Map<string, string>
+  ): string {
+    const target =
+      (relId ? rels.get(relId) : undefined) ||
+      `worksheets/sheet${sheetId}.xml`
+
+    const cleaned = target.startsWith('/') ? target.slice(1) : target
+    return cleaned.startsWith('xl/') ? cleaned : `xl/${cleaned}`
+  }
+
+  /**
    * 解析单个工作表
    */
-  private parseWorksheet(name: string, sheetId: number): Worksheet {
-    const sheetFile = this.getFile(`xl/worksheets/sheet${sheetId}.xml`)
+  private parseWorksheet(name: string, sheetPath: string): Worksheet {
+    const sheetFile = this.getFile(sheetPath)
     if (!sheetFile) {
-      throw new FileFormatError(`未找到 sheet${sheetId}.xml`)
+      throw new FileFormatError(`未找到 ${sheetPath}`)
     }
 
     try {
@@ -467,9 +522,12 @@ class XLSXReader {
           : [worksheet.sheetData.row]
 
         // 获取最大行号
-        const maxRow = Math.max(
-          ...rowElements.map((r: any) => parseInt(r['@_r'] || '0'))
-        )
+        const maxRow =
+          rowElements.length > 0
+            ? Math.max(
+                ...rowElements.map((r: any) => parseInt(r['@_r'] || '0'))
+              )
+            : 0
 
         // 创建空行数组
         for (let i = 0; i < maxRow; i++) {
@@ -479,29 +537,28 @@ class XLSXReader {
         // 填充数据
         for (const rowElement of rowElements) {
           const rowIndex = parseInt(rowElement['@_r'] || '1') - 1
-          const cells = this.parseRowCells(rowElement)
-          if (rowIndex >= 0 && rowIndex < maxRow) {
-            rows[rowIndex] = new Row(cells)
+          const { cells, options } = this.parseRowCells(rowElement)
+
+          // 如果行索引超出当前长度，补齐空行
+          while (rows.length <= rowIndex) {
+            rows.push(new Row([]))
+          }
+
+          if (rowIndex >= 0) {
+            rows[rowIndex] = new Row(cells, options)
           }
         }
       }
 
       // 解析合并单元格
       const mergedCells = this.parseMergedCells(worksheet)
+      const columnWidths = this.parseColumnWidths(worksheet)
 
-      const sheet = new Worksheet(name, {
-        rows: rows.map(row => row.cells.map(cell => cell.value))
+      return new Worksheet(name, {
+        rows,
+        mergedCells,
+        columnWidths
       })
-
-      // 应用合并单元格
-      if (mergedCells.length > 0) {
-          // 这里需要 Worksheet 支持设置 mergedCells，目前构造函数不支持，
-          // 但可以通过直接赋值或扩展 Worksheet 类来支持。
-          // 暂时忽略，因为 Worksheet 类定义中可能没有直接暴露 mergedCells setter
-          // TODO: 完善 Worksheet 类以支持合并单元格的直接设置
-      }
-
-      return sheet
     } catch (error) {
       throw new ParseError(`解析工作表 ${name} 失败`, { error })
     }
@@ -510,8 +567,12 @@ class XLSXReader {
   /**
    * 解析行中的单元格
    */
-  private parseRowCells(rowElement: any): Cell[] {
-    if (!rowElement.c) return []
+  private parseRowCells(rowElement: any): {
+    cells: Cell[]
+    options: { height?: number; hidden?: boolean }
+  } {
+    if (!rowElement.c)
+      return { cells: [], options: this.parseRowOptions(rowElement) }
 
     const cellElements = Array.isArray(rowElement.c)
       ? rowElement.c
@@ -540,12 +601,27 @@ class XLSXReader {
         ? parseInt(cellElement['@_s'])
         : undefined
       const value = this.parseCellValue(cellElement, styleIndex)
-      const style = this.parseCellStyle(cellElement)
+      const style = this.parseCellStyle(styleIndex)
 
       cells[colIndex] = new Cell(value, style)
     }
 
-    return cells
+    return { cells, options: this.parseRowOptions(rowElement) }
+  }
+
+  /**
+   * 解析行级选项（高度、隐藏）
+   */
+  private parseRowOptions(rowElement: any): { height?: number; hidden?: boolean } {
+    const options: { height?: number; hidden?: boolean } = {}
+    if (rowElement['@_ht']) {
+      const height = parseFloat(rowElement['@_ht'])
+      if (!isNaN(height)) options.height = height
+    }
+    if (rowElement['@_hidden'] !== undefined) {
+      options.hidden = rowElement['@_hidden'] === '1' || rowElement['@_hidden'] === true
+    }
+    return options
   }
 
   /**
@@ -644,21 +720,16 @@ class XLSXReader {
   /**
    * 解析单元格样式
    */
-  private parseCellStyle(cellElement: any): CellStyle | undefined {
-    const styleIndex = cellElement['@_s']
-    if (!styleIndex) return undefined
-
-    const index = parseInt(styleIndex)
+  private parseCellStyle(styleIndex?: number): CellStyle | undefined {
+    if (styleIndex === undefined || styleIndex === null) return undefined
+    const index = typeof styleIndex === 'number' ? styleIndex : parseInt(styleIndex)
     return this.styles[index]
   }
 
   /**
    * 解析合并单元格
    */
-  private parseMergedCells(worksheet: any): Array<{
-    start: { row: number; column: number }
-    end: { row: number; column: number }
-  }> {
+  private parseMergedCells(worksheet: any): MergedCellRange[] {
     if (!worksheet.mergeCells?.mergeCell) return []
 
     const mergeCellElements = Array.isArray(worksheet.mergeCells.mergeCell)
@@ -674,6 +745,34 @@ class XLSXReader {
         end: this.parseAddress(end || start)
       }
     })
+  }
+
+  /**
+   * 解析列宽信息
+   */
+  private parseColumnWidths(worksheet: any): Record<number, number> {
+    const columnWidths: Record<number, number> = {}
+
+    if (!worksheet.cols?.col) return columnWidths
+
+    const cols = Array.isArray(worksheet.cols.col)
+      ? worksheet.cols.col
+      : [worksheet.cols.col]
+
+    for (const col of cols) {
+      const min = parseInt(col['@_min'] || '1')
+      const max = parseInt(col['@_max'] || String(min))
+      const widthRaw = col['@_width']
+      const width = widthRaw !== undefined ? parseFloat(widthRaw) : undefined
+
+      if (!width || isNaN(width)) continue
+
+      for (let idx = min; idx <= max; idx++) {
+        columnWidths[idx - 1] = width
+      }
+    }
+
+    return columnWidths
   }
 
   /**

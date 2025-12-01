@@ -5,9 +5,10 @@
 **主要特性：**
 
 - 不可变 `Cell` / `Row` / `Worksheet` / `Workbook` 数据结构，易于链式操作与快照管理
+- 保真读写单元格样式、列宽与合并单元格，日期格式自动识别
 - `readWorkbook`、`readWorkbookStream` 支持完整解析与行级流式解析
 - `StreamWorkbookWriter` 流式写入，降低大数据量下的内存峰值
-- 地址、日期格式转换工具，以及基础的 Web Worker 客户端
+- 地址、日期格式转换工具，以及支持读/写的 Web Worker 客户端
 
 ## 安装
 
@@ -146,6 +147,8 @@ while (true) {
 }
 ```
 
+> ⚠️ 流式模式在解析时按工作表逐步解压并按 `<row>` 片段增量产出，`batchSize` 控制解析过程的让步频率，可减少主线程占用；处理超大文件时仍需确保可容纳单个工作表的 XML 数据。
+
 ## 流式写入
 
 ```typescript
@@ -165,6 +168,15 @@ import { ExcelWorkerClient } from '@cat-kit/excel'
 
 const client = new ExcelWorkerClient(new URL('./excel.worker', import.meta.url))
 const workbook = await client.readWorkbook(file)
+
+// 在 Worker 中完成写入（可传 Workbook 实例或可序列化的 plain object）
+const blob = await client.writeWorkbook({
+  name: '报表',
+  sheets: [
+    { name: 'Sheet1', rows: [['A1', 'B1'], ['A2', 'B2']] }
+  ]
+})
+
 // 处理完毕后主动释放
 client.terminate()
 ```

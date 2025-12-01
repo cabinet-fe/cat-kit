@@ -315,6 +315,16 @@ describe('对象工具函数', () => {
 
         expect(o(obj).get('a.b.c')).toBe('value')
       })
+
+      it('缺少路径时应该返回 undefined 而不是抛错', () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const obj = { a: {} }
+
+        expect(o(obj).get('a.missing.prop')).toBeUndefined()
+        expect(warnSpy).toHaveBeenCalled()
+
+        warnSpy.mockRestore()
+      })
     })
 
     describe('set', () => {

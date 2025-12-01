@@ -96,6 +96,21 @@ describe('数据转换函数', () => {
 
       expect(Array.from(converted)).toEqual(Array.from(u8a))
     })
+
+    it('在 Node 环境下应支持大数据且不出现堆栈溢出', () => {
+      const largeArray = new Uint8Array(100000)
+      for (let i = 0; i < largeArray.length; i++) {
+        largeArray[i] = i % 256
+      }
+
+      const base64 = u8a2base64(largeArray)
+      const converted = base642u8a(base64)
+
+      expect(converted.length).toBe(largeArray.length)
+      expect(Array.from(converted.slice(0, 10))).toEqual(
+        Array.from(largeArray.slice(0, 10))
+      )
+    })
   })
 
   describe('obj2query 和 query2obj', () => {
@@ -114,7 +129,7 @@ describe('数据转换函数', () => {
 
       expect(obj).toEqual({
         name: 'John',
-        age: '30',
+        age: 30,
         city: 'Beijing'
       })
     })
@@ -125,7 +140,7 @@ describe('数据转换函数', () => {
 
       expect(obj).toEqual({
         name: 'John',
-        age: '30'
+        age: 30
       })
     })
 
@@ -160,6 +175,20 @@ describe('数据转换函数', () => {
         validkey: 'value',
         anotherkey: 'value2'
       })
+    })
+
+    it('应该无损还原原始类型', () => {
+      const original = {
+        num: 1,
+        bool: true,
+        arr: [1, 'a'],
+        nested: { x: 1 }
+      }
+
+      const query = obj2query(original)
+      const parsed = query2obj(query)
+
+      expect(parsed).toEqual(original)
     })
   })
 

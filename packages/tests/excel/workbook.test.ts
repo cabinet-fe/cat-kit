@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { Workbook, Worksheet } from '@cat-kit/excel/src'
 import type { WorkbookMetadata } from '@cat-kit/excel/src'
+import { unzipSync } from 'fflate'
 
 describe('Workbook', () => {
   describe('构造函数', () => {
@@ -338,6 +339,23 @@ describe('Workbook', () => {
 
       expect(blob).toBeInstanceOf(Blob)
       expect(blob.size).toBeGreaterThan(0)
+    })
+
+    it('没有 metadata 也应输出完整 docProps 部件', async () => {
+      const workbook = new Workbook('MyWorkbook', {
+        sheets: [new Worksheet('Sheet1', { rows: [['A1']] })]
+      })
+
+      const blob = await workbook.write()
+      const buffer = new Uint8Array(await blob.arrayBuffer())
+      const files = unzipSync(buffer)
+
+      expect(files['docProps/core.xml']).toBeDefined()
+      expect(files['docProps/app.xml']).toBeDefined()
+
+      const rels = new TextDecoder().decode(files['_rels/.rels'])
+      expect(rels).toContain('docProps/core.xml')
+      expect(rels).toContain('docProps/app.xml')
     })
   })
 })

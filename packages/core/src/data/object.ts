@@ -207,20 +207,21 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    *
    * @returns 值
    */
-  get<T extends any = any>(prop: string): T {
-    let ret = this.raw
+  get<T extends any = any>(prop: string): T | undefined {
+    let ret: Record<string, any> | undefined = this.raw
 
     const propPath = prop.split('.')
     const lastProp = propPath.pop()!
 
-    propPath.some(p => {
-      ret = ret[p]
-      const e = isEmpty(ret)
-      e && console.warn(`${prop}访问中断`)
-      return e
-    })
+    for (const p of propPath) {
+      ret = ret?.[p]
+      if (isEmpty(ret)) {
+        console.warn(`${prop}访问中断`)
+        return undefined
+      }
+    }
 
-    return ret[lastProp]
+    return ret?.[lastProp] as T | undefined
   }
 
   /**

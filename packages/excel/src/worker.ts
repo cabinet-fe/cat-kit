@@ -1,4 +1,9 @@
 import { readWorkbook } from './reader/xlsx-reader'
+import { Workbook } from './core/workbook'
+import { Worksheet } from './core/worksheet'
+import { Row } from './core/row'
+import { Cell } from './core/cell'
+import type { CellValue, WorkbookMetadata, MergedCellRange } from './core/types'
 
 /**
  * Excel Worker 消息类型
@@ -30,21 +35,15 @@ self.onmessage = async (e: MessageEvent<ExcelWorkerMessage>) => {
         workbook: JSON.parse(JSON.stringify(workbook))
       })
     } else if (type === 'write') {
-      // 重建 Workbook 对象（简化版，假设传入的是数据结构）
-      // 注意：这里需要完善 Workbook 的反序列化逻辑
-      // 暂时假设用户在 Worker 外部构建好 Workbook 数据结构传入
-      // 或者 Worker 内部只负责压缩/解压
+      const { writeWorkbook } = await import('./writer/xlsx-writer')
+      const workbook = rebuildWorkbook(e.data.workbook)
+      const blob = await writeWorkbook(workbook)
 
-      // 由于 writeWorkbook 需要 Workbook 实例（包含方法），
-      // 我们这里暂时无法完美支持直接传入纯数据对象。
-      // 更好的方式是 Worker 仅负责 heavy lifting (zip/unzip)，
-      // 但 fflate 已经是异步的了，所以 Worker 的主要价值在于
-      // 避免大量数据处理（如 XML 解析/生成）阻塞主线程。
-
-      // 鉴于 Workbook 类的复杂性，完全在 Worker 中重建实例比较困难。
-      // 我们这里提供一个基础的 Worker 示例，主要用于演示架构。
-
-      throw new Error('Worker write not fully implemented yet due to serialization complexity')
+      self.postMessage({
+        type: 'write_success',
+        id,
+        data: blob
+      })
     }
   } catch (error: any) {
     self.postMessage({
@@ -53,4 +52,49 @@ self.onmessage = async (e: MessageEvent<ExcelWorkerMessage>) => {
       error: error.message || String(error)
     })
   }
+}
+
+/**
+ * 将可序列化的工作簿对象重建为 Workbook 实例
+ */
+function rebuildWorkbook(data: any): Workbook {
+  if (data instanceof Workbook) return data
+
+  const sheets = Array.isArray(data?.sheets)
+    ? data.sheets.map(rebuildWorksheet)
+    : []
+
+  const metadata: WorkbookMetadata | undefined = data?.metadata
+
+  return new Workbook(data?.name || '工作簿', {
+    sheets,
+    metadata
+  })
+}
+
+function rebuildWorksheet(sheet: any): Worksheet {
+  const rows = Array.isArray(sheet?.rows)
+    ? sheet.rows.map((row: any) => {
+        // JSON 序列化后的 Row 形如 { cells: [...], height, hidden }
+        if (Array.isArray(row?.cells)) {
+          const cells = row.cells.map(
+            (cell: any) => new Cell(cell?.value as CellValue, cell?.style)
+          )
+          return new Row(cells, {
+            height: row.height,
+            hidden: row.hidden
+          })
+        }
+        return new Row(row as CellValue[])
+      })
+    : []
+
+  const mergedCells: MergedCellRange[] = sheet?.mergedCells || []
+  const columnWidths: Record<number, number> = sheet?.columnWidths || {}
+
+  return new Worksheet(sheet?.name || 'Sheet', {
+    rows,
+    mergedCells,
+    columnWidths
+  })
 }

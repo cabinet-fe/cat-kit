@@ -318,6 +318,50 @@ describe('Worksheet', () => {
     })
   })
 
+  describe('格式和结构保留', () => {
+    it('链式操作不应移除样式、合并和列宽', () => {
+      const sheet = new Worksheet('Sheet1', {
+        rows: [
+          new Row([
+            new Cell('A1', { font: { bold: true } }),
+            new Cell('B1')
+          ])
+        ],
+        mergedCells: [
+          { start: { row: 0, column: 0 }, end: { row: 0, column: 1 } }
+        ],
+        columnWidths: { 0: 25 }
+      })
+
+      const updated = sheet
+        .appendRow(new Row([new Cell('C1')]))
+        .withName('Sheet1-renamed')
+        .withColumnWidth(1, 15)
+
+      expect(updated.getCell(0, 0)?.style?.font?.bold).toBe(true)
+      expect(updated.mergedCells).toHaveLength(1)
+      expect(updated.columnWidths[0]).toBe(25)
+      expect(updated.columnWidths[1]).toBe(15)
+    })
+
+    it('updateCell 不应清除同一行其他单元格样式', () => {
+      const sheet = new Worksheet('Sheet1', {
+        rows: [
+          new Row([
+            new Cell('Styled', { font: { bold: true, color: '#ff0000' } }),
+            new Cell('Original')
+          ])
+        ]
+      })
+
+      const updated = sheet.updateCell('B1', 'Replaced')
+
+      expect(updated.getCell('A1')?.style?.font?.bold).toBe(true)
+      expect(updated.getCell('A1')?.style?.font?.color).toBe('#ff0000')
+      expect(updated.getCell('B1')?.value).toBe('Replaced')
+    })
+  })
+
   describe('迭代器', () => {
     it('应该支持 for...of 循环', () => {
       const sheet = new Worksheet('Sheet1', {

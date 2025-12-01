@@ -1,5 +1,5 @@
 {
-  "extends": "ts-conf-base/tsconfig.web.json",
+  "extends": "@cat-kit/tsconfig/tsconfig.web.json",
   "compilerOptions": {
     "composite": true,
     "incremental": true,

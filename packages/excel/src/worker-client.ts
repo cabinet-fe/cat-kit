@@ -1,4 +1,5 @@
 import type { ExcelWorkerMessage, ExcelWorkerResponse } from './worker'
+import type { Workbook } from './core/workbook'
 
 /**
  * Excel Worker 客户端
@@ -20,6 +21,13 @@ export class ExcelWorkerClient {
    */
   async readWorkbook(data: Blob | ArrayBuffer | Uint8Array): Promise<any> {
     return this.request({ type: 'read', data, id: this.generateId() })
+  }
+
+  /**
+   * 在 Worker 中写入 Excel 文件
+   */
+  async writeWorkbook(workbook: Workbook | any): Promise<Blob> {
+    return this.request({ type: 'write', workbook, id: this.generateId() })
   }
 
   /**

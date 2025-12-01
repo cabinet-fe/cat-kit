@@ -528,6 +528,40 @@ type Token = { type: TokenType; value: string }
  * @param expr 表达式字符串
  */
 function tokenize(expr: string): Token[] {
+  function readNumber(
+    source: string,
+    start: number,
+    prefix = ''
+  ): { value: string; next: number } {
+    let num = prefix
+    let i = start
+
+    while (i < source.length) {
+      const c = source[i]!
+      if (/[0-9.]/.test(c)) {
+        num += c
+        i++
+        continue
+      }
+      if (
+        (c === 'e' || c === 'E') &&
+        i + 1 < source.length &&
+        /[0-9+-]/.test(source[i + 1]!)
+      ) {
+        num += c
+        i++
+        if (source[i] === '+' || source[i] === '-') {
+          num += source[i]!
+          i++
+        }
+        continue
+      }
+      break
+    }
+
+    return { value: num, next: i }
+  }
+
   const tokens: Token[] = []
   let i = 0
   while (i < expr.length) {
@@ -536,30 +570,30 @@ function tokenize(expr: string): Token[] {
       i++
       continue
     }
-    if (/[0-9.]/.test(char!)) {
-      let num = ''
-      while (i < expr.length) {
-        const c = expr[i]!
-        if (/[0-9.]/.test(c)) {
-          num += c
-          i++
-        } else if (
-          (c === 'e' || c === 'E') &&
-          i + 1 < expr.length &&
-          /[0-9+-]/.test(expr[i + 1]!)
-        ) {
-          num += c
-          i++
-          // Handle optional + or - after e
-          if (expr[i] === '+' || expr[i] === '-') {
-            num += expr[i]
-            i++
-          }
-        } else {
-          break
-        }
+
+    const prev = tokens[tokens.length - 1]
+    const isUnary = !prev || prev.type === 'OP' || prev.type === 'LPAREN'
+
+    if ((char === '+' || char === '-') && isUnary) {
+      const nextChar = expr[i + 1]
+      if (nextChar === '(') {
+        tokens.push({ type: 'NUMBER', value: '0' })
+        tokens.push({ type: 'OP', value: char! })
+        i++
+        continue
       }
-      tokens.push({ type: 'NUMBER', value: num })
+      if (nextChar && /[0-9.]/.test(nextChar)) {
+        const { value, next } = readNumber(expr, i + 1, char!)
+        tokens.push({ type: 'NUMBER', value })
+        i = next
+        continue
+      }
+    }
+
+    if (/[0-9.]/.test(char!)) {
+      const { value, next } = readNumber(expr, i)
+      tokens.push({ type: 'NUMBER', value })
+      i = next
       continue
     }
     if (['+', '-', '*', '/'].includes(char!)) {
@@ -603,9 +637,17 @@ function parse(tokens: Token[]): number {
    * 应用栈顶运算符
    */
   function applyOp() {
-    const op = ops.pop()!
-    const b = values.pop()!
-    const a = values.pop()!
+    const op = ops.pop()
+    if (!op) {
+      throw new Error('Invalid expression: missing operator')
+    }
+    const b = values.pop()
+    const a = values.pop()
+
+    if (a === undefined || b === undefined) {
+      throw new Error('Invalid expression: insufficient operands')
+    }
+
     let res = 0
     switch (op) {
       case '+':
@@ -633,6 +675,9 @@ function parse(tokens: Token[]): number {
       while (ops.length && ops[ops.length - 1] !== '(') {
         applyOp()
       }
+      if (!ops.length) {
+        throw new Error('Invalid expression: mismatched parentheses')
+      }
       ops.pop() // pop '('
     } else if (token.type === 'OP') {
       while (
@@ -647,7 +692,14 @@ function parse(tokens: Token[]): number {
   }
 
   while (ops.length) {
+    if (ops[ops.length - 1] === '(') {
+      throw new Error('Invalid expression: mismatched parentheses')
+    }
     applyOp()
+  }
+
+  if (values.length !== 1) {
+    throw new Error('Invalid expression: residual values')
   }
 
   return values[0]!

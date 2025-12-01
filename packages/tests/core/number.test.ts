@@ -291,6 +291,19 @@ describe('数字工具函数', () => {
       it('应该忽略空格', () => {
         expect($n.calc(' 1 +   2 ')).toBe(3)
       })
+
+      it('应该支持一元负号', () => {
+        expect($n.calc('-1 + 2')).toBe(1)
+        expect($n.calc('1+-2')).toBe(-1)
+        expect($n.calc('-(1+2)')).toBe(-3)
+        expect($n.calc('-0.5 * 2')).toBe(-1)
+      })
+
+      it('非法表达式时应抛出错误', () => {
+        expect(() => $n.calc('1 +')).toThrow()
+        expect(() => $n.calc('1 + * 2')).toThrow()
+        expect(() => $n.calc('(1+2')).toThrow()
+      })
     })
   })
 })

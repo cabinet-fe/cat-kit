@@ -64,8 +64,23 @@ export function hex2u8a(hex: string): Uint8Array {
  * @returns Uint8Array 类型的数据
  */
 export function base642u8a(base64: string): Uint8Array {
-  const binString = atob(base64)
-  return new Uint8Array(binString.split('').map(char => char.charCodeAt(0)))
+  if (!base64) return new Uint8Array(0)
+
+  if (isInNode() && typeof Buffer !== 'undefined') {
+    return new Uint8Array(Buffer.from(base64, 'base64'))
+  }
+
+  if (typeof atob === 'function') {
+    const binString = atob(base64)
+    const len = binString.length
+    const bytes = new Uint8Array(len)
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binString.charCodeAt(i)!
+    }
+    return bytes
+  }
+
+  throw new Error('不支持的转换')
 }
 
 /**
@@ -74,7 +89,22 @@ export function base642u8a(base64: string): Uint8Array {
  * @returns Base64 字符串
  */
 export function u8a2base64(u8a: Uint8Array): string {
-  return btoa(String.fromCharCode.apply(null, Array.from(u8a)))
+  if (!u8a.length) return ''
+
+  if (isInNode() && typeof Buffer !== 'undefined') {
+    return Buffer.from(u8a).toString('base64')
+  }
+
+  if (typeof btoa === 'function') {
+    let binary = ''
+    const CHUNK_SIZE = 0x8000
+    for (let i = 0; i < u8a.length; i += CHUNK_SIZE) {
+      binary += String.fromCharCode(...u8a.subarray(i, i + CHUNK_SIZE))
+    }
+    return btoa(binary)
+  }
+
+  throw new Error('不支持的转换')
 }
 
 /**
@@ -97,7 +127,7 @@ export function obj2query(obj: Record<string, any>): string {
  * @param query URL 查询字符串（可以包含开头的 ?）
  * @returns 转换后的对象
  */
-export function query2obj(query: string): Record<string, string> {
+export function query2obj(query: string): Record<string, any> {
   query = query.replace(/^\?/, '')
   if (!query) return {}
   return Object.fromEntries(
@@ -106,7 +136,17 @@ export function query2obj(query: string): Record<string, string> {
       .filter(pair => pair.includes('='))
       .map(pair => {
         const [key = '', value = ''] = pair.split('=')
-        return [decodeURIComponent(key), decodeURIComponent(value)]
+        const decodedValue = decodeURIComponent(value)
+
+        if (decodedValue === '') {
+          return [decodeURIComponent(key), '']
+        }
+
+        try {
+          return [decodeURIComponent(key), JSON.parse(decodedValue)]
+        } catch {
+          return [decodeURIComponent(key), decodedValue]
+        }
       })
   )
 }
