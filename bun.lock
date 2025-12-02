@@ -98,6 +98,20 @@
         "@cat-kit/core": ">=1.0.0-alpha.1",
       },
     },
+    "packages/maintenance": {
+      "name": "@cat-kit/maintenance",
+      "version": "1.0.0-alpha.1",
+      "devDependencies": {
+        "@cat-kit/core": "workspace:*",
+        "typescript": "^5.9.3",
+      },
+      "peerDependencies": {
+        "@cat-kit/core": ">=1.0.0-alpha.1",
+      },
+      "optionalPeers": [
+        "@cat-kit/core",
+      ],
+    },
     "packages/tests": {
       "name": "@cat-kit/tests",
       "version": "1.0.0-alpha.1",
@@ -148,6 +162,8 @@
     "@cat-kit/fe": ["@cat-kit/fe@workspace:packages/fe"],
 
     "@cat-kit/http": ["@cat-kit/http@workspace:packages/http"],
+
+    "@cat-kit/maintenance": ["@cat-kit/maintenance@workspace:packages/maintenance"],
 
     "@cat-kit/tests": ["@cat-kit/tests@workspace:packages/tests"],
 

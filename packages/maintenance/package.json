@@ -18,7 +18,8 @@
     }
   },
   "devDependencies": {
-    "@cat-kit/core": "workspace:*"
+    "@cat-kit/core": "workspace:*",
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "@cat-kit/core": ">=1.0.0-alpha.1"

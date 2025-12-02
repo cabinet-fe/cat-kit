@@ -46,5 +46,13 @@ export const pkgs: PackageOption[] = [
       input: 'src/index.ts',
       external: ['@cat-kit/core']
     }
+  },
+  {
+    dir: pkg('maintenance'),
+    deps: ['@cat-kit/core'],
+    build: {
+      input: 'src/index.ts',
+      external: ['@cat-kit/core']
+    }
   }
 ]

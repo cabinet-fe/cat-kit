@@ -17,6 +17,7 @@ Cat-Kit（喵喵工具箱）是一个基于 monorepo 的 TypeScript 工具库，
 - `packages/http` - HTTP 请求工具包（依赖 core）
 - `packages/be` - 后端工具包（依赖 core）
 - `packages/excel` - Excel 文件处理库（依赖 core）
+- `packages/maintenance` - 库维护工具包（依赖 core）
 
 ### 支持工作空间
 
@@ -32,7 +33,8 @@ Cat-Kit（喵喵工具箱）是一个基于 monorepo 的 TypeScript 工具库，
     ├── @cat-kit/fe
     ├── @cat-kit/http
     ├── @cat-kit/be
-    └── @cat-kit/excel
+    ├── @cat-kit/excel
+    └── @cat-kit/maintenance
 ```
 
 ## 工作流程指导
