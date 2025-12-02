@@ -6,7 +6,10 @@
       "Bash(bun run dev)",
       "Bash(timeout /t 3)",
       "Bash(node -e:*)",
-      "Bash(bun test:*)"
+      "Bash(bun test:*)",
+      "Bash(bun run build)",
+      "Bash(bun install)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
