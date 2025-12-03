@@ -35,6 +35,11 @@ function deepMerge(target: Mergeable, source: Mergeable): Mergeable {
   return result
 }
 
+/**
+ * 深度合并多个配置对象
+ * @param configs - 待合并的配置集合
+ * @returns 合并后的新对象
+ */
 export function mergeConfig<T extends Mergeable>(
   ...configs: Array<Partial<T>>
 ): T {
@@ -43,4 +48,3 @@ export function mergeConfig<T extends Mergeable>(
     {}
   ) as T
 }
-

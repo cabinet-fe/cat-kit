@@ -14,6 +14,11 @@ export interface GetNetworkInterfacesOptions {
   includeInternal?: boolean
 }
 
+/**
+ * 获取本机网络接口信息
+ * @param options - 控制是否包含内部地址
+ * @returns 网络接口列表
+ */
 export function getNetworkInterfaces(
   options: GetNetworkInterfacesOptions = {}
 ): NetworkInterfaceInfo[] {
@@ -41,4 +46,3 @@ export function getNetworkInterfaces(
 
   return result
 }
-

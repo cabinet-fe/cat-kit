@@ -46,6 +46,11 @@ function parseValue(value: string): string {
   return trimmed.replace(/\s+#.*$/, '').trim()
 }
 
+/**
+ * 将 .env 文件内容解析为键值对
+ * @param content - 原始文件内容
+ * @returns 解析出的环境变量映射
+ */
 export function parseEnvFile(content: string): EnvRecord {
   const result: EnvRecord = {}
   const lines = content.split(/\r?\n/)
@@ -77,6 +82,11 @@ function resolveFiles(mode?: string, files?: string[]): string[] {
   return resolved
 }
 
+/**
+ * 读取并解析 .env 文件集合
+ * @param options - 加载选项
+ * @returns 聚合后的环境变量映射
+ */
 export async function loadEnv(
   options: LoadEnvOptions = {}
 ): Promise<EnvRecord> {
@@ -169,6 +179,13 @@ function coerceValue(
   }
 }
 
+/**
+ * 根据 schema 校验并转换环境变量
+ * @param schema - 变量定义
+ * @param source - 默认的数据源，默认为 process.env
+ * @returns 转换后的类型安全结果
+ * @throws {Error} 当 required 字段缺失或类型转换失败时抛出
+ */
 export function parseEnv<T extends Record<string, any>>(
   schema: EnvSchema<T>,
   source: Record<string, string | undefined> = process.env
@@ -189,4 +206,3 @@ export function parseEnv<T extends Record<string, any>>(
 
   return result
 }
-

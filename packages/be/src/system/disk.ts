@@ -65,6 +65,11 @@ async function getDiskInfoWindows(path: string): Promise<DiskInfo> {
   }
 }
 
+/**
+ * 获取指定路径所在磁盘的容量信息
+ * @param path - 目标路径，默认使用当前工作目录
+ * @returns 磁盘容量、剩余与使用信息
+ */
 export async function getDiskInfo(path = process.cwd()): Promise<DiskInfo> {
   const resolvedPath = resolve(path)
 
@@ -85,4 +90,3 @@ export async function getDiskInfo(path = process.cwd()): Promise<DiskInfo> {
     throw error
   }
 }
-

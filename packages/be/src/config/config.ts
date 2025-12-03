@@ -79,6 +79,12 @@ async function parseByFormat<T>(
   }
 }
 
+/**
+ * 加载并解析配置文件
+ * @param filePath - 相对或绝对路径
+ * @param options - 解析及合并选项
+ * @returns 解析后的配置对象
+ */
 export async function loadConfig<
   T extends Record<string, unknown> = Record<string, unknown>
 >(filePath: string, options: LoadConfigOptions<T> = {}): Promise<T> {

@@ -5,6 +5,11 @@ export interface GetLocalIPOptions {
   includeInternal?: boolean
 }
 
+/**
+ * 获取本机网卡的首个匹配 IP
+ * @param options - 地址族与是否包含内网地址
+ * @returns 匹配到的 IP，若不存在则为 undefined
+ */
 export function getLocalIP(
   options: GetLocalIPOptions = {}
 ): string | undefined {
@@ -23,4 +28,3 @@ export function getLocalIP(
 
   return undefined
 }
-

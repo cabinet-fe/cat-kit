@@ -52,10 +52,14 @@ export interface ReadDirOptionsWithEntries extends ReadDirOptionsBase {
   returnType: 'entry'
 }
 
-export type ReadDirOptions =
-  | ReadDirOptionsWithPaths
-  | ReadDirOptionsWithEntries
+export type ReadDirOptions = ReadDirOptionsWithPaths | ReadDirOptionsWithEntries
 
+/**
+ * 读取目录内容
+ * @param dir - 起始目录
+ * @param options - 过滤、返回类型与递归选项
+ * @returns 路径数组或包含元数据的条目
+ */
 export function readDir(
   dir: string,
   options?: ReadDirOptionsWithPaths
@@ -120,4 +124,3 @@ export async function readDir(
 
   return entries.map(entry => (absolute ? entry.path : entry.relativePath))
 }
-

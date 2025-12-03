@@ -13,10 +13,7 @@ const FIELD_CONFIGS: CronFieldConfig[] = [
 
 const MAX_ITERATIONS = 100000
 
-function parsePart(
-  value: string,
-  { min, max }: CronFieldConfig
-): number[] {
+function parsePart(value: string, { min, max }: CronFieldConfig): number[] {
   if (value === '*' || value === '?') {
     return Array.from({ length: max - min + 1 }, (_, i) => i + min)
   }
@@ -79,6 +76,9 @@ function buildRange(
   return values
 }
 
+/**
+ * 可计算下一次执行时间的 Cron 表达式解析器
+ */
 export class CronExpression {
   private readonly minutes: Set<number>
 
@@ -132,7 +132,11 @@ export class CronExpression {
   }
 }
 
+/**
+ * 解析 Cron 表达式
+ * @param expression - 5 位 Cron 规则
+ * @returns CronExpression 实例
+ */
 export function parseCron(expression: string): CronExpression {
   return new CronExpression(expression)
 }
-

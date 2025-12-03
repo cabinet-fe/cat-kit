@@ -7,6 +7,10 @@ export interface MemoryInfo {
   usedPercent: number
 }
 
+/**
+ * 获取系统内存使用情况
+ * @returns 总量、空闲、已用及使用率
+ */
 export function getMemoryInfo(): MemoryInfo {
   const total = totalmem()
   const free = freemem()
@@ -20,4 +24,3 @@ export function getMemoryInfo(): MemoryInfo {
     usedPercent
   }
 }
-

@@ -5,6 +5,12 @@ export interface PortCheckOptions {
   timeout?: number
 }
 
+/**
+ * 检查端口是否可用
+ * @param port - 目标端口
+ * @param options - 指定 host 与超时时间
+ * @returns 端口可用时返回 true
+ */
 export async function isPortAvailable(
   port: number,
   options: PortCheckOptions = {}
@@ -42,4 +48,3 @@ export async function isPortAvailable(
     }, timeout).unref()
   })
 }
-

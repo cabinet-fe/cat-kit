@@ -18,6 +18,12 @@ const defaultResolver = (...args: unknown[]): string => {
   return args.length === 1 ? String(args[0]) : JSON.stringify(args)
 }
 
+/**
+ * 为函数添加缓存能力
+ * @param fn - 需要缓存的原函数
+ * @param options - 自定义缓存、键解析与过期时间
+ * @returns 带缓存功能的函数，并附带 cache/clear 属性
+ */
 export function memoize<F extends (...args: any[]) => any>(
   fn: F,
   options: MemoizeOptions<F, unknown> = {}
@@ -40,10 +46,12 @@ export function memoize<F extends (...args: any[]) => any>(
     const result = fn.apply(this, args)
 
     if (result && typeof (result as Promise<unknown>).then === 'function') {
-      const promise = (result as Promise<Awaited<ReturnType<F>>>).then(value => {
-        cache.set(key, value, options.ttl)
-        return value
-      })
+      const promise = (result as Promise<Awaited<ReturnType<F>>>).then(
+        value => {
+          cache.set(key, value, options.ttl)
+          return value
+        }
+      )
       // @ts-expect-error - aligning return type
       return promise
     }
@@ -61,4 +69,3 @@ export function memoize<F extends (...args: any[]) => any>(
 
   return memoized
 }
-
