@@ -4,8 +4,21 @@ import { basename, dirname, extname, join } from 'node:path'
 import type { LogEntry, LogFormat, LogLevel } from './logger'
 import { ensureDir } from '../fs/ensure-dir'
 
+/**
+ * 日志传输器接口
+ *
+ * 用于将日志输出到不同的目标（控制台、文件等）。
+ */
 export interface Transport {
+  /** 最低日志级别，低于此级别的日志不会被输出 */
   level?: LogLevel
+  /**
+   * 写入日志条目
+   *
+   * @param entry - 日志条目
+   * @param formatted - 格式化后的日志字符串
+   * @param format - 日志格式
+   */
   write(
     entry: LogEntry,
     formatted: string,
@@ -13,7 +26,11 @@ export interface Transport {
   ): void | Promise<void>
 }
 
+/**
+ * 控制台传输器选项
+ */
 export interface ConsoleTransportOptions {
+  /** 是否使用颜色，默认 true */
   useColors?: boolean
 }
 
@@ -33,7 +50,22 @@ const CONSOLE_METHOD: Record<LogLevel, 'log' | 'warn' | 'error'> = {
   error: 'error'
 }
 
+/**
+ * 控制台日志传输器
+ *
+ * 将日志输出到控制台，支持颜色高亮。
+ *
+ * @example
+ * ```typescript
+ * const transport = new ConsoleTransport({ useColors: true })
+ * const logger = new Logger({ transports: [transport] })
+ * ```
+ */
 export class ConsoleTransport implements Transport {
+  /**
+   * 创建控制台传输器实例
+   * @param options - 传输器选项
+   */
   constructor(private readonly options: ConsoleTransportOptions = {}) {}
 
   write(entry: LogEntry, formatted: string, format: LogFormat): void {
@@ -49,15 +81,39 @@ export class ConsoleTransport implements Transport {
   }
 }
 
+/**
+ * 文件传输器选项
+ */
 export interface FileTransportOptions {
+  /** 日志文件路径 */
   filePath: string
+  /** 最大文件大小（字节），超过此大小会自动轮转 */
   maxSize?: number
+  /** 换行符，默认 '\n' */
   newline?: string
 }
 
+/**
+ * 文件日志传输器
+ *
+ * 将日志写入文件，支持文件大小轮转。
+ *
+ * @example
+ * ```typescript
+ * const transport = new FileTransport({
+ *   filePath: './logs/app.log',
+ *   maxSize: 10 * 1024 * 1024 // 10MB
+ * })
+ * const logger = new Logger({ transports: [transport] })
+ * ```
+ */
 export class FileTransport implements Transport {
   private queue: Promise<void> = Promise.resolve()
 
+  /**
+   * 创建文件传输器实例
+   * @param options - 传输器选项
+   */
   constructor(private readonly options: FileTransportOptions) {}
 
   write(_: LogEntry, formatted: string, _format: LogFormat): Promise<void> {

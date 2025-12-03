@@ -5,6 +5,7 @@ import { importExamples } from './plugins/import-examples'
 import components from 'unplugin-vue-components/vite'
 import autoImport from 'unplugin-auto-import/vite'
 import { VarletImportResolver } from '@varlet/import-resolver'
+import { sidebar } from './sidebar'
 
 export default defineConfig({
   title: 'CatKit',
@@ -36,92 +37,16 @@ export default defineConfig({
       {
         text: '包',
         items: [
-          { text: 'Core 核心', link: '/packages/core/' },
-          { text: 'HTTP 请求', link: '/packages/http/' },
-          { text: 'FE 前端', link: '/packages/fe/' },
-          { text: 'Excel 表格', link: '/packages/excel/' },
-          { text: 'BE 后端', link: '/packages/be/' }
+          { text: '核心库', link: '/packages/core/' },
+          { text: 'HTTP请求', link: '/packages/http/' },
+          { text: '前端', link: '/packages/fe/' },
+          { text: 'Excel处理', link: '/packages/excel/' },
+          { text: '后端', link: '/packages/be/' }
         ]
       }
     ],
 
-
-
-    sidebar: {
-      '/guide/': [
-        {
-          text: '开始',
-          items: [
-            { text: '快速开始', link: '/guide/getting-started' },
-            { text: '安装', link: '/guide/installation' }
-          ]
-        }
-      ],
-      '/packages/core/': [
-        {
-          text: 'Core 核心包',
-          collapsed: false,
-          items: [
-            { text: '概览', link: '/packages/core/' },
-            { text: '数据处理', link: '/packages/core/data' },
-            { text: '数据结构', link: '/packages/core/data-structure' },
-            { text: '日期处理', link: '/packages/core/date' },
-            { text: '环境检测', link: '/packages/core/env' },
-            { text: '性能优化', link: '/packages/core/optimize' },
-            { text: '设计模式', link: '/packages/core/pattern' }
-          ]
-        }
-      ],
-      '/packages/http/': [
-        {
-          text: 'HTTP 请求包',
-          collapsed: false,
-          items: [
-            { text: '概览', link: '/packages/http/' },
-            { text: 'HTTP 客户端', link: '/packages/http/client' },
-            { text: '插件系统', link: '/packages/http/plugins' },
-            { text: '类型定义', link: '/packages/http/types' }
-          ]
-        }
-      ],
-      '/packages/fe/': [
-        {
-          text: 'FE 前端包',
-          collapsed: false,
-          items: [
-            { text: '概览', link: '/packages/fe/' },
-            { text: '文件操作', link: '/packages/fe/file' },
-            { text: '存储', link: '/packages/fe/storage' },
-            { text: '虚拟化', link: '/packages/fe/virtualizer' },
-            { text: 'Web API', link: '/packages/fe/web-api' },
-            { text: '测试', link: '/packages/fe/tests' }
-          ]
-        }
-      ],
-      '/packages/excel/': [
-        {
-          text: 'Excel 表格包',
-          collapsed: false,
-          items: [{ text: '概览', link: '/packages/excel/' }]
-        }
-      ],
-      '/packages/be/': [
-        {
-          text: 'BE 后端包',
-          collapsed: false,
-          items: [
-            { text: '概览', link: '/packages/be/' },
-            { text: '文件系统', link: '/packages/be/fs' },
-            { text: '配置管理', link: '/packages/be/config' },
-            { text: '日志系统', link: '/packages/be/logger' },
-            { text: '缓存工具', link: '/packages/be/cache' },
-            { text: '网络工具', link: '/packages/be/net' },
-            { text: '系统监控', link: '/packages/be/system' },
-            { text: '任务调度', link: '/packages/be/scheduler' }
-          ]
-        }
-      ]
-    },
+    sidebar,
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/cabinet-fe/cat-kit' }
@@ -165,9 +90,7 @@ export default defineConfig({
     search: {
       provider: 'local',
 
-
       options: {
-
         translations: {
           button: {
             buttonText: '搜索文档',
@@ -190,7 +113,7 @@ export default defineConfig({
   markdown: {
     lineNumbers: true,
 
-    config: (md) => {
+    config: md => {
       md.use(demoContainer)
       md.use(copyOrDownloadAsMarkdownButtons)
     }

@@ -2,16 +2,11 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import {
-  FileCache,
-  LRUCache,
-  TTLCache,
-  memoize
-} from '@cat-kit/be/src/cache'
+import { FileCache, LRUCache, memoize } from '@cat-kit/be/src/cache'
 
-describe('@cat-kit/be cache utilities', () => {
+describe('@cat-kit/be 缓存工具', () => {
   describe('LRUCache', () => {
-    it('evicts least recently used entries', () => {
+    it('应该淘汰最近最少使用的条目', () => {
       const cache = new LRUCache<string, number>({ maxSize: 2 })
       cache.set('a', 1)
       cache.set('b', 2)
@@ -24,10 +19,10 @@ describe('@cat-kit/be cache utilities', () => {
     })
   })
 
-  describe('TTLCache', () => {
-    it('expires entries after ttl', async () => {
+  describe('LRUCache TTL', () => {
+    it('应该在 TTL 后使条目过期', () => {
       vi.useFakeTimers()
-      const cache = new TTLCache<string, string>({ ttl: 100 })
+      const cache = new LRUCache<string, string>({ ttl: 100 })
 
       cache.set('token', 'value')
       vi.advanceTimersByTime(50)
@@ -35,6 +30,19 @@ describe('@cat-kit/be cache utilities', () => {
 
       vi.advanceTimersByTime(60)
       expect(cache.get('token')).toBeUndefined()
+      vi.useRealTimers()
+    })
+
+    it('应该支持每个条目的 TTL 覆盖', () => {
+      vi.useFakeTimers()
+      const cache = new LRUCache<string, string>({ ttl: 1000 })
+
+      cache.set('short', 'value1', 50)
+      cache.set('long', 'value2')
+
+      vi.advanceTimersByTime(60)
+      expect(cache.get('short')).toBeUndefined()
+      expect(cache.get('long')).toBe('value2')
       vi.useRealTimers()
     })
   })
@@ -50,7 +58,7 @@ describe('@cat-kit/be cache utilities', () => {
       await rm(tempDir, { recursive: true, force: true })
     })
 
-    it('persists values to disk', async () => {
+    it('应该将值持久化到磁盘', async () => {
       const cache = new FileCache<{ name: string }>({ dir: tempDir })
       await cache.set('user', { name: 'alice' })
       const value = await cache.get('user')
@@ -59,7 +67,7 @@ describe('@cat-kit/be cache utilities', () => {
   })
 
   describe('memoize', () => {
-    it('caches function results with custom resolver', async () => {
+    it('应该使用自定义解析器缓存函数结果', async () => {
       const spy = vi.fn(async (value: number) => value * 2)
       const memoized = memoize(spy, {
         resolver: (value: number) => `key:${value}`

@@ -14,6 +14,13 @@ Cat Kit 是一个基于 TypeScript 的全环境开发工具包，提供了一系
 
 ::: code-group
 
+```bash [bun]
+bun add @cat-kit/core
+bun add @cat-kit/http
+bun add @cat-kit/fe
+bun add @cat-kit/be
+```
+
 ```bash [npm]
 # 安装核心包
 npm install @cat-kit/core
@@ -26,13 +33,6 @@ npm install @cat-kit/fe
 
 # 安装后端工具包
 npm install @cat-kit/be
-```
-
-```bash [yarn]
-yarn add @cat-kit/core
-yarn add @cat-kit/http
-yarn add @cat-kit/fe
-yarn add @cat-kit/be
 ```
 
 ```bash [pnpm]

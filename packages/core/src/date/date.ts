@@ -1,18 +1,18 @@
 import { isDate } from '../data/type'
 
+const DAY_IN_MS = 86400000
+const WEEK_IN_MS = 604800000
+
 type DateCompareReducer<R> = (timeDiff: number) => R
 
 export class Dater {
   private date!: Date
 
   constructor(date: number | string | Date | Dater) {
-    if (date instanceof Dater) {
-      this.date = date.date
-    } else if (isDate(date)) {
-      this.date = date
-    } else {
-      this.date = new Date(date)
-    }
+    const rawDate =
+      date instanceof Dater ? date.raw : isDate(date) ? date : new Date(date)
+
+    this.date = new Date(rawDate)
   }
 
   /** 原始日期对象 */
@@ -40,7 +40,8 @@ export class Dater {
     },
     'h+': (date: Dater, len: number): string => {
       let hour = date.hours
-      let strHour = (hour > 12 ? hour - 12 : hour) + ''
+      let hour12 = hour % 12 || 12
+      let strHour = `${hour12}`
       return len === 1 ? strHour : `0${strHour}`.slice(-2)
     },
     'H+': (date: Dater, len: number): string => {
@@ -163,9 +164,12 @@ export class Dater {
   /** 格式化日期 */
   format(formatter = 'yyyy-MM-dd'): string {
     Object.keys(Dater.matchers).forEach((reg: string) => {
-      formatter = formatter.replace(new RegExp(`(${reg})`), (str: string) => {
-        return Dater.matchers[reg]!(this, str.length)
-      })
+      formatter = formatter.replace(
+        new RegExp(`(${reg})`, 'g'),
+        (str: string) => {
+          return Dater.matchers[reg]!(this, str.length)
+        }
+      )
     })
     return formatter
   }
@@ -182,10 +186,10 @@ export class Dater {
     let { date } = this
 
     if (type === 'days') {
-      return new Dater(this.timestamp + timeStep * 86400000)
+      return new Dater(this.timestamp + timeStep * DAY_IN_MS)
     }
     if (type === 'weeks') {
-      return new Dater(this.timestamp + timeStep * 604800000)
+      return new Dater(this.timestamp + timeStep * WEEK_IN_MS)
     }
     if (type === 'months') {
       date = new Date(date.getTime())
@@ -224,7 +228,10 @@ export class Dater {
     const timeDiff = this.timestamp - dater.timestamp
 
     if (!reducer) {
-      return Math.round(timeDiff / 86400000)
+      const daysDiff = timeDiff / DAY_IN_MS
+      const normalized = daysDiff > 0 ? Math.floor(daysDiff) : Math.ceil(daysDiff)
+
+      return normalized === 0 ? 0 : normalized
     }
 
     return reducer(timeDiff)

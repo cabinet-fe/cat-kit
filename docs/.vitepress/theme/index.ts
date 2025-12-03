@@ -4,11 +4,13 @@ import CopyOrDownloadAsMarkdownButtons from 'vitepress-plugin-llms/vitepress-com
 import DemoContainer from './components/DemoContainer.vue'
 import './styles/custom.css'
 
-
 export default {
   extends: DefaultTheme,
   enhanceApp({ app }) {
     app.component('DemoContainer', DemoContainer)
-    app.component('CopyOrDownloadAsMarkdownButtons', CopyOrDownloadAsMarkdownButtons)
+    app.component(
+      'CopyOrDownloadAsMarkdownButtons',
+      CopyOrDownloadAsMarkdownButtons
+    )
   }
 } satisfies Theme

@@ -1,11 +1,11 @@
 import { CronExpression, Scheduler } from '@cat-kit/be/src/scheduler'
 
-describe('@cat-kit/be scheduler', () => {
+describe('@cat-kit/be 调度器', () => {
   afterEach(() => {
     vi.useRealTimers()
   })
 
-  it('parses cron expressions and finds next execution', () => {
+  it('应该解析 cron 表达式并找到下次执行时间', () => {
     const cron = new CronExpression('*/5 * * * *')
     const base = new Date('2024-01-01T00:00:00.000Z')
     const next = cron.getNextDate(base)
@@ -13,7 +13,7 @@ describe('@cat-kit/be scheduler', () => {
     expect(next?.getUTCMinutes()).toBe(5)
   })
 
-  it('executes cron jobs when scheduler is running', async () => {
+  it('应该在调度器运行时执行 cron 任务', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2024-01-01T00:00:00.000Z'))
 
@@ -29,7 +29,7 @@ describe('@cat-kit/be scheduler', () => {
     scheduler.stop()
   })
 
-  it('supports one-off and interval tasks', async () => {
+  it('应该支持一次性任务和间隔任务', async () => {
     vi.useFakeTimers()
     const scheduler = new Scheduler()
     const once = vi.fn()

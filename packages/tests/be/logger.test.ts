@@ -2,8 +2,8 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { Logger, LogLevel } from '@cat-kit/be/src/logger/logger'
-import type { LogEntry, Transport } from '@cat-kit/be/src/logger/transports'
+import { Logger, LogLevel, type LogEntry } from '@cat-kit/be/src/logger/logger'
+import type { Transport } from '@cat-kit/be/src/logger/transports'
 import { FileTransport } from '@cat-kit/be/src/logger/transports'
 
 class MemoryTransport implements Transport {
@@ -14,7 +14,7 @@ class MemoryTransport implements Transport {
   }
 }
 
-describe('@cat-kit/be logger', () => {
+describe('@cat-kit/be 日志工具', () => {
   let tempDir: string
 
   beforeEach(async () => {
@@ -25,7 +25,7 @@ describe('@cat-kit/be logger', () => {
     await rm(tempDir, { recursive: true, force: true })
   })
 
-  it('logs structured entries respecting level', async () => {
+  it('应该记录结构化条目并遵守日志级别', async () => {
     const transport = new MemoryTransport()
     const logger = new Logger({
       level: LogLevel.INFO,
@@ -44,7 +44,7 @@ describe('@cat-kit/be logger', () => {
     })
   })
 
-  it('writes logs to file using FileTransport', async () => {
+  it('应该使用 FileTransport 将日志写入文件', async () => {
     const logFile = join(tempDir, 'app.log')
     const logger = new Logger({
       format: 'json',
@@ -66,4 +66,3 @@ describe('@cat-kit/be logger', () => {
     })
   })
 })
-

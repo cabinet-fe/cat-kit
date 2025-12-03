@@ -1,84 +1,91 @@
 import { readdir } from 'node:fs/promises'
 import { resolve, relative } from 'node:path'
 
+/**
+ * 目录条目信息
+ */
 export interface DirEntry {
-  /**
-   * 绝对路径
-   */
+  /** 绝对路径 */
   path: string
-  /**
-   * 相对于根目录的路径
-   */
+  /** 相对于根目录的路径 */
   relativePath: string
+  /** 文件名或目录名 */
   name: string
+  /** 目录深度（从根目录开始，根目录为 0） */
   depth: number
+  /** 是否为文件 */
   isFile: boolean
+  /** 是否为目录 */
   isDirectory: boolean
+  /** 是否为符号链接 */
   isSymbolicLink: boolean
 }
 
-interface ReadDirOptionsBase {
+/**
+ * 读取目录选项
+ */
+export interface ReadDirOptions {
   /**
-   * 是否递归读取
+   * 是否递归读取子目录
    * @default false
    */
   recursive?: boolean
   /**
-   * 过滤函数，返回 true 表示保留
+   * 过滤函数，返回 `true` 表示保留该条目
    */
   filter?: (entry: DirEntry) => boolean
   /**
-   * 是否包含文件
-   * @default true
+   * 是否只返回文件路径
+   *
+   * - 当为 `true` 时，返回文件路径数组（string[]）
+   * - 当为 `false` 时，返回包含文件和目录的详细信息数组（DirEntry[]）
+   *
+   * @default false
    */
-  includeFiles?: boolean
-  /**
-   * 是否包含目录
-   * @default true
-   */
-  includeDirs?: boolean
-  /**
-   * 返回的路径是否为绝对路径
-   * @default true
-   */
-  absolute?: boolean
+  onlyFiles?: boolean
 }
-
-export interface ReadDirOptionsWithPaths extends ReadDirOptionsBase {
-  returnType?: 'path'
-}
-
-export interface ReadDirOptionsWithEntries extends ReadDirOptionsBase {
-  returnType: 'entry'
-}
-
-export type ReadDirOptions = ReadDirOptionsWithPaths | ReadDirOptionsWithEntries
 
 /**
  * 读取目录内容
- * @param dir - 起始目录
- * @param options - 过滤、返回类型与递归选项
- * @returns 路径数组或包含元数据的条目
+ *
+ * 支持递归读取、过滤和多种返回格式。
+ *
+ * @example
+ * ```typescript
+ * // 返回文件路径数组
+ * const files = await readDir('./src', {
+ *   recursive: true,
+ *   onlyFiles: true,
+ *   filter: entry => entry.name.endsWith('.ts')
+ * })
+ *
+ * // 返回包含文件和目录的详细信息数组
+ * const entries = await readDir('./src', {
+ *   recursive: true
+ * })
+ * ```
+ *
+ * @param dir - 起始目录路径
+ * @param options - 过滤、递归和返回格式选项
+ * @returns 当 `onlyFiles` 为 `true` 时返回文件路径数组，否则返回包含元数据的条目数组
+ * @throws {Error} 当目录不存在或无法读取时抛出错误
  */
 export function readDir(
   dir: string,
-  options?: ReadDirOptionsWithPaths
-): Promise<string[]>
+  options?: ReadDirOptions & { onlyFiles?: false }
+): Promise<DirEntry[]>
 export function readDir(
   dir: string,
-  options: ReadDirOptionsWithEntries
-): Promise<DirEntry[]>
+  options: ReadDirOptions & { onlyFiles: true }
+): Promise<string[]>
 export async function readDir(
   dir: string,
   options: ReadDirOptions = {}
-): Promise<Array<string | DirEntry>> {
+): Promise<DirEntry[] | string[]> {
   const {
     recursive = false,
     filter,
-    includeDirs = true,
-    includeFiles = true,
-    absolute = true,
-    returnType = 'path'
+    onlyFiles = false
   } = options
 
   const root = resolve(dir)
@@ -102,11 +109,8 @@ export async function readDir(
       }
 
       const passesFilter = filter ? filter(entry) : true
-      const shouldInclude =
-        passesFilter &&
-        ((entry.isFile && includeFiles) || (entry.isDirectory && includeDirs))
 
-      if (shouldInclude) {
+      if (passesFilter) {
         entries.push(entry)
       }
 
@@ -118,9 +122,11 @@ export async function readDir(
 
   await walk(root, 0)
 
-  if (returnType === 'entry') {
+  if (onlyFiles) {
     return entries
+      .filter(entry => entry.isFile)
+      .map(entry => entry.path)
   }
 
-  return entries.map(entry => (absolute ? entry.path : entry.relativePath))
+  return entries
 }

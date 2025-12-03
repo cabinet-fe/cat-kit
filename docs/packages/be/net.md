@@ -1,12 +1,27 @@
 # 网络工具
 
-网络工具模块提供了端口检查和 IP 地址获取等功能。
+网络工具模块提供了网络相关的实用工具函数，帮助你检查端口可用性、获取本机 IP 地址和网络接口信息。
+
+## 概述
+
+网络工具模块包含以下功能：
+
+- **端口检查** - 检查指定端口是否可用
+- **IP 地址获取** - 获取本机 IP 地址
+- **网络接口信息** - 获取本机所有网络接口信息
 
 ## 端口检查
 
 ### isPortAvailable
 
-检查指定端口是否可用（未被占用）。
+检查指定端口是否可用（未被占用）。通过尝试在该端口创建临时服务器来判断端口是否可用。
+
+**适用场景：**
+- 服务器启动前检查端口
+- 动态端口分配
+- 端口冲突检测
+
+#### 基本用法
 
 ```typescript
 import { isPortAvailable } from '@cat-kit/be'
@@ -26,7 +41,7 @@ const available = await isPortAvailable(3000, {
 })
 ```
 
-#### API
+#### API 参考
 
 ```typescript
 function isPortAvailable(
@@ -35,7 +50,7 @@ function isPortAvailable(
 ): Promise<boolean>
 ```
 
-**参数：**
+**参数说明：**
 
 - `port` - 要检查的端口号
 - `options.host` - 主机地址，默认 `'127.0.0.1'`
@@ -53,7 +68,14 @@ function isPortAvailable(
 
 ### getLocalIP
 
-获取本机网卡的首个匹配 IP 地址。
+获取本机网卡的首个匹配 IP 地址。可以根据地址族（IPv4/IPv6）和是否包含内网地址进行过滤。
+
+**适用场景：**
+- 获取服务器地址
+- 网络配置检测
+- 多网卡环境处理
+
+#### 基本用法
 
 ```typescript
 import { getLocalIP } from '@cat-kit/be'
@@ -69,7 +91,7 @@ const ipv6 = getLocalIP({ family: 'IPv6' })
 const allIPs = getLocalIP({ includeInternal: true })
 ```
 
-#### API
+#### API 参考
 
 ```typescript
 function getLocalIP(
@@ -77,7 +99,7 @@ function getLocalIP(
 ): string | undefined
 ```
 
-**参数：**
+**参数说明：**
 
 - `options.family` - 地址族：`'IPv4'` | `'IPv6'`，默认 `'IPv4'`
 - `options.includeInternal` - 是否包含内网地址，默认 `false`
@@ -93,9 +115,21 @@ function getLocalIP(
 3. 根据 `includeInternal` 过滤内网地址
 4. 返回第一个匹配的地址
 
+**内网地址判断：**
+
+- IPv4: `127.0.0.0/8`, `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`
+- IPv6: `::1`, `fe80::/10`, `fc00::/7`
+
 ### getNetworkInterfaces
 
-获取本机所有网络接口信息。
+获取本机所有网络接口信息。可以过滤内网接口，返回详细的网络接口信息。
+
+**适用场景：**
+- 网络接口监控
+- 多网卡环境处理
+- 网络配置分析
+
+#### 基本用法
 
 ```typescript
 import { getNetworkInterfaces } from '@cat-kit/be'
@@ -116,7 +150,7 @@ interfaces.forEach(iface => {
 const allInterfaces = getNetworkInterfaces({ includeInternal: true })
 ```
 
-#### API
+#### API 参考
 
 ```typescript
 function getNetworkInterfaces(
@@ -124,7 +158,7 @@ function getNetworkInterfaces(
 ): NetworkInterfaceInfo[]
 ```
 
-**参数：**
+**参数说明：**
 
 - `options.includeInternal` - 是否包含内部地址，默认 `false`
 
@@ -136,13 +170,13 @@ function getNetworkInterfaces(
 
 ```typescript
 interface NetworkInterfaceInfo {
-  name: string           // 接口名称
-  address: string         // IP 地址
-  family: 'IPv4' | 'IPv6' // 地址族
-  mac: string            // MAC 地址
-  internal: boolean       // 是否为内网地址
-  netmask: string        // 子网掩码
-  cidr?: string          // CIDR 表示法（如果可用）
+  name: string              // 接口名称
+  address: string          // IP 地址
+  family: 'IPv4' | 'IPv6'  // 地址族
+  mac: string              // MAC 地址
+  internal: boolean        // 是否为内网地址
+  netmask: string          // 子网掩码
+  cidr?: string           // CIDR 表示法（如果可用）
 }
 ```
 
@@ -163,6 +197,7 @@ async function startServer(port: number) {
   // 启动服务器
   const server = createServer()
   server.listen(port)
+  console.log(`服务器已启动在端口 ${port}`)
 }
 ```
 
@@ -171,7 +206,10 @@ async function startServer(port: number) {
 ```typescript
 import { isPortAvailable } from '@cat-kit/be'
 
-async function findAvailablePort(startPort: number, maxAttempts = 100): Promise<number> {
+async function findAvailablePort(
+  startPort: number,
+  maxAttempts = 100
+): Promise<number> {
   for (let i = 0; i < maxAttempts; i++) {
     const port = startPort + i
     const available = await isPortAvailable(port)
@@ -181,7 +219,9 @@ async function findAvailablePort(startPort: number, maxAttempts = 100): Promise<
     }
   }
 
-  throw new Error(`在 ${startPort}-${startPort + maxAttempts} 范围内未找到可用端口`)
+  throw new Error(
+    `在 ${startPort}-${startPort + maxAttempts} 范围内未找到可用端口`
+  )
 }
 
 // 使用
@@ -262,3 +302,66 @@ const ip = getPreferredIP()
 console.log(`使用 IP: ${ip}`)
 ```
 
+### 端口范围扫描
+
+```typescript
+import { isPortAvailable } from '@cat-kit/be'
+
+async function scanPorts(startPort: number, endPort: number) {
+  const availablePorts: number[] = []
+  const usedPorts: number[] = []
+
+  for (let port = startPort; port <= endPort; port++) {
+    const available = await isPortAvailable(port)
+    if (available) {
+      availablePorts.push(port)
+    } else {
+      usedPorts.push(port)
+    }
+  }
+
+  return { availablePorts, usedPorts }
+}
+
+// 扫描 3000-3010 端口
+const result = await scanPorts(3000, 3010)
+console.log('可用端口:', result.availablePorts)
+console.log('已用端口:', result.usedPorts)
+```
+
+### 网络接口详细信息
+
+```typescript
+import { getNetworkInterfaces } from '@cat-kit/be'
+
+function getNetworkDetails() {
+  const interfaces = getNetworkInterfaces({ includeInternal: true })
+
+  return interfaces.map(iface => ({
+    name: iface.name,
+    address: iface.address,
+    family: iface.family,
+    mac: iface.mac,
+    isInternal: iface.internal,
+    netmask: iface.netmask,
+    cidr: iface.cidr,
+    // 计算网络地址
+    network: calculateNetwork(iface.address, iface.netmask)
+  }))
+}
+
+function calculateNetwork(ip: string, netmask: string): string {
+  // 简化的网络地址计算
+  // 实际实现需要使用 IP 地址库
+  return `${ip}/${netmask}`
+}
+```
+
+## 最佳实践
+
+1. **端口检查超时**：设置合理的超时时间，避免长时间等待
+2. **错误处理**：处理端口检查可能出现的网络错误
+3. **多网卡环境**：根据实际需求选择合适的 IP 地址获取策略
+4. **内网地址过滤**：在生产环境中通常排除内网地址，只获取公网 IP
+5. **端口范围**：避免扫描过大的端口范围，可能影响性能
+6. **缓存结果**：对于不经常变化的网络接口信息，可以缓存结果

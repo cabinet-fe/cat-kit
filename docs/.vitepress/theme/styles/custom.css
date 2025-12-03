@@ -1,29 +1,87 @@
 /**
- * 自定义样式
+ * 自定义样式 - 基于 CatKit 吉祥物配色
+ * 橘白色小猫 + 蓝灰色眼睛 + 棕色工具箱
  */
 
-/* 品牌颜色 */
+/* 品牌颜色 - 深沉温暖的橘棕色系 */
 :root {
-  --vp-c-brand-1: #5f67ee;
-  --vp-c-brand-2: #7c84f5;
-  --vp-c-brand-3: #989ef8;
-  --vp-c-brand-soft: rgba(95, 103, 238, 0.14);
+  /* 主色调：深橘棕色（更深更饱和） */
+  --vp-c-brand-1: #c75d1f;
+  --vp-c-brand-2: #e07c3e;
+  --vp-c-brand-3: #f59e5e;
+  --vp-c-brand-soft: rgba(199, 93, 31, 0.14);
 
-  /* 首页特性卡片 */
+  /* 辅助色：深蓝灰色（来自小猫眼睛） */
+  --cat-eye-blue: #4a7085;
+  --cat-eye-blue-light: #6b8fa3;
+
+  /* 工具箱深棕色 */
+  --toolbox-brown: #6d3f28;
+  --toolbox-brown-light: #8b5a3c;
+
+  /* 首页英雄区域 - 更鲜明的渐变 */
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: linear-gradient(
     135deg,
-    #5f67ee 0%,
-    #7c84f5 50%,
-    #989ef8 100%
+    #a04416 0%,
+    #c75d1f 30%,
+    #e07c3e 60%,
+    #4a7085 100%
   );
+
+  /* 首页英雄图片光晕 */
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    rgba(199, 93, 31, 0.45) 30%,
+    rgba(74, 112, 133, 0.35) 70%
+  );
+  --vp-home-hero-image-filter: blur(56px);
 }
 
 .dark {
-  --vp-c-brand-1: #7c84f5;
-  --vp-c-brand-2: #989ef8;
-  --vp-c-brand-3: #b3b8fa;
-  --vp-c-brand-soft: rgba(124, 132, 245, 0.16);
+  --vp-c-brand-1: #e07c3e;
+  --vp-c-brand-2: #f59e5e;
+  --vp-c-brand-3: #ffb87a;
+  --vp-c-brand-soft: rgba(224, 124, 62, 0.16);
+
+  --cat-eye-blue: #6b8fa3;
+  --cat-eye-blue-light: #8eb5c9;
+
+  --vp-home-hero-name-background: linear-gradient(
+    135deg,
+    #c75d1f 0%,
+    #e07c3e 30%,
+    #f59e5e 60%,
+    #6b8fa3 100%
+  );
+
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    rgba(224, 124, 62, 0.35) 30%,
+    rgba(107, 143, 163, 0.28) 70%
+  );
+}
+
+/* 品牌按钮渐变效果 */
+.VPButton.brand {
+  background: linear-gradient(135deg, #c75d1f 0%, #e07c3e 50%, #f59e5e 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.VPButton.brand:hover {
+  background: linear-gradient(135deg, #a04416 0%, #c75d1f 50%, #e07c3e 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(199, 93, 31, 0.35);
+}
+
+.dark .VPButton.brand {
+  background: linear-gradient(135deg, #e07c3e 0%, #f59e5e 50%, #ffb87a 100%);
+}
+
+.dark .VPButton.brand:hover {
+  background: linear-gradient(135deg, #c75d1f 0%, #e07c3e 50%, #f59e5e 100%);
+  box-shadow: 0 8px 20px rgba(224, 124, 62, 0.4);
 }
 
 /* 首页样式优化 */
@@ -31,13 +89,20 @@
   padding-bottom: 3rem;
 }
 
+/* 特性卡片动画 */
 .VPFeature {
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
 }
 
 .VPFeature:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(199, 93, 31, 0.18);
+  border-color: var(--vp-c-brand-soft);
+}
+
+.dark .VPFeature:hover {
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
 }
 
 /* 代码块样式优化 */
@@ -106,7 +171,7 @@
 
 .feature-card:hover {
   border-color: var(--vp-c-brand-1);
-  box-shadow: 0 4px 12px rgba(95, 103, 238, 0.15);
+  box-shadow: 0 4px 12px rgba(199, 93, 31, 0.2);
   transform: translateY(-2px);
 }
 

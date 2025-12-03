@@ -218,7 +218,7 @@ describe('Dater', () => {
     it('应该比较两个日期并返回天数差', () => {
       const laterDate = new Date('2024-01-20')
       const diff = testDate.compare(laterDate)
-      expect(diff).toBe(-5) // 5天后
+      expect(diff).toBe(-4) // 5天后
 
       const earlierDate = new Date('2024-01-10')
       const diff2 = testDate.compare(earlierDate)

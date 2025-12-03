@@ -3,11 +3,19 @@ import { statfs } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { promisify } from 'node:util'
 
+/**
+ * 磁盘信息
+ */
 export interface DiskInfo {
+  /** 磁盘路径 */
   path: string
+  /** 总容量（字节） */
   total: number
+  /** 空闲容量（字节） */
   free: number
+  /** 已用容量（字节） */
   used: number
+  /** 使用率（百分比） */
   usedPercent: number
 }
 
@@ -67,8 +75,12 @@ async function getDiskInfoWindows(path: string): Promise<DiskInfo> {
 
 /**
  * 获取指定路径所在磁盘的容量信息
+ *
+ * 支持 Windows 和 Unix 系统。Windows 使用 PowerShell 查询，Unix 使用 `statfs`。
+ *
  * @param path - 目标路径，默认使用当前工作目录
  * @returns 磁盘容量、剩余与使用信息
+ * @throws {Error} 当无法获取磁盘信息时抛出错误
  */
 export async function getDiskInfo(path = process.cwd()): Promise<DiskInfo> {
   const resolvedPath = resolve(path)

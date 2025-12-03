@@ -1,12 +1,22 @@
 import type { Transport } from './transports'
 import { ConsoleTransport } from './transports'
 
+/**
+ * 日志格式类型
+ */
 export type LogFormat = 'text' | 'json'
 
+/**
+ * 日志级别枚举
+ */
 export enum LogLevel {
+  /** 调试信息 */
   DEBUG = 'debug',
+  /** 一般信息 */
   INFO = 'info',
+  /** 警告信息 */
   WARN = 'warn',
+  /** 错误信息 */
   ERROR = 'error'
 }
 
@@ -17,24 +27,42 @@ const LEVEL_WEIGHT: Record<LogLevel, number> = {
   [LogLevel.ERROR]: 40
 }
 
+/**
+ * 日志条目
+ */
 export interface LogEntry {
+  /** 日志级别 */
   level: LogLevel
+  /** 日志消息 */
   message: string
+  /** 时间戳 */
   timestamp: string
+  /** 日志器名称 */
   name?: string
+  /** 附加元数据 */
   meta?: Record<string, unknown>
+  /** 错误信息（如果有） */
   error?: {
     message: string
     stack?: string
   }
 }
 
+/**
+ * 日志器选项
+ */
 export interface LoggerOptions {
+  /** 日志器名称 */
   name?: string
+  /** 最低日志级别，低于此级别的日志不会被输出 */
   level?: LogLevel
+  /** 日志格式，'text' 为文本格式，'json' 为 JSON 格式 */
   format?: LogFormat
+  /** 传输器列表，用于输出日志 */
   transports?: Transport[]
+  /** 上下文信息，会附加到所有日志条目 */
   context?: Record<string, unknown>
+  /** 自定义时间戳生成函数 */
   timestamp?: () => string
 }
 
@@ -65,6 +93,30 @@ function formatEntry(entry: LogEntry, format: LogFormat): string {
   return parts.join(' ')
 }
 
+/**
+ * 结构化日志记录器
+ *
+ * 支持多级别日志、多种输出格式、多个传输器和子日志器。
+ *
+ * @example
+ * ```typescript
+ * const logger = new Logger({
+ *   name: 'app',
+ *   level: LogLevel.INFO,
+ *   format: 'json',
+ *   transports: [
+ *     new ConsoleTransport(),
+ *     new FileTransport({ path: './logs/app.log' })
+ *   ]
+ * })
+ *
+ * await logger.info('Server started', { port: 3000 })
+ * await logger.error('Failed to connect', error)
+ *
+ * // 创建子日志器
+ * const dbLogger = logger.child({ name: 'db' })
+ * ```
+ */
 export class Logger {
   private readonly level: LogLevel
 
@@ -78,6 +130,10 @@ export class Logger {
 
   private readonly context?: Record<string, unknown>
 
+  /**
+   * 创建日志器实例
+   * @param options - 日志器选项
+   */
   constructor(options: LoggerOptions = {}) {
     this.level = options.level ?? LogLevel.INFO
     this.format = options.format ?? 'text'
@@ -87,6 +143,14 @@ export class Logger {
     this.context = options.context
   }
 
+  /**
+   * 创建子日志器
+   *
+   * 子日志器会继承父日志器的配置，可以覆盖部分选项。
+   *
+   * @param options - 子日志器选项，会与父日志器合并
+   * @returns 新的日志器实例
+   */
   child(options: Partial<LoggerOptions>): Logger {
     return new Logger({
       ...options,
@@ -141,6 +205,14 @@ export class Logger {
     )
   }
 
+  /**
+   * 记录日志
+   *
+   * @param level - 日志级别
+   * @param message - 日志消息
+   * @param meta - 附加元数据
+   * @param error - 错误对象（如果有）
+   */
   async log(
     level: LogLevel,
     message: string,
@@ -152,18 +224,40 @@ export class Logger {
     await this.logInternal(entry)
   }
 
+  /**
+   * 记录 DEBUG 级别日志
+   * @param message - 日志消息
+   * @param meta - 附加元数据
+   */
   debug(message: string, meta?: Record<string, unknown>): Promise<void> {
     return this.log(LogLevel.DEBUG, message, meta)
   }
 
+  /**
+   * 记录 INFO 级别日志
+   * @param message - 日志消息
+   * @param meta - 附加元数据
+   */
   info(message: string, meta?: Record<string, unknown>): Promise<void> {
     return this.log(LogLevel.INFO, message, meta)
   }
 
+  /**
+   * 记录 WARN 级别日志
+   * @param message - 日志消息
+   * @param meta - 附加元数据
+   */
   warn(message: string, meta?: Record<string, unknown>): Promise<void> {
     return this.log(LogLevel.WARN, message, meta)
   }
 
+  /**
+   * 记录 ERROR 级别日志
+   *
+   * @param message - 日志消息
+   * @param errorOrMeta - 错误对象或元数据
+   * @param meta - 附加元数据（当第一个参数是错误对象时使用）
+   */
   error(
     message: string,
     errorOrMeta?: Error | Record<string, unknown>,

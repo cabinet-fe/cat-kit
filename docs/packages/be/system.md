@@ -1,12 +1,35 @@
 # 系统监控
 
-系统监控模块提供了 CPU、内存、磁盘和网络接口等系统资源信息的获取功能。
+系统监控模块提供了系统资源监控功能，帮助你了解服务器的 CPU、内存、磁盘和网络接口等运行状态。这对于应用性能监控、资源告警和容量规划非常有用。
+
+## 概述
+
+系统监控模块包含以下功能：
+
+- **CPU 信息** - 获取 CPU 基本信息和使用率
+- **内存信息** - 获取内存使用情况
+- **磁盘信息** - 获取磁盘使用情况
+- **网络接口** - 获取网络接口信息
+
+**主要特性：**
+
+- ✅ 跨平台支持（Windows、Linux、macOS）
+- ✅ 实时资源监控
+- ✅ 详细的资源信息
+- ✅ 易于集成到监控系统
 
 ## CPU 信息
 
 ### getCpuInfo
 
-获取 CPU 基本信息，包括型号、核心数、主频和平均负载。
+获取 CPU 基本信息，包括型号、核心数、主频和平均负载。这些信息是静态的，不会随时间变化。
+
+**适用场景：**
+- 系统信息展示
+- 性能基准测试
+- 资源规划
+
+#### 基本用法
 
 ```typescript
 import { getCpuInfo } from '@cat-kit/be'
@@ -18,7 +41,7 @@ console.log(`主频: ${cpuInfo.speed}MHz`)
 console.log(`平均负载: ${cpuInfo.loadAverage.join(', ')}`)
 ```
 
-#### API
+#### API 参考
 
 ```typescript
 function getCpuInfo(): CpuInfo
@@ -35,9 +58,23 @@ interface CpuInfo {
 }
 ```
 
+**平均负载说明：**
+
+平均负载表示系统在特定时间间隔内的平均活跃进程数。三个值分别表示：
+- 第 1 个值：过去 1 分钟的平均负载
+- 第 2 个值：过去 5 分钟的平均负载
+- 第 3 个值：过去 15 分钟的平均负载
+
 ### getCpuUsage
 
-通过采样获取 CPU 使用率。
+通过采样获取 CPU 使用率。需要指定采样间隔，通过两次采样计算期间 CPU 的使用情况。
+
+**适用场景：**
+- 实时 CPU 监控
+- 性能分析
+- 资源告警
+
+#### 基本用法
 
 ```typescript
 import { getCpuUsage } from '@cat-kit/be'
@@ -53,13 +90,13 @@ console.log(`空闲时间: ${usage.idle}ms`)
 const usage = await getCpuUsage(1000) // 采样 1 秒
 ```
 
-#### API
+#### API 参考
 
 ```typescript
 function getCpuUsage(interval?: number): Promise<CpuUsage>
 ```
 
-**参数：**
+**参数说明：**
 
 - `interval` - 采样间隔（毫秒），默认 `500`
 
@@ -77,13 +114,20 @@ interface CpuUsage {
 
 **工作原理：**
 
-通过两次采样 CPU 时间（间隔 `interval` 毫秒），计算期间 CPU 的使用情况。
+通过两次采样 CPU 时间（间隔 `interval` 毫秒），计算期间 CPU 的使用情况。使用率计算公式：`(total - idle) / total * 100`
 
 ## 内存信息
 
 ### getMemoryInfo
 
-获取系统内存使用情况。
+获取系统内存使用情况。返回总内存、已用内存、空闲内存和使用率。
+
+**适用场景：**
+- 内存监控
+- 内存告警
+- 资源规划
+
+#### 基本用法
 
 ```typescript
 import { getMemoryInfo } from '@cat-kit/be'
@@ -95,7 +139,7 @@ console.log(`空闲内存: ${(memInfo.free / 1024 / 1024 / 1024).toFixed(2)}GB`)
 console.log(`使用率: ${memInfo.usedPercent.toFixed(2)}%`)
 ```
 
-#### API
+#### API 参考
 
 ```typescript
 function getMemoryInfo(): MemoryInfo
@@ -116,7 +160,14 @@ interface MemoryInfo {
 
 ### getDiskInfo
 
-获取指定路径所在磁盘的容量信息。
+获取指定路径所在磁盘的容量信息。可以指定任意路径，函数会返回该路径所在磁盘的信息。
+
+**适用场景：**
+- 磁盘空间监控
+- 磁盘告警
+- 存储容量规划
+
+#### 基本用法
 
 ```typescript
 import { getDiskInfo } from '@cat-kit/be'
@@ -133,13 +184,13 @@ console.log(`使用率: ${diskInfo.usedPercent.toFixed(2)}%`)
 const diskInfo = await getDiskInfo('/var/log')
 ```
 
-#### API
+#### API 参考
 
 ```typescript
 function getDiskInfo(path?: string): Promise<DiskInfo>
 ```
 
-**参数：**
+**参数说明：**
 
 - `path` - 目标路径，默认使用 `process.cwd()`
 
@@ -164,7 +215,14 @@ interface DiskInfo {
 
 ### getNetworkInterfaces
 
-获取本机所有网络接口信息。
+获取本机所有网络接口信息。可以过滤内网接口，返回详细的网络接口信息。
+
+**适用场景：**
+- 网络接口监控
+- 多网卡环境处理
+- 网络配置分析
+
+#### 基本用法
 
 ```typescript
 import { getNetworkInterfaces } from '@cat-kit/be'
@@ -183,7 +241,7 @@ interfaces.forEach(iface => {
 })
 ```
 
-#### API
+#### API 参考
 
 ```typescript
 function getNetworkInterfaces(
@@ -191,7 +249,7 @@ function getNetworkInterfaces(
 ): NetworkInterfaceInfo[]
 ```
 
-**参数：**
+**参数说明：**
 
 - `options.includeInternal` - 是否包含内部地址，默认 `false`
 
@@ -270,20 +328,33 @@ async function checkResources() {
   const diskInfo = await getDiskInfo()
   const cpuUsage = await getCpuUsage()
 
+  const alerts: string[] = []
+
   // 内存告警
   if (memInfo.usedPercent > 90) {
-    console.warn(`内存使用率过高: ${memInfo.usedPercent.toFixed(2)}%`)
+    alerts.push(`内存使用率过高: ${memInfo.usedPercent.toFixed(2)}%`)
   }
 
   // 磁盘告警
   if (diskInfo.usedPercent > 90) {
-    console.warn(`磁盘使用率过高: ${diskInfo.usedPercent.toFixed(2)}%`)
+    alerts.push(`磁盘使用率过高: ${diskInfo.usedPercent.toFixed(2)}%`)
   }
 
   // CPU 告警
   if (cpuUsage.percent > 90) {
-    console.warn(`CPU 使用率过高: ${cpuUsage.percent.toFixed(2)}%`)
+    alerts.push(`CPU 使用率过高: ${cpuUsage.percent.toFixed(2)}%`)
   }
+
+  if (alerts.length > 0) {
+    await sendAlerts(alerts)
+  }
+
+  return alerts
+}
+
+async function sendAlerts(alerts: string[]) {
+  // 发送告警通知
+  console.warn('资源告警:', alerts)
 }
 ```
 
@@ -339,7 +410,7 @@ class MetricsCollector {
   }
 
   private async sendMetrics(metrics: any) {
-    // 发送到监控系统
+    // 发送到监控系统（如 Prometheus、InfluxDB 等）
     console.log('发送指标:', metrics)
   }
 }
@@ -370,3 +441,78 @@ async function checkDiskSpace(path: string, threshold = 0.9) {
 await checkDiskSpace('./data', 0.8)
 ```
 
+### 资源使用趋势分析
+
+```typescript
+import { getCpuUsage, getMemoryInfo } from '@cat-kit/be'
+
+class ResourceTrendAnalyzer {
+  private history: Array<{
+    timestamp: number
+    cpu: number
+    memory: number
+  }> = []
+
+  async record() {
+    const [cpuUsage, memInfo] = await Promise.all([
+      getCpuUsage(),
+      Promise.resolve(getMemoryInfo())
+    ])
+
+    this.history.push({
+      timestamp: Date.now(),
+      cpu: cpuUsage.percent,
+      memory: memInfo.usedPercent
+    })
+
+    // 只保留最近 1 小时的数据
+    const oneHourAgo = Date.now() - 3600000
+    this.history = this.history.filter(
+      entry => entry.timestamp > oneHourAgo
+    )
+  }
+
+  getAverageUsage() {
+    if (this.history.length === 0) {
+      return { cpu: 0, memory: 0 }
+    }
+
+    const sum = this.history.reduce(
+      (acc, entry) => ({
+        cpu: acc.cpu + entry.cpu,
+        memory: acc.memory + entry.memory
+      }),
+      { cpu: 0, memory: 0 }
+    )
+
+    return {
+      cpu: sum.cpu / this.history.length,
+      memory: sum.memory / this.history.length
+    }
+  }
+
+  start(interval = 60000) {
+    setInterval(() => {
+      this.record()
+    }, interval)
+  }
+}
+
+const analyzer = new ResourceTrendAnalyzer()
+analyzer.start()
+
+// 定期查看平均使用率
+setInterval(() => {
+  const avg = analyzer.getAverageUsage()
+  console.log('平均使用率:', avg)
+}, 300000) // 每 5 分钟
+```
+
+## 最佳实践
+
+1. **采样间隔**：`getCpuUsage` 的采样间隔不宜过短，建议至少 500ms
+2. **定期监控**：定期收集系统资源信息，但不要过于频繁，避免影响性能
+3. **告警阈值**：设置合理的告警阈值，避免误报
+4. **错误处理**：处理可能出现的系统调用错误
+5. **数据持久化**：将监控数据持久化，便于历史分析和趋势预测
+6. **资源清理**：及时清理历史数据，避免内存占用过大
