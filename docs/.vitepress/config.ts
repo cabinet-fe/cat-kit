@@ -57,7 +57,7 @@ export default defineConfig({
           ]
         }
       ],
-      '/packages/': [
+      '/packages/core/': [
         {
           text: 'Core 核心包',
           collapsed: false,
@@ -70,7 +70,9 @@ export default defineConfig({
             { text: '性能优化', link: '/packages/core/optimize' },
             { text: '设计模式', link: '/packages/core/pattern' }
           ]
-        },
+        }
+      ],
+      '/packages/http/': [
         {
           text: 'HTTP 请求包',
           collapsed: false,
@@ -80,7 +82,9 @@ export default defineConfig({
             { text: '插件系统', link: '/packages/http/plugins' },
             { text: '类型定义', link: '/packages/http/types' }
           ]
-        },
+        }
+      ],
+      '/packages/fe/': [
         {
           text: 'FE 前端包',
           collapsed: false,
@@ -92,16 +96,29 @@ export default defineConfig({
             { text: 'Web API', link: '/packages/fe/web-api' },
             { text: '测试', link: '/packages/fe/tests' }
           ]
-        },
+        }
+      ],
+      '/packages/excel/': [
         {
           text: 'Excel 表格包',
           collapsed: false,
           items: [{ text: '概览', link: '/packages/excel/' }]
-        },
+        }
+      ],
+      '/packages/be/': [
         {
           text: 'BE 后端包',
           collapsed: false,
-          items: [{ text: '概览', link: '/packages/be/' }]
+          items: [
+            { text: '概览', link: '/packages/be/' },
+            { text: '文件系统', link: '/packages/be/fs' },
+            { text: '配置管理', link: '/packages/be/config' },
+            { text: '日志系统', link: '/packages/be/logger' },
+            { text: '缓存工具', link: '/packages/be/cache' },
+            { text: '网络工具', link: '/packages/be/net' },
+            { text: '系统监控', link: '/packages/be/system' },
+            { text: '任务调度', link: '/packages/be/scheduler' }
+          ]
         }
       ]
     },
