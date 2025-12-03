@@ -12,16 +12,7 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./src": "./src/index.ts",
-    "./src/cache": "./src/cache/index.ts",
-    "./src/config": "./src/config/index.ts",
-    "./src/fs": "./src/fs/index.ts",
-    "./src/logger": "./src/logger/index.ts",
-    "./src/logger/logger": "./src/logger/logger.ts",
-    "./src/logger/transports": "./src/logger/transports.ts",
-    "./src/net": "./src/net/index.ts",
-    "./src/scheduler": "./src/scheduler/index.ts",
-    "./src/system": "./src/system/index.ts"
+    "./src": "./src/index.ts"
   },
   "devDependencies": {
     "@cat-kit/core": "workspace:*",

@@ -19,13 +19,17 @@
   },
   "devDependencies": {
     "@cat-kit/core": "workspace:*",
-    "typescript": "^5.9.3"
+    "@cat-kit/be": "workspace:*"
   },
   "peerDependencies": {
-    "@cat-kit/core": ">=1.0.0-alpha.1"
+    "@cat-kit/core": ">=1.0.0-alpha.1",
+    "@cat-kit/be": ">=1.0.0-alpha.1"
   },
   "peerDependenciesMeta": {
     "@cat-kit/core": {
+      "optional": true
+    },
+    "@cat-kit/be": {
       "optional": true
     }
   }

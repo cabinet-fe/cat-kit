@@ -1,12 +1,15 @@
-import type { MonorepoConfig } from '../types'
+import type { MonorepoConfig, PackageJson } from '../types'
 import type { DependencyGraph, DependencyNode, DependencyEdge } from './types'
 import { loadPackages } from '../utils'
 
 /**
  * 获取依赖类型
+ * @param packageJson - package.json 对象
+ * @param depName - 依赖名称
+ * @returns 依赖类型
  */
 function getDependencyType(
-  packageJson: any,
+  packageJson: PackageJson,
   depName: string
 ): 'dependencies' | 'devDependencies' | 'peerDependencies' {
   if (packageJson.dependencies?.[depName]) {
@@ -56,9 +59,9 @@ export async function buildDependencyGraph(
 
     // 收集所有依赖
     const allDeps = {
-      ...pkg.packageJson.dependencies,
-      ...pkg.packageJson.devDependencies,
-      ...pkg.packageJson.peerDependencies
+      ...(pkg.packageJson.dependencies || {}),
+      ...(pkg.packageJson.devDependencies || {}),
+      ...(pkg.packageJson.peerDependencies || {})
     }
 
     for (const depName of Object.keys(allDeps)) {
@@ -87,9 +90,9 @@ export async function buildDependencyGraph(
     // 为外部依赖添加边
     for (const pkg of packages) {
       const allDeps = {
-        ...pkg.packageJson.dependencies,
-        ...pkg.packageJson.devDependencies,
-        ...pkg.packageJson.peerDependencies
+        ...(pkg.packageJson.dependencies || {}),
+        ...(pkg.packageJson.devDependencies || {}),
+        ...(pkg.packageJson.peerDependencies || {})
       }
 
       if (allDeps[depName]) {

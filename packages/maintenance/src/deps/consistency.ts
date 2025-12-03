@@ -55,6 +55,11 @@ export async function checkVersionConsistency(
         continue
       }
 
+      // 确保 version 是字符串
+      if (typeof version !== 'string') {
+        continue
+      }
+
       // 跳过 workspace 依赖
       if (version.startsWith('workspace:')) {
         continue

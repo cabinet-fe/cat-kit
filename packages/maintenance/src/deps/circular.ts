@@ -1,24 +1,25 @@
-import type { MonorepoConfig } from '../types'
+import type { MonorepoConfig, PackageInfo } from '../types'
 import type { CircularDependencyResult, CircularChain } from './types'
 import { loadPackages } from '../utils'
 
 /**
  * 构建依赖映射
+ * @param packages - 包信息列表
+ * @returns 依赖关系映射（包名 -> 依赖的包名列表）
  */
-function buildDependencyMap(packages: any[]): Map<string, string[]> {
+function buildDependencyMap(packages: PackageInfo[]): Map<string, string[]> {
   const graph = new Map<string, string[]>()
+  const internalPackageNames = new Set(packages.map(p => p.name))
 
   for (const pkg of packages) {
     const deps: string[] = []
 
     // 只关心内部依赖（workspace 包）
     const allDeps = {
-      ...pkg.packageJson.dependencies,
-      ...pkg.packageJson.devDependencies,
-      ...pkg.packageJson.peerDependencies
+      ...(pkg.packageJson.dependencies || {}),
+      ...(pkg.packageJson.devDependencies || {}),
+      ...(pkg.packageJson.peerDependencies || {})
     }
-
-    const internalPackageNames = new Set(packages.map(p => p.name))
 
     for (const depName of Object.keys(allDeps)) {
       if (internalPackageNames.has(depName)) {
@@ -80,13 +81,16 @@ export async function checkCircularDependencies(
     // 遍历邻居节点
     const neighbors = graph.get(node) || []
     for (const neighbor of neighbors) {
+      const nodeLowlink = lowlinks.get(node)!
       if (!indices.has(neighbor)) {
         // 邻居未访问过，递归访问
         strongConnect(neighbor)
-        lowlinks.set(node, Math.min(lowlinks.get(node)!, lowlinks.get(neighbor)!))
+        const neighborLowlink = lowlinks.get(neighbor)!
+        lowlinks.set(node, Math.min(nodeLowlink, neighborLowlink))
       } else if (onStack.has(neighbor)) {
         // 邻居在栈中，说明存在回边
-        lowlinks.set(node, Math.min(lowlinks.get(node)!, indices.get(neighbor)!))
+        const neighborIndex = indices.get(neighbor)!
+        lowlinks.set(node, Math.min(nodeLowlink, neighborIndex))
       }
     }
 
@@ -97,7 +101,9 @@ export async function checkCircularDependencies(
 
       // 弹出栈，直到当前节点
       do {
-        w = stack.pop()!
+        const popped = stack.pop()
+        if (!popped) break // 防止栈为空的情况
+        w = popped
         onStack.delete(w)
         component.push(w)
       } while (w !== node)

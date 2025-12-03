@@ -53,15 +53,15 @@ export interface ValidationResult {
   /** 是否通过验证 */
   valid: boolean
   /** 错误列表 */
-  errors: ValidationError[]
+  errors: ValidationErrorInfo[]
   /** 警告列表 */
   warnings: ValidationWarning[]
 }
 
 /**
- * 验证错误
+ * 验证错误信息
  */
-export interface ValidationError {
+export interface ValidationErrorInfo {
   /** 错误代码 */
   code: string
   /** 错误消息 */

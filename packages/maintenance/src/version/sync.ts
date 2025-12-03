@@ -1,6 +1,33 @@
-import { writeFile } from 'fs/promises'
-import type { MonorepoConfig } from '../types'
+import type { MonorepoConfig, PackageJson } from '../types'
 import { loadPackages, readJson } from '../utils'
+
+// 懒加载 @cat-kit/be 的 writeJson
+let beWriteJson: ((filePath: string, data: unknown, options?: { space?: number; eol?: string }) => Promise<void>) | null = null
+let beWriteJsonLoaded = false
+
+async function writeJsonFile(filePath: string, data: unknown): Promise<void> {
+  // 懒加载 @cat-kit/be 的 writeJson
+  if (!beWriteJsonLoaded) {
+    try {
+      const beModule = await import('@cat-kit/be/src')
+      if (beModule.writeJson && typeof beModule.writeJson === 'function') {
+        beWriteJson = beModule.writeJson
+      }
+    } catch {
+      // 忽略导入错误，使用自定义实现
+    }
+    beWriteJsonLoaded = true
+  }
+
+  // 如果成功加载了 @cat-kit/be 的 writeJson，使用它
+  if (beWriteJson) {
+    return await beWriteJson(filePath, data, { space: 2, eol: '\n' })
+  }
+
+  // 回退到自定义实现
+  const { writeFile } = await import('node:fs/promises')
+  await writeFile(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+}
 
 // Cat-Kit 包列表（用于识别内部包）
 // 这个列表可以从 monorepo 的包列表动态生成
@@ -39,7 +66,7 @@ export async function syncPeerDependencies(
 
   // 遍历所有包，更新 peerDependencies
   for (const pkg of packages) {
-    const packageJson = await readJson(pkg.packageJsonPath)
+    const packageJson = await readJson<PackageJson>(pkg.packageJsonPath)
     let modified = false
 
     // 检查是否有 peerDependencies 需要更新
@@ -55,11 +82,7 @@ export async function syncPeerDependencies(
 
     // 如果有修改，写回文件
     if (modified) {
-      await writeFile(
-        pkg.packageJsonPath,
-        JSON.stringify(packageJson, null, 2) + '\n',
-        'utf-8'
-      )
+      await writeJsonFile(pkg.packageJsonPath, packageJson)
     }
   }
 }
@@ -80,15 +103,16 @@ export async function syncDependencies(
   const internalPackages = new Set(packages.map(pkg => pkg.name))
 
   for (const pkg of packages) {
-    const packageJson = await readJson(pkg.packageJsonPath)
+    const packageJson = await readJson<PackageJson>(pkg.packageJsonPath)
     let modified = false
 
     // 更新 dependencies
     if (packageJson.dependencies) {
       for (const [dep, currentVersion] of Object.entries(
-        packageJson.dependencies as Record<string, string>
+        packageJson.dependencies
       )) {
         if (
+          typeof currentVersion === 'string' &&
           internalPackages.has(dep) &&
           currentVersion.startsWith('workspace:')
         ) {
@@ -99,11 +123,7 @@ export async function syncDependencies(
     }
 
     if (modified) {
-      await writeFile(
-        pkg.packageJsonPath,
-        JSON.stringify(packageJson, null, 2) + '\n',
-        'utf-8'
-      )
+      await writeJsonFile(pkg.packageJsonPath, packageJson)
     }
   }
 }

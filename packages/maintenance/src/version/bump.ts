@@ -1,10 +1,37 @@
-import { writeFile } from 'fs/promises'
-import type { MonorepoConfig } from '../types'
+import type { MonorepoConfig, PackageJson } from '../types'
 import type { BumpOptions, BumpResult } from './types'
 import { loadPackages, readJson } from '../utils'
 import { incrementVersion, isValidSemver } from './semver'
 import { SemverError } from '../errors'
 import { syncPeerDependencies } from './sync'
+
+// 懒加载 @cat-kit/be 的 writeJson
+let beWriteJson: ((filePath: string, data: unknown, options?: { space?: number; eol?: string }) => Promise<void>) | null = null
+let beWriteJsonLoaded = false
+
+async function writeJsonFile(filePath: string, data: unknown): Promise<void> {
+  // 懒加载 @cat-kit/be 的 writeJson
+  if (!beWriteJsonLoaded) {
+    try {
+      const beModule = await import('@cat-kit/be/src')
+      if (beModule.writeJson && typeof beModule.writeJson === 'function') {
+        beWriteJson = beModule.writeJson
+      }
+    } catch {
+      // 忽略导入错误，使用自定义实现
+    }
+    beWriteJsonLoaded = true
+  }
+
+  // 如果成功加载了 @cat-kit/be 的 writeJson，使用它
+  if (beWriteJson) {
+    return await beWriteJson(filePath, data, { space: 2, eol: '\n' })
+  }
+
+  // 回退到自定义实现
+  const { writeFile } = await import('node:fs/promises')
+  await writeFile(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
+}
 
 /**
  * 批量更新包版本号
@@ -79,18 +106,14 @@ export async function bumpVersion(
   // 更新每个包的 version 字段
   // 复用 build/release.ts 的逻辑（L43-57）
   for (const pkg of packagesToUpdate) {
-    const packageJson = await readJson(pkg.packageJsonPath)
-    const oldVersion = packageJson.version
+    const packageJson = await readJson<PackageJson>(pkg.packageJsonPath)
+    const oldVersion = packageJson.version || '0.0.0'
 
     // 更新 version 字段
     packageJson.version = newVersion
 
     // 写回文件
-    await writeFile(
-      pkg.packageJsonPath,
-      JSON.stringify(packageJson, null, 2) + '\n',
-      'utf-8'
-    )
+    await writeJsonFile(pkg.packageJsonPath, packageJson)
 
     updated.push({
       name: pkg.name,
