@@ -12,12 +12,12 @@ Cat-Kit（喵喵工具箱）是一个基于 monorepo 的 TypeScript 工具库，
 
 ### 核心包
 
-- `packages/core` - 核心工具包（无外部依赖的基础包）
-- `packages/fe` - 前端工具包（依赖 core）
-- `packages/http` - HTTP 请求工具包（依赖 core）
-- `packages/be` - 后端工具包（依赖 core）
-- `packages/excel` - Excel 文件处理库（依赖 core）
-- `packages/maintenance` - 库维护工具包（依赖 core）
+- `packages/core` - 核心工具包
+- `packages/fe` - 前端工具包
+- `packages/be` - Node.js 后端工具包
+- `packages/http` - HTTP 请求工具包
+- `packages/excel` - Excel 文件处理库
+- `packages/maintenance` - 库维护工具包
 
 ### 支持工作空间
 
@@ -56,8 +56,7 @@ Cat-Kit（喵喵工具箱）是一个基于 monorepo 的 TypeScript 工具库，
 
 3. **处理依赖关系**
 
-   - 如果工作空间依赖其他包（如 `fe`、`http`、`be`、`excel` 依赖 `core`）
-   - **也需要读取依赖包的 `AGENTS.md` 文件**以了解相关 API 和约定
+   - 如果工作空间依赖其他同为工作空间的包（如 `fe`、`http`、`be`、`excel` 依赖 `core`）, **也需要读取依赖包的 `AGENTS.md` 文件**以了解相关 API 和约定
 
 4. **执行任务**
    - 基于工作空间的具体指导文件执行编码任务
@@ -519,7 +518,7 @@ bun run build
 ## 重要提醒
 
 1. **始终先读取工作空间的 AGENTS.md 文件**再开始编码
-2. **关注依赖关系**，如果工作空间依赖其他包，也要读取依赖包的指导文件
+2. **关注依赖关系**，如果工作空间依赖其他同为工作空间的包，也要读取依赖包的指导文件
 3. **遵循各工作空间的特定规范**，不要假设通用做法
 4. **如果不确定目标工作空间，先询问用户**
 5. **优先使用简单直接的解决方案**，避免过度工程化

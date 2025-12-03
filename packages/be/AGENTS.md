@@ -22,6 +22,41 @@ import { isObject, deepClone } from '@cat-kit/core/src'
 function isObject(value: unknown): boolean { ... }
 ```
 
+## 外部依赖与导出
+
+`package.json` 中目前声明了以下依赖约束：
+
+- `@cat-kit/core`：workspace 依赖，所有基础类型守卫、工具函数统一从这里引入
+- `smol-toml@^1.5.2`：可选 peer 依赖，用于 TOML 配置解析
+- `js-yaml@^4.1.1`：可选 peer 依赖，用于 YAML 配置解析
+
+### 使用约定
+
+1. **惰性加载**：`smol-toml` 与 `js-yaml` 在运行时才会被加载（`await import('smol-toml')`），以便在未安装时抛出可理解的错误，同时避免在不需要时被打包。
+2. **可选依赖提示**：当用户未安装这些 peer 依赖时，务必抛出自定义错误（例如 `ConfigError`），并提示执行 `bun add smol-toml js-yaml`。
+3. **类型导入**：如需类型，使用 `import type { ... } from 'js-yaml'` 的形式，保持运行时代码最小化。
+4. **双入口导出**：遵循 `exports` 中的双入口策略：
+   - `@cat-kit/be` → `dist/index.js`
+   - `@cat-kit/be/src` → 源码入口，方便调试
+
+示例：
+
+```typescript
+export async function parseTomlConfig(
+  file: string
+): Promise<Record<string, unknown>> {
+  const { parse } = await import('smol-toml')
+  return parse(file)
+}
+```
+
+```typescript
+export async function parseYamlConfig(content: string): Promise<unknown> {
+  const { load } = await import('js-yaml')
+  return load(content)
+}
+```
+
 ## 目录结构
 
 ```
@@ -42,7 +77,6 @@ packages/be/src/
 - **异步优先**：使用 Promise/async/await，避免回调
 - **使用 `node:` 协议**：导入内置模块时使用 `node:` 前缀
 
-
 ## 建议的模块方向
 
 基于后端开发的常见需求，建议添加以下模块：
@@ -50,6 +84,7 @@ packages/be/src/
 ### 1. 文件系统工具
 
 增强的文件系统操作：
+
 - 递归读取目录
 - 文件监听
 - 临时文件管理
@@ -58,25 +93,33 @@ packages/be/src/
 ```typescript
 // 示例：packages/be/src/fs/
 export async function readDirRecursive(dir: string): Promise<string[]>
-export async function watchFile(path: string, callback: (event: string) => void): Promise<void>
+export async function watchFile(
+  path: string,
+  callback: (event: string) => void
+): Promise<void>
 ```
 
 ### 2. 进程管理
 
 进程和子进程工具：
+
 - 子进程执行
 - 进程池
 - 优雅退出
 
 ```typescript
 // 示例：packages/be/src/process/
-export async function execCommand(command: string, options?: ExecOptions): Promise<ExecResult>
+export async function execCommand(
+  command: string,
+  options?: ExecOptions
+): Promise<ExecResult>
 export function createProcessPool(options: PoolOptions): ProcessPool
 ```
 
 ### 3. 日志工具
 
 结构化日志记录：
+
 - 分级日志
 - 日志格式化
 - 日志输出（控制台、文件）
@@ -94,6 +137,7 @@ export class Logger {
 ### 4. 环境配置
 
 配置管理：
+
 - 环境变量加载
 - 配置文件解析（JSON、YAML、TOML）
 - 配置验证
@@ -101,12 +145,16 @@ export class Logger {
 ```typescript
 // 示例：packages/be/src/config/
 export function loadEnv(envPath?: string): Record<string, string>
-export async function loadConfig<T>(configPath: string, schema?: Schema): Promise<T>
+export async function loadConfig<T>(
+  configPath: string,
+  schema?: Schema
+): Promise<T>
 ```
 
 ### 5. 缓存工具
 
 内存缓存和持久化缓存：
+
 - LRU 缓存
 - TTL 缓存
 - 文件缓存
@@ -124,6 +172,7 @@ export class LRUCache<K, V> {
 ### 6. 安全工具
 
 安全相关功能：
+
 - 密码哈希
 - 加密/解密
 - 安全随机数生成
@@ -131,7 +180,10 @@ export class LRUCache<K, V> {
 ```typescript
 // 示例：packages/be/src/security/
 export async function hashPassword(password: string): Promise<string>
-export async function verifyPassword(password: string, hash: string): Promise<boolean>
+export async function verifyPassword(
+  password: string,
+  hash: string
+): Promise<boolean>
 export function generateSecureToken(length: number): string
 ```
 
@@ -157,7 +209,6 @@ import { join } from 'path'
 > **📌 通用测试规范请参考根目录的 `AGENTS.md` 文件**
 
 测试位置：`packages/tests/be/`
-
 
 ## 添加新功能
 
@@ -206,20 +257,29 @@ export class Logger {
     this.log(LogLevel.DEBUG, message, meta)
   }
 
-  private log(level: LogLevel, message: string, meta?: Record<string, any>): void {
+  private log(
+    level: LogLevel,
+    message: string,
+    meta?: Record<string, any>
+  ): void {
     const timestamp = new Date().toISOString()
     const prefix = this.options.prefix ? `[${this.options.prefix}] ` : ''
-    console.log(`${timestamp} ${level.toUpperCase()} ${prefix}${message}`, meta || '')
+    console.log(
+      `${timestamp} ${level.toUpperCase()} ${prefix}${message}`,
+      meta || ''
+    )
   }
 }
 ```
 
 然后在 `packages/be/src/logger/index.ts` 中导出：
+
 ```typescript
 export * from './logger'
 ```
 
 最后在 `packages/be/src/index.ts` 中导出：
+
 ```typescript
 export * from './logger'
 ```
@@ -260,24 +320,30 @@ export * from './logger'
 ## 常见任务
 
 ### 添加文件系统工具
+
 → 在 `src/fs/` 下创建新文件
 
 ### 添加日志功能
+
 → 在 `src/logger/` 下创建新文件
 
 ### 添加配置管理
+
 → 在 `src/config/` 下创建新文件
 
 ### 添加缓存功能
+
 → 在 `src/cache/` 下创建新文件
 
 ## Node.js 版本要求
 
 默认目标 Node.js 版本：
+
 - Node.js 18+ （LTS）
 - Node.js 20+ （推荐）
 
 使用新 API 时应该：
+
 1. 检查 Node.js 文档确认版本要求
 2. 在文档中说明最低版本要求
 3. 考虑提供降级方案（如果可能）

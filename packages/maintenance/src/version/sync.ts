@@ -85,8 +85,13 @@ export async function syncDependencies(
 
     // 更新 dependencies
     if (packageJson.dependencies) {
-      for (const [dep, currentVersion] of Object.entries(packageJson.dependencies)) {
-        if (internalPackages.has(dep) && currentVersion.startsWith('workspace:')) {
+      for (const [dep, currentVersion] of Object.entries(
+        packageJson.dependencies as Record<string, string>
+      )) {
+        if (
+          internalPackages.has(dep) &&
+          currentVersion.startsWith('workspace:')
+        ) {
           packageJson.dependencies[dep] = `^${version}`
           modified = true
         }

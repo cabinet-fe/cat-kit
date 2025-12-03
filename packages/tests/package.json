@@ -5,7 +5,8 @@
   "description": "喵喵工具箱测试",
   "main": "index.ts",
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --run",
+    "test:watch": "vitest --watch",
     "test:ui": "vitest --ui"
   },
   "devDependencies": {

@@ -1,0 +1,69 @@
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
+import { Logger, LogLevel } from '@cat-kit/be/src/logger/logger'
+import type { LogEntry, Transport } from '@cat-kit/be/src/logger/transports'
+import { FileTransport } from '@cat-kit/be/src/logger/transports'
+
+class MemoryTransport implements Transport {
+  public readonly entries: LogEntry[] = []
+
+  async write(entry: LogEntry): Promise<void> {
+    this.entries.push(entry)
+  }
+}
+
+describe('@cat-kit/be logger', () => {
+  let tempDir: string
+
+  beforeEach(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), 'cat-kit-logger-'))
+  })
+
+  afterEach(async () => {
+    await rm(tempDir, { recursive: true, force: true })
+  })
+
+  it('logs structured entries respecting level', async () => {
+    const transport = new MemoryTransport()
+    const logger = new Logger({
+      level: LogLevel.INFO,
+      transports: [transport],
+      context: { app: 'test' }
+    })
+
+    await logger.debug('hidden')
+    await logger.info('visible', { user: 'alice' })
+
+    expect(transport.entries).toHaveLength(1)
+    expect(transport.entries[0]).toMatchObject({
+      level: LogLevel.INFO,
+      message: 'visible',
+      meta: { app: 'test', user: 'alice' }
+    })
+  })
+
+  it('writes logs to file using FileTransport', async () => {
+    const logFile = join(tempDir, 'app.log')
+    const logger = new Logger({
+      format: 'json',
+      transports: [new FileTransport({ filePath: logFile })]
+    })
+
+    await logger.error('boom', new Error('fail'))
+
+    const content = await readFile(logFile, 'utf8')
+    const parsed = content
+      .trim()
+      .split('\n')
+      .map(line => JSON.parse(line))
+
+    expect(parsed[0]).toMatchObject({
+      level: LogLevel.ERROR,
+      message: 'boom',
+      error: { message: 'fail' }
+    })
+  })
+})
+
