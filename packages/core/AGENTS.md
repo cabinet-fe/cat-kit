@@ -63,6 +63,8 @@ packages/core/src/
 ### 3. date/ - 日期处理
 
 日期和时间相关的工具函数。
+- `Dater` 提供 `format/compare/calc` 以及不可变的 `add*`、`startOf/endOf`、`diff/isBetween`、`clone` 等方法
+- `Dater.parse` 支持按模板解析（含 `utc` 选项），无效日期返回 `Invalid Date`（不抛错）
 
 ### 4. env/ - 环境检测
 

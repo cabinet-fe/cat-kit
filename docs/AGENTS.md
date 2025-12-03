@@ -2,6 +2,11 @@
 
 本文件为 `docs` 目录提供详细的开发指导。
 
+## 核心原则
+
+- **文档必须兼顾准确性、逻辑性和易读(易懂)性**
+- **必须充分理解代码**
+
 ## 概述
 
 `docs` 目录包含 Cat-Kit 项目的 VitePress 文档站点，提供完整的 API 文档和交互式示例。
@@ -59,6 +64,7 @@ docs/
 文档支持嵌入可运行的 Vue 组件示例：
 
 **在 Markdown 中使用**：
+
 ```markdown
 # 存储示例
 
@@ -69,6 +75,7 @@ docs/
 ```
 
 **示例组件**（`docs/examples/fe/storage/basic.vue`）：
+
 ```vue
 <template>
   <div>
@@ -97,6 +104,7 @@ function loadData() {
 ```
 
 **渲染效果**：
+
 - 实际运行的组件（可交互）
 - 可展开/收起的源代码
 - 语法高亮的代码显示
@@ -105,17 +113,20 @@ function loadData() {
 ### 2. 自动导入系统
 
 **组件自动导入**（`import-examples.ts` 插件）：
+
 - 自动扫描 `examples/` 目录
 - 自动注册所有示例组件
 - 无需手动导入
 
 **API 自动导入**（`unplugin-auto-import`）：
+
 - Vue API（ref, computed, watch 等）
 - @varlet/ui 组件
 
 ### 3. Demo 容器插件
 
 **Markdown 插件**（`demo-container.ts`）：
+
 - 解析 `::: demo` 语法
 - 自动提取组件源代码
 - 使用 Shiki 进行语法高亮
@@ -124,9 +135,11 @@ function loadData() {
 ### 4. 主题定制
 
 **自定义主题组件**：
+
 - `DemoContainer.vue`：示例容器组件，提供代码显示和交互功能
 
 **自定义样式**：
+
 - `custom.css`：全局样式覆盖
 
 ## 配置文件详解
@@ -174,16 +187,18 @@ export default defineConfig({
 ### DemoContainer.vue - 示例容器
 
 **功能**：
+
 - 显示运行的组件
 - 显示/隐藏源代码
 - 代码高亮
 - 复制代码按钮
 
 **Props**：
+
 ```typescript
 interface Props {
-  component: string  // 组件路径（如 'fe/storage/basic.vue'）
-  code: string       // 组件源代码
+  component: string // 组件路径（如 'fe/storage/basic.vue'）
+  code: string // 组件源代码
 }
 ```
 
@@ -201,12 +216,14 @@ bun run dev
 ### 添加新文档页面
 
 1. **创建 Markdown 文件**：
+
    ```bash
    # 例如添加新的 core 包文档
    touch docs/packages/core/my-feature.md
    ```
 
 2. **编写文档内容**：
+
    ```markdown
    # 我的功能
 
@@ -244,6 +261,7 @@ bun run dev
 ### 添加交互式示例
 
 1. **创建示例组件**：
+
    ```bash
    # 在 examples 目录下创建
    mkdir -p docs/examples/core/my-feature
@@ -251,6 +269,7 @@ bun run dev
    ```
 
 2. **编写示例组件**：
+
    ```vue
    <template>
      <div>
@@ -272,6 +291,7 @@ bun run dev
    ```
 
 3. **在文档中引用**：
+
    ```markdown
    ## 交互式示例
 
@@ -288,6 +308,7 @@ bun run dev
 ### 更新导航和侧边栏
 
 **导航栏**（`themeConfig.nav`）：
+
 ```typescript
 nav: [
   { text: '首页', link: '/' },
@@ -295,7 +316,7 @@ nav: [
   {
     text: '包',
     items: [
-      { text: 'Core 核心', link: '/packages/core/' },
+      { text: 'Core 核心', link: '/packages/core/' }
       // ... 其他包
     ]
   }
@@ -303,6 +324,7 @@ nav: [
 ```
 
 **侧边栏**（`themeConfig.sidebar`）：
+
 ```typescript
 sidebar: {
   '/guide/': [
@@ -348,12 +370,14 @@ bun run preview
 ### 部署到生产环境
 
 VitePress 生成静态站点，可以部署到：
+
 - GitHub Pages
 - Netlify
 - Vercel
 - 自己的服务器
 
 **部署步骤**：
+
 1. 运行 `bun run build`
 2. 将 `.vitepress/dist/` 目录部署到服务器
 
@@ -364,6 +388,7 @@ VitePress 生成静态站点，可以部署到：
 Markdown 插件，解析 `::: demo` 语法。
 
 **工作原理**：
+
 1. 检测 `demo` 容器
 2. 读取组件文件
 3. 提取源代码
@@ -375,6 +400,7 @@ Markdown 插件，解析 `::: demo` 语法。
 Vite 插件，自动导入示例组件。
 
 **工作原理**：
+
 1. 扫描 `examples/` 目录
 2. 生成虚拟模块
 3. 导出所有示例组件
@@ -438,30 +464,37 @@ themeConfig: {
 ## 常见任务
 
 ### 添加新的包文档
+
 1. 在 `docs/packages/` 下创建包目录
 2. 添加 `index.md` 和功能文档
 3. 更新 `config.ts` 的导航和侧边栏
 
 ### 添加新的示例
+
 1. 在 `docs/examples/<package>/` 下创建 `.vue` 文件
 2. 在文档中使用 `::: demo` 引用
 
 ### 修改主题样式
+
 → 编辑 `.vitepress/theme/styles/custom.css`
 
 ### 添加新的主题组件
+
 → 在 `.vitepress/theme/components/` 下创建组件
 
 ### 修改首页
+
 → 编辑 `docs/index.md`
 
 ## 依赖包
 
 ### 核心依赖
+
 - `vitepress`: 文档框架
 - `vue`: Vue 3
 
 ### 插件
+
 - `vitepress-plugin-llms`: LLM 友好的插件
 - `markdown-it-container`: Markdown 容器插件
 - `shiki`: 代码语法高亮
@@ -469,6 +502,7 @@ themeConfig: {
 - `unplugin-vue-components`: 组件自动注册
 
 ### UI 库
+
 - `@varlet/ui`: 示例中使用的 UI 组件库
 - `@varlet/import-resolver`: Varlet 组件自动导入解析器
 
@@ -517,6 +551,7 @@ themeConfig: {
 ## 未来改进
 
 建议的改进方向：
+
 1. **API 自动生成**：从 TypeScript 类型自动生成 API 文档
 2. **交互式 Playground**：在线编辑和运行代码
 3. **多语言支持**：添加英文文档

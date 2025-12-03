@@ -14,6 +14,9 @@ describe('Dater', () => {
       const d = new Date('2024-01-15')
       const result = new Dater(d)
       expect(result.raw).toEqual(d)
+
+      d.setFullYear(2025)
+      expect(result.year).toBe(2024)
     })
 
     it('应该接受时间戳', () => {
@@ -33,6 +36,58 @@ describe('Dater', () => {
       const original = new Dater('2024-01-15')
       const copy = new Dater(original)
       expect(copy.timestamp).toBe(original.timestamp)
+    })
+  })
+
+  describe('不可变操作与起止对齐', () => {
+    it('add 方法族不会修改原始实例', () => {
+      const base = date('2024-01-15')
+      const nextDay = base.addDays(1)
+      const nextWeek = base.addWeeks(1)
+      const nextMonth = base.addMonths(1)
+      const nextYear = base.addYears(1)
+
+      expect(base.day).toBe(15)
+      expect(nextDay.day).toBe(16)
+      expect(nextWeek.day).toBe(22)
+      expect(nextMonth.month).toBe(2)
+      expect(nextYear.year).toBe(2025)
+    })
+
+    it('startOf 与 endOf day', () => {
+      const d = date('2024-03-15 10:20:30')
+      expect(d.startOf('day').format('yyyy-MM-dd HH:mm:ss')).toBe(
+        '2024-03-15 00:00:00'
+      )
+      expect(d.endOf('day').format('yyyy-MM-dd HH:mm:ss')).toBe(
+        '2024-03-15 23:59:59'
+      )
+    })
+
+    it('startOf 与 endOf week (周一为一周开始)', () => {
+      const sunday = date('2024-01-14 12:00:00') // 周日
+      expect(sunday.startOf('week').format('yyyy-MM-dd HH:mm:ss')).toBe(
+        '2024-01-08 00:00:00'
+      )
+      expect(sunday.endOf('week').format('yyyy-MM-dd HH:mm:ss')).toBe(
+        '2024-01-14 23:59:59'
+      )
+    })
+
+    it('startOf 与 endOf month/year', () => {
+      const d = date('2024-02-15 10:00:00')
+      expect(d.startOf('month').format('yyyy-MM-dd HH:mm:ss')).toBe(
+        '2024-02-01 00:00:00'
+      )
+      expect(d.endOf('month').format('yyyy-MM-dd HH:mm:ss')).toBe(
+        '2024-02-29 23:59:59'
+      )
+      expect(d.startOf('year').format('yyyy-MM-dd HH:mm:ss')).toBe(
+        '2024-01-01 00:00:00'
+      )
+      expect(d.endOf('year').format('yyyy-MM-dd HH:mm:ss')).toBe(
+        '2024-12-31 23:59:59'
+      )
     })
   })
 
@@ -162,6 +217,13 @@ describe('Dater', () => {
     it('应该格式化完整的日期时间', () => {
       expect(testDate.format('yyyy-MM-dd HH:mm:ss')).toBe('2024-01-15 10:30:45')
     })
+
+    it('应该支持多次占位符和 UTC 选项', () => {
+      const utcDate = new Dater(new Date(Date.UTC(2024, 0, 1, 23, 5, 9)))
+      expect(utcDate.format('yyyy-MM-dd HH:mm:ss HH', { utc: true })).toBe(
+        '2024-01-01 23:05:09 23'
+      )
+    })
   })
 
   describe('calc 方法', () => {
@@ -236,6 +298,74 @@ describe('Dater', () => {
     it('应该比较相同日期', () => {
       const sameDate = new Date(testDate.timestamp)
       expect(testDate.compare(sameDate)).toBe(0)
+    })
+  })
+
+  describe('diff / 判定类方法', () => {
+    it('应该支持多单位 diff', () => {
+      const left = date('2024-01-02 00:00:00')
+      const right = date('2024-01-01 00:00:00')
+
+      expect(left.diff(right, 'milliseconds')).toBe(86400000)
+      expect(left.diff(right, 'days')).toBe(1)
+      expect(left.diff(right, 'weeks', { float: true })).toBe(1 / 7)
+      expect(left.diff(right, 'months')).toBe(0)
+
+      const monthDiff = date('2024-03-31').diff(date('2024-02-29'), 'months')
+      expect(monthDiff).toBe(1)
+
+      const negativeMonthDiff = date('2024-02-15').diff(
+        date('2024-03-15'),
+        'months'
+      )
+      expect(negativeMonthDiff).toBe(-1)
+    })
+
+    it('应该支持绝对值与 isBetween', () => {
+      const target = date('2024-01-15')
+      const start = date('2024-01-10')
+      const end = date('2024-01-20')
+
+      expect(target.diff(end, 'days', { absolute: true })).toBe(5)
+      expect(target.isBetween(start, end)).toBe(true)
+      expect(target.isBetween(end, start)).toBe(true)
+      expect(target.isBetween(start, end, { inclusive: '()' })).toBe(true)
+      expect(start.isBetween(start, end, { inclusive: '()' })).toBe(false)
+    })
+
+    it('应该判断同日/同月/同年与周末、闰年', () => {
+      const d = date('2024-02-29')
+      expect(d.isLeapYear()).toBe(true)
+      expect(d.isWeekend()).toBe(false)
+      expect(d.isSameDay(date('2024-02-29 12:00:00'))).toBe(true)
+      expect(d.isSameMonth(date('2024-02-01'))).toBe(true)
+      expect(d.isSameYear(date('2024-12-01'))).toBe(true)
+    })
+  })
+
+  describe('parse', () => {
+    it('应该按格式解析字符串', () => {
+      const parsed = Dater.parse('2024-03-05 14:20:10', 'yyyy-MM-dd HH:mm:ss')
+      expect(parsed.year).toBe(2024)
+      expect(parsed.month).toBe(3)
+      expect(parsed.day).toBe(5)
+      expect(parsed.hours).toBe(14)
+      expect(parsed.minutes).toBe(20)
+      expect(parsed.seconds).toBe(10)
+    })
+
+    it('应该支持 UTC 解析', () => {
+      const parsed = Dater.parse('2024-01-01 00:00:00', 'yyyy-MM-dd HH:mm:ss', {
+        utc: true
+      })
+      expect(parsed.format('yyyy-MM-dd HH:mm:ss', { utc: true })).toBe(
+        '2024-01-01 00:00:00'
+      )
+    })
+
+    it('无效日期应返回 Invalid Date（不抛错）', () => {
+      const parsed = Dater.parse('2024-02-30', 'yyyy-MM-dd')
+      expect(Number.isNaN(parsed.timestamp)).toBe(true)
     })
   })
 })
