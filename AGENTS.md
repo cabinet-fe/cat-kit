@@ -507,6 +507,45 @@ cd docs
 bun run build
 ```
 
+## 文档编写规范
+
+### 文档结构
+
+文档使用 VitePress 构建，位于 `docs/` 目录。文档应该：
+
+- **清晰的层次结构** - 使用适当的标题层级（H1-H6）
+- **代码示例** - 提供实际可运行的代码示例
+- **类型信息** - 展示完整的类型签名
+- **实际用例** - 说明何时使用某个功能
+
+### 前置知识章节
+
+在编写复杂工具的文档时（如构建工具、打包器），应该包含"前置知识"或"基础概念"章节，帮助读者理解：
+
+- 相关技术的基础概念
+- 配置选项的作用原理
+- 常见术语的解释
+- 最佳实践和决策指南
+
+**示例**：`docs/packages/maintenance/index.md` 的"前置知识"章节解释了：
+- 库构建 vs 应用构建的本质区别
+- tsdown 作为库构建工具的特性
+- package.json 中的依赖类型在库构建上下文中的意义
+- external 字段在库构建中的作用
+- Monorepo 库构建的最佳实践
+
+### 文档更新记录
+
+**最近更新**：
+
+- **2025-12-04** - 为 `@cat-kit/maintenance` 包文档重写"前置知识"章节，基于 tsdown 官方文档：
+  - 区分库构建 vs 应用构建的本质差异
+  - 介绍 tsdown 的核心特性和默认行为
+  - 在库构建上下文中解释三种依赖类型（dependencies、devDependencies、peerDependencies）
+  - 说明 external 字段在库构建中的作用和配置策略
+  - Monorepo 库构建的最佳实践和配置检查清单
+  - 引用官方资源：[tsdown 文档](https://tsdown.dev/)、[库打包指南](https://tobias-barth.net/blog/How-to-bundle-your-library-and-why)
+
 ## TypeScript 配置
 
 项目使用 TypeScript 项目引用（在根 `tsconfig.json` 中定义）。每个包都有自己的 `tsconfig.json`，继承自 `@cat-kit/tsconfig`。
