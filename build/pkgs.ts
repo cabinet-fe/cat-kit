@@ -1,6 +1,6 @@
+import type { BundlePackageOption } from '@cat-kit/maintenance/src'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { BundlePackageOption } from './types'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -34,8 +34,10 @@ export const pkgs: BundlePackageOption[] = [
   {
     dir: pkg('be'),
     deps: ['@cat-kit/core'],
+
     build: {
       input: 'src/index.ts',
+      platform: 'node',
       external: ['@cat-kit/core']
     }
   },
@@ -44,15 +46,17 @@ export const pkgs: BundlePackageOption[] = [
     deps: ['@cat-kit/core'],
     build: {
       input: 'src/index.ts',
+      platform: 'browser',
       external: ['@cat-kit/core']
     }
   },
   {
     dir: pkg('maintenance'),
-    deps: ['@cat-kit/core'],
+    deps: ['@cat-kit/core', '@cat-kit/be'],
     build: {
       input: 'src/index.ts',
-      external: ['@cat-kit/core']
+      platform: 'node',
+      external: ['@cat-kit/core', '@cat-kit/be']
     }
   }
 ]

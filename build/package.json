@@ -1,15 +1,11 @@
 {
   "name": "build",
   "devDependencies": {
-    "@types/fs-extra": "^11.0.4",
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
-    "fs-extra": "^11.3.2",
-    "picocolors": "^1.1.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "rollup-plugin-visualizer": "^6.0.5",
-    "tsdown": "^0.16.5"
+    "@cat-kit/maintenance": "workspace:*"
   },
   "scripts": {
     "build": "bun index.ts",

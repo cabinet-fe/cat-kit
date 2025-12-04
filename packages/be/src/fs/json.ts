@@ -50,7 +50,7 @@ export interface WriteJsonOptions {
  * @throws {Error} 当文件不存在或 JSON 格式错误时抛出错误
  * @template T 返回数据类型
  */
-export async function readJson<T = unknown>(
+export async function readJson<T = Record<string, any>>(
   filePath: string,
   options: ReadJsonOptions = {}
 ): Promise<T> {

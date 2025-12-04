@@ -75,14 +75,10 @@ export function exampleFunction(value: string): string {
 
 ### 运行时依赖
 
-- `fs-extra`: 增强的文件系统操作（JSON 读写、目录操作等）
+- `@cat-kit/be`: 后端工具包，提供文件系统操作（JSON 读写等）
 - `picocolors`: 终端颜色输出
 - `tsdown`: TypeScript 打包工具（基于 Rolldown）
 - `rollup-plugin-visualizer`: Bundle 分析插件
-
-### 开发依赖
-
-- `@types/fs-extra`: fs-extra 类型定义
 
 ## 使用示例
 

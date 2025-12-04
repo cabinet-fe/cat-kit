@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { readJson } from 'fs-extra'
+import { readJson } from '@cat-kit/be'
 import pic from 'picocolors'
 import { build } from 'tsdown'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -55,11 +55,16 @@ export class MonoRepoBundler {
   private async initPackages(): Promise<void> {
     this.packagesConfigs = await Promise.all(
       this.packages.map(async pkg => {
-        const { dir, build: buildOpt, output, deps } = pkg
+        const { dir, build: buildOpt, output } = pkg
         const pkgJson = await readJson(path.resolve(dir, 'package.json'))
         if (!pkgJson.name) {
           throw new Error(`${dir}/package.json 中缺少 name 字段`)
         }
+        const { dependencies, devDependencies } = pkgJson
+        const allDeps = { ...dependencies, ...devDependencies }
+        const deps = Object.keys(allDeps).filter(dep =>
+          allDeps[dep].startsWith('workspace:*')
+        )
 
         return {
           dir,
@@ -78,9 +83,7 @@ export class MonoRepoBundler {
    * @param buildedPackages - 已构建的包名称集合
    * @returns 可以构建的包配置列表
    */
-  private getPkgsToBuild(
-    buildedPackages: Set<string>
-  ): BundlePackageConfig[] {
+  private getPkgsToBuild(buildedPackages: Set<string>): BundlePackageConfig[] {
     return this.packagesConfigs.filter(
       pkg =>
         !buildedPackages.has(pkg.name) &&
@@ -222,7 +225,7 @@ export class MonoRepoBundler {
           dts: '.d.ts'
         }),
         format: 'es',
-        platform: 'neutral',
+        platform: buildOpt.platform || 'neutral',
         minify: true,
         logLevel: 'warn',
         plugins: [
@@ -261,4 +264,3 @@ export class MonoRepoBundler {
     }
   }
 }
-

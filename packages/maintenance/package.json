@@ -18,12 +18,14 @@
     }
   },
   "dependencies": {
-    "fs-extra": "^11.3.2",
     "picocolors": "^1.1.1",
     "rollup-plugin-visualizer": "^6.0.5",
-    "tsdown": "^0.16.5"
+    "tsdown": "^0.17.0-beta.6"
   },
   "devDependencies": {
-    "@types/fs-extra": "^11.0.4"
+    "@cat-kit/be": "workspace:*"
+  },
+  "peerDependencies": {
+    "@cat-kit/be": ">=1.0.0-alpha.1"
   }
 }

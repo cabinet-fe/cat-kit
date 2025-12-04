@@ -1,7 +1,7 @@
-import { writeJson } from 'fs-extra'
+import { writeJson, readJson } from '@cat-kit/be'
 import type { MonorepoConfig, PackageJson } from '../types'
 import type { BumpOptions, BumpResult } from './types'
-import { loadPackages, readJson } from '../utils'
+import { loadPackages } from '../utils'
 import { incrementVersion, isValidSemver } from './semver'
 import { SemverError } from '../errors'
 import { syncPeerDependencies } from './sync'
@@ -92,7 +92,7 @@ export async function bumpVersion(
     packageJson.version = newVersion
 
     // 写回文件
-    await writeJson(pkg.packageJsonPath, packageJson, { spaces: 2, EOL: '\n' })
+    await writeJson(pkg.packageJsonPath, packageJson, { space: 2, eol: '\n' })
 
     updated.push({
       name: pkg.name,

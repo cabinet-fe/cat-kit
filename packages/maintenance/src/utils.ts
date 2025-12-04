@@ -1,24 +1,9 @@
 import { join, resolve, sep } from 'node:path'
 import { readdir, stat } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
-import { readJson as fsReadJson } from 'fs-extra'
+import { readJson } from '@cat-kit/be'
 import type { MonorepoConfig, PackageInfo, PackageJson } from './types'
 import { ConfigError, GitError } from './errors'
-
-/**
- * 读取 JSON 文件
- *
- * @param filePath - 文件路径
- * @returns 解析后的 JSON 对象
- * @throws {ConfigError} 当文件读取失败或 JSON 解析失败时
- */
-export async function readJson<T = unknown>(filePath: string): Promise<T> {
-  try {
-    return await fsReadJson(filePath)
-  } catch (error) {
-    throw new ConfigError(`无法读取 JSON 文件: ${filePath}`, filePath, error)
-  }
-}
 
 /**
  * 加载 monorepo 中的所有包

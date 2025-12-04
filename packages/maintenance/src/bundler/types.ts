@@ -8,11 +8,6 @@ export interface BundlePackageOption {
   dir: string
 
   /**
-   * 包的构建依赖，在构建时会优先先构建这些依赖
-   */
-  deps?: string[]
-
-  /**
    * 包的构建配置
    */
   build: BundleBuildConfig
@@ -33,6 +28,14 @@ export interface BundleBuildConfig {
   dts?: boolean
   /** 外部依赖，不打包进产物 */
   external?: string[]
+  /**
+   * 构建平台
+   * @default 'neutral'
+   * @description 'neutral' 表示构建产物可以在浏览器和 Node.js 中使用。
+   * @description 'node' 表示构建产物只能在 Node.js 中使用。
+   * @description 'browser' 表示构建产物只能在浏览器中使用。
+   */
+  platform?: 'neutral' | 'node' | 'browser'
 }
 
 /**
@@ -51,6 +54,7 @@ export interface BundleOutputConfig {
 export interface BundlePackageConfig {
   /** 包名称 */
   name: string
+
   /** 包目录 */
   dir: string
   /** 包依赖 */
@@ -104,4 +108,3 @@ export interface BuildSummary {
   /** 各批次的结果 */
   batches: BatchBuildResult[]
 }
-

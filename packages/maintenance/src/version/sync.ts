@@ -1,6 +1,6 @@
-import { writeJson } from 'fs-extra'
+import { writeJson, readJson } from '@cat-kit/be'
 import type { MonorepoConfig, PackageJson } from '../types'
-import { loadPackages, readJson } from '../utils'
+import { loadPackages } from '../utils'
 
 // Cat-Kit 包列表（用于识别内部包）
 // 这个列表可以从 monorepo 的包列表动态生成
@@ -56,8 +56,8 @@ export async function syncPeerDependencies(
     // 如果有修改，写回文件
     if (modified) {
       await writeJson(pkg.packageJsonPath, packageJson, {
-        spaces: 2,
-        EOL: '\n'
+        space: 2,
+        eol: '\n'
       })
     }
   }
@@ -100,8 +100,8 @@ export async function syncDependencies(
 
     if (modified) {
       await writeJson(pkg.packageJsonPath, packageJson, {
-        spaces: 2,
-        EOL: '\n'
+        space: 2,
+        eol: '\n'
       })
     }
   }
