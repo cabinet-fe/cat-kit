@@ -2,7 +2,7 @@
   "name": "@cat-kit/excel",
   "type": "module",
   "version": "1.0.0-alpha.1",
-  "description": "excel处理库",
+  "description": "excel文件处理",
   "files": [
     "dist",
     "src"

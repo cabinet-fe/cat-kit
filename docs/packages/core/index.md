@@ -1,6 +1,6 @@
 ---
-title: Core 核心包
-description: '@cat-kit/core 核心工具包文档'
+title: 核心工具库
+description: '@cat-kit/core 核心工具库文档'
 outline: deep
 ---
 

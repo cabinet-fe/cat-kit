@@ -2,7 +2,7 @@
   "name": "@cat-kit/maintenance",
   "type": "module",
   "version": "1.0.0-alpha.1",
-  "description": "库维护工具包",
+  "description": "包维护工具",
   "files": [
     "dist",
     "src"
@@ -17,20 +17,13 @@
       "types": "./src/index.ts"
     }
   },
+  "dependencies": {
+    "fs-extra": "^11.3.2",
+    "picocolors": "^1.1.1",
+    "rollup-plugin-visualizer": "^6.0.5",
+    "tsdown": "^0.16.5"
+  },
   "devDependencies": {
-    "@cat-kit/core": "workspace:*",
-    "@cat-kit/be": "workspace:*"
-  },
-  "peerDependencies": {
-    "@cat-kit/core": ">=1.0.0-alpha.1",
-    "@cat-kit/be": ">=1.0.0-alpha.1"
-  },
-  "peerDependenciesMeta": {
-    "@cat-kit/core": {
-      "optional": true
-    },
-    "@cat-kit/be": {
-      "optional": true
-    }
+    "@types/fs-extra": "^11.0.4"
   }
 }

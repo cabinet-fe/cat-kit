@@ -31,11 +31,12 @@ const DOCS_ROOT = fileURLToPath(new URL('../', import.meta.url))
 const COLLATOR = new Intl.Collator('zh-CN')
 
 const PACKAGE_LABELS: Record<string, string> = {
-  core: 'Core 核心包',
-  http: 'HTTP 请求包',
-  fe: 'FE 前端包',
-  excel: 'Excel 表格包',
-  be: 'BE 后端包'
+  core: '核心工具',
+  http: 'HTTP 请求',
+  fe: '前端工具',
+  excel: 'Excel文件操作工具',
+  be: '后端工具',
+  maintenance: '包维护工具'
 }
 
 export const sidebar: DefaultTheme.Sidebar = generateSidebar({

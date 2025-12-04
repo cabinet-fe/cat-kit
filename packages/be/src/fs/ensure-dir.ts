@@ -23,7 +23,7 @@ export async function ensureDir(dirPath: string): Promise<void> {
     const stats = await stat(dirPath)
 
     if (!stats.isDirectory()) {
-      throw new Error(`Path "${dirPath}" exists but is not a directory`)
+      throw new Error(`路径 "${dirPath}" 存在但不是目录`)
     }
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
@@ -33,4 +33,3 @@ export async function ensureDir(dirPath: string): Promise<void> {
     await mkdir(dirPath, { recursive: true })
   }
 }
-

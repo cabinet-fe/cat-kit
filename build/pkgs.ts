@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { PackageOption } from './types'
+import type { BundlePackageOption } from './types'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -8,7 +8,7 @@ function pkg(dir: string) {
   return path.resolve(__dirname, '../packages', dir)
 }
 
-export const pkgs: PackageOption[] = [
+export const pkgs: BundlePackageOption[] = [
   {
     dir: pkg('core'),
     build: {

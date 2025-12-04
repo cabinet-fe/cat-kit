@@ -9,3 +9,6 @@ export * from './deps'
 
 // 版本管理模块
 export * from './version'
+
+// 打包器模块
+export * from './bundler'

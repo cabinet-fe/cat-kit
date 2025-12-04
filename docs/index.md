@@ -4,7 +4,7 @@ layout: home
 hero:
   name: 'CatKit'
   text: '喵喵工具箱'
-  tagline: 面向浏览器和 Node.js 的 TypeScript 工具库集合。涵盖数据处理、存储、HTTP、文件系统、Excel 等常用功能，提供统一的 API 设计和完整的类型支持。
+  tagline: 为浏览器和 Node.js 打造的现代 TypeScript 工具库。简洁直观的 API、完整的类型推导、Tree-shaking 友好的架构设计，让开发更高效、代码更优雅。
   image:
     src: /banner.png
     alt: CatKit
@@ -18,41 +18,29 @@ hero:
       link: https://github.com/cabinet-fe/cat-kit
 
 features:
-  - icon: 🎯
-    title: 全环境支持
-    details: 同时支持浏览器和 Node.js/Bun 环境，一套 API 适配前后端开发场景。
-
-  - icon: 📦
-    title: 模块化设计
-    details: 5 个独立包（Core、FE、BE、HTTP、Excel），按需引入，灵活组合。
+  - icon: ✨
+    title: 现代 API 设计
+    details: 简洁直观的函数式 API，符合现代 JavaScript 开发习惯，学习成本低，上手即用。
 
   - icon: 💪
-    title: 类型安全
-    details: 完整的 TypeScript 类型定义，提供智能提示和编译时类型检查。
+    title: 完整类型推导
+    details: 从输入到输出的全链路类型安全，智能提示开箱即用，编译时捕获潜在错误。
 
   - icon: 🌳
     title: Tree-Shaking 友好
-    details: 只打包你使用的功能，保持应用体积最小，充分利用构建工具优化。
+    details: 纯 ESM 模块，细粒度导出设计，只打包你使用的代码，保持应用体积最小。
 
   - icon: ⚡
-    title: 零依赖核心
-    details: Core 包零外部依赖，减少安全风险和包体积，提升加载速度。
+    title: 轻量零依赖
+    details: 核心包零外部依赖，减少供应链风险，更小的包体积，更快的安装速度。
 
-  - icon: 🗄️
-    title: 存储解决方案
-    details: 统一封装 LocalStorage、SessionStorage、Cookie、IndexedDB，简化存储操作。
+  - icon: 🔄
+    title: 全栈链路
+    details: 统一的 API 设计，支持浏览器和 Node.js/Bun 环境各种工具。
 
-  - icon: 📡
-    title: HTTP 客户端
-    details: 跨平台 HTTP 请求库，支持插件系统和请求拦截，类型安全的 API 设计。
-
-  - icon: 📊
-    title: Excel 处理
-    details: 流式读写 Excel 文件，支持大文件处理和样式保留，不可变数据结构设计。
-
-  - icon: 📖
+  - icon: 🤖
     title: 完善文档
-    details: 提供完整的中文文档和交互式示例，降低学习成本，快速上手。
+    details: 详尽易读的文档、完整的类型定义和 LLM 上下文支持，人机协作开发体验俱佳。
 ---
 
 <style>
@@ -105,9 +93,6 @@ features:
 .VPFeatures .VPFeature:nth-child(4) { animation-delay: 0.8s; }
 .VPFeatures .VPFeature:nth-child(5) { animation-delay: 0.9s; }
 .VPFeatures .VPFeature:nth-child(6) { animation-delay: 1.0s; }
-.VPFeatures .VPFeature:nth-child(7) { animation-delay: 1.1s; }
-.VPFeatures .VPFeature:nth-child(8) { animation-delay: 1.2s; }
-.VPFeatures .VPFeature:nth-child(9) { animation-delay: 1.3s; }
 
 /* 特性卡片图标动画 */
 .VPFeature .icon {

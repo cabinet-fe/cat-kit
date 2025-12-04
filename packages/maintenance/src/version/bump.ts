@@ -1,37 +1,10 @@
+import { writeJson } from 'fs-extra'
 import type { MonorepoConfig, PackageJson } from '../types'
 import type { BumpOptions, BumpResult } from './types'
 import { loadPackages, readJson } from '../utils'
 import { incrementVersion, isValidSemver } from './semver'
 import { SemverError } from '../errors'
 import { syncPeerDependencies } from './sync'
-
-// 懒加载 @cat-kit/be 的 writeJson
-let beWriteJson: ((filePath: string, data: unknown, options?: { space?: number; eol?: string }) => Promise<void>) | null = null
-let beWriteJsonLoaded = false
-
-async function writeJsonFile(filePath: string, data: unknown): Promise<void> {
-  // 懒加载 @cat-kit/be 的 writeJson
-  if (!beWriteJsonLoaded) {
-    try {
-      const beModule = await import('@cat-kit/be/src')
-      if (beModule.writeJson && typeof beModule.writeJson === 'function') {
-        beWriteJson = beModule.writeJson
-      }
-    } catch {
-      // 忽略导入错误，使用自定义实现
-    }
-    beWriteJsonLoaded = true
-  }
-
-  // 如果成功加载了 @cat-kit/be 的 writeJson，使用它
-  if (beWriteJson) {
-    return await beWriteJson(filePath, data, { space: 2, eol: '\n' })
-  }
-
-  // 回退到自定义实现
-  const { writeFile } = await import('node:fs/promises')
-  await writeFile(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
-}
 
 /**
  * 批量更新包版本号
@@ -72,7 +45,13 @@ export async function bumpVersion(
   config: MonorepoConfig,
   options: BumpOptions
 ): Promise<BumpResult> {
-  const { type, version: targetVersion, preid, packages: targetPackages, syncPeer = true } = options
+  const {
+    type,
+    version: targetVersion,
+    preid,
+    packages: targetPackages,
+    syncPeer = true
+  } = options
 
   // 加载所有包
   const allPackages = await loadPackages(config)
@@ -113,7 +92,7 @@ export async function bumpVersion(
     packageJson.version = newVersion
 
     // 写回文件
-    await writeJsonFile(pkg.packageJsonPath, packageJson)
+    await writeJson(pkg.packageJsonPath, packageJson, { spaces: 2, EOL: '\n' })
 
     updated.push({
       name: pkg.name,

@@ -1,7 +1,7 @@
-import { readFile, writeFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
-
 import { ensureDir } from './ensure-dir'
+import { writeFile } from './write-file'
 
 /**
  * 读取 JSON 文件选项
@@ -90,8 +90,6 @@ export async function writeJson(
   options: WriteJsonOptions = {}
 ): Promise<void> {
   const { encoding = 'utf8', replacer, space = 2, eol = '\n' } = options
-
   const json = JSON.stringify(data, replacer, space) + eol
-  await ensureDir(dirname(filePath))
   await writeFile(filePath, json, { encoding })
 }

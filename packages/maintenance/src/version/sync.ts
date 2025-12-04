@@ -1,33 +1,6 @@
+import { writeJson } from 'fs-extra'
 import type { MonorepoConfig, PackageJson } from '../types'
 import { loadPackages, readJson } from '../utils'
-
-// 懒加载 @cat-kit/be 的 writeJson
-let beWriteJson: ((filePath: string, data: unknown, options?: { space?: number; eol?: string }) => Promise<void>) | null = null
-let beWriteJsonLoaded = false
-
-async function writeJsonFile(filePath: string, data: unknown): Promise<void> {
-  // 懒加载 @cat-kit/be 的 writeJson
-  if (!beWriteJsonLoaded) {
-    try {
-      const beModule = await import('@cat-kit/be/src')
-      if (beModule.writeJson && typeof beModule.writeJson === 'function') {
-        beWriteJson = beModule.writeJson
-      }
-    } catch {
-      // 忽略导入错误，使用自定义实现
-    }
-    beWriteJsonLoaded = true
-  }
-
-  // 如果成功加载了 @cat-kit/be 的 writeJson，使用它
-  if (beWriteJson) {
-    return await beWriteJson(filePath, data, { space: 2, eol: '\n' })
-  }
-
-  // 回退到自定义实现
-  const { writeFile } = await import('node:fs/promises')
-  await writeFile(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
-}
 
 // Cat-Kit 包列表（用于识别内部包）
 // 这个列表可以从 monorepo 的包列表动态生成
@@ -82,7 +55,10 @@ export async function syncPeerDependencies(
 
     // 如果有修改，写回文件
     if (modified) {
-      await writeJsonFile(pkg.packageJsonPath, packageJson)
+      await writeJson(pkg.packageJsonPath, packageJson, {
+        spaces: 2,
+        EOL: '\n'
+      })
     }
   }
 }
@@ -123,7 +99,10 @@ export async function syncDependencies(
     }
 
     if (modified) {
-      await writeJsonFile(pkg.packageJsonPath, packageJson)
+      await writeJson(pkg.packageJsonPath, packageJson, {
+        spaces: 2,
+        EOL: '\n'
+      })
     }
   }
 }

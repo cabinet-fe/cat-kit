@@ -2,7 +2,7 @@
   "name": "@cat-kit/be",
   "type": "module",
   "version": "1.0.0-alpha.1",
-  "description": "后端工具包",
+  "description": "后端工具",
   "files": [
     "dist",
     "src"

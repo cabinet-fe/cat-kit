@@ -1,6 +1,6 @@
 ---
-title: BE 后端工具包
-description: '@cat-kit/be 是为 Node.js 和 Bun 等后端环境设计的工具包'
+title: 后端工具库
+description: '@cat-kit/be 是为 Node.js 和 Bun 等后端环境设计的工具库'
 outline: deep
 ---
 
@@ -24,10 +24,6 @@ npm install @cat-kit/be
 pnpm add @cat-kit/be
 ```
 
-```bash [yarn]
-yarn add @cat-kit/be
-```
-
 :::
 
 ### 可选依赖
@@ -49,8 +45,10 @@ bun add smol-toml
 提供增强的文件和目录操作功能，简化常见的文件系统任务。
 
 **主要功能：**
+
 - `readDir` - 递归读取目录，支持过滤和多种返回格式
 - `ensureDir` - 确保目录存在，自动创建父目录
+- `writeFile` - 增强的文件写入，支持流和自动创建目录
 - `readJson` / `writeJson` - JSON 文件的便捷读写操作
 - `removePath` - 安全删除文件或目录
 
@@ -63,6 +61,7 @@ bun add smol-toml
 提供灵活的配置管理方案，支持环境变量和多种配置文件格式。
 
 **主要功能：**
+
 - `loadEnv` - 加载 `.env` 文件，支持多环境配置
 - `parseEnv` - 解析和验证环境变量，支持类型转换
 - `loadConfig` - 加载配置文件（JSON/YAML/TOML），支持合并默认值
@@ -77,6 +76,7 @@ bun add smol-toml
 提供结构化日志记录功能，支持多种传输方式和日志级别。
 
 **主要功能：**
+
 - `Logger` - 日志记录器类，支持多传输方式
 - `ConsoleTransport` - 控制台输出传输，支持彩色输出
 - `FileTransport` - 文件输出传输，支持日志轮转
@@ -92,6 +92,7 @@ bun add smol-toml
 提供多种缓存实现，满足不同的缓存需求。
 
 **主要功能：**
+
 - `LRUCache` - 最近最少使用缓存，支持 TTL 过期
 - `FileCache` - 文件系统缓存，数据持久化到磁盘
 - `memoize` - 函数记忆化装饰器，自动缓存函数结果
@@ -105,6 +106,7 @@ bun add smol-toml
 提供网络相关的实用工具函数。
 
 **主要功能：**
+
 - `isPortAvailable` - 检查端口是否可用
 - `getLocalIP` - 获取本机 IP 地址
 - `getNetworkInterfaces` - 获取网络接口信息
@@ -118,6 +120,7 @@ bun add smol-toml
 提供系统资源监控功能，帮助你了解服务器运行状态。
 
 **主要功能：**
+
 - `getCpuInfo` - 获取 CPU 基本信息
 - `getCpuUsage` - 获取 CPU 使用率
 - `getMemoryInfo` - 获取内存使用情况
@@ -133,6 +136,7 @@ bun add smol-toml
 提供灵活的任务调度功能，支持 Cron 表达式、延迟执行和定时执行。
 
 **主要功能：**
+
 - `Scheduler` - 任务调度器类
 - `CronExpression` / `parseCron` - Cron 表达式解析器
 - 支持 Cron 任务、延迟任务和定时任务
@@ -147,16 +151,23 @@ bun add smol-toml
 ### 文件系统操作
 
 ```typescript
-import { readDir, ensureDir, readJson, writeJson } from '@cat-kit/be'
+import { readDir, ensureDir, writeFile, readJson, writeJson } from '@cat-kit/be'
 
 // 递归读取目录
 const files = await readDir('./src', {
   recursive: true,
-  includeFiles: true
+  onlyFiles: true
 })
 
 // 确保目录存在（自动创建父目录）
 await ensureDir('./logs/app')
+
+// 写入文件（支持流、自动创建目录）
+await writeFile('./logs/app.log', 'Hello World')
+
+// 下载文件（流式写入）
+const response = await fetch('https://example.com/file.zip')
+await writeFile('./downloads/file.zip', response.body!)
 
 // 读取和写入 JSON
 const config = await readJson('./config.json')
@@ -211,9 +222,12 @@ const cache = new LRUCache({
 cache.set('key', 'value')
 
 // 函数记忆化
-const fetchUser = memoize(async (id: number) => {
-  return await fetchUserFromDB(id)
-}, { ttl: 300000 }) // 5分钟过期
+const fetchUser = memoize(
+  async (id: number) => {
+    return await fetchUserFromDB(id)
+  },
+  { ttl: 300000 }
+) // 5分钟过期
 ```
 
 ### 任务调度

@@ -1,6 +1,6 @@
-import { MonoRepoLib } from './repo'
+import { MonoRepoBundler } from './repo'
 import { pkgs } from './pkgs'
 
-const lib = new MonoRepoLib(pkgs)
+const bundler = new MonoRepoBundler(pkgs)
 
-await lib.build()
+await bundler.build()

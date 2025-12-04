@@ -1,54 +1,20 @@
 import { join, resolve, sep } from 'node:path'
-import { readFile, readdir, stat } from 'node:fs/promises'
+import { readdir, stat } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
+import { readJson as fsReadJson } from 'fs-extra'
 import type { MonorepoConfig, PackageInfo, PackageJson } from './types'
 import { ConfigError, GitError } from './errors'
 
-// 缓存 @cat-kit/be 的 readJson 函数（懒加载）
-let beReadJson: (<T = unknown>(filePath: string) => Promise<T>) | null = null
-let beReadJsonLoaded = false
-
 /**
  * 读取 JSON 文件
- *
- * 优先使用 @cat-kit/be 的 readJson，如果不可用则使用自定义实现
  *
  * @param filePath - 文件路径
  * @returns 解析后的 JSON 对象
  * @throws {ConfigError} 当文件读取失败或 JSON 解析失败时
  */
 export async function readJson<T = unknown>(filePath: string): Promise<T> {
-  // 懒加载 @cat-kit/be 的 readJson
-  if (!beReadJsonLoaded) {
-    try {
-      const beModule = await import('@cat-kit/be/src')
-      if (beModule.readJson && typeof beModule.readJson === 'function') {
-        beReadJson = beModule.readJson
-      }
-    } catch {
-      // 忽略导入错误，使用自定义实现
-    }
-    beReadJsonLoaded = true
-  }
-
-  // 如果成功加载了 @cat-kit/be 的 readJson，使用它
-  if (beReadJson) {
-    try {
-      return await beReadJson<T>(filePath)
-    } catch (error) {
-      // 如果错误已经是 ConfigError，直接抛出
-      if (error instanceof ConfigError) {
-        throw error
-      }
-      // 否则包装为 ConfigError
-      throw new ConfigError(`无法读取 JSON 文件: ${filePath}`, filePath, error)
-    }
-  }
-
-  // 回退到自定义实现
   try {
-    const content = await readFile(filePath, 'utf-8')
-    return JSON.parse(content) as T
+    return await fsReadJson(filePath)
   } catch (error) {
     throw new ConfigError(`无法读取 JSON 文件: ${filePath}`, filePath, error)
   }

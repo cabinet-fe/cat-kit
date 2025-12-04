@@ -41,7 +41,8 @@ export default defineConfig({
           { text: 'HTTP请求', link: '/packages/http/' },
           { text: '前端', link: '/packages/fe/' },
           { text: 'Excel处理', link: '/packages/excel/' },
-          { text: '后端', link: '/packages/be/' }
+          { text: '后端', link: '/packages/be/' },
+          { text: '维护工具', link: '/packages/maintenance/' }
         ]
       }
     ],
