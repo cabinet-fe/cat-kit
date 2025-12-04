@@ -7,8 +7,10 @@
 文件系统模块包含以下功能：
 
 - **目录读取** - 递归读取目录，支持过滤和多种返回格式
-- **目录操作** - 确保目录存在，自动创建父目录
+- **目录操作** - 确保目录存在，清空目录，自动创建父目录
+- **文件写入** - 增强的文件写入，支持流和自动创建目录
 - **JSON 文件操作** - JSON 文件的便捷读写操作
+- **移动操作** - 移动文件或目录，支持覆盖选项
 - **删除操作** - 安全删除文件或目录
 
 ## 目录读取
@@ -18,6 +20,7 @@
 递归读取目录内容，支持过滤和多种返回格式。可以通过 `onlyFiles` 参数控制返回文件路径数组还是包含文件和目录的详细信息数组。
 
 **适用场景：**
+
 - 批量处理文件
 - 查找特定类型的文件
 - 目录结构分析
@@ -103,13 +106,13 @@ function readDir(
 
 ```typescript
 interface DirEntry {
-  path: string              // 绝对路径
-  relativePath: string      // 相对路径
-  name: string              // 文件名或目录名
-  depth: number             // 深度（从起始目录开始）
-  isFile: boolean           // 是否为文件
-  isDirectory: boolean      // 是否为目录
-  isSymbolicLink: boolean   // 是否为符号链接
+  path: string // 绝对路径
+  relativePath: string // 相对路径
+  name: string // 文件名或目录名
+  depth: number // 深度（从起始目录开始）
+  isFile: boolean // 是否为文件
+  isDirectory: boolean // 是否为目录
+  isSymbolicLink: boolean // 是否为符号链接
 }
 ```
 
@@ -120,6 +123,7 @@ interface DirEntry {
 确保目录存在，如果不存在则创建（包括父目录）。这是一个非常实用的函数，可以避免手动检查目录是否存在。
 
 **适用场景：**
+
 - 创建日志目录
 - 创建缓存目录
 - 创建输出目录
@@ -149,6 +153,161 @@ function ensureDir(dirPath: string): Promise<void>
 
 - 如果路径已存在但不是目录，会抛出错误
 
+### emptyDir
+
+确保目录为空。如果目录不为空，则删除目录内容。如果目录不存在，则创建该目录。目录本身不会被删除。
+
+**适用场景：**
+
+- 清空临时目录
+- 清空缓存目录
+- 清空构建输出目录
+- 准备干净的工作目录
+
+#### 基本用法
+
+```typescript
+import { emptyDir } from '@cat-kit/be'
+
+// 清空目录内容
+await emptyDir('./temp')
+// 如果目录不为空，会删除所有内容；如果不存在，会创建空目录
+
+// 清空缓存目录
+await emptyDir('./cache')
+
+// 清空构建输出目录
+await emptyDir('./dist')
+```
+
+#### API 参考
+
+```typescript
+function emptyDir(dirPath: string): Promise<void>
+```
+
+**参数说明：**
+
+- `dirPath` - 目标目录路径
+
+**异常：**
+
+- 如果路径已存在但不是目录，会抛出错误
+- 如果目录操作失败，会抛出错误
+
+**注意事项：**
+
+- 目录本身不会被删除，只删除目录内容
+- 如果目录不存在，会自动创建
+- 会递归删除子目录和所有文件
+
+## 文件写入
+
+### writeFile
+
+增强的文件写入函数，相比 Node.js 原生 `fs.writeFile` 提供以下增强功能：
+
+- **自动创建父目录** - 目标路径的父目录不存在时自动创建
+- **支持流写入** - 支持 Web ReadableStream、Node.js Readable 流
+- **支持可迭代对象** - 支持 AsyncIterable 和 Iterable
+
+**适用场景：**
+
+- 下载文件保存（支持流式写入）
+- 日志文件追加
+- 数据文件写入
+- 自动创建目录结构
+
+#### 基本用法
+
+```typescript
+import { writeFile } from '@cat-kit/be'
+
+// 写入字符串
+await writeFile('./logs/app.log', 'Hello World')
+
+// 写入 Buffer
+await writeFile('./data/binary.dat', Buffer.from([0x00, 0x01, 0x02]))
+
+// 写入 Web ReadableStream（如 fetch 响应体）
+const response = await fetch('https://example.com/file.zip')
+await writeFile('./downloads/file.zip', response.body!)
+
+// 追加模式
+await writeFile('./logs/app.log', 'New line\n', { flag: 'a' })
+
+// 指定编码
+await writeFile('./data/utf16.txt', 'Unicode 文本', { encoding: 'utf16le' })
+
+// 指定文件权限
+await writeFile('./scripts/run.sh', '#!/bin/bash\necho "Hello"', {
+  mode: 0o755
+})
+```
+
+#### 流式下载示例
+
+```typescript
+import { writeFile } from '@cat-kit/be'
+
+// 下载大文件（流式写入，内存友好）
+async function downloadFile(url: string, savePath: string) {
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`下载失败: ${response.status}`)
+  }
+
+  // 直接将响应体流写入文件
+  await writeFile(savePath, response.body!)
+}
+
+await downloadFile(
+  'https://example.com/large-file.zip',
+  './downloads/large-file.zip'
+)
+```
+
+#### API 参考
+
+```typescript
+function writeFile(
+  filePath: string,
+  data: WriteFileData,
+  options?: WriteFileOptions
+): Promise<void>
+```
+
+**参数说明：**
+
+- `filePath` - 目标文件路径（如果父目录不存在会自动创建）
+- `data` - 要写入的数据，支持以下类型：
+  - `string` - 文本内容
+  - `Buffer` - 二进制数据
+  - `ArrayBufferView` - TypedArray 等
+  - `ReadableStream<Uint8Array>` - Web Streams API（如 fetch 响应体）
+  - `Readable` - Node.js 流
+  - `AsyncIterable` / `Iterable` - 可迭代对象
+- `options.encoding` - 文件编码，默认 `'utf8'`
+- `options.mode` - 文件权限模式，默认 `0o666`
+- `options.flag` - 文件系统标志：
+  - `'w'`（默认）- 写入，如果文件存在则截断
+  - `'a'` - 追加，如果文件不存在则创建
+  - `'wx'` - 写入，如果文件存在则失败
+
+**支持的数据类型：**
+
+```typescript
+type WriteFileData =
+  | string
+  | Buffer
+  | NodeJS.ArrayBufferView
+  | ReadableStream<Uint8Array>
+  | Readable
+  | AsyncIterable<string | Buffer | NodeJS.ArrayBufferView>
+  | Iterable<string | Buffer | NodeJS.ArrayBufferView>
+```
+
 ## JSON 文件操作
 
 ### readJson
@@ -156,6 +315,7 @@ function ensureDir(dirPath: string): Promise<void>
 读取 JSON 文件并解析为对象。支持自定义 reviver 函数进行数据转换。
 
 **适用场景：**
+
 - 读取配置文件
 - 读取数据文件
 - 读取缓存文件
@@ -203,6 +363,7 @@ function readJson<T = unknown>(
 将数据序列化为 JSON 文件。支持自定义格式化和 replacer 函数。
 
 **适用场景：**
+
 - 保存配置文件
 - 保存数据文件
 - 保存缓存文件
@@ -220,8 +381,8 @@ await writeJson('./data.json', {
 
 // 自定义格式
 await writeJson('./config.json', config, {
-  space: 4,  // 4 空格缩进
-  eol: '\n'  // 换行符
+  space: 4, // 4 空格缩进
+  eol: '\n' // 换行符
 })
 
 // 使用 replacer
@@ -254,6 +415,74 @@ function writeJson(
 - `options.space` - 缩进空格数，默认 `2`
 - `options.eol` - 文件末尾换行符，默认 `'\n'`
 
+## 移动操作
+
+### movePath
+
+移动文件或目录到新位置。支持覆盖选项，自动创建目标父目录。
+
+**适用场景：**
+
+- 文件重命名
+- 文件归档
+- 目录重组
+- 备份文件
+
+#### 基本用法
+
+```typescript
+import { movePath } from '@cat-kit/be'
+
+// 移动文件
+await movePath('./old/file.txt', './new/file.txt')
+
+// 移动目录
+await movePath('./old-dir', './new-dir')
+
+// 覆盖已存在的目标
+await movePath('./source.txt', './target.txt', { overwrite: true })
+
+// 自动创建目标父目录
+await movePath('./file.txt', './nested/deep/dir/file.txt')
+```
+
+#### 跨分区移动
+
+```typescript
+import { movePath } from '@cat-kit/be'
+
+// 跨分区移动时会自动使用复制+删除策略
+await movePath('C:/temp/file.txt', 'D:/backup/file.txt')
+```
+
+#### API 参考
+
+```typescript
+function movePath(
+  src: string,
+  dest: string,
+  options?: MoveOptions
+): Promise<void>
+```
+
+**参数说明：**
+
+- `src` - 源路径（文件或目录）
+- `dest` - 目标路径（必须与源路径类型一致）
+- `options.overwrite` - 是否覆盖已存在的目标，默认 `false`
+
+**异常：**
+
+- 当源路径不存在时抛出错误
+- 当源路径和目标路径类型不一致时抛出错误（一个是文件，一个是目录）
+- 当目标路径已存在且 `overwrite` 为 `false` 时抛出错误
+
+**注意事项：**
+
+- 源路径和目标路径类型必须一致（都是文件或都是目录）
+- 目标父目录不存在时会自动创建
+- 同一文件系统上使用 `rename`（高效），跨文件系统使用复制+删除
+
 ## 删除操作
 
 ### removePath
@@ -261,6 +490,7 @@ function writeJson(
 删除文件或目录。支持递归删除目录，可以忽略不存在的路径。
 
 **适用场景：**
+
 - 清理临时文件
 - 删除缓存目录
 - 清理旧数据
@@ -310,9 +540,7 @@ const configFiles = await readDir('./config', {
   filter: entry => entry.name.endsWith('.json')
 })
 
-const configs = await Promise.all(
-  configFiles.map(file => readJson(file))
-)
+const configs = await Promise.all(configFiles.map(file => readJson(file)))
 
 const mergedConfig = configs.reduce(
   (acc, config) => ({ ...acc, ...config }),
@@ -352,6 +580,49 @@ const backupPath = `./backups/data-${format(
 await writeJson(backupPath, data)
 ```
 
+### 流式下载文件
+
+```typescript
+import { writeFile } from '@cat-kit/be'
+
+// 下载大文件（流式写入，内存友好）
+async function downloadFile(url: string, savePath: string) {
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`下载失败: ${response.status}`)
+  }
+
+  // 直接将响应体流写入文件，无需全部加载到内存
+  await writeFile(savePath, response.body!)
+}
+
+// 下载多个文件
+const downloads = [
+  { url: 'https://example.com/file1.zip', path: './downloads/file1.zip' },
+  { url: 'https://example.com/file2.zip', path: './downloads/file2.zip' }
+]
+
+await Promise.all(downloads.map(({ url, path }) => downloadFile(url, path)))
+```
+
+### 日志文件追加
+
+```typescript
+import { writeFile } from '@cat-kit/be'
+
+// 追加日志到文件
+async function appendLog(message: string) {
+  const timestamp = new Date().toISOString()
+  const logLine = `[${timestamp}] ${message}\n`
+
+  await writeFile('./logs/app.log', logLine, { flag: 'a' })
+}
+
+await appendLog('应用启动')
+await appendLog('用户登录: user123')
+```
+
 ### 查找特定文件
 
 ```typescript
@@ -361,8 +632,7 @@ import { readDir } from '@cat-kit/be'
 const tsFiles = await readDir('./src', {
   recursive: true,
   onlyFiles: true,
-  filter: entry =>
-    entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')
+  filter: entry => entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')
 })
 
 // 查找所有测试文件
@@ -418,6 +688,80 @@ async function initializeApp() {
   await ensureDir('./temp')
 
   console.log('目录初始化完成')
+}
+```
+
+### 清空构建输出目录
+
+```typescript
+import { emptyDir } from '@cat-kit/be'
+
+// 构建前清空输出目录
+async function build() {
+  // 清空 dist 目录，确保干净的构建
+  await emptyDir('./dist')
+
+  // 执行构建...
+  console.log('开始构建...')
+}
+```
+
+### 文件归档
+
+```typescript
+import { movePath, ensureDir } from '@cat-kit/be'
+import { format } from 'date-fns'
+
+// 将日志文件归档到按日期命名的目录
+async function archiveLog(logFile: string) {
+  const date = format(new Date(), 'yyyy-MM-dd')
+  const archiveDir = `./archives/${date}`
+
+  await ensureDir(archiveDir)
+  await movePath(logFile, `${archiveDir}/app.log`)
+}
+```
+
+### 批量移动文件
+
+```typescript
+import { movePath, readDir } from '@cat-kit/be'
+import { basename } from 'node:path'
+
+// 将所有 .txt 文件移动到指定目录
+async function moveTextFiles(srcDir: string, destDir: string) {
+  const files = await readDir(srcDir, {
+    onlyFiles: true,
+    filter: entry => entry.name.endsWith('.txt')
+  })
+
+  await Promise.all(
+    files.map(file =>
+      movePath(file, `${destDir}/${basename(file)}`, { overwrite: true })
+    )
+  )
+}
+```
+
+### 临时目录管理
+
+```typescript
+import { emptyDir, removePath } from '@cat-kit/be'
+
+// 使用临时目录进行工作
+async function processWithTempDir() {
+  const tempDir = './temp-work'
+
+  // 确保临时目录为空
+  await emptyDir(tempDir)
+
+  try {
+    // 在临时目录中进行工作...
+    console.log('处理中...')
+  } finally {
+    // 清理临时目录
+    await removePath(tempDir, { force: true })
+  }
 }
 ```
 
