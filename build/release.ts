@@ -1,5 +1,6 @@
 import { $ } from 'bun'
-import { readFile, writeFile } from 'fs/promises'
+import { bumpVersion } from '@cat-kit/maintenance/src'
+import type { PackageVersionConfig } from '@cat-kit/maintenance/src'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -12,13 +13,6 @@ type ReleaseTarget = {
 const version = process.argv[2] ?? '1.0.0-alpha.1'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(__dirname, '..')
-const catKitPkgs = [
-  '@cat-kit/core',
-  '@cat-kit/fe',
-  '@cat-kit/http',
-  '@cat-kit/excel',
-  '@cat-kit/be'
-]
 
 const targets: ReleaseTarget[] = [
   { name: 'root', dir: '.', publish: false },
@@ -28,7 +22,8 @@ const targets: ReleaseTarget[] = [
   { name: '@cat-kit/fe', dir: 'packages/fe', publish: true },
   { name: '@cat-kit/http', dir: 'packages/http', publish: true },
   { name: '@cat-kit/excel', dir: 'packages/excel', publish: true },
-  { name: '@cat-kit/be', dir: 'packages/be', publish: true }
+  { name: '@cat-kit/be', dir: 'packages/be', publish: true },
+  { name: '@cat-kit/maintenance', dir: 'packages/maintenance', publish: true }
 ]
 
 async function runStep(label: string, task: () => Promise<void>) {
@@ -36,24 +31,23 @@ async function runStep(label: string, task: () => Promise<void>) {
   await task()
 }
 
-function resolvePkgJson(dir: string) {
-  return path.join(repoRoot, dir, 'package.json')
-}
+async function updateAllVersions() {
+  // 收集所有包（包括不发布的）
+  const allPackages: PackageVersionConfig[] = targets.map(t => ({
+    dir: path.join(repoRoot, t.dir)
+  }))
 
-async function updateVersion(target: ReleaseTarget) {
-  const pkgPath = resolvePkgJson(target.dir)
-  const pkg = JSON.parse(await readFile(pkgPath, 'utf8'))
-  pkg.version = version
+  // 使用 bumpVersion 统一更新版本
+  const result = await bumpVersion(allPackages, {
+    type: 'patch',
+    version,
+    syncPeer: true
+  })
 
-  if (pkg.peerDependencies) {
-    Object.keys(pkg.peerDependencies).forEach(dep => {
-      if (catKitPkgs.includes(dep)) {
-        pkg.peerDependencies[dep] = `>=${version}`
-      }
-    })
-  }
-
-  await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
+  console.log(`✅ 更新到版本: ${result.version}`)
+  result.updated.forEach(pkg => {
+    console.log(`   ${pkg.name}: ${pkg.oldVersion} → ${pkg.newVersion}`)
+  })
 }
 
 async function main() {
@@ -66,9 +60,7 @@ async function main() {
   })
 
   await runStep(`写入版本 ${version}`, async () => {
-    for (const target of targets) {
-      await updateVersion(target)
-    }
+    await updateAllVersions()
   })
 
   await runStep('发布所有包', async () => {

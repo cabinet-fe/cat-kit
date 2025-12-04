@@ -1,68 +1,67 @@
 import { writeJson, readJson } from '@cat-kit/be'
-import type { MonorepoConfig, PackageJson } from '../types'
-import type { BumpOptions, BumpResult } from './types'
-import { loadPackages } from '../utils'
+import { join } from 'node:path'
+import type { PackageJson } from '../types'
+import type { BumpOptions, BumpResult, PackageVersionConfig } from './types'
 import { incrementVersion, isValidSemver } from './semver'
-import { SemverError } from '../errors'
+import { SemverError, ConfigError } from '../errors'
 import { syncPeerDependencies } from './sync'
 
 /**
  * 批量更新包版本号
  *
  * 此函数复用了 build/release.ts 中的版本更新逻辑，支持：
- * - 批量更新所有或指定包的版本号
- * - 自动同步 peerDependencies 中的版本约束
+ * - 批量更新指定包的版本号
+ * - 可选同步 peerDependencies 中的版本约束
  * - 支持多种版本递增类型（major/minor/patch/prerelease 等）
  *
- * @param config - Monorepo 配置
+ * @param packages - 包配置列表
  * @param options - 版本更新选项
  * @returns 版本更新结果
  * @throws {SemverError} 当版本号格式无效时
+ * @throws {ConfigError} 当包配置无效时
  *
  * @example
  * ```ts
- * // 递增所有包的 minor 版本号
- * const result = await bumpVersion(config, {
+ * import { bumpVersion } from '@cat-kit/maintenance'
+ * import { resolve } from 'node:path'
+ *
+ * // 递增多个包的 minor 版本号
+ * const packages = [
+ *   { dir: resolve(process.cwd(), 'packages/core') },
+ *   { dir: resolve(process.cwd(), 'packages/fe') }
+ * ]
+ *
+ * const result = await bumpVersion(packages, {
  *   type: 'minor',
  *   syncPeer: true
  * })
  *
+ * console.log(`更新到版本: ${result.version}`)
+ * result.updated.forEach(pkg => {
+ *   console.log(`${pkg.name}: ${pkg.oldVersion} → ${pkg.newVersion}`)
+ * })
+ *
  * // 设置特定版本号
- * const result = await bumpVersion(config, {
+ * const result = await bumpVersion(packages, {
  *   type: 'patch',
- *   version: '1.2.3',
- *   packages: ['@cat-kit/core']
+ *   version: '1.2.3'
  * })
  *
  * // 创建预发布版本
- * const result = await bumpVersion(config, {
+ * const result = await bumpVersion(packages, {
  *   type: 'prerelease',
  *   preid: 'alpha'
  * })
  * ```
  */
 export async function bumpVersion(
-  config: MonorepoConfig,
+  packages: PackageVersionConfig[],
   options: BumpOptions
 ): Promise<BumpResult> {
-  const {
-    type,
-    version: targetVersion,
-    preid,
-    packages: targetPackages,
-    syncPeer = true
-  } = options
+  const { type, version: targetVersion, preid, syncPeer = false } = options
 
-  // 加载所有包
-  const allPackages = await loadPackages(config)
-
-  // 过滤要更新的包
-  const packagesToUpdate = targetPackages
-    ? allPackages.filter(pkg => targetPackages.includes(pkg.name))
-    : allPackages.filter(pkg => !pkg.private) // 默认不更新私有包
-
-  if (packagesToUpdate.length === 0) {
-    throw new SemverError('未找到要更新的包')
+  if (packages.length === 0) {
+    throw new ConfigError('包列表不能为空')
   }
 
   // 确定新版本号
@@ -76,26 +75,36 @@ export async function bumpVersion(
     newVersion = targetVersion
   } else {
     // 基于第一个包的当前版本号递增
-    const firstPkg = packagesToUpdate[0]!
-    newVersion = incrementVersion(firstPkg.version, type, preid)
+    const firstPkgPath = join(packages[0]!.dir, 'package.json')
+    const firstPkg = await readJson<PackageJson>(firstPkgPath)
+    const currentVersion = firstPkg.version || '0.0.0'
+    newVersion = incrementVersion(currentVersion, type, preid)
   }
 
   const updated: BumpResult['updated'] = []
 
   // 更新每个包的 version 字段
-  // 复用 build/release.ts 的逻辑（L43-57）
-  for (const pkg of packagesToUpdate) {
-    const packageJson = await readJson<PackageJson>(pkg.packageJsonPath)
+  for (const pkgConfig of packages) {
+    const packageJsonPath = join(pkgConfig.dir, 'package.json')
+    const packageJson = await readJson<PackageJson>(packageJsonPath)
+
+    if (!packageJson.name) {
+      throw new ConfigError(
+        `package.json 缺少 name 字段`,
+        packageJsonPath
+      )
+    }
+
     const oldVersion = packageJson.version || '0.0.0'
 
     // 更新 version 字段
     packageJson.version = newVersion
 
     // 写回文件
-    await writeJson(pkg.packageJsonPath, packageJson, { space: 2, eol: '\n' })
+    await writeJson(packageJsonPath, packageJson, { space: 2, eol: '\n' })
 
     updated.push({
-      name: pkg.name,
+      name: packageJson.name,
       oldVersion,
       newVersion
     })
@@ -103,7 +112,7 @@ export async function bumpVersion(
 
   // 同步 peerDependencies
   if (syncPeer) {
-    await syncPeerDependencies(config, newVersion)
+    await syncPeerDependencies(packages, newVersion)
   }
 
   return {

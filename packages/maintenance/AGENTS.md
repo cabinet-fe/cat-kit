@@ -82,12 +82,11 @@ export function exampleFunction(value: string): string {
 
 ## 使用示例
 
-### 依赖管理和版本管理
+### 依赖管理
 
 ```typescript
 import {
   checkCircularDependencies,
-  bumpVersion,
   checkVersionConsistency
 } from '@cat-kit/maintenance'
 
@@ -99,17 +98,39 @@ if (circular.hasCircular) {
   console.log('发现循环依赖:', circular.cycles)
 }
 
-// 批量更新版本
-await bumpVersion(config, {
-  type: 'minor',
-  syncPeer: true
-})
-
 // 检查版本一致性
 const consistency = await checkVersionConsistency(config)
 if (!consistency.consistent) {
   console.log('发现版本不一致:', consistency.inconsistent)
 }
+```
+
+### 版本管理
+
+```typescript
+import { bumpVersion, syncPeerDependencies } from '@cat-kit/maintenance'
+import { resolve } from 'node:path'
+
+// 定义要更新版本的包
+const packages = [
+  { dir: resolve(process.cwd(), 'packages/core') },
+  { dir: resolve(process.cwd(), 'packages/fe') },
+  { dir: resolve(process.cwd(), 'packages/http') }
+]
+
+// 批量更新版本
+const result = await bumpVersion(packages, {
+  type: 'minor',
+  syncPeer: true
+})
+
+console.log(`更新到版本: ${result.version}`)
+result.updated.forEach(pkg => {
+  console.log(`${pkg.name}: ${pkg.oldVersion} → ${pkg.newVersion}`)
+})
+
+// 单独同步 peerDependencies
+await syncPeerDependencies(packages, '1.2.3')
 ```
 
 ### 打包器（MonoRepoBundler）

@@ -29,6 +29,16 @@ export type BumpType =
   | 'prerelease'
 
 /**
+ * 包版本配置
+ */
+export interface PackageVersionConfig {
+  /** 包目录（绝对路径） */
+  dir: string
+  /** 包名称（可选，用于日志输出） */
+  name?: string
+}
+
+/**
  * 版本更新选项
  */
 export interface BumpOptions {
@@ -38,9 +48,7 @@ export interface BumpOptions {
   version?: string
   /** 预发布标识（如 'alpha', 'beta'，用于 pre* 类型） */
   preid?: string
-  /** 要更新的包（不指定则更新所有非私有包） */
-  packages?: string[]
-  /** 是否同步 peerDependencies（默认 true） */
+  /** 是否同步 peerDependencies（默认 false） */
   syncPeer?: boolean
 }
 
