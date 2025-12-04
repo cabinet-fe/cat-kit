@@ -17,7 +17,6 @@ export const pkgs: BundlePackageOption[] = [
   },
   {
     dir: pkg('fe'),
-    deps: ['@cat-kit/core'],
     build: {
       input: 'src/index.ts',
       external: ['@cat-kit/core']
@@ -25,7 +24,6 @@ export const pkgs: BundlePackageOption[] = [
   },
   {
     dir: pkg('http'),
-    deps: ['@cat-kit/core'],
     build: {
       input: 'src/index.ts',
       external: ['@cat-kit/core']
@@ -33,8 +31,6 @@ export const pkgs: BundlePackageOption[] = [
   },
   {
     dir: pkg('be'),
-    deps: ['@cat-kit/core'],
-
     build: {
       input: 'src/index.ts',
       platform: 'node',
@@ -43,7 +39,6 @@ export const pkgs: BundlePackageOption[] = [
   },
   {
     dir: pkg('excel'),
-    deps: ['@cat-kit/core'],
     build: {
       input: 'src/index.ts',
       platform: 'browser',
@@ -52,7 +47,6 @@ export const pkgs: BundlePackageOption[] = [
   },
   {
     dir: pkg('maintenance'),
-    deps: ['@cat-kit/core', '@cat-kit/be'],
     build: {
       input: 'src/index.ts',
       platform: 'node',
