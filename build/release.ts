@@ -52,11 +52,17 @@ async function updateAllVersions() {
 
 async function main() {
   await runStep('运行测试', async () => {
-    await $({ cwd: path.join(repoRoot, 'packages/tests'), stdio: 'inherit' })`bun run test`
+    await $({
+      cwd: path.join(repoRoot, 'packages/tests'),
+      stdio: 'inherit'
+    })`bun run test`
   })
 
   await runStep('构建产物', async () => {
-    await $({ cwd: path.join(repoRoot, 'build'), stdio: 'inherit' })`bun run build`
+    await $({
+      cwd: path.join(repoRoot, 'build'),
+      stdio: 'inherit'
+    })`bun run build`
   })
 
   await runStep(`写入版本 ${version}`, async () => {
@@ -66,7 +72,10 @@ async function main() {
   await runStep('发布所有包', async () => {
     for (const target of targets) {
       if (!target.publish) continue
-      await $({ cwd: repoRoot, stdio: 'inherit' })`npm publish --workspace ${target.name} --access public`
+      await $({
+        cwd: repoRoot,
+        stdio: 'inherit'
+      })`npm publish --workspace ${target.name} --access public`
     }
   })
 }

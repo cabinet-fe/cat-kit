@@ -27,6 +27,7 @@
   - 使用 tsdown 进行构建
   - 支持 TypeScript、生成类型声明文件和 sourcemap
   - 自动生成 bundle 分析报告（stats.html）
+  - peerDependencies 与 devDependencies 同时存在的依赖会自动标记为 external，并与配置项中的 external 合并传给 tsdown
 - `BundlePackageOption` - 包构建选项类型
 - `BundlePackageConfig` - 包构建配置类型（内部使用）
 - `BuildSummary` - 构建结果摘要类型

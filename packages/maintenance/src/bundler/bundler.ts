@@ -11,6 +11,13 @@ import type {
   BundleResult
 } from './types'
 
+interface PackageJson {
+  name?: string
+  dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
+  peerDependencies?: Record<string, string>
+}
+
 /**
  * Monorepo 打包器
  *
@@ -56,15 +63,33 @@ export class MonoRepoBundler {
     this.packagesConfigs = await Promise.all(
       this.packages.map(async pkg => {
         const { dir, build: buildOpt, output } = pkg
-        const pkgJson = await readJson(path.resolve(dir, 'package.json'))
+        const pkgJson = await readJson<PackageJson>(
+          path.resolve(dir, 'package.json')
+        )
         if (!pkgJson.name) {
           throw new Error(`${dir}/package.json 中缺少 name 字段`)
         }
-        const { dependencies, devDependencies } = pkgJson
-        const allDeps = { ...dependencies, ...devDependencies }
+        const {
+          dependencies = {},
+          devDependencies = {},
+          peerDependencies = {}
+        } = pkgJson
+
+        const allDeps = {
+          ...dependencies,
+          ...peerDependencies,
+          ...devDependencies
+        }
         const deps = Object.keys(allDeps).filter(dep =>
-          allDeps[dep].startsWith('workspace:*')
+          allDeps[dep]!.startsWith('workspace:*')
         )
+
+        buildOpt.external = [
+          ...this.getPeerDevExternal(peerDependencies, devDependencies),
+          ...(buildOpt.external ?? [])
+        ]
+
+        console.log(dir, buildOpt.external)
 
         return {
           dir,
@@ -199,6 +224,37 @@ export class MonoRepoBundler {
       totalFailed,
       batches
     }
+  }
+
+  /**
+   * 获取需要标记为 external 的依赖
+   * @param peerDependencies - peerDependencies 列表
+   * @param devDependencies - devDependencies 列表
+   * @returns 同时存在于 peerDependencies 与 devDependencies 中的依赖
+   */
+  private getPeerDevExternal(
+    peerDependencies: Record<string, string>,
+    devDependencies: Record<string, string>
+  ): string[] {
+    if (!Object.keys(peerDependencies).length) return []
+    const devDepsSet = new Set(Object.keys(devDependencies))
+    return Object.keys(peerDependencies).filter(dep => devDepsSet.has(dep))
+  }
+
+  /**
+   * 合并显式 external 和自动 external
+   * @param configExternal - 配置中传入的 external
+   * @param autoExternal - 自动检测出的 external
+   * @returns 去重合并后的 external，如果为空返回 undefined
+   */
+  private mergeExternalDeps(
+    configExternal?: string[],
+    autoExternal: string[] = []
+  ): string[] | undefined {
+    const merged = new Set<string>()
+    configExternal?.forEach(dep => merged.add(dep))
+    autoExternal.forEach(dep => merged.add(dep))
+    return merged.size ? [...merged] : undefined
   }
 
   /**

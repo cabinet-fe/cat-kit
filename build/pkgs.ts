@@ -18,39 +18,34 @@ export const pkgs: BundlePackageOption[] = [
   {
     dir: pkg('fe'),
     build: {
-      input: 'src/index.ts',
-      external: ['@cat-kit/core']
+      input: 'src/index.ts'
     }
   },
   {
     dir: pkg('http'),
     build: {
-      input: 'src/index.ts',
-      external: ['@cat-kit/core']
+      input: 'src/index.ts'
     }
   },
   {
     dir: pkg('be'),
     build: {
       input: 'src/index.ts',
-      platform: 'node',
-      external: ['@cat-kit/core']
+      platform: 'node'
     }
   },
   {
     dir: pkg('excel'),
     build: {
       input: 'src/index.ts',
-      platform: 'browser',
-      external: ['@cat-kit/core']
+      platform: 'browser'
     }
   },
   {
     dir: pkg('maintenance'),
     build: {
       input: 'src/index.ts',
-      platform: 'node',
-      external: ['@cat-kit/core', '@cat-kit/be']
+      platform: 'node'
     }
   }
 ]

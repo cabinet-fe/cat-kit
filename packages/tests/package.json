@@ -15,6 +15,7 @@
     "@cat-kit/be": "workspace:*",
     "@cat-kit/http": "workspace:*",
     "@cat-kit/excel": "workspace:*",
+    "@cat-kit/maintenance": "workspace:*",
     "vitest": "^4.0.10",
     "@vitest/ui": "^4.0.10"
   }

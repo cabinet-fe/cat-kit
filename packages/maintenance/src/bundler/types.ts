@@ -26,7 +26,7 @@ export interface BundleBuildConfig {
   input: string
   /** 是否生成 d.ts 文件，默认 true */
   dts?: boolean
-  /** 外部依赖，不打包进产物 */
+  /** 外部依赖，不打包进产物，会与 peer+dev 自动 external 合并 */
   external?: string[]
   /**
    * 构建平台
