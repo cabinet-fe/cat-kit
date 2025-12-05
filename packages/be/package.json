@@ -14,19 +14,14 @@
     },
     "./src": "./src/index.ts"
   },
-  "devDependencies": {
-    "@cat-kit/core": "workspace:*",
+  "dependencies": {
     "smol-toml": "^1.5.2",
     "js-yaml": "^4.1.1"
   },
-  "peerDependencies": {
-    "@cat-kit/core": ">=1.0.0-alpha.1",
-    "smol-toml": ">=1.5.2",
-    "js-yaml": ">=4.1.1"
+  "devDependencies": {
+    "@cat-kit/core": "workspace:*"
   },
-  "peerDependenciesMeta": {
-    "@cat-kit/core": {
-      "optional": true
-    }
+  "peerDependencies": {
+    "@cat-kit/core": "1.0.0-alpha.1"
   }
 }

@@ -11,10 +11,7 @@
       "Bash(bun install)",
       "Bash(git add:*)",
       "WebFetch(domain:tsdown.dev)",
-      "WebSearch",
-      "Bash(git commit -m \"$(cat <<''EOF''\ndocs: 完善 maintenance 包文档，添加库构建前置知识\n\n- 在 maintenance 包文档中新增\"前置知识\"章节\n- 详细解释库构建 vs 应用构建的本质区别\n- 介绍 tsdown 的核心特性和默认行为\n- 说明 package.json 中三种依赖类型在库构建上下文中的意义\n- 解释 external 字段在库构建中的作用和配置策略\n- 提供 Monorepo 库构建的最佳实践和配置检查清单\n- 在 AGENTS.md 中添加文档编写规范和更新记录\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git commit -m \"$(cat <<''EOF''\nrefactor(maintenance): 版本管理 API 改为显式传入包列表\n\n重构版本管理相关函数，使其像 MonoRepoBundler 一样由使用者显式传入\n要处理的包列表，而不是自动加载所有工作区。\n\n**核心改动**：\n\n- 新增 `PackageVersionConfig` 接口，定义包配置结构\n- `bumpVersion` 函数签名改为接受包列表作为第一个参数\n- `syncPeerDependencies` 和 `syncDependencies` 改为接受包列表\n- 移除对 `loadPackages` 的依赖和硬编码的包名列表\n- 添加 `options.only` 参数，支持选择性同步特定包\n\n**Breaking Changes**：\n\n- `bumpVersion(config, options)` → `bumpVersion(packages, options)`\n- `syncPeerDependencies(config, version)` → `syncPeerDependencies(packages, version, options?)`\n- `syncDependencies(config, version)` → `syncDependencies(packages, version, options?)`\n- `BumpOptions` 移除 `packages` 字段\n- `syncPeer` 默认值改为 `false`\n\n**文档和示例**：\n\n- 更新 `packages/maintenance/AGENTS.md` 中的使用示例\n- 新增 `build/version-example.ts` 展示新 API 的使用方式\n- 更新 `build/release.ts` 使用新的 `bumpVersion` API\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push)"
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

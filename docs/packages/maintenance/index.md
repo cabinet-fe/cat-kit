@@ -37,6 +37,108 @@ npm install @cat-kit/maintenance -D
 
 在使用构建工具之前,了解以下概念将帮助你更好地理解库构建的配置和最佳实践。
 
+### package.json 中的依赖类型
+
+#### 为什么要区分三种依赖类型?
+
+npm 将依赖分为 `dependencies`、`devDependencies` 和 `peerDependencies` 三种类型,这种设计并非随意的,而是为了解决以下核心问题:
+
+1. **安装时机问题**: 哪些包需要在生产环境安装?哪些只在开发时需要?
+2. **版本冲突问题**: 如何避免同一个库被安装多次导致的问题?
+3. **包体积问题**: 如何让使用方只安装必需的依赖?
+
+对于**应用开发者**来说,这三种依赖的区别主要体现在安装行为上。但对于**库开发者**来说,这三种依赖直接决定了打包工具的行为 - 哪些代码会被打包进产物,哪些会保留为外部引用。
+
+#### dependencies
+
+**定义**: 项目运行时必须的依赖。
+
+**安装行为**:
+- 运行 `npm install` 时会被安装
+- 当其他项目安装你的库时,这些依赖**也会被自动安装**
+
+**适用场景**:
+- 库在运行时直接使用的外部包
+- 你希望使用方无需额外安装即可使用的功能依赖
+
+**示例**:
+```json
+{
+  "name": "my-date-lib",
+  "dependencies": {
+    "dayjs": "^1.11.0"  // 库在运行时需要 dayjs
+  }
+}
+```
+
+#### devDependencies
+
+**定义**: 仅在开发、测试、构建阶段需要的依赖。
+
+**安装行为**:
+- 运行 `npm install` 时会被安装
+- 当其他项目安装你的库时,这些依赖**不会被安装**
+
+**适用场景**:
+- 构建工具(如 TypeScript、tsdown、rollup)
+- 测试框架(如 vitest、jest)
+- 类型定义(如 @types/*)
+- 开发时使用的辅助工具
+
+**示例**:
+```json
+{
+  "devDependencies": {
+    "typescript": "^5.0.0",      // 仅构建时需要
+    "vitest": "^1.0.0",          // 仅测试时需要
+    "@types/node": "^20.0.0"     // 仅类型检查时需要
+  }
+}
+```
+
+#### peerDependencies
+
+**定义**: 声明"我的库需要与某个包配合使用",但由使用方负责安装。
+
+**安装行为**:
+- 运行 `npm install` 时**不会自动安装**(npm 7+ 会自动安装,但可配置)
+- 包管理器会检查使用方是否已安装兼容版本,若未安装则发出警告
+
+**适用场景**:
+- 框架插件(如 React 组件库依赖 react)
+- 需要与宿主项目共享同一实例的库
+- 避免依赖重复安装导致的问题
+
+**为什么需要 peerDependencies?**
+
+假设你开发了一个 React 组件库:
+
+```
+❌ 使用 dependencies:
+用户项目:
+  └─ react 18.2.0
+  └─ your-lib
+      └─ react 18.2.0 (重复!)
+结果: 两份 React 实例,可能导致 Hook 错误
+
+✅ 使用 peerDependencies:
+用户项目:
+  └─ react 18.2.0 (共享)
+  └─ your-lib (使用用户的 react)
+结果: 只有一份 React 实例,正常工作
+```
+
+**示例**:
+```json
+{
+  "name": "@my-org/react-components",
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}
+```
+
 ### 库构建 vs 应用构建
 
 理解库构建和应用构建的本质区别,有助于你正确配置依赖和 external 选项。
@@ -75,7 +177,7 @@ npm run build
 # 构建库
 tsdown
 # 输出: dist/index.js, dist/index.d.ts
-# import 语句被保留,不打包 peerDependencies
+# import 语句被保留,不打包外部依赖
 ```
 
 **库构建的产物示例**:
@@ -107,177 +209,116 @@ export function formatDate(date) {
 - 📤 **多种输出格式** - 支持 ES Module、CommonJS 等
 - 🔌 **插件生态** - 兼容 Rolldown 和大部分 Rollup 插件
 
-**默认行为** (来源: [tsdown Dependencies](https://tsdown.dev/options/dependencies)):
+#### tsdown 中的依赖处理
 
-- `peerDependencies` 自动视为 external,不会被打包
-- `devDependencies` 只在被实际导入时才会打包
-- 类型声明文件(.d.ts)中,默认不打包任何依赖
+在库构建场景下,tsdown 对三种依赖类型有特定的默认处理方式 (来源: [tsdown Dependencies](https://tsdown.dev/zh-CN/options/dependencies)):
 
-### package.json 中的依赖类型
+| 依赖类型 | 默认行为 | 说明 |
+|---------|---------|------|
+| **dependencies** | 不打包(external) | 被视为外部依赖,保留 import 语句 |
+| **peerDependencies** | 不打包(external) | 被视为外部依赖,保留 import 语句 |
+| **devDependencies** | 按需打包 | 只有在源码中实际被 import 时才会打包 |
 
-在库开发中,正确使用三种依赖类型非常重要。
-
-#### dependencies
-
-**定义**: 库运行时必须的依赖,会随库一起安装。
-
-**在库构建中**:
-- 默认情况下**会被打包**到产物中(除非配置为 external)
-- 使用方安装你的库时,这些依赖会自动安装
-- 适合小型、专用的工具库
+::: tip 幻影依赖 (Phantom Dependencies)
+存在于 `node_modules` 中但未在 `package.json` 中声明的依赖,tsdown 只会在实际使用时才将其打包。这可以帮助发现未声明的依赖问题。
+:::
 
 **示例**:
+
+假设 `package.json` 如下:
 ```json
 {
-  "name": "@cat-kit/maintenance",
   "dependencies": {
-    "picocolors": "^1.1.1",      // 小型工具,打包进产物
-    "tsdown": "^0.17.0"           // 库运行时需要
-  }
-}
-```
-
-#### devDependencies
-
-**定义**: 仅在开发、测试、构建阶段需要的依赖。
-
-**在库构建中**:
-- **不会被打包**到产物中
-- 发布库后,使用方**不会**安装这些依赖
-- 即使在代码中 import,也只会在被实际导入时打包
-
-**示例**:
-```json
-{
+    "dayjs": "^1.11.0"
+  },
   "devDependencies": {
-    "typescript": "^5.0.0",      // 构建工具
-    "vitest": "^1.0.0",          // 测试框架
-    "@types/node": "^20.0.0"     // 类型定义
-  }
-}
-```
-
-**Monorepo 特殊用法**:
-
-在 monorepo 中,内部包依赖也放在 `devDependencies`:
-
-```json
-{
-  "name": "@cat-kit/fe",
-  "devDependencies": {
-    "@cat-kit/core": "workspace:*"  // 开发时使用工作区版本
+    "lodash-es": "^4.17.21"
   },
   "peerDependencies": {
-    "@cat-kit/core": ">=1.0.0"      // 声明对外的依赖要求
+    "react": "^18.0.0"
   }
 }
 ```
 
-#### peerDependencies
-
-**定义**: 要求使用方安装的依赖,用于声明"我的库需要与某个包配合使用"。
-
-**在库构建中** (来源: [tsdown Dependencies](https://tsdown.dev/options/dependencies)):
-- **tsdown 自动将 peerDependencies 视为 external**
-- 不会被打包,保留 import 语句
-- 避免重复安装大型库(如 React、Vue)
-
-**示例**:
-```json
-{
-  "name": "@my-org/react-components",
-  "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
-  }
-}
+源代码:
+```typescript
+import dayjs from 'dayjs'        // dependencies → 不打包
+import { merge } from 'lodash-es' // devDependencies 且实际使用 → 打包
+import React from 'react'        // peerDependencies → 不打包
 ```
 
-**为什么使用 peerDependencies?**
-
-假设你开发了一个 React 组件库:
-
-```
-❌ 使用 dependencies:
-用户项目:
-  └─ react 18.2.0
-  └─ your-lib
-      └─ react 18.2.0 (重复!)
-结果: 两份 React,可能导致 Hook 错误
-
-✅ 使用 peerDependencies:
-用户项目:
-  └─ react 18.2.0 (共享)
-  └─ your-lib (使用用户的 react)
-结果: 只有一份 React,正常工作
+构建产物:
+```javascript
+// dist/index.js
+import dayjs from 'dayjs'        // ← 保留
+// lodash-es 的 merge 函数代码被打包进来了
+import React from 'react'        // ← 保留
 ```
 
 ### 构建配置中的 external 字段
 
 `external` 字段告诉构建工具**哪些导入应该保留,不打包进产物**。
 
-#### 作用原理
+由于 tsdown 默认将 `dependencies` 和 `peerDependencies` 视为 external,大多数情况下你无需手动配置。但在以下场景中可能需要调整:
 
-```typescript
-// 源代码 src/index.ts
-import { someUtil } from '@my-org/core'
-import colors from 'picocolors'
+#### 何时需要手动配置 external
 
-export function log(msg: string) {
-  console.log(colors.blue(someUtil(msg)))
-}
-```
+**使用 `noExternal` 强制打包**:
 
-**配置 external: ['@my-org/core']**:
-
-```javascript
-// 产物 dist/index.js
-import { someUtil } from '@my-org/core'  // ← 保留导入
-// picocolors 的代码被打包进来了
-const colors = { blue: (str) => `\x1b[34m${str}\x1b[0m` }
-
-export function log(msg) {
-  console.log(colors.blue(someUtil(msg)))
-}
-```
-
-#### tsdown 的 external 配置
-
-参考 [tsdown external 配置](https://tsdown.dev/options/dependencies):
+当你希望将某个 `dependencies` 中的小型工具库打包进产物时:
 
 ```typescript
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  // 标记为外部依赖,不打包
-  external: [
-    '@my-org/core',
-    'react',
-    'react/jsx-runtime'
-  ],
+  // 强制打包这些依赖(即使在 dependencies/peerDependencies 中)
+  noExternal: ['picocolors', 'clsx']
+})
+```
 
-  // 强制打包(即使在 peerDependencies 中)
-  noExternal: ['some-package'],
+**使用 `external` 排除额外的包**:
+
+当你需要排除一些 `devDependencies` 中被实际引用的包时:
+
+```typescript
+import { defineConfig } from 'tsdown'
+
+export default defineConfig({
+  external: [
+    '@my-org/core',      // 排除 monorepo 内部包
+    'react/jsx-runtime'  // 排除子路径导入
+  ]
+})
+```
+
+#### 配置选项总结
+
+参考 [tsdown external 配置](https://tsdown.dev/zh-CN/options/dependencies):
+
+```typescript
+import { defineConfig } from 'tsdown'
+
+export default defineConfig({
+  // 额外标记为外部依赖
+  external: ['@my-org/core'],
+
+  // 强制打包(覆盖默认的 external 行为)
+  noExternal: ['picocolors'],
 
   // 跳过所有 node_modules 的打包
   skipNodeModulesBundle: true
 })
 ```
 
-#### 何时使用 external
+#### 打包决策参考
 
-**必须 external**:
-1. **peerDependencies** - tsdown 自动处理,但也可显式配置
-2. **Monorepo 内部包** - 避免重复打包,保持独立性
-3. **Node.js 内置模块** - 如 `fs`、`path`、`http`
-
-**建议 external**:
-1. **大型库** - React、Vue、Lodash 等,让使用方管理版本
-2. **插件系统** - 如果你的库是某个系统的插件
-
-**可以打包**:
-1. **小型工具库** - 如 `picocolors`、`clsx`(几 KB)
-2. **专用依赖** - 只有你的库使用,不太可能重复安装
+| 场景 | 建议 | 原因 |
+|-----|------|------|
+| React/Vue 等框架 | peerDependencies | 避免重复实例 |
+| Monorepo 内部包 | peerDependencies + external | 保持独立性 |
+| 小型工具库(< 10KB) | noExternal 打包 | 减少使用方安装负担 |
+| 大型工具库(lodash 等) | dependencies(默认 external) | 让使用方管理版本 |
+| 仅类型依赖 | devDependencies | 运行时不需要 |
 
 ### Monorepo 库构建最佳实践
 
@@ -289,10 +330,10 @@ export default defineConfig({
 {
   "name": "@cat-kit/fe",
   "dependencies": {
-    // 空 - 不依赖外部运行时包
+    // 运行时依赖 - tsdown 默认不打包,保留 import
   },
   "devDependencies": {
-    "@cat-kit/core": "workspace:*"  // 开发时引用
+    "@cat-kit/core": "workspace:*"  // 开发时引用工作区版本
   },
   "peerDependencies": {
     "@cat-kit/core": ">=1.0.0-alpha.1"  // 声明给使用方
@@ -300,14 +341,23 @@ export default defineConfig({
 }
 ```
 
+::: tip 为什么内部依赖同时在 devDependencies 和 peerDependencies 中?
+- `devDependencies` + `workspace:*`: 让开发时能正确解析到本地工作区的包
+- `peerDependencies`: 发布后,声明使用方需要安装的版本要求
+
+这是 Monorepo 中处理内部依赖的标准模式。
+:::
+
 #### 2. 构建配置
+
+由于 `@cat-kit/core` 在 `devDependencies` 中且被实际导入,tsdown 默认会打包它。需要显式配置 `external`:
 
 ```typescript
 {
   dir: '/path/to/packages/fe',
   build: {
     input: 'src/index.ts',
-    external: ['@cat-kit/core']  // 不打包内部依赖
+    external: ['@cat-kit/core']  // 显式排除内部依赖
   }
 }
 ```
@@ -335,12 +385,13 @@ export function myFeature() {
 
 ### 配置检查清单
 
-- ✅ Monorepo 内部依赖在 `peerDependencies` 中声明
-- ✅ Monorepo 内部依赖在 `devDependencies` 中引用(`workspace:*`)
-- ✅ 构建配置的 `external` 包含所有内部依赖
-- ✅ `dependencies` 只包含要打包进产物的小型库
-- ✅ 大型第三方库(如框架)在 `peerDependencies` 中
-- ✅ 构建工具、测试工具在 `devDependencies` 中
+- ✅ Monorepo 内部依赖在 `peerDependencies` 中声明(供发布后使用)
+- ✅ Monorepo 内部依赖在 `devDependencies` 中引用(`workspace:*`,供开发时使用)
+- ✅ 构建配置的 `external` 显式包含 Monorepo 内部依赖
+- ✅ 运行时外部依赖放在 `dependencies` 中(tsdown 默认不打包)
+- ✅ 框架依赖(React/Vue 等)放在 `peerDependencies` 中
+- ✅ 构建工具、测试工具放在 `devDependencies` 中
+- ✅ 需要打包进产物的小型工具库,使用 `noExternal` 配置
 
 ## 功能模块
 

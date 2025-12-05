@@ -46,19 +46,16 @@
     "packages/be": {
       "name": "@cat-kit/be",
       "version": "1.0.0-alpha.1",
-      "devDependencies": {
-        "@cat-kit/core": "workspace:*",
+      "dependencies": {
         "js-yaml": "^4.1.1",
         "smol-toml": "^1.5.2",
       },
-      "peerDependencies": {
-        "@cat-kit/core": ">=1.0.0-alpha.1",
-        "js-yaml": ">=4.1.1",
-        "smol-toml": ">=1.5.2",
+      "devDependencies": {
+        "@cat-kit/core": "workspace:*",
       },
-      "optionalPeers": [
-        "@cat-kit/core",
-      ],
+      "peerDependencies": {
+        "@cat-kit/core": "1.0.0-alpha.1",
+      },
     },
     "packages/core": {
       "name": "@cat-kit/core",
@@ -67,12 +64,13 @@
     "packages/excel": {
       "name": "@cat-kit/excel",
       "version": "1.0.0-alpha.1",
-      "dependencies": {
-        "@cat-kit/core": "workspace:*",
-      },
       "devDependencies": {
+        "@cat-kit/core": "workspace:*",
         "fast-xml-parser": "^5.3.2",
         "fflate": "^0.8.2",
+      },
+      "peerDependencies": {
+        "@cat-kit/core": "1.0.0-alpha.1",
       },
     },
     "packages/fe": {
@@ -82,11 +80,8 @@
         "@cat-kit/core": "workspace:*",
       },
       "peerDependencies": {
-        "@cat-kit/core": ">=1.0.0-alpha.1",
+        "@cat-kit/core": "1.0.0-alpha.1",
       },
-      "optionalPeers": [
-        "@cat-kit/core",
-      ],
     },
     "packages/http": {
       "name": "@cat-kit/http",
@@ -95,14 +90,14 @@
         "@cat-kit/core": "workspace:*",
       },
       "peerDependencies": {
-        "@cat-kit/core": ">=1.0.0-alpha.1",
+        "@cat-kit/core": "1.0.0-alpha.1",
       },
     },
     "packages/maintenance": {
       "name": "@cat-kit/maintenance",
       "version": "1.0.0-alpha.1",
       "dependencies": {
-        "picocolors": "^1.1.1",
+        "chalk": "^5.6.2",
         "rollup-plugin-visualizer": "^6.0.5",
         "tsdown": "^0.17.0-beta.6",
       },
@@ -110,7 +105,7 @@
         "@cat-kit/be": "workspace:*",
       },
       "peerDependencies": {
-        "@cat-kit/be": ">=1.0.0-alpha.1",
+        "@cat-kit/be": "1.0.0-alpha.1",
       },
     },
     "packages/tests": {
@@ -493,6 +488,8 @@
     "ccount": ["ccount@2.0.1", "", {}, "sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg=="],
 
     "chai": ["chai@6.2.1", "", {}, "sha512-p4Z49OGG5W/WBCPSS/dH3jQ73kD6tiMmUM+bckNK6Jr5JHMG3k9bg/BvKR8lKmtVBKmOiuVaV2ws8s9oSbwysg=="],
+
+    "chalk": ["chalk@5.6.2", "", {}, "sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA=="],
 
     "character-entities": ["character-entities@2.0.2", "", {}, "sha512-shx7oQ0Awen/BRIdkjkvz54PnEEI/EjwXDSIZp86/KKdbafHh1Df/RYGBhn4hbe2+uKC9FnT5UCEdyPz3ai9hQ=="],
 

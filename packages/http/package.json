@@ -20,6 +20,6 @@
     "@cat-kit/core": "workspace:*"
   },
   "peerDependencies": {
-    "@cat-kit/core": ">=1.0.0-alpha.1"
+    "@cat-kit/core": "1.0.0-alpha.1"
   }
 }
