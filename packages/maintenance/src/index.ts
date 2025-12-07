@@ -12,7 +12,6 @@ export * from './version'
 
 // 打包器模块
 export * from './build'
-export * from './bundler'
 
 // MonoRepo 统一管理类
 export * from './monorepo'

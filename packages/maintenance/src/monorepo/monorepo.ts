@@ -1,11 +1,10 @@
-import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs'
-import { join, resolve, sep, isAbsolute } from 'node:path'
+import { existsSync } from 'node:fs'
+import { join, resolve, isAbsolute } from 'node:path'
 import chalk from 'chalk'
 
 import type {
   MonorepoWorkspace,
   WorkspaceBuildConfig,
-  GroupBuildOptions,
   GroupBumpOptions,
   GroupPublishOptions,
   BuildSummary,
@@ -15,75 +14,12 @@ import type {
 import type { PackageJson } from '../types'
 import type { BumpResult } from '../version/types'
 
-import { buildLib } from '../build'
+import { buildLib, type BuildConfig } from '../build'
 import { bumpVersion, syncPeerDependencies, syncDependencies } from '../version'
 import { publishPackage } from '../release'
-
-/**
- * 同步读取 JSON 文件
- */
-function readJsonSync<T>(filePath: string): T {
-  const content = readFileSync(filePath, 'utf-8')
-  return JSON.parse(content) as T
-}
-
-/**
- * 简单的同步 glob 匹配（支持 * 通配符）
- */
-function matchGlobSync(pattern: string, cwd: string): string[] {
-  const normalizedPattern = pattern.replace(/\//g, sep)
-  const parts = normalizedPattern.split(sep).filter(p => p.length > 0)
-  const results: string[] = []
-
-  function match(currentPath: string, patternParts: string[], depth: number): void {
-    if (patternParts.length === 0) {
-      const fullPath = join(cwd, currentPath)
-      if (existsSync(join(fullPath, 'package.json'))) {
-        results.push(currentPath)
-      }
-      return
-    }
-
-    const [currentPattern, ...remainingParts] = patternParts
-    const fullCurrentPath = currentPath ? join(cwd, currentPath) : cwd
-
-    if (!existsSync(fullCurrentPath)) return
-
-    if (currentPattern === '*') {
-      // 匹配所有目录
-      const entries = readdirSync(fullCurrentPath, { withFileTypes: true })
-      for (const entry of entries) {
-        if (entry.isDirectory() && !entry.name.startsWith('.')) {
-          const nextPath = currentPath ? join(currentPath, entry.name) : entry.name
-          match(nextPath, remainingParts, depth + 1)
-        }
-      }
-    } else if (currentPattern) {
-      // 精确匹配
-      const nextPath = currentPath ? join(currentPath, currentPattern) : currentPattern
-      const nextFullPath = join(cwd, nextPath)
-      if (existsSync(nextFullPath) && statSync(nextFullPath).isDirectory()) {
-        match(nextPath, remainingParts, depth + 1)
-      }
-    }
-  }
-
-  match('', parts, 0)
-  return results
-}
-
-/**
- * 获取同时在 peerDependencies 和 devDependencies 中的依赖作为 external
- */
-function getPeerDevExternal(pkg: PackageJson): string[] {
-  const peerDeps = pkg.peerDependencies || {}
-  const devDeps = pkg.devDependencies || {}
-  const devDepsSet = new Set(Object.keys(devDeps))
-
-  return Object.keys(peerDeps).filter(dep =>
-    devDepsSet.has(dep) && devDeps[dep]?.startsWith('workspace:')
-  )
-}
+import { checkCircularDependencies } from '../deps/circular'
+import { checkVersionConsistency } from '../deps/consistency'
+import { readJsonSync, matchWorkspaces, getPeerDevExternal } from './helpers'
 
 /**
  * 工作区分组类
@@ -100,30 +36,31 @@ class WorkspaceGroup<Workspaces extends readonly string[]> {
   }
 
   /**
-   * 获取工作区列表
-   */
-  get workspaces(): MonorepoWorkspace[] {
-    return this.#workspaces
-  }
-
-  /**
-   * 构建工作区
+   * 构建
    *
-   * 按依赖关系分批并行构建
+   * @param configs - 工作区配置, 如果传入将会被合并
    */
   async build(
-    configs: { [K in Workspaces[number]]?: WorkspaceBuildConfig },
-    options: GroupBuildOptions = {}
+    configs?: Record<string, WorkspaceBuildConfig>,
   ): Promise<BuildSummary> {
-    const { parallel = true } = options
     const start = Date.now()
+    const workspaces = this.#workspaces
 
-    // 构建内部包名称集合
-    const internalNames = new Set(this.#workspaces.map(ws => ws.name))
+    // 生成构建配置
+    function getBuildConfig(ws: MonorepoWorkspace): BuildConfig {
+      const autoExternal = getPeerDevExternal(ws.pkg)
+      const { external = [], ...config } = configs?.[ws.name] || {}
+      return {
+        dir: ws.dir,
+        external: [...new Set([...autoExternal, ...external])],
+        ...config
+      }
+    }
 
-    // 构建依赖映射：包名 -> 依赖的内部包名列表
+    // 构建内部依赖映射
+    const internalNames = new Set(workspaces.map(ws => ws.name))
     const depsMap = new Map<string, string[]>()
-    for (const ws of this.#workspaces) {
+    for (const ws of workspaces) {
       const allDeps = {
         ...(ws.pkg.dependencies || {}),
         ...(ws.pkg.devDependencies || {}),
@@ -133,32 +70,71 @@ class WorkspaceGroup<Workspaces extends readonly string[]> {
       depsMap.set(ws.name, internalDeps)
     }
 
-    // 分批构建（拓扑排序）
+    // 生成批次（拓扑排序）
+    const batches: MonorepoWorkspace[][] = []
     const built = new Set<string>()
-    const results: BuildSummary['results'] = []
-    let batchIndex = 1
 
-    while (built.size < this.#workspaces.length) {
-      // 找出可以构建的包（依赖已全部构建）
-      const batch = this.#workspaces.filter(ws =>
+    while (built.size < workspaces.length) {
+      const batch = workspaces.filter(ws =>
         !built.has(ws.name) &&
         (depsMap.get(ws.name) || []).every(dep => built.has(dep))
       )
 
       if (batch.length === 0) {
-        // 存在循环依赖，无法继续
         throw new Error('检测到循环依赖，无法完成构建')
       }
 
+      batches.push(batch)
+      batch.forEach(ws => built.add(ws.name))
+    }
+
+    console.log(batches)
+
+    // 执行构建
+    const results: BuildSummary['results'] = []
+    let batchIndex = 1
+
+    for (const batch of batches) {
       console.log(chalk.bold(`⚡ 第${batchIndex}轮构建 (${batch.length} 个包)`))
 
-      // 构建本批次
-      const batchResults = parallel
-        ? await Promise.all(batch.map(ws => this.#buildWorkspace(ws, configs[ws.name as Workspaces[number]])))
-        : await this.#buildSequential(batch, configs)
+      const batchResults = await Promise.all(
+        batch.map(async ws => {
+          const wsStart = Date.now()
+          const config = getBuildConfig(ws)
+
+          try {
+            const result = await buildLib(config)
+            const duration = Date.now() - wsStart
+
+            if (result.success) {
+              console.log(`  ${chalk.green('✓')} ${chalk.cyan(ws.name)} ${chalk.dim(`${duration}ms`)}`)
+            } else {
+              console.log(`  ${chalk.red('✗')} ${chalk.red(ws.name)}`)
+              if (result.error) console.error(result.error)
+            }
+
+            return {
+              name: ws.name,
+              success: result.success,
+              duration,
+              error: result.error
+            }
+          } catch (err) {
+            const duration = Date.now() - wsStart
+            console.log(`  ${chalk.red('✗')} ${chalk.red(ws.name)}`)
+            console.error(err)
+
+            return {
+              name: ws.name,
+              success: false,
+              duration,
+              error: err instanceof Error ? err : new Error(String(err))
+            }
+          }
+        })
+      )
 
       results.push(...batchResults)
-      batch.forEach(ws => built.add(ws.name))
       batchIndex++
     }
 
@@ -172,66 +148,6 @@ class WorkspaceGroup<Workspaces extends readonly string[]> {
       successCount,
       failedCount,
       results
-    }
-  }
-
-  async #buildSequential(
-    workspaces: MonorepoWorkspace[],
-    configs: { [K in Workspaces[number]]?: WorkspaceBuildConfig }
-  ): Promise<BuildSummary['results']> {
-    const results: BuildSummary['results'] = []
-    for (const ws of workspaces) {
-      const result = await this.#buildWorkspace(ws, configs[ws.name as Workspaces[number]])
-      results.push(result)
-    }
-    return results
-  }
-
-  async #buildWorkspace(
-    ws: MonorepoWorkspace,
-    config?: WorkspaceBuildConfig
-  ): Promise<BuildSummary['results'][number]> {
-    const start = Date.now()
-
-    // 合并 external
-    const autoExternal = getPeerDevExternal(ws.pkg)
-    const external = [...new Set([...(config?.external || []), ...autoExternal])]
-
-    try {
-      const result = await buildLib({
-        dir: ws.dir,
-        entry: config?.entry,
-        dts: config?.dts,
-        external: external.length > 0 ? external : undefined,
-        platform: config?.platform,
-        output: config?.output
-      })
-
-      const duration = Date.now() - start
-      if (result.success) {
-        console.log(`  ${chalk.green('✓')} ${chalk.cyan(ws.name)} ${chalk.dim(`${duration}ms`)}`)
-      } else {
-        console.log(`  ${chalk.red('✗')} ${chalk.red(ws.name)}`)
-        if (result.error) console.error(result.error)
-      }
-
-      return {
-        name: ws.name,
-        success: result.success,
-        duration,
-        error: result.error
-      }
-    } catch (err) {
-      const duration = Date.now() - start
-      console.log(`  ${chalk.red('✗')} ${chalk.red(ws.name)}`)
-      console.error(err)
-
-      return {
-        name: ws.name,
-        success: false,
-        duration,
-        error: err instanceof Error ? err : new Error(String(err))
-      }
     }
   }
 
@@ -330,12 +246,7 @@ export class Monorepo {
     this.#rootDir = dir
   }
 
-  /**
-   * 根目录
-   */
-  get rootDir(): string {
-    return this.#rootDir
-  }
+
 
   /**
    * 工作区列表
@@ -364,34 +275,33 @@ export class Monorepo {
       return []
     }
 
+    const dirs = matchWorkspaces(workspacePatterns, this.#rootDir)
+
     const workspaces: MonorepoWorkspace[] = []
+    for (const dir of dirs) {
+      const absoluteDir = resolve(this.#rootDir, dir)
+      const pkgPath = join(absoluteDir, 'package.json')
 
-    for (const pattern of workspacePatterns) {
-      const dirs = matchGlobSync(pattern, this.#rootDir)
+      if (!existsSync(pkgPath)) continue
 
-      for (const dir of dirs) {
-        const absoluteDir = resolve(this.#rootDir, dir)
-        const pkgPath = join(absoluteDir, 'package.json')
+      try {
+        const pkg = readJsonSync<PackageJson>(pkgPath)
 
-        if (!existsSync(pkgPath)) continue
+        if (!pkg.name) continue
 
-        try {
-          const pkg = readJsonSync<PackageJson>(pkgPath)
-
-          if (!pkg.name) continue
-
-          workspaces.push({
-            name: pkg.name,
-            dir: absoluteDir,
-            version: pkg.version || '0.0.0',
-            pkg,
-            private: pkg.private || false
-          })
-        } catch {
-          // 跳过无效的 package.json
-        }
+        workspaces.push({
+          name: pkg.name,
+          dir: absoluteDir,
+          version: pkg.version || '0.0.0',
+          pkg,
+          private: pkg.private || false
+        })
+      } catch {
+        // 跳过无效的 package.json
       }
     }
+
+
 
     return workspaces
   }
@@ -411,93 +321,22 @@ export class Monorepo {
    */
   isValid(): MonorepoValidationResult {
     const workspaces = this.workspaces
-    const internalNames = new Set(workspaces.map(ws => ws.name))
 
-    // 构建依赖图
-    const depsMap = new Map<string, string[]>()
-    for (const ws of workspaces) {
-      const allDeps = {
-        ...(ws.pkg.dependencies || {}),
-        ...(ws.pkg.devDependencies || {}),
-        ...(ws.pkg.peerDependencies || {})
-      }
-      const internalDeps = Object.keys(allDeps).filter(dep => internalNames.has(dep))
-      depsMap.set(ws.name, internalDeps)
-    }
+    // 转换为 deps 模块需要的格式
+    const packages = workspaces.map(ws => ({
+      name: ws.name,
+      version: ws.version,
+      pkg: ws.pkg
+    }))
 
-    // 检测循环依赖（DFS）
-    const circularChains: string[][] = []
-    const visited = new Set<string>()
-    const recursionStack = new Set<string>()
-    const path: string[] = []
-
-    function dfs(node: string): void {
-      visited.add(node)
-      recursionStack.add(node)
-      path.push(node)
-
-      for (const neighbor of depsMap.get(node) || []) {
-        if (!visited.has(neighbor)) {
-          dfs(neighbor)
-        } else if (recursionStack.has(neighbor)) {
-          // 找到循环
-          const cycleStart = path.indexOf(neighbor)
-          circularChains.push([...path.slice(cycleStart), neighbor])
-        }
-      }
-
-      path.pop()
-      recursionStack.delete(node)
-    }
-
-    for (const ws of workspaces) {
-      if (!visited.has(ws.name)) {
-        dfs(ws.name)
-      }
-    }
-
-    // 检测版本不一致
-    const versionMap = new Map<string, Map<string, string[]>>()
-
-    for (const ws of workspaces) {
-      const allDeps = {
-        ...(ws.pkg.dependencies || {}),
-        ...(ws.pkg.devDependencies || {})
-      }
-
-      for (const [depName, version] of Object.entries(allDeps)) {
-        if (typeof version !== 'string' || version.startsWith('workspace:')) continue
-
-        if (!versionMap.has(depName)) {
-          versionMap.set(depName, new Map())
-        }
-
-        const versions = versionMap.get(depName)!
-        if (!versions.has(version)) {
-          versions.set(version, [])
-        }
-        versions.get(version)!.push(ws.name)
-      }
-    }
-
-    const inconsistentDeps: MonorepoValidationResult['inconsistentDeps'] = []
-    for (const [depName, versions] of versionMap) {
-      if (versions.size > 1) {
-        inconsistentDeps.push({
-          name: depName,
-          versions: Array.from(versions.entries()).map(([version, usedBy]) => ({
-            version,
-            usedBy
-          }))
-        })
-      }
-    }
+    const circularResult = checkCircularDependencies(packages)
+    const consistencyResult = checkVersionConsistency(packages)
 
     return {
-      valid: circularChains.length === 0 && inconsistentDeps.length === 0,
-      hasCircular: circularChains.length > 0,
-      circularChains,
-      inconsistentDeps
+      valid: !circularResult.hasCircular && consistencyResult.consistent,
+      hasCircular: circularResult.hasCircular,
+      circularChains: circularResult.cycles.map((c: { chain: string[] }) => c.chain),
+      inconsistentDeps: consistencyResult.inconsistent
     }
   }
 

@@ -1,4 +1,4 @@
-import { writeJson, readJson } from '@cat-kit/be'
+import { writeJson, readJson } from '@cat-kit/be/src'
 import { join, basename } from 'node:path'
 import type { PackageJson } from '../types'
 import type { BumpOptions, BumpResult } from './types'

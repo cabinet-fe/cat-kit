@@ -337,7 +337,7 @@ export default defineConfig({
     "@cat-kit/core": "workspace:*"  // 开发时引用工作区版本
   },
   "peerDependencies": {
-    "@cat-kit/core": ">=1.0.0-alpha.1"  // 声明给使用方
+    "@cat-kit/core": "1.0.0-alpha.1"  // 声明给使用方
   }
 }
 ```

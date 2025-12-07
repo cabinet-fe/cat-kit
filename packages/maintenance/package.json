@@ -1,7 +1,7 @@
 {
   "name": "@cat-kit/maintenance",
   "type": "module",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.1",
   "description": "包维护工具",
   "files": [
     "dist",
@@ -12,15 +12,13 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./src": {
-      "import": "./src/index.ts",
-      "types": "./src/index.ts"
-    }
+    "./src": "./src/index.ts"
   },
   "dependencies": {
     "chalk": "^5.6.2",
+    "fast-glob": "^3.3.3",
     "rollup-plugin-visualizer": "^6.0.5",
-    "tsdown": "^0.17.0-beta.6"
+    "tsdown": "^0.17.0"
   },
   "devDependencies": {
     "@cat-kit/be": "workspace:*"

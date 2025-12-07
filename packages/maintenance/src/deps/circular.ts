@@ -1,20 +1,19 @@
-import type { CircularDependencyResult, CircularChain } from './types'
-import type { MonorepoWorkspace } from '../monorepo/types'
+import type { PackageInfo, CircularDependencyResult, CircularChain } from './types'
 
 /**
  * 构建依赖映射
  */
-function buildDependencyMap(workspaces: MonorepoWorkspace[]): Map<string, string[]> {
+function buildDependencyMap(packages: PackageInfo[]): Map<string, string[]> {
   const graph = new Map<string, string[]>()
-  const internalPackageNames = new Set(workspaces.map(ws => ws.name))
+  const internalPackageNames = new Set(packages.map(p => p.name))
 
-  for (const ws of workspaces) {
+  for (const p of packages) {
     const deps: string[] = []
 
     const allDeps = {
-      ...(ws.pkg.dependencies || {}),
-      ...(ws.pkg.devDependencies || {}),
-      ...(ws.pkg.peerDependencies || {})
+      ...(p.pkg.dependencies || {}),
+      ...(p.pkg.devDependencies || {}),
+      ...(p.pkg.peerDependencies || {})
     }
 
     for (const depName of Object.keys(allDeps)) {
@@ -23,7 +22,7 @@ function buildDependencyMap(workspaces: MonorepoWorkspace[]): Map<string, string
       }
     }
 
-    graph.set(ws.name, deps)
+    graph.set(p.name, deps)
   }
 
   return graph
@@ -34,15 +33,19 @@ function buildDependencyMap(workspaces: MonorepoWorkspace[]): Map<string, string
  *
  * 使用 Tarjan 算法查找强连通分量（Strongly Connected Components）
  *
- * @param workspaces - 工作区列表
+ * @param packages - 包列表，每个包需要包含 name 和 pkg（package.json 内容）
  * @returns 循环依赖检查结果
  *
  * @example
  * ```ts
- * import { Monorepo, checkCircularDependencies } from '@cat-kit/maintenance'
+ * import { checkCircularDependencies } from '@cat-kit/maintenance'
  *
- * const repo = new Monorepo()
- * const result = checkCircularDependencies(repo.workspaces)
+ * const packages = [
+ *   { name: '@my/core', pkg: corePackageJson },
+ *   { name: '@my/utils', pkg: utilsPackageJson }
+ * ]
+ *
+ * const result = checkCircularDependencies(packages)
  * if (result.hasCircular) {
  *   console.log('发现循环依赖:')
  *   result.cycles.forEach(cycle => {
@@ -52,9 +55,9 @@ function buildDependencyMap(workspaces: MonorepoWorkspace[]): Map<string, string
  * ```
  */
 export function checkCircularDependencies(
-  workspaces: MonorepoWorkspace[]
+  packages: PackageInfo[]
 ): CircularDependencyResult {
-  const graph = buildDependencyMap(workspaces)
+  const graph = buildDependencyMap(packages)
 
   let index = 0
   const stack: string[] = []

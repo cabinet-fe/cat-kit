@@ -1,3 +1,17 @@
+import type { PackageJson } from '../types'
+
+/**
+ * 包信息（用于依赖分析）
+ */
+export interface PackageInfo {
+  /** 包名称 */
+  name: string
+  /** 包版本 */
+  version?: string
+  /** package.json 内容 */
+  pkg: PackageJson
+}
+
 /**
  * 依赖关系图
  */

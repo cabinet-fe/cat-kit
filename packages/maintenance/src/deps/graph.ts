@@ -1,21 +1,19 @@
-import type { PackageJson } from '../types'
-import type { DependencyGraph, DependencyNode, DependencyEdge } from './types'
-import type { MonorepoWorkspace } from '../monorepo/types'
+import type { PackageInfo, DependencyGraph, DependencyNode, DependencyEdge } from './types'
 
 /**
  * 获取依赖类型
  */
 function getDependencyType(
-  packageJson: PackageJson,
+  pkg: PackageInfo['pkg'],
   depName: string
 ): 'dependencies' | 'devDependencies' | 'peerDependencies' {
-  if (packageJson.dependencies?.[depName]) {
+  if (pkg.dependencies?.[depName]) {
     return 'dependencies'
   }
-  if (packageJson.devDependencies?.[depName]) {
+  if (pkg.devDependencies?.[depName]) {
     return 'devDependencies'
   }
-  if (packageJson.peerDependencies?.[depName]) {
+  if (pkg.peerDependencies?.[depName]) {
     return 'peerDependencies'
   }
   return 'dependencies'
@@ -24,47 +22,51 @@ function getDependencyType(
 /**
  * 构建依赖关系图
  *
- * @param workspaces - 工作区列表
+ * @param packages - 包列表，每个包需要包含 name、version 和 pkg（package.json 内容）
  * @returns 依赖关系图
  *
  * @example
  * ```ts
- * import { Monorepo, buildDependencyGraph } from '@cat-kit/maintenance'
+ * import { buildDependencyGraph } from '@cat-kit/maintenance'
  *
- * const repo = new Monorepo()
- * const graph = buildDependencyGraph(repo.workspaces)
+ * const packages = [
+ *   { name: '@my/core', version: '1.0.0', pkg: corePackageJson },
+ *   { name: '@my/utils', version: '1.0.0', pkg: utilsPackageJson }
+ * ]
+ *
+ * const graph = buildDependencyGraph(packages)
  * console.log(`包含 ${graph.nodes.length} 个节点和 ${graph.edges.length} 条边`)
  * ```
  */
 export function buildDependencyGraph(
-  workspaces: MonorepoWorkspace[]
+  packages: (PackageInfo & { version: string })[]
 ): DependencyGraph {
   const nodes: DependencyNode[] = []
   const edges: DependencyEdge[] = []
   const externalDeps = new Set<string>()
-  const internalPackageNames = new Set(workspaces.map(ws => ws.name))
+  const internalPackageNames = new Set(packages.map(p => p.name))
 
   // 构建内部包节点
-  for (const ws of workspaces) {
+  for (const p of packages) {
     nodes.push({
-      id: ws.name,
-      version: ws.version,
+      id: p.name,
+      version: p.version,
       external: false
     })
 
     // 收集所有依赖
     const allDeps = {
-      ...(ws.pkg.dependencies || {}),
-      ...(ws.pkg.devDependencies || {}),
-      ...(ws.pkg.peerDependencies || {})
+      ...(p.pkg.dependencies || {}),
+      ...(p.pkg.devDependencies || {}),
+      ...(p.pkg.peerDependencies || {})
     }
 
     for (const depName of Object.keys(allDeps)) {
       if (internalPackageNames.has(depName)) {
         edges.push({
-          from: ws.name,
+          from: p.name,
           to: depName,
-          type: getDependencyType(ws.pkg, depName)
+          type: getDependencyType(p.pkg, depName)
         })
       } else {
         externalDeps.add(depName)
@@ -80,18 +82,18 @@ export function buildDependencyGraph(
       external: true
     })
 
-    for (const ws of workspaces) {
+    for (const p of packages) {
       const allDeps = {
-        ...(ws.pkg.dependencies || {}),
-        ...(ws.pkg.devDependencies || {}),
-        ...(ws.pkg.peerDependencies || {})
+        ...(p.pkg.dependencies || {}),
+        ...(p.pkg.devDependencies || {}),
+        ...(p.pkg.peerDependencies || {})
       }
 
       if (allDeps[depName]) {
         edges.push({
-          from: ws.name,
+          from: p.name,
           to: depName,
-          type: getDependencyType(ws.pkg, depName)
+          type: getDependencyType(p.pkg, depName)
         })
       }
     }
@@ -109,7 +111,7 @@ export function buildDependencyGraph(
  *
  * @example
  * ```ts
- * const graph = buildDependencyGraph(workspaces)
+ * const graph = buildDependencyGraph(packages)
  * const mermaid = visualizeDependencyGraph(graph, { includeExternal: false })
  * console.log(mermaid)
  * // graph TD

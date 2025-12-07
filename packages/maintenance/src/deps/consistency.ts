@@ -1,21 +1,24 @@
-import type { ConsistencyResult, InconsistentDependency } from './types'
-import type { MonorepoWorkspace } from '../monorepo/types'
+import type { PackageInfo, ConsistencyResult, InconsistentDependency } from './types'
 
 /**
  * 检查版本一致性
  *
- * 检测 monorepo 中相同依赖是否使用了不同的版本
+ * 检测多个包中相同依赖是否使用了不同的版本
  *
- * @param workspaces - 工作区列表
+ * @param packages - 包列表，每个包需要包含 name 和 pkg（package.json 内容）
  * @param options - 可选配置
  * @returns 一致性检查结果
  *
  * @example
  * ```ts
- * import { Monorepo, checkVersionConsistency } from '@cat-kit/maintenance'
+ * import { checkVersionConsistency } from '@cat-kit/maintenance'
  *
- * const repo = new Monorepo()
- * const result = checkVersionConsistency(repo.workspaces)
+ * const packages = [
+ *   { name: '@my/core', pkg: corePackageJson },
+ *   { name: '@my/utils', pkg: utilsPackageJson }
+ * ]
+ *
+ * const result = checkVersionConsistency(packages)
  * if (!result.consistent) {
  *   console.log('发现版本不一致:')
  *   result.inconsistent.forEach(dep => {
@@ -28,7 +31,7 @@ import type { MonorepoWorkspace } from '../monorepo/types'
  * ```
  */
 export function checkVersionConsistency(
-  workspaces: MonorepoWorkspace[],
+  packages: PackageInfo[],
   options: {
     /** 忽略的依赖包（不检查版本一致性） */
     ignore?: string[]
@@ -41,10 +44,10 @@ export function checkVersionConsistency(
     Map<string, string[]>
   >()
 
-  for (const ws of workspaces) {
+  for (const p of packages) {
     const allDeps = {
-      ...ws.pkg.dependencies,
-      ...ws.pkg.devDependencies
+      ...p.pkg.dependencies,
+      ...p.pkg.devDependencies
     }
 
     for (const [depName, version] of Object.entries(allDeps)) {
@@ -69,7 +72,7 @@ export function checkVersionConsistency(
         versionMap.set(version, [])
       }
 
-      versionMap.get(version)!.push(ws.name)
+      versionMap.get(version)!.push(p.name)
     }
   }
 
