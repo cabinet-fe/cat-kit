@@ -2,6 +2,10 @@
 
 本文件为 `packages/tests` 目录提供详细的测试指导。
 
+## 核心原则
+
+- **不要引入任何 package.json 中不存在的依赖**
+
 ## 概述
 
 `packages/tests` 是 Cat-Kit monorepo 的集中测试套件，包含所有包的测试用例。
@@ -54,13 +58,11 @@ packages/core/src/data/array.ts → packages/tests/core/data/array.test.ts
 - 测试文件以 `.test.ts` 结尾
 - 测试文件名与被测试文件名对应
 
-
 ## 编写测试
 
 > **📌 详细的测试最佳实践请参考根目录的 `AGENTS.md` 文件**
 
 基本测试模板参考根目录 `AGENTS.md` 中的示例。
-
 
 ## 测试覆盖率
 
@@ -130,12 +132,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
-        'dist/',
-        '**/*.d.ts',
-        '**/*.config.*'
-      ]
+      exclude: ['node_modules/', 'dist/', '**/*.d.ts', '**/*.config.*']
     }
   }
 })
@@ -143,13 +140,14 @@ export default defineConfig({
 
 ## 测试最佳实践
 
-> **注意**：详细的测试最佳实践（AAA模式、边界测试、测试隔离、描述性命名、避免测试实现细节等）请参考根目录的 `AGENTS.md` 文件。
+> **注意**：详细的测试最佳实践（AAA 模式、边界测试、测试隔离、描述性命名、避免测试实现细节等）请参考根目录的 `AGENTS.md` 文件。
 
 ## 添加新测试
 
 ### 步骤
 
 1. **确定位置**：根据被测试的包确定测试文件位置
+
    - `@cat-kit/core` → `packages/tests/core/`
    - `@cat-kit/fe` → `packages/tests/fe/`
    - 等等
@@ -159,6 +157,7 @@ export default defineConfig({
 3. **编写测试**：遵循测试最佳实践
 
 4. **运行测试**：确保所有测试通过
+
    ```bash
    cd packages/tests
    bun run test
@@ -193,6 +192,7 @@ it('should do something', () => {
 ```
 
 然后使用 Node.js 调试器运行：
+
 ```bash
 node --inspect-brk ./node_modules/.bin/vitest
 ```
@@ -202,6 +202,7 @@ node --inspect-brk ./node_modules/.bin/vitest
 ### 测试超时
 
 增加超时时间：
+
 ```typescript
 it('should handle slow operation', async () => {
   // 测试代码
@@ -211,6 +212,7 @@ it('should handle slow operation', async () => {
 ### 异步测试未完成
 
 确保返回 Promise 或使用 async/await：
+
 ```typescript
 // ✅ 正确
 it('should wait for async operation', async () => {
@@ -229,6 +231,7 @@ it('should wait for async operation', () => {
 ## 持续集成
 
 测试应该在 CI/CD 流程中自动运行。确保：
+
 - 所有测试都通过
 - 覆盖率达标
 - 没有跳过的测试（除非有充分理由）

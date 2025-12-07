@@ -2,9 +2,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { Logger, LogLevel, type LogEntry } from '@cat-kit/be/src/logger/logger'
-import type { Transport } from '@cat-kit/be/src/logger/transports'
-import { FileTransport } from '@cat-kit/be/src/logger/transports'
+import { Logger, LogLevel, FileTransport, type LogEntry, type Transport } from '@cat-kit/be/src'
 
 class MemoryTransport implements Transport {
   public readonly entries: LogEntry[] = []

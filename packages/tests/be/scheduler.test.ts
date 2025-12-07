@@ -1,4 +1,4 @@
-import { CronExpression, Scheduler } from '@cat-kit/be/src/scheduler'
+import { CronExpression, Scheduler } from '@cat-kit/be/src'
 
 describe('@cat-kit/be 调度器', () => {
   afterEach(() => {

@@ -1,6 +1,6 @@
 import { createServer } from 'node:net'
 
-import { getLocalIP, isPortAvailable } from '@cat-kit/be/src/net'
+import { getLocalIP, isPortAvailable } from '@cat-kit/be/src'
 
 describe('@cat-kit/be 网络工具', () => {
   it('应该检测端口可用性', async () => {

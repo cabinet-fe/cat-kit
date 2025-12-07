@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { readJson } from '@cat-kit/be'
-import pic from 'picocolors'
+import chalk from 'chalk'
 import { build } from 'tsdown'
 import { visualizer } from 'rollup-plugin-visualizer'
 import type {
@@ -16,6 +16,38 @@ interface PackageJson {
   dependencies?: Record<string, string>
   devDependencies?: Record<string, string>
   peerDependencies?: Record<string, string>
+}
+
+/**
+ * 获取需要标记为 external 的依赖
+ * 返回同时存在于 peerDependencies 与 devDependencies 中的依赖
+ * @param peerDependencies - peerDependencies 列表
+ * @param devDependencies - devDependencies 列表
+ * @returns 交集依赖列表
+ */
+export function getPeerDevExternalDeps(
+  peerDependencies: Record<string, string>,
+  devDependencies: Record<string, string>
+): string[] {
+  if (!Object.keys(peerDependencies).length) return []
+  const devDepsSet = new Set(Object.keys(devDependencies))
+  return Object.keys(peerDependencies).filter(dep => devDepsSet.has(dep))
+}
+
+/**
+ * 合并显式 external 和自动 external
+ * @param configExternal - 配置中传入的 external
+ * @param autoExternal - 自动检测出的 external
+ * @returns 去重合并后的 external，如果为空返回 undefined
+ */
+export function mergeExternalDeps(
+  configExternal?: string[],
+  autoExternal: string[] = []
+): string[] | undefined {
+  const merged = new Set<string>()
+  configExternal?.forEach(dep => merged.add(dep))
+  autoExternal.forEach(dep => merged.add(dep))
+  return merged.size ? [...merged] : undefined
 }
 
 /**
@@ -84,12 +116,10 @@ export class MonoRepoBundler {
           allDeps[dep]!.startsWith('workspace:*')
         )
 
-        buildOpt.external = [
-          ...this.getPeerDevExternal(peerDependencies, devDependencies),
-          ...(buildOpt.external ?? [])
-        ]
-
-        console.log(dir, buildOpt.external)
+        buildOpt.external = this.mergeExternalDeps(
+          buildOpt.external,
+          this.getPeerDevExternal(peerDependencies, devDependencies)
+        )
 
         return {
           dir,
@@ -139,7 +169,7 @@ export class MonoRepoBundler {
     const start = Date.now()
     await this.initPackages()
 
-    console.log(pic.bold(pic.magenta('🚀 开始构建...\n')))
+    console.log(chalk.bold(chalk.magenta('🚀 开始构建...\n')))
 
     const buildedPackages = new Set<string>()
     const batches: BatchBuildResult[] = []
@@ -154,7 +184,7 @@ export class MonoRepoBundler {
       const batchStart = Date.now()
 
       // 打印批次信息
-      console.log(pic.bold(`⚡ 第${batchIndex}轮`))
+      console.log(chalk.bold(`⚡ 第${batchIndex}轮`))
 
       const results = await Promise.all(
         pkgsToBuild.map(conf => this.buildPackage(conf))
@@ -180,13 +210,13 @@ export class MonoRepoBundler {
 
       // 打印批次完成信息
       const statsText = [
-        batchSuccess > 0 && pic.green(`✓ ${batchSuccess}`),
-        batchFailed > 0 && pic.red(`✗ ${batchFailed}`)
+        batchSuccess > 0 && chalk.green(`✓ ${batchSuccess}`),
+        batchFailed > 0 && chalk.red(`✗ ${batchFailed}`)
       ]
         .filter(Boolean)
         .join(' ')
 
-      console.log(pic.dim(`  └─ ${batchDuration}ms `) + statsText + '\n')
+      console.log(chalk.dim(`  └─ ${batchDuration}ms `) + statsText + '\n')
 
       pkgsToBuild = this.getPkgsToBuild(buildedPackages)
       batchIndex++
@@ -196,25 +226,25 @@ export class MonoRepoBundler {
 
     // 打印总体统计
     const totalStats = [
-      totalSuccess > 0 && pic.green(`✓ ${totalSuccess}`),
-      totalFailed > 0 && pic.red(`✗ ${totalFailed}`)
+      totalSuccess > 0 && chalk.green(`✓ ${totalSuccess}`),
+      totalFailed > 0 && chalk.red(`✗ ${totalFailed}`)
     ]
       .filter(Boolean)
       .join(' ')
 
     console.log(
-      pic.bold(pic.green(`✨ 总耗时: ${totalDuration}ms `)) + totalStats
+      chalk.bold(chalk.green(`✨ 总耗时: ${totalDuration}ms `)) + totalStats
     )
 
     // 如果有成功构建的包，提示查看分析报告
     if (totalSuccess > 0) {
       console.log(
         '\n' +
-          pic.bold(pic.cyan('📊 Bundle 分析报告已生成')) +
+          chalk.bold(chalk.cyan('📊 Bundle 分析报告已生成')) +
           '\n' +
-          pic.dim('  运行 ') +
-          pic.cyan('bun run analyze') +
-          pic.dim(' 启动服务查看可视化分析\n')
+          chalk.dim('  运行 ') +
+          chalk.cyan('bun run analyze') +
+          chalk.dim(' 启动服务查看可视化分析\n')
       )
     }
 
@@ -228,33 +258,22 @@ export class MonoRepoBundler {
 
   /**
    * 获取需要标记为 external 的依赖
-   * @param peerDependencies - peerDependencies 列表
-   * @param devDependencies - devDependencies 列表
-   * @returns 同时存在于 peerDependencies 与 devDependencies 中的依赖
    */
   private getPeerDevExternal(
     peerDependencies: Record<string, string>,
     devDependencies: Record<string, string>
   ): string[] {
-    if (!Object.keys(peerDependencies).length) return []
-    const devDepsSet = new Set(Object.keys(devDependencies))
-    return Object.keys(peerDependencies).filter(dep => devDepsSet.has(dep))
+    return getPeerDevExternalDeps(peerDependencies, devDependencies)
   }
 
   /**
    * 合并显式 external 和自动 external
-   * @param configExternal - 配置中传入的 external
-   * @param autoExternal - 自动检测出的 external
-   * @returns 去重合并后的 external，如果为空返回 undefined
    */
   private mergeExternalDeps(
     configExternal?: string[],
     autoExternal: string[] = []
   ): string[] | undefined {
-    const merged = new Set<string>()
-    configExternal?.forEach(dep => merged.add(dep))
-    autoExternal.forEach(dep => merged.add(dep))
-    return merged.size ? [...merged] : undefined
+    return mergeExternalDeps(configExternal, autoExternal)
   }
 
   /**
@@ -295,10 +314,10 @@ export class MonoRepoBundler {
       const duration = Date.now() - start
       console.log(
         `  ├─ ` +
-          pic.green('✓') +
+          chalk.green('✓') +
           ' ' +
-          pic.cyan(conf.name.padEnd(22)) +
-          pic.dim(`${duration}ms`)
+          chalk.cyan(conf.name.padEnd(22)) +
+          chalk.dim(`${duration}ms`)
       )
 
       return {
@@ -308,7 +327,7 @@ export class MonoRepoBundler {
       }
     } catch (err) {
       const duration = Date.now() - start
-      console.error(`  ├─ ` + pic.red('✗') + ' ' + pic.red(conf.name))
+      console.error(`  ├─ ` + chalk.red('✗') + ' ' + chalk.red(conf.name))
       console.error(err)
 
       return {

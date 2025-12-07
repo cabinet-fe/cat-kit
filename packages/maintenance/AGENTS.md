@@ -32,6 +32,12 @@
 - `BundlePackageConfig` - 包构建配置类型（内部使用）
 - `BuildSummary` - 构建结果摘要类型
 
+### release（发布与 Git 辅助）
+
+- `createGitTag()` - 创建（可选推送）带注释的 git tag，支持强制覆盖
+- `commitAndPush()` - 执行 add/commit/push，可选推送所有 tag
+- `publishPackage()` - npm 包发布，支持自定义 registry/OTP/dry-run/provenance
+
 ## 编码规范
 
 ### 通用规范

@@ -11,7 +11,10 @@
       "Bash(bun install)",
       "Bash(git add:*)",
       "WebFetch(domain:tsdown.dev)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(bun i:*)",
+      "Bash(bun run test --help:*)",
+      "Bash(bun run test:*)"
     ],
     "deny": [],
     "ask": []

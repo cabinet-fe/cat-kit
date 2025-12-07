@@ -1,5 +1,5 @@
 {
-  "extends": "@cat-kit/tsconfig",
+  "extends": "@cat-kit/tsconfig/tsconfig.json",
   "compilerOptions": {
     "types": ["vitest/globals", "node"],
     "composite": true,

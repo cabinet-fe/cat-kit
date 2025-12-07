@@ -68,3 +68,17 @@ export class GitError extends MaintenanceError {
     this.name = 'GitError'
   }
 }
+
+/**
+ * 发布错误
+ */
+export class PublishError extends MaintenanceError {
+  constructor(
+    message: string,
+    public readonly command?: string,
+    originalError?: unknown
+  ) {
+    super(message, 'PUBLISH_ERROR', originalError)
+    this.name = 'PublishError'
+  }
+}

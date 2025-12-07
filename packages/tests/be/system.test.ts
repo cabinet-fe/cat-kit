@@ -4,7 +4,7 @@ import {
   getDiskInfo,
   getMemoryInfo,
   getNetworkInterfaces
-} from '@cat-kit/be/src/system'
+} from '@cat-kit/be/src'
 
 describe('@cat-kit/be 系统工具', () => {
   it('应该返回 CPU 信息', () => {

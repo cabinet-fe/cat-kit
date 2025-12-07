@@ -14,6 +14,7 @@ order: -1
 - 📊 **依赖可视化** - 生成 Mermaid 格式的依赖关系图
 - 🔢 **版本管理** - 符合 semver 规范的版本解析、比较和递增
 - 📦 **批量构建** - 按依赖关系分批并行构建 monorepo 中的包
+- 🚀 **发布辅助** - git 提交/tag/push 与 npm publish（支持自定义 registry、2FA）
 
 ## 安装
 
@@ -421,13 +422,24 @@ Monorepo 构建打包工具：
 - 基于 tsdown，支持 TypeScript 和类型声明生成
 - 自动生成 Bundle 分析报告
 
+### [发布与 Git 辅助](./release)
+
+发布流程自动化：
+
+- `createGitTag` - 创建/推送带注释的 git tag
+- `commitAndPush` - 执行 add/commit/push，可选推送所有 tag
+- `publishPackage` - npm 发布封装，支持换源、dry-run、2FA、provenance
+
 ## 快速示例
 
 ```typescript
 import {
   MonoRepoBundler,
   checkCircularDependencies,
-  bumpVersion
+  bumpVersion,
+  publishPackage,
+  createGitTag,
+  commitAndPush
 } from '@cat-kit/maintenance'
 
 // 检查循环依赖
@@ -446,4 +458,13 @@ const bundler = new MonoRepoBundler([
   { dir: '/path/to/packages/core', build: { input: 'src/index.ts' } }
 ])
 await bundler.build()
+
+// 发布示例（提交 + tag + npm 发布）
+await commitAndPush({ cwd: '/path/to/repo', message: 'chore: release' })
+await createGitTag({ cwd: '/path/to/repo', tag: 'v1.2.3', push: true })
+await publishPackage({
+  cwd: '/path/to/pkg',
+  registry: 'https://registry.npmmirror.com',
+  tag: 'latest'
+})
 ```

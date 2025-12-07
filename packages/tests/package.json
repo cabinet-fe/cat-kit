@@ -9,14 +9,15 @@
     "test:watch": "vitest --watch",
     "test:ui": "vitest --ui"
   },
-  "devDependencies": {
-    "@cat-kit/core": "workspace:*",
-    "@cat-kit/fe": "workspace:*",
+  "dependencies": {
     "@cat-kit/be": "workspace:*",
-    "@cat-kit/http": "workspace:*",
+    "@cat-kit/core": "workspace:*",
     "@cat-kit/excel": "workspace:*",
+    "@cat-kit/fe": "workspace:*",
+    "@cat-kit/http": "workspace:*",
     "@cat-kit/maintenance": "workspace:*",
-    "vitest": "^4.0.10",
-    "@vitest/ui": "^4.0.10"
+    "@vitest/ui": "^4.0.10",
+    "fflate": "^0.8.2",
+    "vitest": "^4.0.10"
   }
 }

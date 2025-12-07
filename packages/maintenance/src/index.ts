@@ -12,3 +12,6 @@ export * from './version'
 
 // 打包器模块
 export * from './bundler'
+
+// 发布与 git 辅助
+export * from './release'

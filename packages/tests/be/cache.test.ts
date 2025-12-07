@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { FileCache, LRUCache, memoize } from '@cat-kit/be/src/cache'
+import { FileCache, LRUCache, memoize } from '@cat-kit/be/src'
 
 describe('@cat-kit/be 缓存工具', () => {
   describe('LRUCache', () => {

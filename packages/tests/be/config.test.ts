@@ -7,7 +7,7 @@ import {
   loadEnv,
   mergeConfig,
   parseEnv
-} from '@cat-kit/be/src/config'
+} from '@cat-kit/be/src'
 
 describe('@cat-kit/be 配置工具', () => {
   let tempDir: string

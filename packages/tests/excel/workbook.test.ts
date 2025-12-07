@@ -54,8 +54,7 @@ describe('Workbook', () => {
     })
 
     it('应该拒绝重复的工作表名称', () => {
-      const workbook = new Workbook()
-        .addSheet(new Worksheet('Sheet1'))
+      const workbook = new Workbook().addSheet(new Worksheet('Sheet1'))
 
       expect(() => {
         workbook.addSheet(new Worksheet('Sheet1'))
@@ -92,10 +91,7 @@ describe('Workbook', () => {
       const workbook = new Workbook()
 
       expect(() => {
-        workbook.addSheets([
-          new Worksheet('Sheet1'),
-          new Worksheet('Sheet1')
-        ])
+        workbook.addSheets([new Worksheet('Sheet1'), new Worksheet('Sheet1')])
       }).toThrow('工作表名称 "Sheet1" 已存在')
     })
 
@@ -162,10 +158,7 @@ describe('Workbook', () => {
 
     it('应该通过名称删除工作表', () => {
       const workbook1 = new Workbook('MyWorkbook', {
-        sheets: [
-          new Worksheet('Sheet1'),
-          new Worksheet('Sheet2')
-        ]
+        sheets: [new Worksheet('Sheet1'), new Worksheet('Sheet2')]
       })
 
       const workbook2 = workbook1.removeSheet('Sheet1')
@@ -293,10 +286,7 @@ describe('Workbook', () => {
   describe('迭代器', () => {
     it('应该支持 for...of 循环', () => {
       const workbook = new Workbook('MyWorkbook', {
-        sheets: [
-          new Worksheet('Sheet1'),
-          new Worksheet('Sheet2')
-        ]
+        sheets: [new Worksheet('Sheet1'), new Worksheet('Sheet2')]
       })
 
       const names: string[] = []
@@ -309,16 +299,13 @@ describe('Workbook', () => {
 
     it('应该支持展开运算符', () => {
       const workbook = new Workbook('MyWorkbook', {
-        sheets: [
-          new Worksheet('Sheet1'),
-          new Worksheet('Sheet2')
-        ]
+        sheets: [new Worksheet('Sheet1'), new Worksheet('Sheet2')]
       })
 
       const sheets = [...workbook]
       expect(sheets).toHaveLength(2)
-      expect(sheets[0].name).toBe('Sheet1')
-      expect(sheets[1].name).toBe('Sheet2')
+      expect(sheets[0]!.name).toBe('Sheet1')
+      expect(sheets[1]!.name).toBe('Sheet2')
     })
   })
 
@@ -330,7 +317,9 @@ describe('Workbook', () => {
 
       const blob = await workbook.write()
       expect(blob).toBeInstanceOf(Blob)
-      expect(blob.type).toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+      expect(blob.type).toBe(
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      )
     })
 
     it('空工作簿也应该可以写入', async () => {
@@ -359,4 +348,3 @@ describe('Workbook', () => {
     })
   })
 })
-
