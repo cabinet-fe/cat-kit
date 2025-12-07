@@ -10,18 +10,16 @@
 **构建工具**：tsdown（基于 Rolldown）
 **运行环境**：Node.js（使用 Bun）
 
-> **注意**：核心构建逻辑（`MonoRepoBundler` 类）已迁移至 `@cat-kit/maintenance` 包。
+> **注意**：核心构建逻辑（`MonoRepo` 类）已迁移至 `@cat-kit/maintenance` 包。
 > 本目录现在主要作为构建入口和配置文件存放处。
 
 ## 目录结构
 
 ```
 build/
-├── index.ts           # 构建入口（CLI）
-├── repo.ts            # Re-export MonoRepoBundler（来自 @cat-kit/maintenance）
+├── index.ts           # 构建入口（使用 MonoRepo）
 ├── pkgs.ts            # 包配置列表
-├── types.ts           # Re-export 类型定义（来自 @cat-kit/maintenance）
-├── release.ts         # 发布脚本
+├── release.ts         # 发布脚本（使用 MonoRepo）
 ├── stats.tsx          # Bundle 分析可视化组件
 ├── stats.html         # Bundle 分析 HTML 模板
 ├── package.json
@@ -32,7 +30,21 @@ build/
 
 ### index.ts - 构建入口
 
-提供命令行接口（CLI）：
+使用 `MonoRepo` 类进行构建：
+
+```typescript
+import { MonoRepo } from '@cat-kit/maintenance/src'
+import { pkgs } from './pkgs'
+
+const repo = new MonoRepo({
+  rootDir: path.resolve(__dirname, '..'),
+  packages: pkgs
+})
+
+await repo.build()
+```
+
+**命令行接口**：
 
 ```bash
 # 构建所有包
@@ -42,40 +54,35 @@ bun run build
 bun run analyze
 ```
 
-### repo.ts - 构建编排器（Re-export）
+### MonoRepo 类
 
-从 `@cat-kit/maintenance` 包 re-export `MonoRepoBundler` 类。
+从 `@cat-kit/maintenance` 包导入的 `MonoRepo` 类提供统一的构建、版本管理、发布等功能：
 
-```typescript
-// Re-export from @cat-kit/maintenance
-export { MonoRepoBundler } from '@cat-kit/maintenance/src'
-```
-
-`MonoRepoBundler` 类负责整个构建流程的编排：
-
-**核心功能**：
-
-1. 读取所有包的 `package.json`
-2. 解析包依赖关系
-3. 按依赖顺序分批构建（依赖已满足的包并行构建）
-4. 生成 bundle 分析报告
-
-**关键方法**：
+**核心方法**：
 
 ```typescript
-class MonoRepoBundler {
-  /** 构建所有包（按依赖顺序） */
+class MonoRepo {
+  // 构建
   async build(): Promise<BuildSummary>
 
-  /** 构建单个包 */
-  private async buildPackage(pkg: BundlePackageConfig): Promise<BundleResult>
+  // 依赖校验
+  async checkCircularDeps(): Promise<CircularDependencyResult>
+  async checkVersionConsistency(): Promise<ConsistencyResult>
 
-  /** 获取待构建包（依赖已满足） */
-  private getPkgsToBuild(buildedPackages: Set<string>): BundlePackageConfig[]
+  // 版本管理
+  async bumpVersion(options: BumpOptions): Promise<BumpResult>
+  async syncPeerDeps(version: string): Promise<void>
+
+  // 发布
+  async publish(): Promise<BatchPublishResult>
+
+  // Git
+  async createTag(options): Promise<GitTagResult>
+  async commitAndPush(options): Promise<GitCommitResult>
 }
 ```
 
-> 详细文档请参阅 `packages/maintenance/AGENTS.md` 中的 bundler 模块说明。
+> 详细文档请参阅 `packages/maintenance/AGENTS.md` 中的 monorepo 模块说明。
 
 ### pkgs.ts - 包配置
 

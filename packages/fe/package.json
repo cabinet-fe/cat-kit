@@ -1,7 +1,7 @@
 {
   "name": "@cat-kit/fe",
   "type": "module",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.3",
   "description": "前端工具",
   "files": [
     "dist",

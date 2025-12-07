@@ -6,7 +6,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import type {
   BundlePackageOption,
   BundlePackageConfig,
-  BuildSummary,
+  BundleSummary,
   BatchBuildResult,
   BundleResult
 } from './types'
@@ -85,7 +85,7 @@ export class MonoRepoBundler {
    * 创建 MonoRepoBundler 实例
    * @param packages - 包配置列表
    */
-  constructor(private packages: BundlePackageOption[]) {}
+  constructor(private packages: BundlePackageOption[]) { }
 
   /**
    * 初始化包配置
@@ -165,7 +165,7 @@ export class MonoRepoBundler {
    * console.log(`成功: ${summary.totalSuccess}, 失败: ${summary.totalFailed}`)
    * ```
    */
-  async build(): Promise<BuildSummary> {
+  async build(): Promise<BundleSummary> {
     const start = Date.now()
     await this.initPackages()
 
@@ -240,11 +240,11 @@ export class MonoRepoBundler {
     if (totalSuccess > 0) {
       console.log(
         '\n' +
-          chalk.bold(chalk.cyan('📊 Bundle 分析报告已生成')) +
-          '\n' +
-          chalk.dim('  运行 ') +
-          chalk.cyan('bun run analyze') +
-          chalk.dim(' 启动服务查看可视化分析\n')
+        chalk.bold(chalk.cyan('📊 Bundle 分析报告已生成')) +
+        '\n' +
+        chalk.dim('  运行 ') +
+        chalk.cyan('bun run analyze') +
+        chalk.dim(' 启动服务查看可视化分析\n')
       )
     }
 
@@ -314,10 +314,10 @@ export class MonoRepoBundler {
       const duration = Date.now() - start
       console.log(
         `  ├─ ` +
-          chalk.green('✓') +
-          ' ' +
-          chalk.cyan(conf.name.padEnd(22)) +
-          chalk.dim(`${duration}ms`)
+        chalk.green('✓') +
+        ' ' +
+        chalk.cyan(conf.name.padEnd(22)) +
+        chalk.dim(`${duration}ms`)
       )
 
       return {

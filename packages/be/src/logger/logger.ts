@@ -1,3 +1,4 @@
+import { Dater } from '@cat-kit/core'
 import type { Transport } from './transports'
 import { ConsoleTransport } from './transports'
 
@@ -49,6 +50,36 @@ export interface LogEntry {
 }
 
 /**
+ * Text 格式化变量
+ */
+export interface TextFormatVars {
+  /** 时间戳 */
+  timestamp: string
+  /** 日志级别 */
+  level: string
+  /** 日志器名称 */
+  name?: string
+  /** 日志消息 */
+  message: string
+  /** 附加元数据 JSON */
+  meta?: string
+  /** 错误信息 */
+  error?: string
+}
+
+/**
+ * Text 格式化函数
+ */
+export type TextFormatter = (vars: TextFormatVars, entry: LogEntry) => string
+
+/**
+ * Text 格式化配置
+ * - 字符串：使用 {} 引用变量，如 '{timestamp} [{level}] {message}'
+ * - 函数：回调函数，接收变量对象
+ */
+export type TextFormatConfig = string | TextFormatter
+
+/**
  * 日志器选项
  */
 export interface LoggerOptions {
@@ -62,41 +93,66 @@ export interface LoggerOptions {
   transports?: Transport[]
   /** 上下文信息，会附加到所有日志条目 */
   context?: Record<string, unknown>
-  /** 自定义时间戳生成函数 */
-  timestamp?: () => string
+  /** 时间戳格式，默认 'yyyy-MM-dd HH:mm:ss' */
+  timestampFormat?: string
+  /** 是否使用 UTC 时间，默认 false */
+  utc?: boolean
+  /** Text 格式化配置（仅 format='text' 时生效） */
+  textFormat?: TextFormatConfig
 }
 
 function shouldLog(currentLevel: LogLevel, targetLevel: LogLevel): boolean {
   return LEVEL_WEIGHT[targetLevel] >= LEVEL_WEIGHT[currentLevel]
 }
 
-function formatEntry(entry: LogEntry, format: LogFormat): string {
+/**
+ * 默认 text 格式化模板
+ */
+const DEFAULT_TEXT_FORMAT = '{timestamp} {level} {name}{message}{meta}{error}'
+
+/**
+ * 格式化日志条目
+ */
+function formatEntry(
+  entry: LogEntry,
+  format: LogFormat,
+  textFormatConfig?: TextFormatConfig
+): string {
   if (format === 'json') {
     return JSON.stringify(entry)
   }
 
-  const parts: string[] = [
-    entry.timestamp,
-    entry.level.toUpperCase().padEnd(5),
-    entry.name ? `[${entry.name}]` : '',
-    entry.message
-  ].filter(Boolean)
-
-  if (entry.meta && Object.keys(entry.meta).length) {
-    parts.push(JSON.stringify(entry.meta))
+  // 构建格式化变量
+  const vars: TextFormatVars = {
+    timestamp: entry.timestamp,
+    level: entry.level.toUpperCase().padEnd(5),
+    name: entry.name ? `[${entry.name}] ` : '',
+    message: entry.message,
+    meta: entry.meta && Object.keys(entry.meta).length
+      ? ` ${JSON.stringify(entry.meta)}`
+      : '',
+    error: entry.error
+      ? ` ${entry.error.stack ?? entry.error.message}`
+      : ''
   }
 
-  if (entry.error) {
-    parts.push(entry.error.stack ?? entry.error.message)
+  // 如果是函数，直接调用
+  if (typeof textFormatConfig === 'function') {
+    return textFormatConfig(vars, entry)
   }
 
-  return parts.join(' ')
+  // 字符串模板替换
+  const template = textFormatConfig || DEFAULT_TEXT_FORMAT
+  return template.replace(/\{(\w+)\}/g, (_, key) => {
+    const value = vars[key as keyof TextFormatVars]
+    return value ?? ''
+  })
 }
 
 /**
  * 结构化日志记录器
  *
- * 支持多级别日志、多种输出格式、多个传输器和子日志器。
+ * 支持多级别日志、多种输出格式、多个传输器。
  *
  * @example
  * ```typescript
@@ -106,29 +162,35 @@ function formatEntry(entry: LogEntry, format: LogFormat): string {
  *   format: 'json',
  *   transports: [
  *     new ConsoleTransport(),
- *     new FileTransport({ path: './logs/app.log' })
+ *     new FileTransport({ path: './logs' })
  *   ]
  * })
  *
  * await logger.info('Server started', { port: 3000 })
  * await logger.error('Failed to connect', error)
  *
- * // 创建子日志器
- * const dbLogger = logger.child({ name: 'db' })
+ * // 使用自定义 text 格式
+ * const customLogger = new Logger({
+ *   format: 'text',
+ *   textFormat: '[{timestamp}] {level} - {message}'
+ * })
+ *
+ * // 使用函数格式化
+ * const fnLogger = new Logger({
+ *   format: 'text',
+ *   textFormat: (vars) => `${vars.timestamp} | ${vars.message}`
+ * })
  * ```
  */
 export class Logger {
   private readonly level: LogLevel
-
   private readonly format: LogFormat
-
-  private readonly timestamp: () => string
-
+  private readonly timestampFormat: string
+  private readonly utc: boolean
   private readonly transports: Transport[]
-
   private readonly name?: string
-
   private readonly context?: Record<string, unknown>
+  private readonly textFormat?: TextFormatConfig
 
   /**
    * 创建日志器实例
@@ -137,33 +199,19 @@ export class Logger {
   constructor(options: LoggerOptions = {}) {
     this.level = options.level ?? LogLevel.INFO
     this.format = options.format ?? 'text'
-    this.timestamp = options.timestamp ?? (() => new Date().toISOString())
+    this.timestampFormat = options.timestampFormat ?? 'yyyy-MM-dd HH:mm:ss'
+    this.utc = options.utc ?? false
     this.transports = options.transports ?? [new ConsoleTransport()]
     this.name = options.name
     this.context = options.context
+    this.textFormat = options.textFormat
   }
 
   /**
-   * 创建子日志器
-   *
-   * 子日志器会继承父日志器的配置，可以覆盖部分选项。
-   *
-   * @param options - 子日志器选项，会与父日志器合并
-   * @returns 新的日志器实例
+   * 生成时间戳
    */
-  child(options: Partial<LoggerOptions>): Logger {
-    return new Logger({
-      ...options,
-      level: options.level ?? this.level,
-      format: options.format ?? this.format,
-      transports: options.transports ?? this.transports,
-      timestamp: options.timestamp ?? this.timestamp,
-      context: {
-        ...this.context,
-        ...options.context
-      },
-      name: options.name ?? this.name
-    })
+  private getTimestamp(): string {
+    return new Dater(new Date()).format(this.timestampFormat, { utc: this.utc })
   }
 
   private buildEntry(
@@ -175,28 +223,28 @@ export class Logger {
     const mergedMeta =
       meta || this.context
         ? {
-            ...this.context,
-            ...meta
-          }
+          ...this.context,
+          ...meta
+        }
         : undefined
 
     return {
       level,
       message,
-      timestamp: this.timestamp(),
+      timestamp: this.getTimestamp(),
       name: this.name,
       meta: mergedMeta,
       error: error
         ? {
-            message: error.message,
-            stack: error.stack
-          }
+          message: error.message,
+          stack: error.stack
+        }
         : undefined
     }
   }
 
   private async logInternal(entry: LogEntry): Promise<void> {
-    const formatted = formatEntry(entry, this.format)
+    const formatted = formatEntry(entry, this.format, this.textFormat)
 
     await Promise.all(
       this.transports
@@ -269,4 +317,3 @@ export class Logger {
     return this.log(LogLevel.ERROR, message, errorOrMeta ?? meta)
   }
 }
-

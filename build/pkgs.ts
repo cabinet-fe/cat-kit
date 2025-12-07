@@ -12,7 +12,8 @@ export const pkgs: BundlePackageOption[] = [
   {
     dir: pkg('core'),
     build: {
-      input: 'src/index.ts'
+      input: 'src/index.ts',
+
     }
   },
   {

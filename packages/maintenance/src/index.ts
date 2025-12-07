@@ -11,7 +11,12 @@ export * from './deps'
 export * from './version'
 
 // 打包器模块
+export * from './build'
 export * from './bundler'
+
+// MonoRepo 统一管理类
+export * from './monorepo'
 
 // 发布与 git 辅助
 export * from './release'
+

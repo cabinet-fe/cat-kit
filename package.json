@@ -12,9 +12,7 @@
     "build",
     "docs"
   ],
-  "scripts": {
-    "release": "bun run build/release.ts"
-  },
+
   "devDependencies": {
     "@types/bun": "^1.3.3",
     "@types/node": "^24.10.1",

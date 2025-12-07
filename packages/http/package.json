@@ -1,7 +1,7 @@
 {
   "name": "@cat-kit/http",
   "type": "module",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.3",
   "description": "HTTP 请求工具",
   "exports": {
     ".": {

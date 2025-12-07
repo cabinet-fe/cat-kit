@@ -1,6 +1,6 @@
-import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { PublishError } from '../errors'
-import { PublishOptions, PublishResult } from './types'
+import type { PublishOptions, PublishResult } from './types'
 
 /**
  * 以 promise 形式执行子进程命令
@@ -11,7 +11,7 @@ import { PublishOptions, PublishResult } from './types'
  */
 async function execNpm(cwd: string, args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
-    const proc: ChildProcessWithoutNullStreams = spawn('npm', args, {
+    const proc = spawn('npm', args, {
       cwd,
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: false

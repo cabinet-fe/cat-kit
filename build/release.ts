@@ -1,6 +1,6 @@
 import { $ } from 'bun'
-import { bumpVersion } from '@cat-kit/maintenance/src'
-import type { PackageVersionConfig } from '@cat-kit/maintenance/src'
+import { MonoRepo } from '@cat-kit/maintenance/src'
+import type { BundlePackageOption } from '@cat-kit/maintenance/src'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -26,56 +26,73 @@ const targets: ReleaseTarget[] = [
   { name: '@cat-kit/maintenance', dir: 'packages/maintenance', publish: true }
 ]
 
+// 构建需要发布的包配置
+const buildPackages: BundlePackageOption[] = targets
+  .filter(t => t.publish)
+  .map(t => ({
+    dir: path.join(repoRoot, t.dir),
+    build: {
+      input: 'src/index.ts',
+      platform: ['be', 'maintenance'].some(name => t.dir.includes(name))
+        ? 'node' as const
+        : t.dir.includes('excel')
+          ? 'browser' as const
+          : 'neutral' as const
+    }
+  }))
+
+// 创建 MonoRepo 实例
+const repo = new MonoRepo({
+  rootDir: repoRoot,
+  packages: buildPackages
+})
+
 async function runStep(label: string, task: () => Promise<void>) {
   console.log(`\n› ${label}`)
   await task()
 }
 
-async function updateAllVersions() {
-  // 收集所有包（包括不发布的）
-  const allPackages: PackageVersionConfig[] = targets.map(t => ({
-    dir: path.join(repoRoot, t.dir)
-  }))
-
-  // 使用 bumpVersion 统一更新版本
-  const result = await bumpVersion(allPackages, {
-    type: 'patch',
-    version,
-    syncPeer: true
-  })
-
-  console.log(`✅ 更新到版本: ${result.version}`)
-  result.updated.forEach(pkg => {
-    console.log(`   ${pkg.name}: ${pkg.oldVersion} → ${pkg.newVersion}`)
-  })
-}
-
 async function main() {
   await runStep('运行测试', async () => {
-    await $({
-      cwd: path.join(repoRoot, 'packages/tests'),
-      stdio: 'inherit'
-    })`bun run test`
+    $.cwd(path.join(repoRoot, 'packages/tests'))
+    await $`bun run test`
   })
 
   await runStep('构建产物', async () => {
-    await $({
-      cwd: path.join(repoRoot, 'build'),
-      stdio: 'inherit'
-    })`bun run build`
+    await repo.build()
   })
 
   await runStep(`写入版本 ${version}`, async () => {
-    await updateAllVersions()
+    // 收集所有包（包括不发布的）
+    const allPackages = targets.map(t => ({
+      dir: path.join(repoRoot, t.dir)
+    }))
+
+    // 临时创建一个包含所有包的 MonoRepo 用于版本更新
+    const allRepo = new MonoRepo({
+      rootDir: repoRoot,
+      packages: allPackages.map(p => ({ dir: p.dir, build: { input: 'src/index.ts' } }))
+    })
+
+    const result = await allRepo.bumpVersion({
+      type: 'patch',
+      version
+    })
+
+    // 同步 peerDependencies
+    await allRepo.syncPeerDeps(result.version)
+
+    console.log(`✅ 更新到版本: ${result.version}`)
+    result.updated.forEach(pkg => {
+      console.log(`   ${pkg.name}: ${pkg.oldVersion} → ${pkg.newVersion}`)
+    })
   })
 
   await runStep('发布所有包', async () => {
+    $.cwd(repoRoot)
     for (const target of targets) {
       if (!target.publish) continue
-      await $({
-        cwd: repoRoot,
-        stdio: 'inherit'
-      })`npm publish --workspace ${target.name} --access public`
+      await $`npm publish --workspace ${target.name} --access public`
     }
   })
 }

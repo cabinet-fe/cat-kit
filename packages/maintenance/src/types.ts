@@ -1,32 +1,4 @@
 /**
- * Monorepo 配置接口
- */
-export interface MonorepoConfig {
-  /** 项目根目录（绝对路径） */
-  rootDir: string
-  /** 包目录模式（默认从 package.json 的 workspaces 字段读取） */
-  workspaces?: string[]
-}
-
-/**
- * 包信息接口
- */
-export interface PackageInfo {
-  /** 包名称 */
-  name: string
-  /** 包版本 */
-  version: string
-  /** 包目录（绝对路径） */
-  dir: string
-  /** package.json 文件路径 */
-  packageJsonPath: string
-  /** package.json 内容 */
-  packageJson: PackageJson
-  /** 是否为私有包 */
-  private: boolean
-}
-
-/**
  * package.json 类型定义
  */
 export interface PackageJson {

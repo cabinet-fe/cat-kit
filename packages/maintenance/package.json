@@ -1,7 +1,7 @@
 {
   "name": "@cat-kit/maintenance",
   "type": "module",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.3",
   "description": "包维护工具",
   "files": [
     "dist",

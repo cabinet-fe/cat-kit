@@ -1,5 +1,5 @@
 import { execGit } from '../utils'
-import { GitCommitAndPushOptions, GitCommitResult, GitTagOptions, GitTagResult } from './types'
+import type { GitCommitAndPushOptions, GitCommitResult, GitTagOptions, GitTagResult } from './types'
 
 /**
  * 创建 git tag（可选推送）

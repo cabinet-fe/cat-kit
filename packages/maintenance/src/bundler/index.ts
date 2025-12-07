@@ -1,9 +1,4 @@
-// bundler 模块：Monorepo 打包工具
+// Bundler 模块
 
-export * from './types'
-export {
-  MonoRepoBundler,
-  getPeerDevExternalDeps,
-  mergeExternalDeps
-} from './bundler'
-
+export type * from './types'
+export { getPeerDevExternalDeps, mergeExternalDeps, MonoRepoBundler } from './bundler'

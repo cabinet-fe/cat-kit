@@ -29,7 +29,7 @@ export type BumpType =
   | 'prerelease'
 
 /**
- * 包版本配置
+ * 包版本配置（用于同步函数）
  */
 export interface PackageVersionConfig {
   /** 包目录（绝对路径） */
@@ -48,8 +48,6 @@ export interface BumpOptions {
   version?: string
   /** 预发布标识（如 'alpha', 'beta'，用于 pre* 类型） */
   preid?: string
-  /** 是否同步 peerDependencies（默认 false） */
-  syncPeer?: boolean
 }
 
 /**

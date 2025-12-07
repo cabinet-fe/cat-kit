@@ -21,13 +21,10 @@
 - `bumpVersion()` - 批量更新包版本（复用 build/release.ts 逻辑）
 - `syncPeerDependencies()` - 同步 peerDependencies 版本约束
 
-### bundler（打包器）
+### bundler（打包工具函数）
 
-- `MonoRepoBundler` - Monorepo 打包器类，按依赖关系分批并行构建多个包
-  - 使用 tsdown 进行构建
-  - 支持 TypeScript、生成类型声明文件和 sourcemap
-  - 自动生成 bundle 分析报告（stats.html）
-  - peerDependencies 与 devDependencies 同时存在的依赖会自动标记为 external，并与配置项中的 external 合并传给 tsdown
+- `getPeerDevExternalDeps()` - 获取 peer 和 dev 同时存在的依赖（用于 external）
+- `mergeExternalDeps()` - 合并显式 external 和自动 external
 - `BundlePackageOption` - 包构建选项类型
 - `BundlePackageConfig` - 包构建配置类型（内部使用）
 - `BuildSummary` - 构建结果摘要类型
@@ -37,6 +34,18 @@
 - `createGitTag()` - 创建（可选推送）带注释的 git tag，支持强制覆盖
 - `commitAndPush()` - 执行 add/commit/push，可选推送所有 tag
 - `publishPackage()` - npm 包发布，支持自定义 registry/OTP/dry-run/provenance
+
+### monorepo（统一管理）
+
+- `MonoRepo` - Monorepo 统一管理类，集成以下功能：
+  - **构建**: `build()` - 按依赖关系分批并行构建（使用 tsdown）
+  - **依赖校验**: `checkCircularDeps()`, `checkVersionConsistency()`, `getDependencyGraph()`
+  - **版本管理**: `bumpVersion()`, `syncPeerDeps()`, `syncDeps()`
+  - **发布**: `publish()` - 批量发布包到 npm
+  - **Git**: `createTag()`, `commitAndPush()`
+  - **工具**: `getPackages()`, `clearCache()`
+- 统一日志系统，支持 `silent`、`info`、`verbose` 三种级别
+- 错误立即抛出策略
 
 ## 编码规范
 
@@ -140,35 +149,36 @@ result.updated.forEach(pkg => {
 await syncPeerDependencies(packages, '1.2.3')
 ```
 
-### 打包器（MonoRepoBundler）
+### MonoRepo（推荐）
 
 ```typescript
-import { MonoRepoBundler } from '@cat-kit/maintenance'
-import type { BundlePackageOption } from '@cat-kit/maintenance'
+import { MonoRepo } from '@cat-kit/maintenance'
+import { resolve } from 'node:path'
 
-// 定义包配置
-const packages: BundlePackageOption[] = [
-  {
-    dir: '/path/to/packages/core',
-    build: { input: 'src/index.ts' }
-  },
-  {
-    dir: '/path/to/packages/utils',
-    deps: ['@my-org/core'],
-    build: {
-      input: 'src/index.ts',
-      external: ['@my-org/core']
-    }
-  }
-]
+const repo = new MonoRepo({
+  rootDir: resolve(process.cwd()),
+  packages: [
+    { dir: resolve('packages/core'), build: { input: 'src/index.ts' } },
+    { dir: resolve('packages/fe'), build: { input: 'src/index.ts' } }
+  ]
+})
 
-// 创建打包器并执行构建
-const bundler = new MonoRepoBundler(packages)
-const summary = await bundler.build()
+// 检查循环依赖
+const circular = await repo.checkCircularDeps()
+if (circular.hasCircular) {
+  console.log('发现循环依赖')
+  process.exit(1)
+}
 
-// 查看构建结果
-console.log(`总耗时: ${summary.totalDuration}ms`)
-console.log(`成功: ${summary.totalSuccess}, 失败: ${summary.totalFailed}`)
+// 构建
+const buildResult = await repo.build()
+console.log(`构建完成: ${buildResult.totalSuccess} 个包`)
+
+// 更新版本并发布
+await repo.bumpVersion({ type: 'patch', syncPeer: true })
+await repo.commitAndPush({ message: 'chore: release' })
+await repo.createTag({ tag: 'v1.0.0', push: true })
+await repo.publish()
 ```
 
 ## 开发流程

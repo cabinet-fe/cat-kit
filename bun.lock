@@ -45,8 +45,9 @@
     },
     "packages/be": {
       "name": "@cat-kit/be",
-      "version": "1.0.0-alpha.1",
+      "version": "1.0.0-alpha.3",
       "dependencies": {
+        "chalk": "^5.6.2",
         "js-yaml": "^4.1.1",
         "smol-toml": "^1.5.2",
       },
@@ -54,16 +55,16 @@
         "@cat-kit/core": "workspace:*",
       },
       "peerDependencies": {
-        "@cat-kit/core": "1.0.0-alpha.1",
+        "@cat-kit/core": "1.0.0-alpha.3",
       },
     },
     "packages/core": {
       "name": "@cat-kit/core",
-      "version": "1.0.0-alpha.1",
+      "version": "1.0.0-alpha.3",
     },
     "packages/excel": {
       "name": "@cat-kit/excel",
-      "version": "1.0.0-alpha.1",
+      "version": "1.0.0-alpha.3",
       "devDependencies": {
         "@cat-kit/core": "workspace:*",
         "fast-xml-parser": "^5.3.2",
@@ -75,7 +76,7 @@
     },
     "packages/fe": {
       "name": "@cat-kit/fe",
-      "version": "1.0.0-alpha.1",
+      "version": "1.0.0-alpha.3",
       "devDependencies": {
         "@cat-kit/core": "workspace:*",
       },
@@ -85,7 +86,7 @@
     },
     "packages/http": {
       "name": "@cat-kit/http",
-      "version": "1.0.0-alpha.1",
+      "version": "1.0.0-alpha.3",
       "devDependencies": {
         "@cat-kit/core": "workspace:*",
       },
@@ -95,7 +96,7 @@
     },
     "packages/maintenance": {
       "name": "@cat-kit/maintenance",
-      "version": "1.0.0-alpha.1",
+      "version": "1.0.0-alpha.3",
       "dependencies": {
         "chalk": "^5.6.2",
         "rollup-plugin-visualizer": "^6.0.5",

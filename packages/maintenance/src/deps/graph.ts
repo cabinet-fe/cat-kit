@@ -1,12 +1,9 @@
-import type { MonorepoConfig, PackageJson } from '../types'
+import type { PackageJson } from '../types'
 import type { DependencyGraph, DependencyNode, DependencyEdge } from './types'
-import { loadPackages } from '../utils'
+import type { MonorepoWorkspace } from '../monorepo/types'
 
 /**
  * 获取依赖类型
- * @param packageJson - package.json 对象
- * @param depName - 依赖名称
- * @returns 依赖类型
  */
 function getDependencyType(
   packageJson: PackageJson,
@@ -21,59 +18,55 @@ function getDependencyType(
   if (packageJson.peerDependencies?.[depName]) {
     return 'peerDependencies'
   }
-  return 'dependencies' // 默认
+  return 'dependencies'
 }
 
 /**
  * 构建依赖关系图
  *
- * 此函数复用了 build/repo.ts 的拓扑排序思路（L43-49），
- * 构建包含所有内部和外部依赖的完整依赖图
- *
- * @param config - Monorepo 配置
+ * @param workspaces - 工作区列表
  * @returns 依赖关系图
  *
  * @example
  * ```ts
- * const graph = await buildDependencyGraph(config)
+ * import { Monorepo, buildDependencyGraph } from '@cat-kit/maintenance'
+ *
+ * const repo = new Monorepo()
+ * const graph = buildDependencyGraph(repo.workspaces)
  * console.log(`包含 ${graph.nodes.length} 个节点和 ${graph.edges.length} 条边`)
  * ```
  */
-export async function buildDependencyGraph(
-  config: MonorepoConfig
-): Promise<DependencyGraph> {
-  const packages = await loadPackages(config)
-
+export function buildDependencyGraph(
+  workspaces: MonorepoWorkspace[]
+): DependencyGraph {
   const nodes: DependencyNode[] = []
   const edges: DependencyEdge[] = []
   const externalDeps = new Set<string>()
-  const internalPackageNames = new Set(packages.map(pkg => pkg.name))
+  const internalPackageNames = new Set(workspaces.map(ws => ws.name))
 
   // 构建内部包节点
-  for (const pkg of packages) {
+  for (const ws of workspaces) {
     nodes.push({
-      id: pkg.name,
-      version: pkg.version,
+      id: ws.name,
+      version: ws.version,
       external: false
     })
 
     // 收集所有依赖
     const allDeps = {
-      ...(pkg.packageJson.dependencies || {}),
-      ...(pkg.packageJson.devDependencies || {}),
-      ...(pkg.packageJson.peerDependencies || {})
+      ...(ws.pkg.dependencies || {}),
+      ...(ws.pkg.devDependencies || {}),
+      ...(ws.pkg.peerDependencies || {})
     }
 
     for (const depName of Object.keys(allDeps)) {
-      // 如果是内部依赖，添加边
       if (internalPackageNames.has(depName)) {
         edges.push({
-          from: pkg.name,
+          from: ws.name,
           to: depName,
-          type: getDependencyType(pkg.packageJson, depName)
+          type: getDependencyType(ws.pkg, depName)
         })
       } else {
-        // 记录外部依赖
         externalDeps.add(depName)
       }
     }
@@ -83,23 +76,22 @@ export async function buildDependencyGraph(
   for (const depName of externalDeps) {
     nodes.push({
       id: depName,
-      version: '*', // 外部依赖版本未知
+      version: '*',
       external: true
     })
 
-    // 为外部依赖添加边
-    for (const pkg of packages) {
+    for (const ws of workspaces) {
       const allDeps = {
-        ...(pkg.packageJson.dependencies || {}),
-        ...(pkg.packageJson.devDependencies || {}),
-        ...(pkg.packageJson.peerDependencies || {})
+        ...(ws.pkg.dependencies || {}),
+        ...(ws.pkg.devDependencies || {}),
+        ...(ws.pkg.peerDependencies || {})
       }
 
       if (allDeps[depName]) {
         edges.push({
-          from: pkg.name,
+          from: ws.name,
           to: depName,
-          type: getDependencyType(pkg.packageJson, depName)
+          type: getDependencyType(ws.pkg, depName)
         })
       }
     }
@@ -117,12 +109,11 @@ export async function buildDependencyGraph(
  *
  * @example
  * ```ts
- * const graph = await buildDependencyGraph(config)
+ * const graph = buildDependencyGraph(workspaces)
  * const mermaid = visualizeDependencyGraph(graph, { includeExternal: false })
  * console.log(mermaid)
  * // graph TD
- * //   @cat-kit/fe-->@cat-kit/core
- * //   @cat-kit/http-->@cat-kit/core
+ * //   cat-kit/fe-->cat-kit/core
  * ```
  */
 export function visualizeDependencyGraph(
@@ -138,35 +129,31 @@ export function visualizeDependencyGraph(
 
   let mermaid = 'graph TD\n'
 
-  // 过滤边
   const edges = includeExternal
     ? graph.edges
     : graph.edges.filter(edge => {
-        const targetNode = graph.nodes.find(n => n.id === edge.to)
-        return targetNode && !targetNode.external
-      })
+      const targetNode = graph.nodes.find(n => n.id === edge.to)
+      return targetNode && !targetNode.external
+    })
 
-  // 生成边的表示
   for (const edge of edges) {
     let arrow = '-->'
 
     if (distinguishTypes) {
       switch (edge.type) {
         case 'peerDependencies':
-          arrow = '-..->' // 虚线箭头表示 peer 依赖
+          arrow = '-..->'
           break
         case 'devDependencies':
-          arrow = '--->' // 粗箭头表示 dev 依赖
+          arrow = '--->'
           break
         default:
-          arrow = '-->' // 实线箭头表示普通依赖
+          arrow = '-->'
       }
     }
 
-    // 转义特殊字符
     const from = edge.from.replace(/@/g, '')
     const to = edge.to.replace(/@/g, '')
-
     mermaid += `  ${from}${arrow}${to}\n`
   }
 
