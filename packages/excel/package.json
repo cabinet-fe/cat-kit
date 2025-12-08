@@ -1,7 +1,7 @@
 {
   "name": "@cat-kit/excel",
   "type": "module",
-  "version": "1.0.0-alpha.1",
+  "version": "2.0.0-pre.0",
   "description": "excel文件处理",
   "files": [
     "dist",
@@ -24,7 +24,7 @@
     "@cat-kit/tsconfig": "workspace:*"
   },
   "peerDependencies": {
-    "@cat-kit/core": ">=1.0.0-alpha.1",
+    "@cat-kit/core": ">=2.0.0-pre.0",
     "@cat-kit/tsconfig": "1.0.0"
   }
 }

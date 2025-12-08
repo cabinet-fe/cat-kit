@@ -6,7 +6,7 @@ order: 2
 
 # 版本管理 (version)
 
-版本管理模块提供符合 [语义化版本 (semver)](https://semver.org/lang/zh-CN/) 规范的版本号解析、比较、递增等功能，以及批量更新 monorepo 中包版本的工具。
+版本管理模块提供符合 [语义化版本 (semver)](https://semver.org/lang/zh-CN/) 规范的版本号解析、比较、递增等功能，以及更新包版本的工具。
 
 ## 版本号解析
 
@@ -220,22 +220,27 @@ incrementVersion('1.0.0-alpha.5', 'prerelease') // '1.0.0-alpha.6'
 incrementVersion('1.0.0', 'prerelease', 'alpha') // '1.0.0-alpha.0'
 ```
 
-## 批量版本更新
+## 单包版本更新
 
 ### bumpVersion
 
-批量更新 monorepo 中所有（或指定）包的版本号。
+更新单个包的版本号。
 
 **函数签名：**
 
 ```typescript
 function bumpVersion(
-  config: MonorepoConfig,
+  pkgPath: string,
   options: BumpOptions
 ): Promise<BumpResult>
 ```
 
 **参数：**
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `pkgPath` | `string` | package.json 的路径或包含 package.json 的目录 |
+| `options` | `BumpOptions` | 版本更新选项 |
 
 ```typescript
 interface BumpOptions {
@@ -245,10 +250,6 @@ interface BumpOptions {
   version?: string
   /** 预发布标识（如 'alpha', 'beta'，用于 pre* 类型） */
   preid?: string
-  /** 要更新的包（不指定则更新所有非私有包） */
-  packages?: string[]
-  /** 是否同步 peerDependencies（默认 true） */
-  syncPeer?: boolean
 }
 ```
 
@@ -274,59 +275,44 @@ interface BumpResult {
 
 ```typescript
 import { bumpVersion } from '@cat-kit/maintenance'
+import { resolve } from 'node:path'
 
-// 递增所有包的 minor 版本
-const result = await bumpVersion(
-  { rootDir: '/path/to/monorepo' },
-  { type: 'minor', syncPeer: true }
-)
+// 递增 minor 版本号
+const result = await bumpVersion(resolve('packages/core'), {
+  type: 'minor'
+})
+console.log(`更新到版本: ${result.version}`)
+// 输出: 更新到版本: 1.3.0
 
-console.log(`新版本: ${result.version}`)
 result.updated.forEach(pkg => {
   console.log(`  ${pkg.name}: ${pkg.oldVersion} → ${pkg.newVersion}`)
 })
 ```
 
-**指定版本号：**
+**设置特定版本号：**
 
 ```typescript
 // 设置特定版本号
-const result = await bumpVersion(
-  { rootDir: '/path/to/monorepo' },
-  {
-    type: 'patch', // 会被忽略，因为指定了 version
-    version: '2.0.0'
-  }
-)
-```
-
-**只更新部分包：**
-
-```typescript
-// 只更新指定的包
-const result = await bumpVersion(
-  { rootDir: '/path/to/monorepo' },
-  {
-    type: 'patch',
-    packages: ['@my-org/core', '@my-org/utils']
-  }
-)
+const result = await bumpVersion('packages/core/package.json', {
+  type: 'patch', // 会被忽略，因为指定了 version
+  version: '2.0.0'
+})
+// result.version = '2.0.0'
 ```
 
 **创建预发布版本：**
 
 ```typescript
 // 创建 alpha 预发布版本
-const result = await bumpVersion(
-  { rootDir: '/path/to/monorepo' },
-  {
-    type: 'prerelease',
-    preid: 'alpha'
-  }
-)
+const result = await bumpVersion('packages/core', {
+  type: 'prerelease',
+  preid: 'alpha'
+})
 // 1.0.0 → 1.0.0-alpha.0
 // 1.0.0-alpha.0 → 1.0.0-alpha.1
 ```
+
+## 依赖版本同步
 
 ### syncPeerDependencies
 
@@ -336,9 +322,27 @@ const result = await bumpVersion(
 
 ```typescript
 function syncPeerDependencies(
-  config: MonorepoConfig,
-  version: string
+  packages: PackageVersionConfig[],
+  version: string,
+  options?: { only?: string[] }
 ): Promise<void>
+```
+
+**参数：**
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `packages` | `PackageVersionConfig[]` | 包配置列表 |
+| `version` | `string` | 目标版本号 |
+| `options.only` | `string[]` | 只同步指定的包名 |
+
+```typescript
+interface PackageVersionConfig {
+  /** 包目录（绝对路径） */
+  dir: string
+  /** 包名称（可选，用于日志输出） */
+  name?: string
+}
 ```
 
 **说明：**
@@ -349,21 +353,30 @@ function syncPeerDependencies(
 
 ```typescript
 import { syncPeerDependencies } from '@cat-kit/maintenance'
+import { resolve } from 'node:path'
 
-// 将所有包的 peerDependencies 中的 cat-kit 包版本更新为 >=1.2.3
-await syncPeerDependencies(
-  { rootDir: '/path/to/monorepo' },
-  '1.2.3'
-)
+const packages = [
+  { dir: resolve(process.cwd(), 'packages/core') },
+  { dir: resolve(process.cwd(), 'packages/fe') },
+  { dir: resolve(process.cwd(), 'packages/http') }
+]
+
+// 将所有包的 peerDependencies 中的内部包版本更新为 >=1.2.3
+await syncPeerDependencies(packages, '1.2.3')
+
+// 只同步特定的包
+await syncPeerDependencies(packages, '1.2.3', {
+  only: ['@cat-kit/core']
+})
 ```
 
 **更新前：**
 
 ```json
 {
-  "name": "@my-org/utils",
+  "name": "@cat-kit/fe",
   "peerDependencies": {
-    "@my-org/core": ">=1.0.0"
+    "@cat-kit/core": ">=1.0.0"
   }
 }
 ```
@@ -372,9 +385,9 @@ await syncPeerDependencies(
 
 ```json
 {
-  "name": "@my-org/utils",
+  "name": "@cat-kit/fe",
   "peerDependencies": {
-    "@my-org/core": ">=1.2.3"
+    "@cat-kit/core": ">=1.2.3"
   }
 }
 ```
@@ -387,8 +400,9 @@ await syncPeerDependencies(
 
 ```typescript
 function syncDependencies(
-  config: MonorepoConfig,
-  version: string
+  packages: PackageVersionConfig[],
+  version: string,
+  options?: { only?: string[] }
 ): Promise<void>
 ```
 
@@ -400,11 +414,15 @@ function syncDependencies(
 
 ```typescript
 import { syncDependencies } from '@cat-kit/maintenance'
+import { resolve } from 'node:path'
 
-await syncDependencies(
-  { rootDir: '/path/to/monorepo' },
-  '1.2.3'
-)
+const packages = [
+  { dir: resolve(process.cwd(), 'packages/core') },
+  { dir: resolve(process.cwd(), 'packages/fe') }
+]
+
+// 将 workspace:* 替换为 ^1.2.3
+await syncDependencies(packages, '1.2.3')
 ```
 
 **更新前：**
@@ -412,7 +430,7 @@ await syncDependencies(
 ```json
 {
   "dependencies": {
-    "@my-org/core": "workspace:*"
+    "@cat-kit/core": "workspace:*"
   }
 }
 ```
@@ -422,9 +440,34 @@ await syncDependencies(
 ```json
 {
   "dependencies": {
-    "@my-org/core": "^1.2.3"
+    "@cat-kit/core": "^1.2.3"
   }
 }
+```
+
+## 使用 Monorepo 类批量操作
+
+推荐使用 `Monorepo` 类的 `group().bumpVersion()` 方法进行批量版本更新，它会自动同步依赖：
+
+```typescript
+import { Monorepo } from '@cat-kit/maintenance'
+
+const repo = new Monorepo()
+
+// 选择要操作的包分组
+const group = repo.group(['@cat-kit/core', '@cat-kit/fe', '@cat-kit/http'])
+
+// 批量更新版本（会自动同步 peerDeps 和 deps）
+const result = await group.bumpVersion({
+  type: 'minor',
+  syncPeer: true,  // 自动同步 peerDependencies
+  syncDeps: true   // 自动同步 dependencies 中的 workspace:*
+})
+
+console.log(`新版本: ${result.version}`)
+result.updated.forEach(pkg => {
+  console.log(`  ${pkg.name}: ${pkg.oldVersion} → ${pkg.newVersion}`)
+})
 ```
 
 ## 类型定义
@@ -462,8 +505,6 @@ interface BumpOptions {
   type: BumpType
   version?: string
   preid?: string
-  packages?: string[]
-  syncPeer?: boolean
 }
 ```
 
@@ -480,32 +521,47 @@ interface BumpResult {
 }
 ```
 
+### PackageVersionConfig
+
+```typescript
+interface PackageVersionConfig {
+  /** 包目录（绝对路径） */
+  dir: string
+  /** 包名称（可选） */
+  name?: string
+}
+```
+
 ## 实际应用
 
 ### 发布脚本
 
 ```typescript
 // scripts/release.ts
-import { bumpVersion, compareSemver } from '@cat-kit/maintenance'
+import { Monorepo } from '@cat-kit/maintenance'
 
 type ReleaseType = 'major' | 'minor' | 'patch' | 'alpha' | 'beta' | 'rc'
 
 async function release(type: ReleaseType) {
-  const config = { rootDir: process.cwd() }
+  const repo = new Monorepo()
 
-  let options: Parameters<typeof bumpVersion>[1]
+  // 选择要发布的包
+  const group = repo.group([
+    '@cat-kit/core',
+    '@cat-kit/fe',
+    '@cat-kit/http',
+    '@cat-kit/be'
+  ])
 
-  switch (type) {
-    case 'alpha':
-    case 'beta':
-    case 'rc':
-      options = { type: 'prerelease', preid: type, syncPeer: true }
-      break
-    default:
-      options = { type, syncPeer: true }
-  }
+  // 确定版本更新选项
+  const isPrerelease = ['alpha', 'beta', 'rc'].includes(type)
 
-  const result = await bumpVersion(config, options)
+  const result = await group.bumpVersion({
+    type: isPrerelease ? 'prerelease' : type as 'major' | 'minor' | 'patch',
+    preid: isPrerelease ? type : undefined,
+    syncPeer: true,
+    syncDeps: true
+  })
 
   console.log(`\n🚀 发布 v${result.version}\n`)
   console.log('已更新的包:')
@@ -587,4 +643,3 @@ const latestStable = sorted
   .pop()
 // 'v2.0.0'
 ```
-

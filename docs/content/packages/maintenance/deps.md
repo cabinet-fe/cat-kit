@@ -12,21 +12,19 @@ order: 1
 
 ### checkCircularDependencies
 
-使用 Tarjan 算法检测 monorepo 中的循环依赖。时间复杂度为 O(V + E)，其中 V 是包数量，E 是依赖关系数量。
+使用 Tarjan 算法检测包之间的循环依赖。时间复杂度为 O(V + E)，其中 V 是包数量，E 是依赖关系数量。
 
 **函数签名：**
 
 ```typescript
-function checkCircularDependencies(
-  config: MonorepoConfig
-): Promise<CircularDependencyResult>
+function checkCircularDependencies(packages: PackageInfo[]): CircularDependencyResult
 ```
 
 **参数：**
 
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
-| `config` | `MonorepoConfig` | Monorepo 配置 |
+| `packages` | `PackageInfo[]` | 包信息列表 |
 
 **返回值：**
 
@@ -50,10 +48,31 @@ interface CircularChain {
 
 ```typescript
 import { checkCircularDependencies } from '@cat-kit/maintenance'
+import type { PackageInfo } from '@cat-kit/maintenance'
 
-const result = await checkCircularDependencies({
-  rootDir: '/path/to/monorepo'
-})
+// 准备包信息列表
+const packages: PackageInfo[] = [
+  {
+    name: '@my-org/core',
+    pkg: {
+      name: '@my-org/core',
+      version: '1.0.0',
+      dependencies: {}
+    }
+  },
+  {
+    name: '@my-org/utils',
+    pkg: {
+      name: '@my-org/utils',
+      version: '1.0.0',
+      dependencies: {
+        '@my-org/core': '^1.0.0'
+      }
+    }
+  }
+]
+
+const result = checkCircularDependencies(packages)
 
 if (result.hasCircular) {
   console.log('发现循环依赖:')
@@ -82,26 +101,19 @@ if (result.hasCircular) {
 
 ### checkVersionConsistency
 
-检测 monorepo 中相同的外部依赖是否使用了不同的版本号。这有助于发现潜在的版本冲突问题。
+检测包之间相同的外部依赖是否使用了不同的版本号。这有助于发现潜在的版本冲突问题。
 
 **函数签名：**
 
 ```typescript
-function checkVersionConsistency(
-  config: MonorepoConfig,
-  options?: {
-    /** 忽略的依赖包（不检查版本一致性） */
-    ignore?: string[]
-  }
-): Promise<ConsistencyResult>
+function checkVersionConsistency(packages: PackageInfo[]): ConsistencyResult
 ```
 
 **参数：**
 
 | 参数 | 类型 | 说明 |
 | --- | --- | --- |
-| `config` | `MonorepoConfig` | Monorepo 配置 |
-| `options.ignore` | `string[]` | 可选，忽略检查的依赖列表 |
+| `packages` | `PackageInfo[]` | 包信息列表 |
 
 **返回值：**
 
@@ -130,11 +142,26 @@ interface InconsistentDependency {
 
 ```typescript
 import { checkVersionConsistency } from '@cat-kit/maintenance'
+import type { PackageInfo } from '@cat-kit/maintenance'
 
-const result = await checkVersionConsistency(
-  { rootDir: '/path/to/monorepo' },
-  { ignore: ['typescript'] } // 忽略 TypeScript 版本检查
-)
+const packages: PackageInfo[] = [
+  {
+    name: '@my-org/core',
+    pkg: {
+      name: '@my-org/core',
+      dependencies: { lodash: '^4.17.21' }
+    }
+  },
+  {
+    name: '@my-org/utils',
+    pkg: {
+      name: '@my-org/utils',
+      dependencies: { lodash: '^4.17.15' }  // 版本不一致!
+    }
+  }
+]
+
+const result = checkVersionConsistency(packages)
 
 if (!result.consistent) {
   console.log('发现版本不一致:')
@@ -156,15 +183,8 @@ if (!result.consistent) {
 📦 lodash:
   ^4.17.21
     └─ @my-org/core
-    └─ @my-org/utils
   ^4.17.15
-    └─ @my-org/legacy
-
-📦 axios:
-  ^1.6.0
-    └─ @my-org/http
-  ^0.27.0
-    └─ @my-org/old-client
+    └─ @my-org/utils
 ```
 
 ::: tip 注意
@@ -183,9 +203,15 @@ if (!result.consistent) {
 
 ```typescript
 function buildDependencyGraph(
-  config: MonorepoConfig
-): Promise<DependencyGraph>
+  packages: (PackageInfo & { version: string })[]
+): DependencyGraph
 ```
+
+**参数：**
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `packages` | `(PackageInfo & { version: string })[]` | 包信息列表（必须包含 version） |
 
 **返回值：**
 
@@ -221,9 +247,26 @@ interface DependencyEdge {
 ```typescript
 import { buildDependencyGraph } from '@cat-kit/maintenance'
 
-const graph = await buildDependencyGraph({
-  rootDir: '/path/to/monorepo'
-})
+const packages = [
+  {
+    name: '@my-org/core',
+    version: '1.0.0',
+    pkg: {
+      name: '@my-org/core',
+      dependencies: { dayjs: '^1.11.0' }
+    }
+  },
+  {
+    name: '@my-org/utils',
+    version: '1.0.0',
+    pkg: {
+      name: '@my-org/utils',
+      dependencies: { '@my-org/core': '^1.0.0' }
+    }
+  }
+]
+
+const graph = buildDependencyGraph(packages)
 
 console.log(`共 ${graph.nodes.length} 个节点`)
 console.log(`共 ${graph.edges.length} 条依赖关系`)
@@ -285,9 +328,23 @@ import {
   visualizeDependencyGraph
 } from '@cat-kit/maintenance'
 
-const graph = await buildDependencyGraph({
-  rootDir: '/path/to/monorepo'
-})
+const packages = [
+  {
+    name: '@cat-kit/core',
+    version: '1.0.0',
+    pkg: { name: '@cat-kit/core', dependencies: {} }
+  },
+  {
+    name: '@cat-kit/fe',
+    version: '1.0.0',
+    pkg: {
+      name: '@cat-kit/fe',
+      peerDependencies: { '@cat-kit/core': '>=1.0.0' }
+    }
+  }
+]
+
+const graph = buildDependencyGraph(packages)
 
 // 只显示内部包依赖
 const mermaid = visualizeDependencyGraph(graph, {
@@ -302,12 +359,9 @@ console.log(mermaid)
 
 ```mermaid
 graph TD
-  cat-kit/fe-->cat-kit/core
+  cat-kit/fe-.->cat-kit/core
   cat-kit/http-->cat-kit/core
   cat-kit/be-->cat-kit/core
-  cat-kit/excel-->cat-kit/core
-  cat-kit/maintenance-.->cat-kit/core
-  cat-kit/maintenance-.->cat-kit/be
 ```
 
 **在 Markdown 中使用：**
@@ -317,22 +371,52 @@ graph TD
 
 ```mermaid
 graph TD
-  cat-kit/fe-->cat-kit/core
+  cat-kit/fe-.->cat-kit/core
   cat-kit/http-->cat-kit/core
   cat-kit/be-->cat-kit/core
 ```
 ````
 
-## 类型定义
+## 使用 Monorepo 类
 
-### MonorepoConfig
+如果你正在管理一个完整的 monorepo，推荐使用 `Monorepo` 类来进行依赖分析，它会自动读取工作区信息：
 
 ```typescript
-interface MonorepoConfig {
-  /** 项目根目录（绝对路径） */
-  rootDir: string
-  /** 包目录模式（默认从 package.json 的 workspaces 字段读取） */
-  workspaces?: string[]
+import { Monorepo } from '@cat-kit/maintenance'
+
+const repo = new Monorepo('/path/to/monorepo')
+
+// 验证 monorepo（包含循环依赖和版本一致性检查）
+const validation = repo.validate()
+
+if (!validation.valid) {
+  if (validation.hasCircular) {
+    console.log('循环依赖:', validation.circularChains)
+  }
+  if (validation.inconsistentDeps.length > 0) {
+    console.log('版本不一致:', validation.inconsistentDeps)
+  }
+}
+
+// 构建依赖图
+const graph = repo.buildDependencyGraph({
+  includeExternal: false
+})
+console.log(graph.mermaid)
+```
+
+## 类型定义
+
+### PackageInfo
+
+```typescript
+interface PackageInfo {
+  /** 包名称 */
+  name: string
+  /** 包版本（可选） */
+  version?: string
+  /** package.json 内容 */
+  pkg: PackageJson
 }
 ```
 
@@ -341,6 +425,8 @@ interface MonorepoConfig {
 ```typescript
 // 从 @cat-kit/maintenance 导入类型
 import type {
+  // 包信息
+  PackageInfo,
   // 依赖图相关
   DependencyGraph,
   DependencyNode,
@@ -360,22 +446,20 @@ import type {
 
 ```typescript
 // scripts/check-deps.ts
-import {
-  checkCircularDependencies,
-  checkVersionConsistency
-} from '@cat-kit/maintenance'
+import { Monorepo } from '@cat-kit/maintenance'
 
 async function main() {
-  const config = { rootDir: process.cwd() }
+  const repo = new Monorepo(process.cwd())
+  const validation = repo.validate()
+
   let hasError = false
 
   // 1. 检查循环依赖
   console.log('🔍 检查循环依赖...')
-  const circular = await checkCircularDependencies(config)
-  if (circular.hasCircular) {
+  if (validation.hasCircular) {
     console.error('❌ 发现循环依赖:')
-    circular.cycles.forEach(c => {
-      console.error(`   ${c.chain.join(' → ')}`)
+    validation.circularChains.forEach(chain => {
+      console.error(`   ${chain.join(' → ')}`)
     })
     hasError = true
   } else {
@@ -384,12 +468,9 @@ async function main() {
 
   // 2. 检查版本一致性
   console.log('\n🔍 检查版本一致性...')
-  const consistency = await checkVersionConsistency(config, {
-    ignore: ['typescript', '@types/node']
-  })
-  if (!consistency.consistent) {
+  if (validation.inconsistentDeps.length > 0) {
     console.error('❌ 发现版本不一致:')
-    consistency.inconsistent.forEach(dep => {
+    validation.inconsistentDeps.forEach(dep => {
       console.error(`   ${dep.name}:`)
       dep.versions.forEach(v => {
         console.error(`     ${v.version} @ ${v.usedBy.join(', ')}`)
@@ -413,17 +494,11 @@ main()
 ```typescript
 // scripts/generate-deps-doc.ts
 import { writeFileSync } from 'node:fs'
-import {
-  buildDependencyGraph,
-  visualizeDependencyGraph
-} from '@cat-kit/maintenance'
+import { Monorepo } from '@cat-kit/maintenance'
 
 async function main() {
-  const graph = await buildDependencyGraph({
-    rootDir: process.cwd()
-  })
-
-  const mermaid = visualizeDependencyGraph(graph)
+  const repo = new Monorepo(process.cwd())
+  const graph = repo.buildDependencyGraph({ includeExternal: false })
 
   const markdown = `# 包依赖关系
 
@@ -432,7 +507,7 @@ async function main() {
 ## 依赖图
 
 \`\`\`mermaid
-${mermaid}
+${graph.mermaid}
 \`\`\`
 
 ## 统计
@@ -449,4 +524,3 @@ _生成时间: ${new Date().toISOString()}_
 
 main()
 ```
-

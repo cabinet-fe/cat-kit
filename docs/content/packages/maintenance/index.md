@@ -6,14 +6,14 @@ order: -1
 
 # Maintenance 维护包
 
-`@cat-kit/maintenance` 是 Cat-Kit 的 monorepo 维护工具包，提供依赖管理、版本管理和打包构建等功能。
+`@cat-kit/maintenance` 是 Cat-Kit 的 monorepo 维护工具包，提供依赖管理、版本管理、打包构建和发布等功能。
 
 ## 特性
 
 - 🔍 **依赖分析** - 检测循环依赖、版本不一致等问题
 - 📊 **依赖可视化** - 生成 Mermaid 格式的依赖关系图
 - 🔢 **版本管理** - 符合 semver 规范的版本解析、比较和递增
-- 📦 **批量构建** - 按依赖关系分批并行构建 monorepo 中的包
+- 📦 **Monorepo 管理** - 统一管理工作区，按依赖关系分批并行构建
 - 🚀 **发布辅助** - git 提交/tag/push 与 npm publish（支持自定义 registry、2FA）
 
 ## 安装
@@ -200,7 +200,7 @@ export function formatDate(date) {
 
 ### tsdown: 专为库构建设计
 
-`MonoRepoBundler` 基于 [tsdown](https://tsdown.dev/) 构建,这是一个专为库作者设计的优雅打包工具。
+`Monorepo` 类的构建功能基于 [tsdown](https://tsdown.dev/) 实现,这是一个专为库作者设计的优雅打包工具。
 
 **tsdown 的核心特性** (来源: [tsdown 官方文档](https://tsdown.dev/guide/)):
 
@@ -354,13 +354,12 @@ export default defineConfig({
 由于 `@cat-kit/core` 在 `devDependencies` 中且被实际导入,tsdown 默认会打包它。需要显式配置 `external`:
 
 ```typescript
-{
-  dir: '/path/to/packages/fe',
-  build: {
-    input: 'src/index.ts',
+// 使用 Monorepo 类时，通过 build 方法的 configs 参数配置
+await repo.group(['@cat-kit/fe']).build({
+  '@cat-kit/fe': {
     external: ['@cat-kit/core']  // 显式排除内部依赖
   }
-}
+})
 ```
 
 #### 3. 依赖关系图示
@@ -411,16 +410,17 @@ export function myFeature() {
 
 - `parseSemver()` / `compareSemver()` - 解析和比较版本号
 - `incrementVersion()` - 递增版本号
-- `bumpVersion()` - 批量更新包版本
-- `syncPeerDependencies()` - 同步 peerDependencies
+- `bumpVersion()` - 更新单个包版本
+- `syncPeerDependencies()` / `syncDependencies()` - 同步依赖版本
 
-### [打包器](./bundler)
+### [Monorepo 管理](./monorepo)
 
-Monorepo 构建打包工具：
+Monorepo 统一管理类：
 
-- `MonoRepoBundler` - 按依赖关系分批并行构建
-- 基于 tsdown，支持 TypeScript 和类型声明生成
-- 自动生成 Bundle 分析报告
+- `Monorepo` 类 - 统一管理工作区
+- `WorkspaceGroup` - 工作区分组操作
+- 按依赖关系分批并行构建
+- 批量版本更新和发布
 
 ### [发布与 Git 辅助](./release)
 
@@ -432,34 +432,82 @@ Monorepo 构建打包工具：
 
 ## 快速示例
 
-```typescript
-import {
-  MonoRepoBundler,
-  checkCircularDependencies,
-  bumpVersion,
-  publishPackage,
-  createGitTag,
-  commitAndPush
-} from '@cat-kit/maintenance'
+### 基本用法
 
-// 检查循环依赖
-const circular = await checkCircularDependencies({
-  rootDir: '/path/to/monorepo'
+```typescript
+import { Monorepo } from '@cat-kit/maintenance'
+
+// 创建 Monorepo 实例
+const repo = new Monorepo('/path/to/monorepo')
+
+// 查看工作区列表
+console.log(repo.workspaces.map(ws => ws.name))
+
+// 验证 monorepo（检测循环依赖和版本一致性）
+const validation = repo.validate()
+if (!validation.valid) {
+  console.error('验证失败:', validation)
+  process.exit(1)
+}
+
+// 查看依赖关系图
+const graph = repo.buildDependencyGraph()
+console.log(graph.mermaid)
+```
+
+### 构建和发布
+
+```typescript
+import { Monorepo } from '@cat-kit/maintenance'
+
+const repo = new Monorepo()
+
+// 选择要操作的包分组
+const group = repo.group(['@cat-kit/core', '@cat-kit/fe', '@cat-kit/http'])
+
+// 按依赖关系分批并行构建
+await group.build({
+  '@cat-kit/fe': { external: ['@cat-kit/core'] },
+  '@cat-kit/http': { external: ['@cat-kit/core'] }
 })
 
 // 批量更新版本
-await bumpVersion(
-  { rootDir: '/path/to/monorepo' },
-  { type: 'minor', syncPeer: true }
-)
+await group.bumpVersion({
+  type: 'minor',
+  syncPeer: true,
+  syncDeps: true
+})
 
-// 构建 monorepo 包
-const bundler = new MonoRepoBundler([
-  { dir: '/path/to/packages/core', build: { input: 'src/index.ts' } }
-])
-await bundler.build()
+// 批量发布
+await group.publish({ skipPrivate: true })
+```
 
-// 发布示例（提交 + tag + npm 发布）
+### 独立函数用法
+
+```typescript
+import {
+  checkCircularDependencies,
+  checkVersionConsistency,
+  bumpVersion,
+  createGitTag,
+  commitAndPush,
+  publishPackage
+} from '@cat-kit/maintenance'
+
+// 检查循环依赖（传入包列表）
+const packages = [
+  { name: '@my/core', pkg: corePackageJson },
+  { name: '@my/utils', pkg: utilsPackageJson }
+]
+const circular = checkCircularDependencies(packages)
+
+// 更新单个包版本
+const result = await bumpVersion('/path/to/packages/core', {
+  type: 'minor'
+})
+console.log(`更新到版本: ${result.version}`)
+
+// 发布流程
 await commitAndPush({ cwd: '/path/to/repo', message: 'chore: release' })
 await createGitTag({ cwd: '/path/to/repo', tag: 'v1.2.3', push: true })
 await publishPackage({

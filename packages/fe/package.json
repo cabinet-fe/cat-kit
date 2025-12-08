@@ -1,7 +1,7 @@
 {
   "name": "@cat-kit/fe",
   "type": "module",
-  "version": "1.0.0-alpha.1",
+  "version": "2.0.0-pre.0",
   "description": "前端工具",
   "files": [
     "dist",
@@ -22,7 +22,7 @@
     "@cat-kit/tsconfig": "workspace:*"
   },
   "peerDependencies": {
-    "@cat-kit/core": ">=1.0.0-alpha.1",
+    "@cat-kit/core": ">=2.0.0-pre.0",
     "@cat-kit/tsconfig": "1.0.0"
   }
 }

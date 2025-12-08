@@ -27,7 +27,7 @@ interface SidebarItemInternal {
   order: number
 }
 
-const DOCS_ROOT = fileURLToPath(new URL('../', import.meta.url))
+const DOCS_ROOT = fileURLToPath(new URL('../content', import.meta.url))
 const COLLATOR = new Intl.Collator('zh-CN')
 
 const PACKAGE_LABELS: Record<string, string> = {
@@ -223,7 +223,7 @@ function parseFrontMatterBlock(raw: string): FrontMatterData {
     const parsedValue = parseScalar(rawValue ?? '')
     if (parsedValue !== null) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(data as any)[key] = parsedValue
+      ; (data as any)[key] = parsedValue
     }
   }
 

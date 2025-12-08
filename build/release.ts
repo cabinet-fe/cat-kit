@@ -12,8 +12,7 @@ async function test() {
   const s = await $({
     cwd: path.resolve(__dirname, '../packages/tests'),
   })`bun run test`.catch(err => {
-
-    console.log(11111)
+    console.error(err)
   })
 
 }

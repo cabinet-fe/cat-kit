@@ -1,7 +1,7 @@
 ---
 title: 发布与 Git 辅助
 sidebarTitle: 发布与 Git
-order: 4
+order: 5
 ---
 
 # 发布与 Git 辅助 (release)
