@@ -16,5 +16,11 @@
       "import": "./src/index.ts",
       "types": "./src/index.ts"
     }
+  },
+  "devDependencies": {
+    "@cat-kit/tsconfig": "workspace:*"
+  },
+  "peerDependencies": {
+    "@cat-kit/tsconfig": "1.0.0"
   }
 }

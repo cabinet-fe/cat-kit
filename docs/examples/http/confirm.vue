@@ -45,6 +45,8 @@ const items = ref([
 
 const logs = ref<string[]>([])
 
+
+
 // 确认删除插件
 function ConfirmDeletePlugin(): ClientPlugin {
   return {

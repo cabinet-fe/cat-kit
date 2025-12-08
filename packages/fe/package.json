@@ -18,9 +18,11 @@
     }
   },
   "devDependencies": {
-    "@cat-kit/core": "workspace:*"
+    "@cat-kit/core": "workspace:*",
+    "@cat-kit/tsconfig": "workspace:*"
   },
   "peerDependencies": {
-    "@cat-kit/core": "1.0.0-alpha.1"
+    "@cat-kit/core": ">=1.0.0-alpha.1",
+    "@cat-kit/tsconfig": "1.0.0"
   }
 }

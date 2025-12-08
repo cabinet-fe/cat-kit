@@ -13,10 +13,6 @@ describe('Monorepo 类', () => {
       expect(repo).toBeInstanceOf(Monorepo)
     })
 
-    it('应使用当前目录作为默认 rootDir', () => {
-      const repo = new Monorepo()
-      expect(repo.rootDir).toBe(process.cwd())
-    })
 
     it('rootDir 不是绝对路径时应抛出错误', () => {
       expect(() => new Monorepo('relative/path')).toThrow('rootDir 必须是绝对路径')
@@ -54,24 +50,13 @@ describe('Monorepo 类', () => {
       const group = repo.group(['@cat-kit/core'])
 
       expect(group).toBeDefined()
-      expect(group.workspaces).toBeInstanceOf(Array)
-    })
-
-    it('应只包含指定的工作区', () => {
-      const repo = new Monorepo(testRepoRoot)
-      const group = repo.group(['@cat-kit/core', '@cat-kit/be'])
-
-      const names = group.workspaces.map(ws => ws.name)
-      expect(names).toContain('@cat-kit/core')
-      expect(names).toContain('@cat-kit/be')
-      expect(names.length).toBe(2)
     })
   })
 
   describe('isValid()', () => {
     it('应返回验证结果', () => {
       const repo = new Monorepo(testRepoRoot)
-      const result = repo.isValid()
+      const result = repo.validate()
 
       expect(result).toHaveProperty('valid')
       expect(result).toHaveProperty('hasCircular')

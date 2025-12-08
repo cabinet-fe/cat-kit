@@ -19,5 +19,11 @@
     "@vitest/ui": "^4.0.10",
     "fflate": "^0.8.2",
     "vitest": "^4.0.10"
+  },
+  "devDependencies": {
+    "@cat-kit/tsconfig": "workspace:*"
+  },
+  "peerDependencies": {
+    "@cat-kit/tsconfig": "1.0.0"
   }
 }

@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs'
 import { join, resolve, isAbsolute } from 'node:path'
 import chalk from 'chalk'
-
 import type {
   MonorepoWorkspace,
+  MonorepoRoot,
   WorkspaceBuildConfig,
   GroupBumpOptions,
   GroupPublishOptions,
@@ -19,6 +19,7 @@ import { bumpVersion, syncPeerDependencies, syncDependencies } from '../version'
 import { publishPackage } from '../release'
 import { checkCircularDependencies } from '../deps/circular'
 import { checkVersionConsistency } from '../deps/consistency'
+import { buildDependencyGraph as buildDepGraph, visualizeDependencyGraph } from '../deps/graph'
 import { readJsonSync, matchWorkspaces, getPeerDevExternal } from './helpers'
 
 /**
@@ -26,13 +27,13 @@ import { readJsonSync, matchWorkspaces, getPeerDevExternal } from './helpers'
  *
  * 用于对一组工作区进行批量操作
  */
-class WorkspaceGroup<Workspaces extends readonly string[]> {
+class WorkspaceGroup<Workspaces extends string> {
   #workspaces: MonorepoWorkspace[]
 
-  constructor(repo: Monorepo, workspaceNames: Workspaces) {
+  constructor(repo: Monorepo, workspaceNames: Workspaces[]) {
     // 过滤出匹配的工作区
     const nameSet = new Set(workspaceNames)
-    this.#workspaces = repo.workspaces.filter(ws => nameSet.has(ws.name))
+    this.#workspaces = repo.workspaces.filter(ws => nameSet.has(ws.name as Workspaces))
   }
 
   /**
@@ -41,8 +42,8 @@ class WorkspaceGroup<Workspaces extends readonly string[]> {
    * @param configs - 工作区配置, 如果传入将会被合并
    */
   async build(
-    configs?: Record<string, WorkspaceBuildConfig>,
-  ): Promise<BuildSummary> {
+    configs?: Partial<Record<Workspaces, WorkspaceBuildConfig>>,
+  ): Promise<void> {
     const start = Date.now()
     const workspaces = this.#workspaces
 
@@ -87,8 +88,6 @@ class WorkspaceGroup<Workspaces extends readonly string[]> {
       batches.push(batch)
       batch.forEach(ws => built.add(ws.name))
     }
-
-    console.log(batches)
 
     // 执行构建
     const results: BuildSummary['results'] = []
@@ -141,14 +140,10 @@ class WorkspaceGroup<Workspaces extends readonly string[]> {
     const successCount = results.filter(r => r.success).length
     const failedCount = results.length - successCount
 
-    console.log(chalk.bold(chalk.green(`✨ 构建完成: ${successCount} 成功, ${failedCount} 失败`)))
+    const totalDuration = Date.now() - start
+    console.log(chalk.bold(chalk.green(`✨ 构建完成: ${successCount} 成功, ${failedCount} 失败 ${totalDuration}ms`)))
 
-    return {
-      totalDuration: Date.now() - start,
-      successCount,
-      failedCount,
-      results
-    }
+
   }
 
   /**
@@ -234,6 +229,7 @@ class WorkspaceGroup<Workspaces extends readonly string[]> {
  */
 export class Monorepo {
   #rootDir: string
+  #root: MonorepoRoot | null = null
   #workspaces: MonorepoWorkspace[] | null = null
 
   constructor(rootDir?: string) {
@@ -246,7 +242,24 @@ export class Monorepo {
     this.#rootDir = dir
   }
 
-
+  /**
+   * 根目录信息
+   */
+  get root(): MonorepoRoot {
+    if (!this.#root) {
+      const rootPkgPath = join(this.#rootDir, 'package.json')
+      if (!existsSync(rootPkgPath)) {
+        throw new Error(`未找到 package.json: ${rootPkgPath}`)
+      }
+      const pkg = readJsonSync<PackageJson>(rootPkgPath)
+      this.#root = {
+        dir: this.#rootDir,
+        pkg,
+        workspacePatterns: pkg.workspaces || []
+      }
+    }
+    return this.#root
+  }
 
   /**
    * 工作区列表
@@ -309,8 +322,8 @@ export class Monorepo {
   /**
    * 按工作区名称分组
    */
-  group<T extends readonly string[]>(names: T): WorkspaceGroup<T> {
-    return new WorkspaceGroup(this, names)
+  group<const T extends readonly string[]>(names: T): WorkspaceGroup<T[number]> {
+    return new WorkspaceGroup(this, [...names])
   }
 
   /**
@@ -319,7 +332,7 @@ export class Monorepo {
    * - 检测循环依赖
    * - 检测版本不一致
    */
-  isValid(): MonorepoValidationResult {
+  validate(): MonorepoValidationResult {
     const workspaces = this.workspaces
 
     // 转换为 deps 模块需要的格式
@@ -349,61 +362,34 @@ export class Monorepo {
   } = {}): DependencyGraphResult {
     const { includeExternal = false } = options
     const workspaces = this.workspaces
-    const internalNames = new Set(workspaces.map(ws => ws.name))
 
-    const nodes: DependencyGraphResult['nodes'] = []
-    const edges: DependencyGraphResult['edges'] = []
-    const externalDeps = new Set<string>()
+    // 转换为 deps 模块需要的格式
+    const packages = workspaces.map(ws => ({
+      name: ws.name,
+      version: ws.version,
+      pkg: ws.pkg
+    }))
 
-    // 添加内部包节点
-    for (const ws of workspaces) {
-      nodes.push({
-        id: ws.name,
-        version: ws.version,
-        external: false
+    // 使用 deps 模块构建依赖图
+    const graph = buildDepGraph(packages)
+
+    // 根据选项过滤节点
+    const nodes = includeExternal
+      ? graph.nodes
+      : graph.nodes.filter(n => !n.external)
+
+    const edges = includeExternal
+      ? graph.edges
+      : graph.edges.filter(edge => {
+        const targetNode = graph.nodes.find(n => n.id === edge.to)
+        return targetNode && !targetNode.external
       })
 
-      const allDeps = {
-        ...(ws.pkg.dependencies || {}),
-        ...(ws.pkg.devDependencies || {}),
-        ...(ws.pkg.peerDependencies || {})
-      }
-
-      for (const depName of Object.keys(allDeps)) {
-        if (internalNames.has(depName)) {
-          // 内部依赖
-          let type: 'dependencies' | 'devDependencies' | 'peerDependencies' = 'dependencies'
-          if (ws.pkg.peerDependencies?.[depName]) type = 'peerDependencies'
-          else if (ws.pkg.devDependencies?.[depName]) type = 'devDependencies'
-
-          edges.push({ from: ws.name, to: depName, type })
-        } else if (includeExternal) {
-          externalDeps.add(depName)
-        }
-      }
-    }
-
-    // 添加外部依赖节点
-    if (includeExternal) {
-      for (const depName of externalDeps) {
-        nodes.push({
-          id: depName,
-          version: '*',
-          external: true
-        })
-      }
-    }
-
     // 生成 Mermaid 图
-    let mermaid = 'graph TD\n'
-    for (const edge of edges) {
-      const from = edge.from.replace(/@/g, '')
-      const to = edge.to.replace(/@/g, '')
-      let arrow = '-->'
-      if (edge.type === 'peerDependencies') arrow = '-..->'
-      else if (edge.type === 'devDependencies') arrow = '--->'
-      mermaid += `  ${from}${arrow}${to}\n`
-    }
+    const mermaid = visualizeDependencyGraph(
+      { nodes, edges },
+      { includeExternal, distinguishTypes: true }
+    )
 
     return { nodes, edges, mermaid }
   }

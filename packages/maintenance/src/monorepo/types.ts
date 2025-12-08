@@ -20,6 +20,18 @@ export interface MonorepoWorkspace {
 }
 
 /**
+ * Monorepo 根目录信息
+ */
+export interface MonorepoRoot {
+  /** 根目录（绝对路径） */
+  dir: string
+  /** package.json 内容 */
+  pkg: PackageJson
+  /** 工作区 glob 模式 */
+  workspacePatterns: string[]
+}
+
+/**
  * 工作区构建配置（不包含 dir）
  */
 export type WorkspaceBuildConfig = Omit<BuildConfig, 'dir'>

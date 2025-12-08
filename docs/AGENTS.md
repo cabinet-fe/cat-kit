@@ -51,7 +51,7 @@ docs/
 │   ├── be/
 │   └── excel/
 ├── public/                   # 静态资源
-│   └── banner.png
+│   └── logo.png
 ├── index.md                  # 首页
 ├── package.json
 └── tsconfig.json
@@ -159,7 +159,7 @@ export default defineConfig({
 
   // 主题配置
   themeConfig: {
-    logo: '/banner.png',
+    logo: '/logo.png',
     nav: [...], // 导航栏
     sidebar: {...}, // 侧边栏
     socialLinks: [...], // 社交链接

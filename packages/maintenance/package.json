@@ -21,9 +21,9 @@
     "tsdown": "^0.17.0"
   },
   "devDependencies": {
-    "@cat-kit/be": "workspace:*"
+    "@cat-kit/tsconfig": "workspace:*"
   },
   "peerDependencies": {
-    "@cat-kit/be": "1.0.0-alpha.1"
+    "@cat-kit/tsconfig": "1.0.0"
   }
 }

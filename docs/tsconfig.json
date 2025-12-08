@@ -5,7 +5,6 @@
     "incremental": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "types": ["vite/client"],
     "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo"
   },
   "include": [
@@ -13,6 +12,6 @@
     ".vitepress/**/*.vue",
     "examples/**/*.vue",
     "examples/**/*.ts",
-    "*.d.ts"
+    "content/**/*.d.ts"
   ]
 }

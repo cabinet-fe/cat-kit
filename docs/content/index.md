@@ -6,7 +6,7 @@ hero:
   text: '喵喵工具箱'
   tagline: 为浏览器和 Node.js 打造的现代 TypeScript 工具库。简洁直观的 API、完整的类型推导、Tree-shaking 友好的架构设计，让开发更高效、代码更优雅。
   image:
-    src: /banner.png
+    src: /logo.png
     alt: CatKit
   actions:
     - theme: brand

@@ -14,8 +14,10 @@ export default defineConfig({
   lastUpdated: true,
   cleanUrls: true,
 
+  srcDir: 'content',
+
   head: [
-    ['link', { rel: 'icon', type: 'image/png', href: '/banner.png' }],
+    ['link', { rel: 'icon', type: 'image/png', href: '/logo.png' }],
     ['meta', { name: 'theme-color', content: '#5f67ee' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:locale', content: 'zh' }],
@@ -28,7 +30,7 @@ export default defineConfig({
   ],
 
   themeConfig: {
-    logo: '/banner.png',
+    logo: '/logo.png',
     siteTitle: 'CatKit',
 
     nav: [
