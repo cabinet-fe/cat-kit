@@ -6,7 +6,34 @@ outline: deep
 
 # 快速开始
 
-Cat Kit 是一个基于 TypeScript 的全环境开发工具包，提供了一系列实用的工具函数和类库。
+## Cat Kit 解决了什么问题?
+
+在日常开发中,我们经常遇到这些痛点:
+
+### 🔄 重复造轮子
+
+每个项目都在写相似的工具函数:数组去重、日期格式化、URL 拼接...这些基础能力需要在不同项目间反复实现。
+
+### 📦 依赖混乱
+
+为了解决简单问题引入大型库,导致项目体积膨胀。例如:仅为了格式化日期而引入整个 moment.js,或者为了一个 HTTP 请求引入 axios 的全部功能。
+
+### 🌐 环境差异
+
+前端代码无法在 Node.js 环境运行,后端工具无法在浏览器使用。同一个业务逻辑需要维护多套实现。
+
+### 🔧 缺乏类型安全
+
+JavaScript 生态的工具函数往往缺少完整的类型定义,导致运行时错误频发,开发体验差。
+
+## Cat Kit 的解决方案
+
+Cat Kit 提供了一套**轻量、类型安全、跨环境**的工具包,让你专注业务���辑而非重复劳动:
+
+- **按需引入** - 只打包你使用的函数,构建产物最小化
+- **完整类型** - 100% TypeScript 编写,提供完整的类型推导和提示
+- **跨平台** - 核心功能同时支持浏览器和 Node.js 环境
+- **零配置** - 开箱即用,无需额外配置
 
 ## 安装
 
@@ -16,193 +43,198 @@ Cat Kit 是一个基于 TypeScript 的全环境开发工具包，提供了一系
 
 ```bash [bun]
 bun add @cat-kit/core
-bun add @cat-kit/http
-bun add @cat-kit/fe
-bun add @cat-kit/be
 ```
 
 ```bash [npm]
-# 安装核心包
 npm install @cat-kit/core
-
-# 安装 HTTP 包
-npm install @cat-kit/http
-
-# 安装前端工具包
-npm install @cat-kit/fe
-
-# 安装后端工具包
-npm install @cat-kit/be
 ```
 
 ```bash [pnpm]
 pnpm add @cat-kit/core
-pnpm add @cat-kit/http
-pnpm add @cat-kit/fe
-pnpm add @cat-kit/be
 ```
 
 :::
 
-### 从源码安装
+## 典型使用场景
 
-```bash
-git clone https://github.com/cabinet-fe/cat-kit.git
-cd cat-kit
-pnpm install
-pnpm build
-```
+### 场景 1: 避免重复的数组处理逻辑
 
-## 基础使用
+**痛点**: 每次需要分组、去重、分块时都要写循环逻辑
 
-### Core 核心包
-
-核心包提供了基础的数据处理、日期处理、环境检测等功能。
+**解决方案**: 使用 `@cat-kit/core` 的数组工具
 
 ```typescript
-import { $arr, $str, $date, isInBrowser } from '@cat-kit/core'
+import { $arr } from '@cat-kit/core'
 
-// 数组操作
-const arr = [1, 2, 3, 4, 5]
-const chunks = $arr.chunk(arr, 2) // [[1, 2], [3, 4], [5]]
+// 数据分块 - 比如实现分页展示
+const items = Array.from({ length: 100 }, (_, i) => i)
+const pages = $arr.chunk(items, 10) // 每页 10 条
 
-// 字符串操作
-const url = $str.joinUrlPath('/api', 'users', '123') // '/api/users/123'
+// 数组去重 - 处理重复数据
+const userIds = [1, 2, 2, 3, 3, 3]
+const uniqueIds = $arr.unique(userIds) // [1, 2, 3]
 
-// 日期处理
-const formatted = $date.format(new Date(), 'YYYY-MM-DD') // '2025-11-17'
-
-// 环境检测
-if (isInBrowser()) {
-  console.log('运行在浏览器环境')
-}
+// 分组 - 按类别整理数据
+const products = [
+  { category: 'book', name: 'TypeScript' },
+  { category: 'book', name: 'JavaScript' },
+  { category: 'food', name: 'Apple' }
+]
+const grouped = $arr.groupBy(products, 'category')
+// { book: [...], food: [...] }
 ```
 
-### HTTP 包
+### 场景 2: 统一的日期处理
 
-HTTP 包提供了一个功能完整的 HTTP 请求客户端。
+**痛点**: 原生 Date API 不够直观,需要大量的计算和格式化逻辑
+
+**解决方案**: 使用简洁的日期工具
+
+```typescript
+import { $date } from '@cat-kit/core'
+
+// 格式化日期 - 无需记忆复杂的 Date API
+const now = new Date()
+$date.format(now, 'YYYY-MM-DD HH:mm:ss') // '2025-12-10 14:30:00'
+
+// 日期计算 - 比如计算活动结束时间
+const endDate = $date.add(now, 7, 'day') // 7 天后
+
+// 日期比较 - 判断是否过期
+const isExpired = $date.isBefore(endDate, new Date())
+```
+
+### 场景 3: 跨环境的 HTTP 请求
+
+**痛点**: 浏览器用 fetch,Node.js 用不同的库,无法复用代码
+
+**解决方案**: 使用统一的 HTTP 客户端
 
 ```typescript
 import { HTTPClient } from '@cat-kit/http'
 
-// 创建客户端
-const http = new HTTPClient('/api', {
+// 创建客户端 - 浏览器和 Node.js 都能用
+const api = new HTTPClient('/api', {
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
   }
 })
 
-// 发送请求
-const response = await http.get('/users')
-console.log(response.data)
+// 发送请求 - 自动处理错误、超时、重试
+const users = await api.get('/users')
 
-// POST 请求
-const createResponse = await http.post('/users', {
-  name: '张三',
-  age: 18
+// 使用插件系统 - 自动添加 token
+api.use(async (context, next) => {
+  const token = getToken()
+  context.request.headers.set('Authorization', `Bearer ${token}`)
+  await next()
 })
 ```
 
-### FE 前端包
+### 场景 4: 前端存储管理
 
-前端包提供了文件操作、存储、Web API 封装等功能。
+**痛点**: localStorage、sessionStorage、Cookie、IndexedDB API 各不相同,使用繁琐
+
+**解决方案**: 统一的存储接口
+
+```typescript
+import { createStorage } from '@cat-kit/fe'
+
+// 创建类型安全的存储
+interface UserPreferences {
+  theme: 'light' | 'dark'
+  language: string
+}
+
+const storage = createStorage<UserPreferences>('local', 'user-prefs')
+
+// 读写数据 - 自动序列化/反序列化
+await storage.set('theme', 'dark')
+const theme = await storage.get('theme') // 类型: 'light' | 'dark'
+
+// 同样的 API 可用于 sessionStorage、IndexedDB、Cookie
+const session = createStorage('session', 'temp-data')
+const db = createStorage('indexedDB', 'large-data')
+```
+
+### 场景 5: 文件下载和处理
+
+**痛点**: 浏览器下载文件需要创建临时 `<a>` 元素,代码冗长
+
+**解决方案**: 简化的文件操作
 
 ```typescript
 import { saveAs, readFile } from '@cat-kit/fe'
 
-// 下载文件
-saveAs(blob, 'filename.pdf')
+// 下载文件 - 一行代码
+const blob = await fetch('/api/report').then(r => r.blob())
+saveAs(blob, 'report.pdf')
 
-// 读取文件
-const content = await readFile(file)
-```
-
-### BE 后端包
-
-后端包提供了 Node.js 环境下的工具函数。
-
-```typescript
-import /* 后端工具 */ '@cat-kit/be'
-
-// 后端相关功能
+// 读取用户上传的文件
+const input = document.querySelector('input[type=file]')
+input.addEventListener('change', async (e) => {
+  const file = e.target.files[0]
+  const content = await readFile(file, 'text') // 支持 text、base64、arrayBuffer
+  console.log(content)
+})
 ```
 
 ## 包说明
 
+Cat Kit 采用模块化设计,按需安装所需的包:
+
 ### @cat-kit/core
 
-核心功能包，提供：
+**解决**: 基础工具函数的重复实现问题
 
-- **数据处理** - 数组、对象、字符串、数字等的操作函数
-- **数据结构** - 树、森林等数据结构
-- **日期处理** - 日期格式化、计算等
-- **环境检测** - 浏览器、Node.js 环境判断
-- **性能优化** - 并行处理、安全执行、定时器等
-- **设计模式** - 观察者模式等
+**适用场景**: 任何需要数据处理、日期操作、环境检测的项目
 
 [查看详细文档 →](/packages/core/)
 
 ### @cat-kit/http
 
-HTTP 请求客户端，提供：
+**解决**: 跨环境 HTTP 请求的复杂性和重复代码
 
-- **跨平台支持** - 支持浏览器环境
-- **插件系统** - 灵活的扩展机制
-- **请求分组** - 方便的 API 组织
-- **TypeScript** - 完整的类型定义
+**适用场景**: 需要在前后端共享 API 调用逻辑的全栈项目
 
 [查看详细文档 →](/packages/http/)
 
 ### @cat-kit/fe
 
-前端工具包，提供：
+**解决**: 前端环境特有功能的封装缺失
 
-- **文件操作** - 文件读取、保存
-- **存储** - localStorage、sessionStorage、IndexedDB、Cookie 封装
-- **虚拟化** - 虚拟列表等
-- **Web API** - 剪贴板、权限等 API 封装
+**适用场景**: 浏览器环境的 Web 应用,需要处理文件、存储、Web API
 
 [查看详细文档 →](/packages/fe/)
 
 ### @cat-kit/be
 
-后端工具包，提供 Node.js 环境下的实用功能。
+**解决**: Node.js 环境工具的整合
+
+**适用场景**: 后端服务、CLI 工具、构建脚本
 
 [查看详细文档 →](/packages/be/)
 
-## TypeScript 支持
+## 环境要求
 
-所有包都使用 TypeScript 编写，提供完整的类型定义。
+### 浏览器
 
-```typescript
-import type { HTTPResponse } from '@cat-kit/http'
-
-interface User {
-  id: number
-  name: string
-  email: string
-}
-
-const response: HTTPResponse<User> = await http.get('/user/123')
-// response.data 的类型为 User
-```
-
-## 浏览器兼容性
+现代浏览器,支持 ES2020+ 特性:
 
 - Chrome >= 90
 - Firefox >= 88
 - Safari >= 14
 - Edge >= 90
 
-## Node.js 兼容性
+### Node.js
 
 - Node.js >= 16
 
 ## 下一步
 
-- [安装指南](/guide/installation) - 详细的安装说明
-- [Core 核心包](/packages/core/) - 核心功能文档
-- [HTTP 包](/packages/http/) - HTTP 客户端文档
-- [FE 前端包](/packages/fe/) - 前端工具文档
-- [BE 后端包](/packages/be/) - 后端工具文档
+- [安装指南](/guide/installation) - 了解不同场景下的安装方式
+- [Core 核心包](/packages/core/) - 深入了解核心工具
+- [HTTP 包](/packages/http/) - 学习跨环境的 HTTP 请求
+- [FE 前端包](/packages/fe/) - 探索前端专属工具
+- [BE 后端包](/packages/be/) - 使用 Node.js 工具
