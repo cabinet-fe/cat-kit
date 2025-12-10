@@ -150,7 +150,7 @@ export function compareSemver(
  * 递增版本号
  * @param version - 当前版本号
  * @param type - 递增类型
- * @param preid - 预发布标识（用于 pre* 类型，默认 'pre'）
+ * @param preid - 预发布标识（用于 pre* 类型，默认 'alpha'）
  * @returns 新版本号字符串
  * @throws {SemverError} 当递增类型无效时
  * @example
@@ -158,14 +158,16 @@ export function compareSemver(
  * incrementVersion('1.2.3', 'major')           // '2.0.0'
  * incrementVersion('1.2.3', 'minor')           // '1.3.0'
  * incrementVersion('1.2.3', 'patch')           // '1.2.4'
- * incrementVersion('1.2.3', 'premajor', 'alpha') // '2.0.0-alpha.0'
+ * incrementVersion('1.2.3', 'premajor')        // '2.0.0-alpha.0'
+ * incrementVersion('1.2.3', 'prerelease')      // '1.2.3-alpha.0'
  * incrementVersion('1.2.3-alpha.0', 'prerelease') // '1.2.3-alpha.1'
+ * incrementVersion('1.2.3', 'prerelease', 'beta') // '1.2.3-beta.0'
  * ```
  */
 export function incrementVersion(
   version: string,
   type: BumpType,
-  preid: string = 'pre'
+  preid: string = 'alpha'
 ): string {
   const ver = parseSemver(version)
 

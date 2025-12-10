@@ -42,11 +42,20 @@ export interface PackageVersionConfig {
  * 版本更新选项
  */
 export interface BumpOptions {
-  /** 更新类型 */
-  type: BumpType
+  /**
+   * 更新类型
+   *
+   * 当未指定时，系统会根据当前版本智能推断：
+   * - 如果当前是预发布版本（如 `1.0.0-alpha.0`），默认使用 `prerelease`
+   * - 如果当前是稳定版本（如 `1.2.3`），默认使用 `patch`
+   */
+  type?: BumpType
   /** 新版本号（如果指定则忽略 type） */
   version?: string
-  /** 预发布标识（如 'alpha', 'beta'，用于 pre* 类型） */
+  /**
+   * 预发布标识（如 'alpha', 'beta'，用于 pre* 类型）
+   * @default 'alpha'
+   */
   preid?: string
 }
 

@@ -10,24 +10,15 @@ const __dirname = path.dirname(__filename)
 
 
 async function test() {
-  // const s = await $({
-  //   cwd: path.resolve(__dirname, '../packages/tests'),
-  // })`bun run test`.catch(err => {
-  //   console.error(err)
-  // })
-
-}
-
-async function build() {
-  await main.build({
-    '@cat-kit/be': {
-      platform: 'node'
-    },
-    '@cat-kit/excel': {
-      platform: 'browser'
-    }
+  const s = await $({
+    cwd: path.resolve(__dirname, '../packages/tests'),
+  })`bun run test`.catch(err => {
+    console.error(err)
   })
+
 }
+
+
 
 async function validate() {
   const { valid, hasCircular, inconsistentDeps } = repo.validate()
@@ -54,13 +45,37 @@ async function chooseGroup() {
   return value
 }
 
+async function releaseMain() {
+  await main.build({
+    '@cat-kit/be': {
+      platform: 'node'
+    },
+    '@cat-kit/excel': {
+      platform: 'browser'
+    }
+  })
+
+  // 获取当前版本
+  const currentVersion = main.workspaces[0]!.pkg.version
+
+  // 根据当前版本让用户选择 下一个版本
+
+  await main.bumpVersion({
+
+  })
+
+
+}
+
 async function release() {
   await validate()
 
   await test()
 
   const targetGroup = await chooseGroup()
-  console.log(targetGroup)
+
+
+
   // await build()
 
 }
