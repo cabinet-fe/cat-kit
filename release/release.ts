@@ -165,7 +165,11 @@ async function promptRollback(
   for (const pkg of failedPackages) {
     console.log(chalk.red(`  ✗ ${pkg.name}`))
     if (pkg.error) {
-      console.log(chalk.dim(`    原因: ${pkg.error.message}`))
+      // 尝试获取更详细的错误信息
+      const err = pkg.error as any
+      // PublishError 有 originalError 属性包含实际错误
+      const detailMessage = err.originalError?.message || err.message
+      console.log(chalk.dim(`    原因: ${detailMessage}`))
     }
   }
 
