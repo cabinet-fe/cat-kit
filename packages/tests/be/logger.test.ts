@@ -46,7 +46,7 @@ describe('@cat-kit/be 日志工具', () => {
     const logFile = join(tempDir, 'app.log')
     const logger = new Logger({
       format: 'json',
-      transports: [new FileTransport({ filePath: logFile })]
+      transports: [new FileTransport({ path: logFile })]
     })
 
     await logger.error('boom', new Error('fail'))
