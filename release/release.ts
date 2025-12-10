@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-import { main } from './repo'
+import { main, repo } from './repo'
 import { $ } from 'execa'
 
 
@@ -28,8 +28,21 @@ async function build() {
   })
 }
 
+async function validate() {
+  const { valid, hasCircular, inconsistentDeps } = repo.validate()
+  if (valid) return
+  if (hasCircular) {
+    throw new Error('存在循环依赖')
+  }
+  if (inconsistentDeps.length) {
+    throw new Error('存在不一致的依赖')
+  }
+}
+
 async function release() {
+  await validate()
   await test()
+
   await build()
 
   main.bumpVersion({

@@ -9,7 +9,7 @@
   },
   "workspaces": [
     "packages/*",
-    "build",
+    "release",
     "docs"
   ],
   "devDependencies": {

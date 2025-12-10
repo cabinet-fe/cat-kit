@@ -1,0 +1,13 @@
+{
+  "extends": "@cat-kit/tsconfig/tsconfig.node.json",
+  "compilerOptions": {
+    "composite": true,
+    "types": ["bun"],
+    "incremental": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo",
+    "jsx": "react-jsx"
+  },
+  "include": ["*.ts", "stats.tsx"]
+}
