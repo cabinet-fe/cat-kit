@@ -213,9 +213,20 @@ class WorkspaceGroup<Workspaces extends string> {
     const results = await Promise.all(
       toPublish.map(async (ws) => {
         try {
+          // 自动检测预发布版本并设置 tag
+          let tag = publishOptions.tag
+          if (!tag) {
+            const prereleaseMatch = ws.version.match(/-([a-zA-Z]+)/)
+            if (prereleaseMatch) {
+              // 从版本号中提取预发布标识（如 alpha, beta, rc）
+              tag = prereleaseMatch[1]
+            }
+          }
+
           await publishPackage({
             cwd: ws.dir,
-            ...publishOptions
+            ...publishOptions,
+            tag
           })
           console.log(chalk.green(`  ✓ ${ws.name}`))
           return {
