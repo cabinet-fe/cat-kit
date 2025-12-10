@@ -11,7 +11,7 @@
     "@inquirer/prompts": "^8.0.2"
   },
   "scripts": {
-    "build": "bun index.ts",
+    "release": "bun release.ts",
     "analyze": "bun stats.tsx"
   }
 }

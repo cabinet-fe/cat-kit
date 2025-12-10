@@ -1,28 +1,28 @@
-import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { renderToString } from 'react-dom/server'
-import { pkgs } from './pkgs'
+import { main, maintenance } from './repo'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..')
 
 interface Package {
   name: string
-  description: string
+  description?: string
   path: string
 }
 
 // 动态扫描 packages 目录
 async function getPackages(): Promise<Package[]> {
+  const workspaces = [...main.workspaces, ...maintenance.workspaces]
   const packages = await Promise.all(
-    pkgs.map(async pkg => {
-      const packageJson = await import(path.join(pkg.dir, 'package.json'))
-      const name = path.basename(pkg.dir)
+    workspaces.map(async ({ dir, name, pkg }) => {
+
+      const dirName = path.basename(dir)
       return {
-        name: packageJson.default.name,
-        description: packageJson.default.description,
-        path: path.join('/packages', name, 'dist/stats.html')
+        name: name,
+        description: pkg.description,
+        path: path.join('/packages', dirName, 'dist/stats.html')
       }
     })
   )

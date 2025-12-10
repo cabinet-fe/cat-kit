@@ -37,6 +37,13 @@ class WorkspaceGroup<Workspaces extends string> {
   }
 
   /**
+   * 工作区列表
+   */
+  get workspaces(): MonorepoWorkspace[] {
+    return this.#workspaces
+  }
+
+  /**
    * 构建
    *
    * @param configs - 工作区配置, 如果传入将会被合并
