@@ -9,7 +9,8 @@ import type {
   GroupPublishOptions,
   BuildSummary,
   MonorepoValidationResult,
-  DependencyGraphResult
+  DependencyGraphResult,
+  PublishGroupResult
 } from './types'
 import type { PackageJson } from '../types'
 import type { BumpResult } from '../version/types'
@@ -192,28 +193,49 @@ class WorkspaceGroup<Workspaces extends string> {
   }
 
   /**
-   * 发布包
+   * 并行发布包
+   *
+   * @returns 发布结果，包含每个包的成功/失败状态
    */
-  async publish(options: GroupPublishOptions = {}): Promise<void> {
+  async publish(options: GroupPublishOptions = {}): Promise<PublishGroupResult> {
     const { skipPrivate = true, ...publishOptions } = options
 
-    for (const ws of this.#workspaces) {
+    // 过滤需要发布的包
+    const toPublish = this.#workspaces.filter(ws => {
       if (skipPrivate && ws.private) {
         console.log(chalk.dim(`  跳过私有包: ${ws.name}`))
-        continue
+        return false
       }
+      return true
+    })
 
-      try {
-        await publishPackage({
-          cwd: ws.dir,
-          ...publishOptions
-        })
-        console.log(chalk.green(`✓ 发布: ${ws.name}`))
-      } catch (err) {
-        console.error(chalk.red(`✗ 发布失败: ${ws.name}`))
-        throw err
-      }
-    }
+    // 并行发布
+    const results = await Promise.all(
+      toPublish.map(async (ws) => {
+        try {
+          await publishPackage({
+            cwd: ws.dir,
+            ...publishOptions
+          })
+          console.log(chalk.green(`  ✓ ${ws.name}`))
+          return {
+            name: ws.name,
+            success: true as const
+          }
+        } catch (err) {
+          console.log(chalk.red(`  ✗ ${ws.name}`))
+          return {
+            name: ws.name,
+            success: false as const,
+            error: err instanceof Error ? err : new Error(String(err))
+          }
+        }
+      })
+    )
+
+    const hasFailure = results.some(r => !r.success)
+
+    return { results, hasFailure }
   }
 }
 

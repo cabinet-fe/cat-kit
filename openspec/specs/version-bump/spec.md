@@ -1,7 +1,8 @@
-# Version Bump Capability
+# version-bump Specification
 
-## MODIFIED Requirements
-
+## Purpose
+TBD - created by archiving change refactor-bump-version. Update Purpose after archive.
+## Requirements
 ### Requirement: 版本号更新配置
 
 系统 SHALL 提供 `BumpOptions` 配置接口，支持以下可选参数：
@@ -38,8 +39,6 @@
 - **WHEN** 调用 `incrementVersion('1.0.0', 'prerelease', 'beta')` 指定 preid 为 `'beta'`
 - **THEN** 生成的版本号为 `1.0.0-beta.0`
 
-## ADDED Requirements
-
 ### Requirement: 智能版本类型推断
 
 系统 SHALL 提供 `inferBumpType` 内部逻辑，根据当前版本号智能推断默认的递增类型：
@@ -56,3 +55,4 @@
 - **GIVEN** 当前版本为 `1.5.3`
 - **WHEN** 系统推断默认更新类型
 - **THEN** 返回 `patch`
+

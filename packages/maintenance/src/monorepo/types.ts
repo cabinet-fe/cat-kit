@@ -117,3 +117,32 @@ export interface DependencyGraphResult {
   /** Mermaid 格式的依赖图 */
   mermaid: string
 }
+
+/**
+ * 并行发布结果
+ */
+export interface PublishGroupResult {
+  /** 各包发布结果 */
+  results: Array<{
+    /** 包名称 */
+    name: string
+    /** 是否成功 */
+    success: boolean
+    /** 错误信息（失败时） */
+    error?: Error
+  }>
+  /** 是否有失败的包 */
+  hasFailure: boolean
+}
+
+/**
+ * 回滚上下文
+ */
+export interface RollbackContext {
+  /** 原始版本号 */
+  originalVersion: string
+  /** 需要回滚的包目录列表 */
+  packageDirs: string[]
+  /** Git 提交哈希（用于 reset） */
+  commitHash?: string
+}

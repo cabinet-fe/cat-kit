@@ -9,5 +9,8 @@ export type {
   GroupPublishOptions,
   BuildSummary,
   MonorepoValidationResult,
-  DependencyGraphResult
+  DependencyGraphResult,
+  PublishGroupResult,
+  RollbackContext
 } from './types'
+
