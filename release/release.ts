@@ -147,15 +147,27 @@ async function gitReset(commitHash: string): Promise<void> {
   console.log(chalk.green('✓ Git 已重置'))
 }
 
+interface FailedPackage {
+  name: string
+  error?: Error
+}
+
 /**
  * 提示用户是否回滚
  */
 async function promptRollback(
   context: RollbackContext,
-  failedPackages: string[]
+  failedPackages: FailedPackage[]
 ): Promise<void> {
   console.log(chalk.red(`\n⚠ 发布失败: ${failedPackages.length} 个包发布失败`))
-  console.log(chalk.dim(`  失败的包: ${failedPackages.join(', ')}`))
+
+  // 显示每个失败包的详细错误信息
+  for (const pkg of failedPackages) {
+    console.log(chalk.red(`  ✗ ${pkg.name}`))
+    if (pkg.error) {
+      console.log(chalk.dim(`    原因: ${pkg.error.message}`))
+    }
+  }
 
   const shouldRollback = await confirm({
     message: '是否回滚版本变更？',
@@ -253,7 +265,7 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
   if (publishResult.hasFailure) {
     const failedPackages = publishResult.results
       .filter(r => !r.success)
-      .map(r => r.name)
+      .map(r => ({ name: r.name, error: r.error }))
 
     await promptRollback(rollbackCtx, failedPackages)
     return
