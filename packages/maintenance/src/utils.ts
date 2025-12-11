@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process'
+import { $ } from 'execa'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { GitError } from './errors'
@@ -11,46 +11,17 @@ import { GitError } from './errors'
  * @throws {GitError} 当 git 命令执行失败时
  */
 export async function execGit(cwd: string, args: string[]): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn('git', args, {
-      cwd,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      shell: false
-    })
+  const command = `git ${args.join(' ')}`
 
-    let stdout = ''
-    let stderr = ''
-
-    proc.stdout?.on('data', (data: Buffer) => {
-      stdout += data.toString()
-    })
-
-    proc.stderr?.on('data', (data: Buffer) => {
-      stderr += data.toString()
-    })
-
-    proc.on('error', error => {
-      const command = `git ${args.join(' ')}`
-      reject(new GitError(`执行 git 命令失败: ${command}`, command, error))
-    })
-
-    proc.on('close', exitCode => {
-      if (exitCode !== 0) {
-        const command = `git ${args.join(' ')}`
-        const errorMessage = stderr || `Git 命令退出码: ${exitCode}`
-        reject(
-          new GitError(
-            `执行 git 命令失败: ${command}`,
-            command,
-            new Error(errorMessage)
-          )
-        )
-      } else {
-        resolve(stdout.trim())
-      }
-    })
-  })
+  try {
+    const { stdout } = await $({ cwd })`git ${args}`
+    return stdout.trim()
+  } catch (error) {
+    throw new GitError(`执行 git 命令失败: ${command}`, command, error as Error)
+  }
 }
+
+
 
 /**
  * 并行处理工具

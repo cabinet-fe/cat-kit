@@ -1,57 +1,12 @@
-import { spawn } from 'node:child_process'
+import { $ } from 'execa'
 import { PublishError } from '../errors'
 import type { PublishOptions, PublishResult } from './types'
 
 /**
- * 以 promise 形式执行子进程命令
- * @param cwd - 工作目录
- * @param args - 命令参数
- * @returns 标准输出
- * @throws {PublishError} 当命令失败时
- */
-async function execNpm(cwd: string, args: string[]): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const proc = spawn('npm', args, {
-      cwd,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      shell: false
-    })
-
-    let stdout = ''
-    let stderr = ''
-
-    proc.stdout.on('data', (data: Buffer) => {
-      stdout += data.toString()
-    })
-
-    proc.stderr.on('data', (data: Buffer) => {
-      stderr += data.toString()
-    })
-
-    proc.on('error', error => {
-      const command = `npm ${args.join(' ')}`
-      reject(new PublishError(`执行 npm 命令失败: ${command}`, command, error))
-    })
-
-    proc.on('close', code => {
-      if (code !== 0) {
-        const command = `npm ${args.join(' ')}`
-        reject(
-          new PublishError(
-            `npm 命令执行失败: ${command}`,
-            command,
-            new Error(stderr || `退出码 ${code}`)
-          )
-        )
-      } else {
-        resolve(stdout.trim())
-      }
-    })
-  })
-}
-
-/**
  * 发布 npm 包，支持自定义 registry
+ *
+ * 使用实时输出模式，让用户可以看到发布进度。
+ *
  * @param options - 发布配置
  * @returns 发布结果
  * @throws {PublishError} 当发布失败时
@@ -78,7 +33,7 @@ export async function publishPackage(
     provenance = false
   } = options
 
-  const args = ['publish']
+  const args: string[] = []
 
   if (registry) {
     args.push('--registry', registry)
@@ -104,7 +59,13 @@ export async function publishPackage(
     args.push('--provenance')
   }
 
-  const output = await execNpm(cwd, args)
+  const command = `npm publish ${args.join(' ')}`.trim()
 
-  return { output }
+  try {
+    // 使用 stdio: 'inherit' 实时输出发布进度到控制台
+    await $({ cwd, stdio: 'inherit' })`npm publish ${args}`
+    return { output: '' }
+  } catch (error) {
+    throw new PublishError(`npm 命令执行失败: ${command}`, command, error as Error)
+  }
 }

@@ -8,7 +8,7 @@
     { "path": "./packages/be/tsconfig.json" },
     { "path": "./packages/http/tsconfig.json" },
     { "path": "./packages/tests/tsconfig.json" },
-    { "path": "./build/tsconfig.json" },
+    { "path": "./release/tsconfig.json" },
     { "path": "./docs/tsconfig.json" }
   ]
 }
