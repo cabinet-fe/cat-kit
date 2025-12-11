@@ -3,7 +3,7 @@ import path from 'node:path'
 import { writeFileSync, readFileSync } from 'node:fs'
 import { main, maintenance, tsconfig, repo } from './repo'
 import { $ } from 'execa'
-import { select, confirm } from '@inquirer/prompts'
+import { select } from '@inquirer/prompts'
 import chalk from 'chalk'
 import {
   incrementVersion,
@@ -139,62 +139,14 @@ function rollbackVersion(context: RollbackContext): void {
 }
 
 /**
- * 重置 Git 提交
+ * 重置 Git 提交（使用 soft 重置，保留工作区更改）
  */
 async function gitReset(commitHash: string): Promise<void> {
-  console.log(chalk.yellow('⏪ 正在重置 Git 提交...'))
-  await $({ cwd: repo.root.dir })`git reset --hard ${commitHash}^`
-  console.log(chalk.green('✓ Git 已重置'))
+  console.log(chalk.yellow('⏪ 正在重置 Git 提交（soft）...'))
+  await $({ cwd: repo.root.dir })`git reset --soft ${commitHash}^`
+  console.log(chalk.green('✓ Git 已重置（保留工作区更改）'))
 }
 
-interface FailedPackage {
-  name: string
-  error?: Error
-}
-
-/**
- * 提示用户是否回滚
- */
-async function promptRollback(
-  context: RollbackContext,
-  failedPackages: FailedPackage[]
-): Promise<void> {
-  console.log(chalk.red(`\n⚠ 发布失败: ${failedPackages.length} 个包发布失败`))
-
-  // 显示每个失败包的详细错误信息
-  for (const pkg of failedPackages) {
-    console.log(chalk.red(`  ✗ ${pkg.name}`))
-    if (pkg.error) {
-      // 尝试获取更详细的错误信息
-      const err = pkg.error as any
-      // PublishError 有 originalError 属性包含实际错误
-      const detailMessage = err.originalError?.message || err.message
-      console.log(chalk.dim(`    原因: ${detailMessage}`))
-    }
-  }
-
-  const shouldRollback = await confirm({
-    message: '是否回滚版本变更？',
-    default: true,
-  })
-
-  if (shouldRollback) {
-    rollbackVersion(context)
-
-    if (context.commitHash) {
-      const shouldResetGit = await confirm({
-        message: '是否重置 Git 提交？',
-        default: true,
-      })
-
-      if (shouldResetGit) {
-        await gitReset(context.commitHash)
-      }
-    }
-  } else {
-    console.log(chalk.dim('保留当前状态，请稍后手动处理'))
-  }
-}
 
 // ============================================================================
 // 发布流程
@@ -227,7 +179,6 @@ const GROUPS_BUILD = {
 async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Promise<void> {
   const builder = GROUPS_BUILD[groupName]
 
-
   // 1. 构建
   if (builder) {
     console.log(chalk.bold('\n🔨 开始构建...'))
@@ -248,7 +199,35 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
   console.log(chalk.bold('\n📝 更新版本...'))
   const { version: newVersion } = await group.bumpVersion({ type: bumpType })
 
-  // 6. Git 提交
+  // 6. Dry-run 验证发布
+  console.log(chalk.bold('\n🔍 验证发布（dry-run）...'))
+  const dryRunResult = await group.publish({ dryRun: true })
+
+  if (dryRunResult.hasFailure) {
+    console.log(chalk.red('\n❌ 发布验证失败'))
+    const failedPackages = dryRunResult.results
+      .filter(r => !r.success)
+      .map(r => ({ name: r.name, error: r.error }))
+
+    // 显示错误详情
+    for (const pkg of failedPackages) {
+      console.log(chalk.red(`  ✗ ${pkg.name}`))
+      if (pkg.error) {
+        const err = pkg.error as any
+        const detailMessage = err.originalError?.message || err.message
+        console.log(chalk.dim(`    原因: ${detailMessage}`))
+      }
+    }
+
+    // 自动回滚版本
+    console.log(chalk.yellow('\n⏪ 自动回滚版本...'))
+    rollbackVersion(rollbackCtx)
+    return
+  }
+
+  console.log(chalk.green('✓ 发布验证通过'))
+
+  // 7. Git 提交
   console.log(chalk.bold('\n📤 提交变更...'))
   try {
     const commitResult = await commitAndPush({
@@ -263,8 +242,8 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
     throw err
   }
 
-  // 7. 发布
-  console.log(chalk.bold('\n🚀 发布中...'))
+  // 8. 真正发布
+  console.log(chalk.bold('\n🚀 正式发布中...'))
   const publishResult = await group.publish()
 
   if (publishResult.hasFailure) {
@@ -272,11 +251,30 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
       .filter(r => !r.success)
       .map(r => ({ name: r.name, error: r.error }))
 
-    await promptRollback(rollbackCtx, failedPackages)
+    console.log(chalk.red(`\n⚠ 发布失败: ${failedPackages.length} 个包发布失败`))
+
+    // 显示每个失败包的详细错误信息
+    for (const pkg of failedPackages) {
+      console.log(chalk.red(`  ✗ ${pkg.name}`))
+      if (pkg.error) {
+        const err = pkg.error as any
+        const detailMessage = err.originalError?.message || err.message
+        console.log(chalk.dim(`    原因: ${detailMessage}`))
+      }
+    }
+
+    // 自动回滚
+    console.log(chalk.yellow('\n⏪ 自动回滚...'))
+    rollbackVersion(rollbackCtx)
+
+    if (rollbackCtx.commitHash) {
+      await gitReset(rollbackCtx.commitHash)
+    }
+
     return
   }
 
-  // 8. 完成
+  // 9. 完成
   console.log(chalk.bold(chalk.green(`\n✨ 发布完成！版本 ${newVersion}`)))
 }
 
