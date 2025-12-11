@@ -28,7 +28,7 @@ JavaScript 生态的工具函数往往缺少完整的类型定义,导致运行�
 
 ## Cat Kit 的解决方案
 
-Cat Kit 提供了一套**轻量、类型安全、跨环境**的工具包,让你专注业务���辑而非重复劳动:
+Cat Kit 提供了一套**轻量、类型安全、跨环境**的工具包,让你专注业务逻辑而非重复劳动:
 
 - **按需引入** - 只打包你使用的函数,构建产物最小化
 - **完整类型** - 100% TypeScript 编写,提供完整的类型推导和提示
@@ -59,29 +59,35 @@ pnpm add @cat-kit/core
 
 ### 场景 1: 避免重复的数组处理逻辑
 
-**痛点**: 每次需要分组、去重、分块时都要写循环逻辑
+**痛点**: 每次需要分组、去重、移动元素时都要写循环逻辑
 
 **解决方案**: 使用 `@cat-kit/core` 的数组工具
 
 ```typescript
-import { $arr } from '@cat-kit/core'
+import { arr, last, union, unionBy } from '@cat-kit/core'
 
-// 数据分块 - 比如实现分页展示
-const items = Array.from({ length: 100 }, (_, i) => i)
-const pages = $arr.chunk(items, 10) // 每页 10 条
+// 获取数组最后一个元素
+const items = [1, 2, 3, 4, 5]
+const lastItem = last(items) // 5
 
-// 数组去重 - 处理重复数据
-const userIds = [1, 2, 2, 3, 3, 3]
-const uniqueIds = $arr.unique(userIds) // [1, 2, 3]
+// 合并多个数组并去重
+const arr1 = [1, 2, 3]
+const arr2 = [2, 3, 4]
+const merged = union(arr1, arr2) // [1, 2, 3, 4]
 
-// 分组 - 按类别整理数据
+// 使用链式 API 进行更复杂的操作
 const products = [
   { category: 'book', name: 'TypeScript' },
   { category: 'book', name: 'JavaScript' },
   { category: 'food', name: 'Apple' }
 ]
-const grouped = $arr.groupBy(products, 'category')
+// 按类别分组
+const grouped = arr(products).groupBy(item => item.category)
 // { book: [...], food: [...] }
+
+// 移动元素位置
+const list = ['a', 'b', 'c', 'd']
+const reordered = arr(list).move(0, 2) // ['b', 'c', 'a', 'd']
 ```
 
 ### 场景 2: 统一的日期处理
@@ -91,17 +97,30 @@ const grouped = $arr.groupBy(products, 'category')
 **解决方案**: 使用简洁的日期工具
 
 ```typescript
-import { $date } from '@cat-kit/core'
+import { date, Dater } from '@cat-kit/core'
+
+// 创建日期实例 - 链式 API 设计
+const now = date() // 当前时间
+const specific = date('2025-12-10') // 指定日期
 
 // 格式化日期 - 无需记忆复杂的 Date API
-const now = new Date()
-$date.format(now, 'YYYY-MM-DD HH:mm:ss') // '2025-12-10 14:30:00'
+now.format('YYYY-MM-DD HH:mm:ss') // '2025-12-10 14:30:00'
 
-// 日期计算 - 比如计算活动结束时间
-const endDate = $date.add(now, 7, 'day') // 7 天后
+// 日期计算 - 不可变操作
+const nextWeek = now.addDays(7)
+const nextMonth = now.addMonths(1)
+const nextYear = now.addYears(1)
 
-// 日期比较 - 判断是否过期
-const isExpired = $date.isBefore(endDate, new Date())
+// 日期比较和判断
+const deadline = date('2025-12-31')
+const daysDiff = now.compare(deadline) // 返回天数差
+
+// 判断是否在区间内
+const isInRange = now.isBetween('2025-01-01', '2025-12-31')
+
+// 对齐到时间边界
+const startOfMonth = now.startOf('month')
+const endOfWeek = now.endOf('week')
 ```
 
 ### 场景 3: 跨环境的 HTTP 请求
@@ -115,68 +134,91 @@ import { HTTPClient } from '@cat-kit/http'
 
 // 创建客户端 - 浏览器和 Node.js 都能用
 const api = new HTTPClient('/api', {
+  origin: 'http://localhost:8080',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
   }
 })
 
-// 发送请求 - 自动处理错误、超时、重试
-const users = await api.get('/users')
+// 发送请求 - 简洁的链式调用
+const users = await api.get<User[]>('/users')
+const user = await api.post<User>('/users', { name: 'Zhang San' })
 
-// 使用插件系统 - 自动添加 token
-api.use(async (context, next) => {
-  const token = getToken()
-  context.request.headers.set('Authorization', `Bearer ${token}`)
-  await next()
-})
+// 创建请求分组 - 更好的代码组织
+const userApi = api.group('/users')
+await userApi.get('/profile')  // 实际请求 /api/users/profile
+await userApi.put('/settings', { theme: 'dark' })
 ```
 
 ### 场景 4: 前端存储管理
 
-**痛点**: localStorage、sessionStorage、Cookie、IndexedDB API 各不相同,使用繁琐
+**痛点**: localStorage、sessionStorage API 使用繁琐,缺乏类型安全
 
-**解决方案**: 统一的存储接口
+**解决方案**: 类型安全的存储封装
 
 ```typescript
-import { createStorage } from '@cat-kit/fe'
+import { WebStorage, storageKey } from '@cat-kit/fe'
 
-// 创建类型安全的存储
-interface UserPreferences {
-  theme: 'light' | 'dark'
-  language: string
-}
+// 定义类型安全的存储键
+const THEME_KEY = storageKey<'light' | 'dark'>('user-theme')
+const USER_KEY = storageKey<{ name: string; age: number }>('user-info')
 
-const storage = createStorage<UserPreferences>('local', 'user-prefs')
+// 创建存储实例
+const storage = new WebStorage(localStorage)
 
-// 读写数据 - 自动序列化/反序列化
-await storage.set('theme', 'dark')
-const theme = await storage.get('theme') // 类型: 'light' | 'dark'
+// 类型安全的读写 - 自动序列化/反序列化
+storage.set(THEME_KEY, 'dark')
+const theme = storage.get(THEME_KEY) // 类型: 'light' | 'dark' | null
+const themeWithDefault = storage.get(THEME_KEY, 'light') // 类型: 'light' | 'dark'
 
-// 同样的 API 可用于 sessionStorage、IndexedDB、Cookie
-const session = createStorage('session', 'temp-data')
-const db = createStorage('indexedDB', 'large-data')
+// 支持过期时间（秒）
+storage.set(USER_KEY, { name: 'John', age: 25 }, 3600) // 1小时后过期
+
+// 批量获取
+const [theme2, user] = storage.get([THEME_KEY, USER_KEY])
+
+// 监听值变化
+storage.on('user-theme', (key, value) => {
+  console.log(`${key} changed to ${value}`)
+})
 ```
 
-### 场景 5: 文件下载和处理
+### 场景 5: 文件下载和读取
 
 **痛点**: 浏览器下载文件需要创建临时 `<a>` 元素,代码冗长
 
 **解决方案**: 简化的文件操作
 
 ```typescript
-import { saveAs, readFile } from '@cat-kit/fe'
+import { saveFromBlob, saveFromURL, saveFromStream, readFile } from '@cat-kit/fe'
 
-// 下载文件 - 一行代码
-const blob = await fetch('/api/report').then(r => r.blob())
-saveAs(blob, 'report.pdf')
+// 从 Blob 保存文件 - 一行代码
+const blob = new Blob(['Hello, World!'], { type: 'text/plain' })
+saveFromBlob(blob, 'hello.txt')
 
-// 读取用户上传的文件
-const input = document.querySelector('input[type=file]')
-input.addEventListener('change', async (e) => {
-  const file = e.target.files[0]
-  const content = await readFile(file, 'text') // 支持 text、base64、arrayBuffer
-  console.log(content)
+// 从 URL 下载文件（带进度）
+await saveFromURL('/api/report.pdf', 'report.pdf', {
+  onProgress: bytes => console.log(`已下载: ${bytes} 字节`)
+})
+
+// 流式下载大文件
+const response = await fetch('/api/large-file.zip')
+await saveFromStream(response.body!, 'large-file.zip', {
+  size: Number(response.headers.get('content-length')),
+  onProgress: bytes => updateProgressBar(bytes)
+})
+
+// 分块读取用户上传的文件
+const input = document.querySelector<HTMLInputElement>('input[type=file]')!
+input.addEventListener('change', async e => {
+  const file = (e.target as HTMLInputElement).files![0]
+  await readFile(file, {
+    chunkSize: 10 * 1024 * 1024, // 每块 10MB
+    onChunk: (chunk, index) => {
+      console.log(`读取第 ${index + 1} 块,大小: ${chunk.byteLength}`)
+    }
+  })
 })
 ```
 
