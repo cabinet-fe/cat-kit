@@ -1,6 +1,6 @@
 {
   "name": "@cat-kit/tsconfig",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0",
   "description": "TypeScript 配置预设，提供适用于不同运行环境的 TypeScript 配置",
   "keywords": [
     "typescript",

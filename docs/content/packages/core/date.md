@@ -79,6 +79,9 @@ const nextWeek = base.clone().addWeeks(1) // base 未被修改
 
 ## 格式化
 
+::: demo core/format-demo.vue
+:::
+
 ```ts
 const d = date('2024-01-15 14:30:45')
 
@@ -109,6 +112,9 @@ d.format('yyyy-MM-dd HH:mm:ss', { utc: true }) // 按 UTC 输出
 - 模板缺失的字段使用默认值：年=当前年、月=1、日=1、时分秒=0。
 - 解析结果会进行溢出校验（例如 2024-02-30 会返回 `Invalid Date` 而不是自动进位）。
 
+::: demo core/parse-demo.vue
+:::
+
 ```ts
 const parsed = Dater.parse('2024-03-05 14:20:10', 'yyyy-MM-dd HH:mm:ss')
 parsed.format('yyyy/MM/dd HH:mm') // 2024/03/05 14:20
@@ -122,6 +128,9 @@ Number.isNaN(invalid.timestamp) // true
 ```
 
 ## 计算与对齐
+
+::: demo core/calc-demo.vue
+:::
 
 ```ts
 const d = date('2024-03-15 10:20:30')
@@ -141,6 +150,9 @@ date('2024-02-01 12:00').endOf('month').format('yyyy-MM-dd HH:mm:ss') // 2024-02
 ```
 
 ## 比较、差值与范围
+
+::: demo core/compare-demo.vue
+:::
 
 ```ts
 const a = date('2024-01-15')

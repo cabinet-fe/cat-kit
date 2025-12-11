@@ -200,42 +200,43 @@ async function promptRollback(
 // 发布流程
 // ============================================================================
 
-type WorkspaceGroup = typeof main | typeof maintenance | typeof tsconfig
-
-interface GroupConfig {
-  group: WorkspaceGroup
-  buildConfigs?: Parameters<typeof main.build>[0]
+const GROUP_MAP = {
+  main,
+  maintenance,
+  tsconfig,
 }
 
-const GROUP_CONFIGS: Record<'main' | 'maintenance' | 'tsconfig', GroupConfig> = {
-  main: {
-    group: main,
-    buildConfigs: {
+const GROUPS_BUILD = {
+  main() {
+    return main.build({
       '@cat-kit/be': { platform: 'node' },
       '@cat-kit/excel': { platform: 'browser' },
-    },
+    })
   },
-  maintenance: {
-    group: maintenance,
-  },
-  tsconfig: {
-    group: tsconfig,
-  },
+
+  maintenance() {
+    return maintenance.build({
+      '@cat-kit/maintenance': { platform: 'node' },
+    })
+  }
 }
 
 /**
  * 发布指定组
  */
 async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Promise<void> {
-  const config = GROUP_CONFIGS[groupName]
-  const group = config.group
+  const builder = GROUPS_BUILD[groupName]
+
 
   // 1. 构建
-  console.log(chalk.bold('\n🔨 开始构建...'))
-  await group.build(config.buildConfigs as any)
+  if (builder) {
+    console.log(chalk.bold('\n🔨 开始构建...'))
+    await builder()
+  }
 
   // 2. 获取当前版本
-  const currentVersion = group.workspaces[0]?.pkg.version || '0.0.0'
+  const group = GROUP_MAP[groupName]
+  const currentVersion: string = group.workspaces[0]?.pkg.version || '0.0.0'
 
   // 3. 选择版本
   const bumpType = await chooseVersion(currentVersion)
