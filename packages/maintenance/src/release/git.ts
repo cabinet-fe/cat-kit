@@ -78,6 +78,9 @@ export async function createGitTag(options: GitTagOptions): Promise<GitTagResult
 
 /**
  * 提交并推送代码（可选推送 tag）
+ *
+ * 如果没有待提交的变更，将跳过提交步骤，视为提交完成。
+ *
  * @param options - 提交与推送配置
  * @returns 提交结果
  * @throws {GitError} 当 git 命令执行失败时
@@ -111,17 +114,26 @@ export async function commitAndPush(
     await execGit(cwd, ['add', '-A'])
   }
 
-  const commitArgs = ['commit', '-m', message.trim()]
-  if (allowEmpty) {
-    commitArgs.push('--allow-empty')
+  // 检测是否有待提交的变更
+  const status = await execGit(cwd, ['status', '--porcelain'])
+  const hasChanges = status.length > 0
+
+  if (hasChanges || allowEmpty) {
+    const commitArgs = ['commit', '-m', message.trim()]
+    if (allowEmpty) {
+      commitArgs.push('--allow-empty')
+    }
+    await execGit(cwd, commitArgs)
   }
-  await execGit(cwd, commitArgs)
 
   const branch =
     specifiedBranch ||
     (await execGit(cwd, ['rev-parse', '--abbrev-ref', 'HEAD'])).trim()
 
-  await execGit(cwd, ['push', remote, branch])
+  // 只有在有变更时才推送
+  if (hasChanges || allowEmpty) {
+    await execGit(cwd, ['push', remote, branch])
+  }
 
   if (pushTags) {
     await execGit(cwd, ['push', remote, '--tags'])
