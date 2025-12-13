@@ -152,7 +152,11 @@ class WorkspaceGroup<Workspaces extends string> {
     const totalDuration = Date.now() - start
     console.log(chalk.bold(chalk.green(`✨ 构建完成: ${successCount} 成功, ${failedCount} 失败 ${totalDuration}ms`)))
 
-
+    // 如果有构建失败，抛出错误阻止后续流程
+    if (failedCount > 0) {
+      const failedNames = results.filter(r => !r.success).map(r => r.name).join(', ')
+      throw new Error(`构建失败: ${failedNames}`)
+    }
   }
 
   /**
