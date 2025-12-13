@@ -10,7 +10,5 @@ export type {
   BuildSummary,
   MonorepoValidationResult,
   DependencyGraphResult,
-  PublishGroupResult,
   RollbackContext
 } from './types'
-
