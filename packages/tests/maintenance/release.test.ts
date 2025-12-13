@@ -45,4 +45,40 @@ describe('release/publish', () => {
       })
     ).rejects.toBeInstanceOf(PublishError)
   })
+
+  it('使用 workspace 参数发布指定工作区', async () => {
+    const { publishPackage } = await import('@cat-kit/maintenance/src')
+
+    // 由于目录不存在，应该抛出 PublishError
+    await expect(
+      publishPackage({
+        cwd: '/nonexistent-repo',
+        workspace: ['@cat-kit/core', '@cat-kit/fe']
+      })
+    ).rejects.toBeInstanceOf(PublishError)
+  })
+
+  it('使用 workspaces 参数发布所有工作区', async () => {
+    const { publishPackage } = await import('@cat-kit/maintenance/src')
+
+    // 由于目录不存在，应该抛出 PublishError
+    await expect(
+      publishPackage({
+        cwd: '/nonexistent-repo',
+        workspaces: true
+      })
+    ).rejects.toBeInstanceOf(PublishError)
+  })
+
+  it('provenance 和 provenanceFile 不能同时使用', async () => {
+    const { publishPackage } = await import('@cat-kit/maintenance/src')
+
+    await expect(
+      publishPackage({
+        cwd: '/some-path',
+        provenance: true,
+        provenanceFile: '/path/to/provenance.json'
+      })
+    ).rejects.toThrow('provenance 和 provenanceFile 不能同时使用')
+  })
 })

@@ -38,10 +38,54 @@ export interface GitCommitAndPushOptions {
 
 /**
  * npm 发布选项
+ *
+ * 支持三种发布模式：
+ * 1. 单包发布：仅提供 cwd，发布 cwd 目录下的包
+ * 2. 指定工作区发布：提供 cwd + workspace，使用 npm 原生 --workspace 参数
+ * 3. 全部工作区发布：提供 cwd + workspaces=true，使用 npm 原生 --workspaces 参数
  */
 export interface PublishOptions {
-  /** 包所在目录（包含 package.json） */
+  /** 仓库根目录或包所在目录 */
   cwd: string
+  /**
+   * 要发布的工作区名称或路径列表
+   *
+   * 使用 npm 原生的 --workspace 参数，可以是：
+   * - 工作区名称（如 '@cat-kit/core'）
+   * - 工作区目录路径
+   * - 父目录路径（会发布该目录下所有工作区）
+   *
+   * @example
+   * ```ts
+   * // 发布指定工作区
+   * await publishPackage({
+   *   cwd: '/path/to/monorepo',
+   *   workspace: ['@cat-kit/core', '@cat-kit/fe']
+   * })
+   * ```
+   */
+  workspace?: string[]
+  /**
+   * 是否发布所有工作区
+   *
+   * 使用 npm 原生的 --workspaces 参数
+   *
+   * @example
+   * ```ts
+   * // 发布所有工作区
+   * await publishPackage({
+   *   cwd: '/path/to/monorepo',
+   *   workspaces: true
+   * })
+   * ```
+   */
+  workspaces?: boolean
+  /**
+   * 是否包含根工作区
+   *
+   * 仅在 workspace 或 workspaces 生效时有效
+   */
+  includeWorkspaceRoot?: boolean
   /** 自定义 registry，默认使用 npm 官方源 */
   registry?: string
   /** 发布 dist-tag，默认 latest */
@@ -52,8 +96,10 @@ export interface PublishOptions {
   dryRun?: boolean
   /** 包访问级别 */
   access?: 'public' | 'restricted'
-  /** 启用 provenance（npm 9+ 支持） */
+  /** 启用 provenance（npm 9+ 支持，需要在 CI/CD 环境中使用） */
   provenance?: boolean
+  /** provenance 文件路径（与 provenance 互斥） */
+  provenanceFile?: string
 }
 
 /**

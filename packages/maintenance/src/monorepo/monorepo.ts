@@ -9,8 +9,7 @@ import type {
   GroupPublishOptions,
   BuildSummary,
   MonorepoValidationResult,
-  DependencyGraphResult,
-  PublishGroupResult
+  DependencyGraphResult
 } from './types'
 import type { PackageJson } from '../types'
 import type { BumpResult } from '../version/types'
@@ -30,8 +29,10 @@ import { readJsonSync, matchWorkspaces, getPeerDevExternal } from './helpers'
  */
 class WorkspaceGroup<Workspaces extends string> {
   #workspaces: MonorepoWorkspace[]
+  #repo: Monorepo
 
   constructor(repo: Monorepo, workspaceNames: Workspaces[]) {
+    this.#repo = repo
     // 过滤出匹配的工作区
     const nameSet = new Set(workspaceNames)
     this.#workspaces = repo.workspaces.filter(ws => nameSet.has(ws.name as Workspaces))
@@ -193,11 +194,15 @@ class WorkspaceGroup<Workspaces extends string> {
   }
 
   /**
-   * 并行发布包
+   * 批量发布包
    *
-   * @returns 发布结果，包含每个包的成功/失败状态
+   * 使用 npm 原生的 --workspace 参数发布指定工作区。
+   * npm 会自动处理发布顺序和依赖关系。
+   *
+   * @param options - 发布选项
+   * @throws {PublishError} 当发布失败时
    */
-  async publish(options: GroupPublishOptions = {}): Promise<PublishGroupResult> {
+  async publish(options: GroupPublishOptions = {}): Promise<void> {
     const { skipPrivate = true, ...publishOptions } = options
 
     // 过滤需要发布的包
@@ -209,44 +214,24 @@ class WorkspaceGroup<Workspaces extends string> {
       return true
     })
 
-    // 并行发布
-    const results = await Promise.all(
-      toPublish.map(async (ws) => {
-        try {
-          // 自动检测预发布版本并设置 tag
-          let tag = publishOptions.tag
-          if (!tag) {
-            const prereleaseMatch = ws.version.match(/-([a-zA-Z]+)/)
-            if (prereleaseMatch) {
-              // 从版本号中提取预发布标识（如 alpha, beta, rc）
-              tag = prereleaseMatch[1]
-            }
-          }
+    if (toPublish.length === 0) {
+      console.log(chalk.yellow('没有需要发布的包'))
+      return
+    }
 
-          await publishPackage({
-            cwd: ws.dir,
-            ...publishOptions,
-            tag
-          })
-          console.log(chalk.green(`  ✓ ${ws.name}`))
-          return {
-            name: ws.name,
-            success: true as const
-          }
-        } catch (err) {
-          console.log(chalk.red(`  ✗ ${ws.name}`))
-          return {
-            name: ws.name,
-            success: false as const,
-            error: err instanceof Error ? err : new Error(String(err))
-          }
-        }
-      })
-    )
+    console.log(chalk.blue(`📦 准备发布 ${toPublish.length} 个包:`))
+    for (const ws of toPublish) {
+      console.log(chalk.dim(`  - ${ws.name}@${ws.version}`))
+    }
 
-    const hasFailure = results.some(r => !r.success)
+    // 使用 npm 原生的 --workspace 参数批量发布
+    await publishPackage({
+      cwd: this.#repo.root.dir,
+      workspace: toPublish.map(ws => ws.name),
+      ...publishOptions
+    })
 
-    return { results, hasFailure }
+    console.log(chalk.green(`✓ 发布完成`))
   }
 }
 

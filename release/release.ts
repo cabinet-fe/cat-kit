@@ -211,22 +211,13 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
 
   // 6. Dry-run 验证发布
   console.log(chalk.bold('\n🔍 验证发布（dry-run）...'))
-  const dryRunResult = await group.publish({ dryRun: true })
-
-  if (dryRunResult.hasFailure) {
+  try {
+    await group.publish({ dryRun: true })
+    console.log(chalk.green('✓ 发布验证通过'))
+  } catch (err) {
     console.log(chalk.red('\n❌ 发布验证失败'))
-    const failedPackages = dryRunResult.results
-      .filter(r => !r.success)
-      .map(r => ({ name: r.name, error: r.error }))
-
-    // 显示错误详情
-    for (const pkg of failedPackages) {
-      console.log(chalk.red(`  ✗ ${pkg.name}`))
-      if (pkg.error) {
-        const err = pkg.error as any
-        const detailMessage = err.originalError?.message || err.message
-        console.log(chalk.dim(`    原因: ${detailMessage}`))
-      }
+    if (err instanceof Error) {
+      console.log(chalk.dim(`  原因: ${err.message}`))
     }
 
     // 自动回滚版本
@@ -234,8 +225,6 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
     rollbackVersion(rollbackCtx)
     return
   }
-
-  console.log(chalk.green('✓ 发布验证通过'))
 
   // 7. Git 提交
   console.log(chalk.bold('\n📤 提交变更...'))
@@ -254,23 +243,12 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
 
   // 8. 真正发布
   console.log(chalk.bold('\n🚀 正式发布中...'))
-  const publishResult = await group.publish()
-
-  if (publishResult.hasFailure) {
-    const failedPackages = publishResult.results
-      .filter(r => !r.success)
-      .map(r => ({ name: r.name, error: r.error }))
-
-    console.log(chalk.red(`\n⚠ 发布失败: ${failedPackages.length} 个包发布失败`))
-
-    // 显示每个失败包的详细错误信息
-    for (const pkg of failedPackages) {
-      console.log(chalk.red(`  ✗ ${pkg.name}`))
-      if (pkg.error) {
-        const err = pkg.error as any
-        const detailMessage = err.originalError?.message || err.message
-        console.log(chalk.dim(`    原因: ${detailMessage}`))
-      }
+  try {
+    await group.publish()
+  } catch (err) {
+    console.log(chalk.red('\n⚠ 发布失败'))
+    if (err instanceof Error) {
+      console.log(chalk.dim(`  原因: ${err.message}`))
     }
 
     // 自动回滚

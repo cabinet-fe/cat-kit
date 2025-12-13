@@ -57,7 +57,7 @@ export interface GroupBumpOptions extends BumpOptions {
 /**
  * 工作区分组发布选项
  */
-export interface GroupPublishOptions extends Omit<PublishOptions, 'cwd'> {
+export interface GroupPublishOptions extends Omit<PublishOptions, 'cwd' | 'workspace' | 'workspaces' | 'includeWorkspaceRoot'> {
   /** 是否跳过私有包，默认 true */
   skipPrivate?: boolean
 }
@@ -116,23 +116,6 @@ export interface DependencyGraphResult {
   }>
   /** Mermaid 格式的依赖图 */
   mermaid: string
-}
-
-/**
- * 并行发布结果
- */
-export interface PublishGroupResult {
-  /** 各包发布结果 */
-  results: Array<{
-    /** 包名称 */
-    name: string
-    /** 是否成功 */
-    success: boolean
-    /** 错误信息（失败时） */
-    error?: Error
-  }>
-  /** 是否有失败的包 */
-  hasFailure: boolean
 }
 
 /**
