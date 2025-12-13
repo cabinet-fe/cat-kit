@@ -75,13 +75,14 @@ const BUMP_TYPES: BumpType[] = [
   'prepatch',
   'preminor',
   'premajor',
-  'prerelease',
+  'prerelease'
 ]
 
 /**
  * 交互式选择版本类型
  */
-async function chooseVersion(currentVersion: string): Promise<BumpType> {
+async function chooseVersion(currentVersion: string): Promise<BumpType
+  | 'current'> {
   console.log(chalk.bold(`\n📦 当前版本: ${chalk.cyan(currentVersion)}`))
 
   const choices = BUMP_TYPES.map(type => {
@@ -94,7 +95,10 @@ async function chooseVersion(currentVersion: string): Promise<BumpType> {
 
   const bumpType = await select({
     message: '选择版本类型',
-    choices,
+    choices: [
+      ...choices,
+      { value: 'current' as const, name: `${'current'.padEnd(12)} → ${currentVersion}`, },
+    ],
   })
 
   return bumpType
@@ -196,8 +200,14 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
   const rollbackCtx = createRollbackContext(group.workspaces, currentVersion)
 
   // 5. 更新版本
-  console.log(chalk.bold('\n📝 更新版本...'))
-  const { version: newVersion } = await group.bumpVersion({ type: bumpType })
+  let nextVersion: string | undefined
+  if (bumpType === 'current') {
+    nextVersion = currentVersion
+  } else {
+    console.log(chalk.bold('\n📝 更新版本...'))
+    const { version } = await group.bumpVersion({ type: bumpType })
+    nextVersion = version
+  }
 
   // 6. Dry-run 验证发布
   console.log(chalk.bold('\n🔍 验证发布（dry-run）...'))
@@ -232,10 +242,10 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
   try {
     const commitResult = await commitAndPush({
       cwd: repo.root.dir,
-      message: `chore(release): v${newVersion}`,
+      message: `chore(release): v${nextVersion}`,
     })
     rollbackCtx.commitHash = commitResult.commitHash
-    console.log(chalk.green(`✓ 已提交: chore(release): v${newVersion}`))
+    console.log(chalk.green(`✓ 已提交: chore(release): v${nextVersion}`))
   } catch (err) {
     console.error(chalk.red('Git 提交失败'))
     rollbackVersion(rollbackCtx)
@@ -275,7 +285,7 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
   }
 
   // 9. 完成
-  console.log(chalk.bold(chalk.green(`\n✨ 发布完成！版本 ${newVersion}`)))
+  console.log(chalk.bold(chalk.green(`\n✨ 发布完成！版本 ${nextVersion}`)))
 }
 
 /**
