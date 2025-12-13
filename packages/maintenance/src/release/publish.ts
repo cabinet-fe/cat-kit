@@ -86,7 +86,16 @@ export async function publishPackage(
     await $({ cwd, stdio: 'inherit' })`npm publish ${args}`
     return { output: '' }
   } catch (error) {
-    throw new PublishError(`npm 命令执行失败: ${command}`, command, error as Error)
+    // 提取 execa 错误中的 stderr 信息
+    const execaError = error as { stderr?: string; message?: string }
+    const stderr = execaError.stderr?.trim()
+    const errorMessage = stderr || execaError.message || '未知错误'
+
+    throw new PublishError(
+      `npm 命令执行失败: ${command}\n${errorMessage}`,
+      command,
+      error as Error
+    )
   }
 }
 

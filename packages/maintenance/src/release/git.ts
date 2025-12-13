@@ -17,7 +17,16 @@ export async function execGit(cwd: string, args: string[]): Promise<string> {
     const { stdout } = await $({ cwd })`git ${args}`
     return stdout.trim()
   } catch (error) {
-    throw new GitError(`执行 git 命令失败: ${command}`, command, error as Error)
+    // 提取 execa 错误中的 stderr 信息
+    const execaError = error as { stderr?: string; message?: string }
+    const stderr = execaError.stderr?.trim()
+    const errorMessage = stderr || execaError.message || '未知错误'
+
+    throw new GitError(
+      `执行 git 命令失败: ${command}\n${errorMessage}`,
+      command,
+      error as Error
+    )
   }
 }
 
