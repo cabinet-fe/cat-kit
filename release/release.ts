@@ -244,7 +244,9 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
   // 8. 真正发布
   console.log(chalk.bold('\n🚀 正式发布中...'))
   try {
-    await group.publish()
+    await group.publish({
+      access: 'public',
+    })
   } catch (err) {
     console.log(chalk.red('\n⚠ 发布失败'))
     if (err instanceof Error) {
