@@ -1,5 +1,26 @@
-import { execGit } from '../utils'
+import { $ } from 'execa'
+import { GitError } from '../errors'
 import type { GitCommitAndPushOptions, GitCommitResult, GitTagOptions, GitTagResult } from './types'
+
+
+/**
+ * 执行 git 命令
+ * @param cwd - 工作目录
+ * @param args - git 命令参数
+ * @returns 命令输出
+ * @throws {GitError} 当 git 命令执行失败时
+ */
+export async function execGit(cwd: string, args: string[]): Promise<string> {
+  const command = `git ${args.join(' ')}`
+
+  try {
+    const { stdout } = await $({ cwd })`git ${args}`
+    return stdout.trim()
+  } catch (error) {
+    throw new GitError(`执行 git 命令失败: ${command}`, command, error as Error)
+  }
+}
+
 
 /**
  * 创建 git tag（可选推送）

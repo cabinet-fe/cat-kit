@@ -7,7 +7,6 @@
     "react-dom": "^19.2.0",
     "@cat-kit/maintenance": "workspace:*",
     "@cat-kit/tsconfig": "workspace:*",
-    "execa": "^9.6.0",
     "@inquirer/prompts": "^8.0.2"
   },
   "scripts": {
