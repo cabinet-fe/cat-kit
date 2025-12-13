@@ -219,6 +219,20 @@ class WorkspaceGroup<Workspaces extends string> {
       return
     }
 
+    // 自动检测预发布版本并设置 tag
+    // 假设同一个 group 的包版本号一致
+    let tag = publishOptions.tag
+    if (!tag) {
+      const firstVersion = toPublish[0]?.version
+      if (firstVersion) {
+        const prereleaseMatch = firstVersion.match(/-([a-zA-Z]+)/)
+        if (prereleaseMatch) {
+          tag = prereleaseMatch[1]
+          console.log(chalk.dim(`  检测到预发布版本，自动设置 tag: ${tag}`))
+        }
+      }
+    }
+
     console.log(chalk.blue(`📦 准备发布 ${toPublish.length} 个包:`))
     for (const ws of toPublish) {
       console.log(chalk.dim(`  - ${ws.name}@${ws.version}`))
@@ -228,7 +242,8 @@ class WorkspaceGroup<Workspaces extends string> {
     await publishPackage({
       cwd: this.#repo.root.dir,
       workspace: toPublish.map(ws => ws.name),
-      ...publishOptions
+      ...publishOptions,
+      tag
     })
 
     console.log(chalk.green(`✓ 发布完成`))
