@@ -14,9 +14,11 @@
       "WebSearch",
       "Bash(bun i:*)",
       "Bash(bun run test --help:*)",
-      "Bash(bun run test:*)"
+      "Bash(bun run test:*)",
+      "mcp__Relace__relace_search"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "outputStyle": "default"
 }

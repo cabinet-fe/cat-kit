@@ -85,6 +85,8 @@ features:
 /* 特性卡片交错入场 */
 .VPFeatures .VPFeature {
   animation: fadeInUp 0.6s ease-out both;
+  position: relative;
+  overflow: hidden;
 }
 
 .VPFeatures .VPFeature:nth-child(1) { animation-delay: 0.5s; }
@@ -94,12 +96,56 @@ features:
 .VPFeatures .VPFeature:nth-child(5) { animation-delay: 0.9s; }
 .VPFeatures .VPFeature:nth-child(6) { animation-delay: 1.0s; }
 
+/* 特性卡片流光动画 */
+.VPFeatures .VPFeature::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    rgba(199, 93, 31, 0.4),
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.VPFeatures .VPFeature:hover::before {
+  left: 100%;
+}
+
+/* 暗色模式下的流光效果 */
+.dark .VPFeatures .VPFeature::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    rgba(224, 124, 62, 0.5),
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+}
+
+/* 确保卡片内容在流光之上 */
+.VPFeatures .VPFeature > * {
+  position: relative;
+  z-index: 2;
+}
+
 /* 特性卡片图标动画 */
-.VPFeature .icon {
+.VPFeatures .VPFeature .icon {
   transition: transform 0.3s ease;
 }
 
-.VPFeature:hover .icon {
+.VPFeatures .VPFeature:hover .icon {
   transform: scale(1.2) rotate(-5deg);
 }
 
@@ -156,6 +202,10 @@ features:
   .VPHero .image-container .image-src,
   .VPFeatures .VPFeature {
     animation: none;
+  }
+
+  .VPFeatures .VPFeature::before {
+    display: none;
   }
 }
 </style>
