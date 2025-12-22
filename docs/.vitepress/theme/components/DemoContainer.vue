@@ -13,7 +13,9 @@ const props = defineProps<{
 const showSource = ref(false)
 const copied = ref(false)
 
-const decodedCode = computed(() => (props.code ? decodeURIComponent(props.code) : ''))
+const decodedCode = computed(() =>
+  props.code ? decodeURIComponent(props.code) : ''
+)
 const decodedHighlightCode = computed(() =>
   props.highlightCode ? decodeURIComponent(props.highlightCode) : ''
 )
@@ -44,14 +46,25 @@ const toggleSource = () => {
     <div class="demo-preview">
       <div v-if="!is" class="demo-error">
         <span class="error-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="8" x2="12" y2="12"></line>
             <line x1="12" y1="16" x2="12.01" y2="16"></line>
           </svg>
         </span>
-        <span>Demo 文件不存在: <code>examples/{{ path }}</code></span>
+        <span
+          >Demo 文件不存在: <code>examples/{{ path }}</code></span
+        >
       </div>
       <component v-else :is="is" />
     </div>
@@ -60,7 +73,9 @@ const toggleSource = () => {
     <div v-show="showSource" class="demo-source-wrapper">
       <div class="demo-source">
         <div class="line-numbers-wrapper" aria-hidden="true">
-          <span v-for="n in lineNumbers" :key="n" class="line-number">{{ n }}</span>
+          <span v-for="n in lineNumbers" :key="n" class="line-number">{{
+            n
+          }}</span>
         </div>
         <div class="code-content" v-html="decodedHighlightCode"></div>
       </div>
@@ -70,21 +85,61 @@ const toggleSource = () => {
     <div class="demo-actions">
       <span class="demo-lang">vue</span>
       <div class="demo-btns">
-        <button class="demo-btn" :class="{ copied }" @click="copyCode" :title="copied ? '已复制' : '复制代码'">
-          <svg v-if="copied" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button
+          class="demo-btn"
+          :class="{ copied }"
+          @click="copyCode"
+          :title="copied ? '已复制' : '复制代码'"
+        >
+          <svg
+            v-if="copied"
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            <path
+              d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            ></path>
           </svg>
         </button>
-        <button class="demo-btn" :class="{ active: showSource }" @click="toggleSource"
-          :title="showSource ? '收起源码' : '查看源码'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button
+          class="demo-btn"
+          :class="{ active: showSource }"
+          @click="toggleSource"
+          :title="showSource ? '收起源码' : '查看源码'"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <polyline points="16 18 22 12 16 6"></polyline>
             <polyline points="8 6 2 12 8 18"></polyline>
           </svg>
@@ -96,16 +151,26 @@ const toggleSource = () => {
 
 <style scoped>
 .demo-container {
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  margin: 16px 0;
+  border: 1px solid var(--ink-trace);
+  border-radius: 6px;
+  margin: 24px 0;
   background-color: var(--vp-c-bg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.demo-container:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--ink-light);
 }
 
 /* 预览区域 */
 .demo-preview {
-  padding: 12px;
-  border-radius: 8px 8px 0 0;
+  padding: 20px;
+  border-radius: 6px 6px 0 0;
+  background-image: radial-gradient(var(--ink-trace) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-color: var(--vp-c-bg-alt);
 }
 
 .demo-error {
@@ -114,7 +179,7 @@ const toggleSource = () => {
   gap: 8px;
   padding: 12px 16px;
   background-color: var(--vp-c-danger-soft);
-  border-radius: 6px;
+  border-radius: 4px;
   color: var(--vp-c-danger-1);
   font-size: 14px;
 }
@@ -135,7 +200,8 @@ const toggleSource = () => {
 
 /* 代码区域 */
 .demo-source-wrapper {
-  background-color: var(--vp-code-block-bg);
+  background-color: var(--vp-c-bg);
+  border-top: 1px solid var(--ink-trace);
 }
 
 .demo-source {
@@ -143,7 +209,7 @@ const toggleSource = () => {
   /* max-height: 400px; */
   overflow: auto;
   padding-left: 32px;
-  background-color: var(--vp-code-block-bg);
+  background-color: var(--vp-c-bg);
 }
 
 .line-numbers-wrapper {
@@ -158,8 +224,9 @@ const toggleSource = () => {
   font-family: var(--vp-font-family-mono);
   line-height: var(--vp-code-line-height);
   font-size: var(--vp-code-font-size);
-  color: var(--vp-code-line-number-color);
-  border-right: 1px solid var(--vp-code-block-divider-color);
+  color: var(--ink-light);
+  border-right: 1px solid var(--ink-trace);
+  background-color: var(--vp-c-bg-soft);
   user-select: none;
 }
 
@@ -184,7 +251,7 @@ const toggleSource = () => {
   min-width: 100%;
   line-height: var(--vp-code-line-height);
   font-size: var(--vp-code-font-size);
-  color: var(--vp-code-block-color);
+  color: var(--vp-c-text-2); /* 调整为次要文本色，更柔和 */
 }
 
 .code-content :deep(.shiki) {
@@ -199,24 +266,26 @@ const toggleSource = () => {
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background-color: var(--vp-code-block-bg);
-  border-top: 1px solid var(--vp-c-divider);
-  border-radius: 0 0 8px 8px;
+  background-color: var(--vp-c-bg);
+  border-top: 1px solid var(--ink-trace);
+  border-radius: 0 0 6px 6px;
   z-index: 10;
 }
 
 .demo-lang {
   font-size: 12px;
   font-weight: 500;
-  color: var(--vp-code-lang-color);
+  color: var(--ink-light);
   text-transform: uppercase;
   user-select: none;
+  font-family: var(--vp-font-family-mono);
+  letter-spacing: 1px;
 }
 
 .demo-btns {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 .demo-btn {
@@ -225,21 +294,23 @@ const toggleSource = () => {
   justify-content: center;
   width: 32px;
   height: 32px;
-  color: var(--vp-c-text-2);
+  color: var(--ink-light);
   background-color: transparent;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .demo-btn:hover {
-  color: var(--vp-c-text-1);
-  background-color: var(--vp-c-default-soft);
+  color: var(--ink-heavy);
+  background-color: var(--vp-c-bg-soft);
+  border-color: var(--ink-trace);
 }
 
 .demo-btn.active {
-  color: var(--vp-c-brand-1);
+  color: var(--ink-heavy);
+  background-color: var(--vp-c-bg-soft);
 }
 
 .demo-btn.copied {

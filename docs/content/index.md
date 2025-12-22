@@ -44,38 +44,37 @@ features:
 ---
 
 <style>
-/* 首页动画效果 */
+/* 首页动画效果 - 水墨风格 */
 
-/* 英雄区域入场动画 */
+/* 英雄区域入场动画 - 缓慢晕染 */
 .VPHero .name {
-  animation: fadeInUp 0.8s ease-out both;
+  animation: inkSpread 1.2s ease-out both;
 }
 
 .VPHero .text {
-  animation: fadeInUp 0.8s ease-out 0.1s both;
+  animation: inkSpread 1.2s ease-out 0.2s both;
 }
 
 .VPHero .tagline {
-  animation: fadeInUp 0.8s ease-out 0.2s both;
+  animation: inkSpread 1.2s ease-out 0.4s both;
 }
 
 .VPHero .actions {
-  animation: fadeInUp 0.8s ease-out 0.3s both;
+  animation: inkSpread 1.2s ease-out 0.6s both;
 }
 
-/* 吉祥物图片动画 - 只在容器上添加动画，避免覆盖子元素的 transform 定位 */
+/* 吉祥物图片动画 */
 .VPHero .image-container {
-  animation: imageContainerIn 1s ease-out 0.4s both;
+  animation: inkFadeIn 1.5s ease-out 0.8s both;
 }
 
-/* 使用 filter 实现光晕脉动效果，不影响 transform */
+/* 呼吸效果 - 极缓 */
 .VPHero .image-container .image-bg {
-  animation: bgPulse 4s ease-in-out infinite;
+  animation: mistPulse 6s ease-in-out infinite;
 }
 
-/* 图片容器整体浮动效果 */
 .VPHero .image-container .image-src {
-  animation: gentleFloat 3s ease-in-out infinite;
+  animation: gentleFloat 4s ease-in-out infinite;
 }
 
 .VPHero .image-container:hover .image-src {
@@ -84,76 +83,50 @@ features:
 
 /* 特性卡片交错入场 */
 .VPFeatures .VPFeature {
-  animation: fadeInUp 0.6s ease-out both;
+  animation: inkUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   position: relative;
   overflow: hidden;
 }
 
-.VPFeatures .VPFeature:nth-child(1) { animation-delay: 0.5s; }
-.VPFeatures .VPFeature:nth-child(2) { animation-delay: 0.6s; }
-.VPFeatures .VPFeature:nth-child(3) { animation-delay: 0.7s; }
-.VPFeatures .VPFeature:nth-child(4) { animation-delay: 0.8s; }
-.VPFeatures .VPFeature:nth-child(5) { animation-delay: 0.9s; }
-.VPFeatures .VPFeature:nth-child(6) { animation-delay: 1.0s; }
+.VPFeatures .VPFeature:nth-child(1) { animation-delay: 0.6s; }
+.VPFeatures .VPFeature:nth-child(2) { animation-delay: 0.7s; }
+.VPFeatures .VPFeature:nth-child(3) { animation-delay: 0.8s; }
+.VPFeatures .VPFeature:nth-child(4) { animation-delay: 0.9s; }
+.VPFeatures .VPFeature:nth-child(5) { animation-delay: 1.0s; }
+.VPFeatures .VPFeature:nth-child(6) { animation-delay: 1.1s; }
 
-/* 特性卡片流光动画 */
+/* 移除流光效果，改为墨韵晕染 */
 .VPFeatures .VPFeature::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.5),
-    rgba(199, 93, 31, 0.4),
-    rgba(255, 255, 255, 0.5),
-    transparent
-  );
-  transform: skewX(-25deg);
-  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.VPFeatures .VPFeature:hover::before {
-  left: 100%;
-}
-
-/* 暗色模式下的流光效果 */
-.dark .VPFeatures .VPFeature::before {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    rgba(224, 124, 62, 0.5),
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-}
-
-/* 确保卡片内容在流光之上 */
-.VPFeatures .VPFeature > * {
-  position: relative;
-  z-index: 2;
+  display: none;
 }
 
 /* 特性卡片图标动画 */
 .VPFeatures .VPFeature .icon {
-  transition: transform 0.3s ease;
+  transition: transform 0.4s ease;
 }
 
 .VPFeatures .VPFeature:hover .icon {
-  transform: scale(1.2) rotate(-5deg);
+  transform: translateY(-2px);
 }
 
-/* 动画关键帧 */
-@keyframes fadeInUp {
+/* 动画关键帧 - 水墨晕染 */
+@keyframes inkSpread {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: scale(0.98) translateY(10px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes inkUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
@@ -161,34 +134,19 @@ features:
   }
 }
 
-/* 图片容器入场动画 - 只用 opacity，不用 transform */
-@keyframes imageContainerIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+@keyframes inkFadeIn {
+  from { opacity: 0; filter: blur(8px); }
+  to { opacity: 1; filter: blur(0); }
 }
 
-/* 浮动动画 - 使用 margin 而非 transform，避免覆盖定位 */
 @keyframes gentleFloat {
-  0%, 100% {
-    margin-top: 4px;
-  }
-  50% {
-    margin-top: -4px;
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
-/* 背景光晕脉动 - 只用 opacity */
-@keyframes bgPulse {
-  0%, 100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
+@keyframes mistPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.02); }
 }
 
 /* 减少动画偏好的用户 */
@@ -203,9 +161,6 @@ features:
   .VPFeatures .VPFeature {
     animation: none;
   }
-
-  .VPFeatures .VPFeature::before {
-    display: none;
-  }
 }
 </style>
+

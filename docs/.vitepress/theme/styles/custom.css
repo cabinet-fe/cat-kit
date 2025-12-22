@@ -1,188 +1,239 @@
 /**
- * 自定义样式 - 基于 CatKit 吉祥物配色
- * 橘白色小猫 + 蓝灰色眼睛 + 棕色工具箱
+ * 水墨丹青主题 - Minimalist Ink Style
+ * 设计理念：计白当黑，墨分五色，以形写神
  */
 
-/* 品牌颜色 - 深沉温暖的橘棕色系 */
 :root {
-  /* 主色调：深橘棕色（更深更饱和） */
-  --vp-c-brand-1: #c75d1f;
-  --vp-c-brand-2: #e07c3e;
-  --vp-c-brand-3: #f59e5e;
-  --vp-c-brand-soft: rgba(199, 93, 31, 0.14);
+  /* --- 墨色系统 (Ink System) --- */
+  /* 浓墨 - 主标题、强调 */
+  --ink-heavy: #1a1a1a;
+  /* 重墨 - 正文 */
+  --ink-medium: #333333;
+  /* 淡墨 - 次要文字 */
+  --ink-light: #666666;
+  /* 清墨 - 辅助信息 */
+  --ink-faint: #999999;
+  /* 墨痕 - 边框分隔 */
+  --ink-trace: #d4d0c8;
 
-  /* 辅助色：深蓝灰色（来自小猫眼睛） */
-  --cat-eye-blue: #4a7085;
-  --cat-eye-blue-light: #6b8fa3;
+  /* --- 纸张系统 (Paper System) --- */
+  /* 宣纸白 - 主背景 */
+  --paper-white: #f8f6f1;
+  /* 素笺 - 卡片/区块背景 */
+  --paper-soft: #eeebe5;
+  /* 暖白 - 高亮/悬浮 */
+  --paper-warm: #fffefb;
 
-  /* 工具箱深棕色 */
-  --toolbox-brown: #6d3f28;
-  --toolbox-brown-light: #8b5a3c;
+  /* --- VitePress 变量覆盖 --- */
 
-  /* 首页英雄区域 - 更鲜明的渐变 */
+  /* 品牌色 - 这里的品牌色即为浓墨，保持克制 */
+  --vp-c-brand-1: var(--ink-heavy);
+  --vp-c-brand-2: var(--ink-medium);
+  --vp-c-brand-3: var(--ink-light);
+  --vp-c-brand-soft: rgba(26, 26, 26, 0.05);
+
+  /* 背景色 */
+  --vp-c-bg: var(--paper-white);
+  --vp-c-bg-alt: var(--paper-soft);
+  --vp-c-bg-soft: var(--paper-soft);
+
+  /* 文字颜色 */
+  --vp-c-text-1: var(--ink-heavy);
+  --vp-c-text-2: var(--ink-medium);
+  --vp-c-text-3: var(--ink-light);
+
+  /* 边框颜色 */
+  --vp-c-divider: var(--ink-trace);
+  --vp-c-border: var(--ink-trace);
+
+  /* 字体配置 - 霞鹜文楷优先 */
+  --vp-font-family-base: "LXGW WenKai", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --vp-font-family-mono: "Fira Code", monospace;
+
+  /* 首页英雄区域 */
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: linear-gradient(
-    135deg,
-    #a04416 0%,
-    #c75d1f 30%,
-    #e07c3e 60%,
-    #4a7085 100%
+    180deg,
+    var(--ink-heavy) 0%,
+    var(--ink-medium) 100%
   );
 
-  /* 首页英雄图片光晕 */
-  --vp-home-hero-image-background-image: linear-gradient(
-    -45deg,
-    rgba(199, 93, 31, 0.45) 30%,
-    rgba(74, 112, 133, 0.35) 70%
+  /* 英雄图片光晕 - 极淡的墨晕 */
+  --vp-home-hero-image-background-image: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 0.08) 0%,
+    transparent 70%
   );
-  --vp-home-hero-image-filter: blur(56px);
+  --vp-home-hero-image-filter: blur(40px);
 }
 
+/* --- 暗色模式 (Night Ink) --- */
 .dark {
-  --vp-c-brand-1: #e07c3e;
-  --vp-c-brand-2: #f59e5e;
-  --vp-c-brand-3: #ffb87a;
-  --vp-c-brand-soft: rgba(224, 124, 62, 0.16);
+  /* 夜墨系统 */
+  --ink-heavy: #e8e6e3;    /* 月白 - 对应亮色的浓墨 */
+  --ink-medium: #c7c5c2;   /* 对应重墨 */
+  --ink-light: #a3a19e;    /* 对应淡墨 */
+  --ink-faint: #757370;    /* 对应清墨 */
+  --ink-trace: #3a3a3a;    /* 对应墨痕 */
 
-  --cat-eye-blue: #6b8fa3;
-  --cat-eye-blue-light: #8eb5c9;
+  /* 深邃背景 */
+  --paper-white: #0d0d0d;  /* 夜墨深底 */
+  --paper-soft: #1a1a1a;   /* 深灰区块 */
+  --paper-warm: #262626;   /* 高亮 */
 
-  --vp-home-hero-name-background: linear-gradient(
-    135deg,
-    #c75d1f 0%,
-    #e07c3e 30%,
-    #f59e5e 60%,
-    #6b8fa3 100%
-  );
+  /* 变量重映射 */
+  --vp-c-bg: var(--paper-white);
+  --vp-c-bg-alt: var(--paper-soft);
+  --vp-c-bg-soft: var(--paper-soft);
 
-  --vp-home-hero-image-background-image: linear-gradient(
-    -45deg,
-    rgba(224, 124, 62, 0.35) 30%,
-    rgba(107, 143, 163, 0.28) 70%
+  --vp-c-brand-1: var(--ink-heavy);
+  --vp-c-brand-2: var(--ink-medium);
+  --vp-c-brand-3: var(--ink-light);
+  --vp-c-brand-soft: rgba(255, 255, 255, 0.08);
+
+  --vp-home-hero-image-background-image: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.05) 0%,
+    transparent 70%
   );
 }
 
-/* 品牌按钮渐变效果 */
+/* --- 组件样式优化 --- */
+
+/* 1. 按钮 - 朴素的墨色风格 */
 .VPButton.brand {
-  background: linear-gradient(135deg, #c75d1f 0%, #e07c3e 50%, #f59e5e 100%);
-  border: none;
-  transition: all 0.3s ease;
+  background: var(--ink-heavy);
+  color: var(--vp-c-bg);
+  border: 1px solid transparent;
+  border-radius: 4px; /* 减小圆角，更显方正 */
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .VPButton.brand:hover {
-  background: linear-gradient(135deg, #a04416 0%, #c75d1f 50%, #e07c3e 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(199, 93, 31, 0.35);
+  background: var(--ink-medium);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 墨影 */
 }
 
-.dark .VPButton.brand {
-  background: linear-gradient(135deg, #e07c3e 0%, #f59e5e 50%, #ffb87a 100%);
+.VPButton.alt {
+  background: transparent;
+  border: 1px solid var(--ink-trace);
+  color: var(--ink-heavy);
+  border-radius: 4px;
 }
 
-.dark .VPButton.brand:hover {
-  background: linear-gradient(135deg, #c75d1f 0%, #e07c3e 50%, #f59e5e 100%);
-  box-shadow: 0 8px 20px rgba(224, 124, 62, 0.4);
+.VPButton.alt:hover {
+  border-color: var(--ink-medium);
+  background-color: var(--vp-c-bg-soft);
 }
 
-/* 首页样式优化 */
-.VPHome {
-  padding-bottom: 3rem;
-}
-
-/* 特性卡片动画 */
+/* 2. 特性卡片 - 宣纸质感 */
 .VPFeature {
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid transparent;
+  background-color: transparent;
+  border: 1px solid var(--ink-trace);
+  border-radius: 6px;
+  transition: all 0.4s ease;
 }
 
 .VPFeature:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 32px rgba(199, 93, 31, 0.18);
-  border-color: var(--vp-c-brand-soft);
+  background-color: var(--paper-warm);
+  border-color: var(--ink-light);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); /* 淡淡的阴影 */
 }
 
 .dark .VPFeature:hover {
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+  background-color: var(--paper-soft);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
-/* 代码块样式优化 */
+.VPFeature .icon {
+  background-color: transparent !important; /* 移除图标背景色 */
+  color: var(--ink-heavy);
+}
+
+/* 3. 导航栏 - 磨砂玻璃感减弱，更像纸张 */
+.VPNavBar {
+  border-bottom: 1px solid var(--ink-trace);
+}
+
+.VPNavBar.has-sidebar .content {
+  border-bottom-color: var(--ink-trace);
+}
+
+/* 4. 侧边栏 */
+.VPSidebar {
+  border-right: 1px solid var(--ink-trace);
+  background-color: var(--vp-c-bg-alt); /* 侧边栏微深，区分层级 */
+}
+
+/* 5. 代码块 - 极简风格 */
 .vp-doc div[class*='language-'] {
-  margin: 1rem 0;
-  border-radius: 8px;
-  transition: box-shadow 0.25s;
+  border-radius: 6px;
+  border: 1px solid var(--ink-trace);
+  box-shadow: none;
+  background-color: var(--vp-c-bg-alt);
 }
 
-.vp-doc div[class*='language-']:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-/* API 表格样式 */
-.vp-doc table {
-  margin: 1.5rem 0;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.vp-doc th {
+/* 6. 提示框 - 淡雅配色 */
+.vp-doc .custom-block.tip {
+  border-color: var(--ink-light);
   background-color: var(--vp-c-bg-soft);
-  font-weight: 600;
+  color: var(--ink-medium);
 }
 
-.vp-doc tr:hover {
-  background-color: var(--vp-c-bg-soft);
+.vp-doc .custom-block.warning {
+  border-color: #dcbfa3; /* 枯茶色 */
+  background-color: rgba(220, 191, 163, 0.1);
+  color: #8b5a2b;
 }
 
-/* 提示框样式优化 */
-.vp-doc .tip,
-.vp-doc .warning,
-.vp-doc .danger {
-  border-radius: 8px;
-  padding: 1rem 1.25rem;
+.vp-doc .custom-block.danger {
+  border-color: #cfb1b1; /* 藕荷色 */
+  background-color: rgba(207, 177, 177, 0.1);
+  color: #8a4a4a;
 }
 
-/* Badge 样式 */
-.vp-doc .vp-badge {
-  margin-left: 0.5rem;
+/* 7. 标题样式优化 */
+.vp-doc h1, .vp-doc h2, .vp-doc h3 {
+  font-weight: normal; /* 书法字体不需要过粗 */
 }
 
-/* 自定义类 */
-.api-signature {
-  background-color: var(--vp-c-bg-soft);
-  padding: 1rem;
-  border-radius: 8px;
-  margin: 1rem 0;
-  font-family: var(--vp-font-family-mono);
-  font-size: 0.9em;
+.vp-doc h1 {
+  border-bottom: none;
+  position: relative;
+  display: inline-block;
+  margin-bottom: 48px;
 }
 
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin: 2rem 0;
+/* 标题下的墨痕装饰 */
+.vp-doc h1::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background-color: var(--ink-heavy);
+  opacity: 0.6;
 }
 
-.feature-card {
-  padding: 1.5rem;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  transition: all 0.3s;
+/* --- 自定义辅助类 --- */
+
+.text-ink { color: var(--ink-heavy); }
+.bg-paper { background-color: var(--paper-white); }
+
+/* 滚动条美化 - 细长雅致 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.feature-card:hover {
-  border-color: var(--vp-c-brand-1);
-  box-shadow: 0 4px 12px rgba(199, 93, 31, 0.2);
-  transform: translateY(-2px);
+::-webkit-scrollbar-thumb {
+  background: var(--ink-trace);
+  border-radius: 3px;
 }
 
-.feature-card h3 {
-  margin-top: 0;
-  color: var(--vp-c-brand-1);
-}
-
-/* 响应式优化 */
-@media (max-width: 768px) {
-  .feature-grid {
-    grid-template-columns: 1fr;
-  }
+::-webkit-scrollbar-track {
+  background: transparent;
 }
