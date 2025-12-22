@@ -12,10 +12,13 @@
     "release",
     "docs"
   ],
+  "scripts": {
+    "update": "bun update -i -r --latest"
+  },
   "devDependencies": {
-    "@types/bun": "^1.3.3",
+    "@types/bun": "^1.3.5",
     "@types/node": "^24.10.1",
-    "oxlint": "^1.30.0",
+    "oxlint": "^1.34.0",
     "typescript": "^5.9.3"
   }
 }

@@ -3,11 +3,11 @@
   "devDependencies": {
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "@cat-kit/maintenance": "workspace:*",
     "@cat-kit/tsconfig": "workspace:*",
-    "@inquirer/prompts": "^8.0.2"
+    "@inquirer/prompts": "^8.1.0"
   },
   "scripts": {
     "release": "bun release.ts",

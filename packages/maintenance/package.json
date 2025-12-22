@@ -18,7 +18,7 @@
     "chalk": "^5.6.2",
     "fast-glob": "^3.3.3",
     "rollup-plugin-visualizer": "^6.0.5",
-    "tsdown": "^0.17.2",
+    "tsdown": "^0.18.2",
     "execa": "^9.6.1"
   },
   "devDependencies": {

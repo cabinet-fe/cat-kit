@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "fflate": "^0.8.2",
-    "fast-xml-parser": "^5.3.2",
+    "fast-xml-parser": "^5.3.3",
     "@cat-kit/core": "workspace:*",
     "@cat-kit/tsconfig": "workspace:*"
   },

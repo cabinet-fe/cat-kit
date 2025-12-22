@@ -14,15 +14,15 @@
     "@cat-kit/excel": "workspace:*",
     "@cat-kit/fe": "workspace:*",
     "@cat-kit/http": "workspace:*",
-    "@types/markdown-it-container": "^2.0.10",
+    "@types/markdown-it-container": "^2.0.11",
     "@varlet/import-resolver": "^3.12.3",
     "unplugin-auto-import": "^20.3.0",
     "unplugin-vue-components": "^30.0.0",
     "markdown-it-container": "^4.0.0",
-    "shiki": "^3.17.0",
+    "shiki": "^3.20.0",
     "vitepress": "^2.0.0-alpha.15",
     "vitepress-plugin-llms": "^1.9.3",
-    "vue": "^3.5.24",
+    "vue": "^3.5.26",
     "@varlet/ui": "^3.12.3",
     "@cat-kit/tsconfig": "workspace:*"
   }

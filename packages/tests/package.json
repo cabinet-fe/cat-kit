@@ -16,9 +16,9 @@
     "@cat-kit/fe": "workspace:*",
     "@cat-kit/http": "workspace:*",
     "@cat-kit/maintenance": "workspace:*",
-    "@vitest/ui": "^4.0.10",
+    "@vitest/ui": "^4.0.16",
     "fflate": "^0.8.2",
-    "vitest": "^4.0.10"
+    "vitest": "^4.0.16"
   },
   "devDependencies": {
     "@cat-kit/tsconfig": "workspace:*"
