@@ -74,7 +74,7 @@ features:
 }
 
 .VPHero .image-container .image-src {
-  animation: gentleFloat 4s ease-in-out infinite;
+  animation: gentleFloat 3s ease-in-out infinite;
 }
 
 .VPHero .image-container:hover .image-src {
@@ -140,8 +140,8 @@ features:
 }
 
 @keyframes gentleFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  0%, 100% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, -56%); }
 }
 
 @keyframes mistPulse {
@@ -163,4 +163,3 @@ features:
   }
 }
 </style>
-
