@@ -1,7 +1,5 @@
 # Cat-Kit 统一改进计划（Agent 可执行版）
 
-> 目标：把 `plans/level-1-critical.md`、`plans/level-2-high.md`、`plans/improvements.md` 的内容去重合并，形成一份**可分阶段**、**可验收**、**便于 agent 逐条推进**的实施计划。
-
 ## 0. 范围与原则
 
 ### 0.1 范围（本计划覆盖）
@@ -71,12 +69,11 @@
   - **验收**：对异步任务提供真实并行/并发控制；同步版本语义明确（必要时拆分 `parallel`/`parallelSync`）
   - **测试**：覆盖并发上限、异常处理策略、顺序与结果对齐
 
-- [ ] **HTTP-001 [Direct/OpenSpec?]**：`Requestor` 空壳处理（实现 or 移除）
+- [ ] **HTTP-001 [OpenSpec]**：移除 `Requestor`（从导出移除并删除实现文件）
 
   - **涉及**：`packages/http/src/requestor.ts`、`packages/http/src/index.ts`
-  - **决策点**：
-    - 若“实现单请求生命周期管理（abort/retry 等）”→ **更像新增能力**，倾向 **[OpenSpec]**
-    - 若“当前版本不承诺”→ **[Direct]**：移除导出/删除文件/补充说明
+  - **已确认决策**：移除 `Requestor`
+  - **迁移建议**：如用户需要取消能力，使用 `AbortSignal`（由 HTTP-003 提供）；如只是误导导出，直接删除并在 changelog/迁移说明中提示
   - **验收**：不再有“导出但不可用”的公开 API
 
 - [ ] **FE-P0-001 [Direct]**：IndexedDB 升级清库问题（升级不应默认丢数据）
@@ -93,10 +90,8 @@
 
 - [ ] **EXCEL-P0-001 [Direct/OpenSpec?]**：Worker 读写序列化导致 `Date` 等类型被破坏
   - **涉及**：`packages/excel/src/worker.ts`、相关 worker client；以及 `docs/content/packages/excel/index.md` 示例
-  - **决策点**：
-    - 若仅修复实现以匹配“文档宣称 worker 支持”的预期 → 多数是 **[Direct]**
-    - 若需要变更公开数据结构/序列化协议 → 可能需要 **[OpenSpec]**
-  - **验收**：Worker 读写下 `Date` 等类型不被意外降级，或明确声明/约束并同步文档
+  - **已确认决策**：完整保真（禁止 JSON 序列化破坏类型）
+  - **验收**：Worker 读写 roundtrip 后 `Date` 等类型保持原类型（或对不支持类型显式报错并在文档声明）
   - **测试**：Worker 通信 roundtrip（至少覆盖包含 `Date` 的示例）
 
 ### 2.2 P1 任务（阶段 B）
@@ -107,11 +102,12 @@
   - **验收**：不会因非法编码导致整请求崩溃；解码范围与规则明确（例如只解码 query 的 value）
   - **测试**：覆盖非法 `%`、保留字符、已编码/未编码混合场景
 
-- [ ] **HTTP-P1-002 [Direct]**：文档示例与类型/字段不一致（method 大小写、params/query 心智模型）
+- [ ] **HTTP-P1-002 [OpenSpec]**：对外请求字段 `query` 重命名为 `params`（并同步类型/实现/文档）
 
   - **涉及**：`packages/http/src/types.ts`、`packages/http/src/client.ts`、（必要时）`packages/http/README.md`、docs 示例
-  - **验收**：类型、实现、示例一致；给出兼容策略（例如同时支持 `params`/`query` 或提供明确迁移）
-  - **测试**：至少覆盖 `method` 归一化与 `params/query` 映射
+  - **已确认决策**：`query` → `params`
+  - **验收**：类型、实现、示例一致；提供迁移策略（建议：短期兼容 `query` 作为 deprecated 别名，未来移除）
+  - **测试**：覆盖 `params` 行为；如兼容 `query`，需覆盖别名映射
 
 - [ ] **FE-P1-001 [Direct]**：WebStorage JSON.parse 易被脏数据击穿（提供安全解析/回退）
 
@@ -144,10 +140,11 @@
 
 ### 2.3 P2 任务（阶段 C）
 
-- [ ] **HTTP-004 [OpenSpec]**：非 2xx 响应是否应抛错（与 axios 等对齐 vs 保持“总返回”）
+- [ ] **HTTP-004 [OpenSpec]**：非 2xx 响应默认抛错，但允许用插件改变其行为
 
   - **涉及**：`packages/http/src/engine/fetch.ts`、`packages/http/src/types.ts`
-  - **验收**：行为在 spec/文档中明确；若改为抛错，提供迁移方案与错误类型（包含 response/config 等）
+  - **已确认决策**：默认抛错；通过插件可改为“不抛错/自定义抛错条件”
+  - **验收**：行为在 spec/文档中明确；提供迁移方案与错误类型（包含 response/config 等）；插件可覆盖默认行为
   - **测试**：4xx/5xx、解析失败、网络错误、AbortError
 
 - [ ] **HTTP-002 [OpenSpec]**：重试插件 `RetryPlugin`
@@ -215,12 +212,13 @@
 
 > 目标：先“止血（空实现/数据丢失）”，再“统一行为（错误/解析/类型污染）”，最后“加能力（重试/取消/传输器）”。
 
-1. **CORE-001 → CORE-002 → HTTP-001（决策）**
+1. **CORE-001 → CORE-002 → HTTP-001（移除 Requestor）**
 2. **FE-P0-001 → FE-P0-002**
 3. **EXCEL-P0-001**
 4. **HTTP-P1-002 → FE-P1-001 → CORE-P1-001 → CORE-P1-002 → CORE-004 → FE-001**
 5. **OpenSpec 组包**（建议合并成少量 change，避免碎片化）：
-   - `http-error-and-cancel`（HTTP-004/HTTP-003/HTTP-P2-001）
+   - `http-default-throw-and-api-renames`（HTTP-004/HTTP-P1-002/HTTP-001）
+   - `http-cancel-and-error-model`（HTTP-003/HTTP-P2-001）
    - `http-retry-plugin`（HTTP-002）
    - `core-catobject-copy`（CORE-003）
    - `be-file-transport`（BE-001）
@@ -236,9 +234,9 @@
 5. **必要时更新文档**：仅当示例/行为/类型改变时更新。
 6. **自检**：确保无新的 lints / 类型错误（在仓库约束下）。
 
-## 5. 待确认问题（建议你拍板，避免 agent “似是而非”）
+## 5. 已确认决策（用于约束后续实现）
 
-- **HTTP 非 2xx 行为**：是否要默认抛错？还是保持“总返回”，由插件决定抛错？
-- **HTTP params/query**：是否要兼容 `params`（别名）还是明确只支持 `query`？
-- **Requestor**：要作为“单请求句柄（abort/retry/progress）”正式能力，还是从导出移除？
-- **Excel Worker 序列化**：目标是“完整保真（含 Date）”还是“只支持可结构化克隆的数据类型并文档声明”？
+- **HTTP 非 2xx**：默认抛错；但允许通过插件改变其行为（例如改为不抛错或自定义条件）。
+- **HTTP query → params**：对外字段重命名为 `params`（建议提供短期兼容 `query` 的迁移窗口）。
+- **Requestor**：移除（从导出移除并删除实现文件，提供迁移说明）。
+- **Excel Worker 序列化**：完整保真（禁止用 JSON 序列化导致 `Date` 等类型降级）。
