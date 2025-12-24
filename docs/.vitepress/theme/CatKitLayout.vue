@@ -2,14 +2,14 @@
 import DefaultTheme from 'vitepress/theme'
 import InkBackground from './components/InkBackground.vue'
 
-const { Layout } = DefaultTheme
+// 将解构出的 Layout 重命名为 DefaultLayout，避免与当前组件名冲突
+const { Layout: DefaultLayout } = DefaultTheme
 </script>
 
 <template>
-  <Layout>
+  <DefaultLayout>
     <template #layout-bottom>
       <InkBackground />
     </template>
-  </Layout>
+  </DefaultLayout>
 </template>
-

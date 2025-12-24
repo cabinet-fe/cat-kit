@@ -43,34 +43,17 @@ features:
     details: 详尽易读的文档、完整的类型定义和 LLM 上下文支持，人机协作开发体验俱佳。
 ---
 
-<style>
-/* 首页动画效果 - 水墨风格 */
+<style lang="css">
 
-/* 英雄区域入场动画 - 缓慢晕染 */
-.VPHero .name {
-  animation: inkSpread 1.2s ease-out both;
-}
-
-.VPHero .text {
-  animation: inkSpread 1.2s ease-out 0.2s both;
-}
-
-.VPHero .tagline {
-  animation: inkSpread 1.2s ease-out 0.4s both;
-}
-
-.VPHero .actions {
-  animation: inkSpread 1.2s ease-out 0.6s both;
-}
 
 /* 吉祥物图片动画 */
 .VPHero .image-container {
-  animation: inkFadeIn 1.5s ease-out 0.8s both;
+  animation: inkFadeIn 1.2s ease-out 0.2s both;
 }
 
 /* 呼吸效果 - 极缓 */
 .VPHero .image-container .image-bg {
-  animation: mistPulse 6s ease-in-out infinite;
+  animation: mistPulse 3s ease-in-out infinite;
 }
 
 .VPHero .image-container .image-src {
@@ -82,18 +65,18 @@ features:
 }
 
 /* 特性卡片交错入场 */
-.VPFeatures .VPFeature {
+.VPFeatures .item {
   animation: inkUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   position: relative;
   overflow: hidden;
 }
 
-.VPFeatures .VPFeature:nth-child(1) { animation-delay: 0.6s; }
-.VPFeatures .VPFeature:nth-child(2) { animation-delay: 0.7s; }
-.VPFeatures .VPFeature:nth-child(3) { animation-delay: 0.8s; }
-.VPFeatures .VPFeature:nth-child(4) { animation-delay: 0.9s; }
-.VPFeatures .VPFeature:nth-child(5) { animation-delay: 1.0s; }
-.VPFeatures .VPFeature:nth-child(6) { animation-delay: 1.1s; }
+.VPFeatures .item:nth-child(1) { animation-delay: 0.6s; }
+.VPFeatures .item:nth-child(2) { animation-delay: 0.7s; }
+.VPFeatures .item:nth-child(3) { animation-delay: 0.8s; }
+.VPFeatures .item:nth-child(4) { animation-delay: 0.9s; }
+.VPFeatures .item:nth-child(5) { animation-delay: 1.0s; }
+.VPFeatures .item:nth-child(6) { animation-delay: 1.1s; }
 
 /* 移除流光效果，改为墨韵晕染 */
 .VPFeatures .VPFeature::before {
@@ -145,8 +128,8 @@ features:
 }
 
 @keyframes mistPulse {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 0.9; transform: scale(1.02); }
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.02); }
 }
 
 /* 减少动画偏好的用户 */

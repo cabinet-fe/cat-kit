@@ -47,8 +47,9 @@
   --vp-c-border: var(--ink-trace);
 
   /* 字体配置 - 霞鹜文楷优先 */
-  --vp-font-family-base: "LXGW WenKai", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --vp-font-family-mono: "Fira Code", monospace;
+  --vp-font-family-base: 'LXGW WenKai', 'PingFang SC', 'Microsoft YaHei',
+    sans-serif;
+  --vp-font-family-mono: 'Fira Code', monospace;
 
   /* 首页英雄区域 */
   --vp-home-hero-name-color: transparent;
@@ -58,28 +59,30 @@
     var(--ink-medium) 100%
   );
 
-  /* 英雄图片光晕 - 极淡的墨晕 */
+  /* 英雄图片光晕 - 墨韵晕染 (增强版) */
   --vp-home-hero-image-background-image: radial-gradient(
     circle at center,
-    rgba(0, 0, 0, 0.08) 0%,
-    transparent 70%
+    rgba(26, 26, 26, 0.45) 0%,
+    rgba(26, 26, 26, 0.25) 25%,
+    rgba(26, 26, 26, 0.1) 50%,
+    transparent 85%
   );
-  --vp-home-hero-image-filter: blur(40px);
+  --vp-home-hero-image-filter: blur(50px);
 }
 
 /* --- 暗色模式 (Night Ink) --- */
 .dark {
   /* 夜墨系统 */
-  --ink-heavy: #e8e6e3;    /* 月白 - 对应亮色的浓墨 */
-  --ink-medium: #c7c5c2;   /* 对应重墨 */
-  --ink-light: #a3a19e;    /* 对应淡墨 */
-  --ink-faint: #757370;    /* 对应清墨 */
-  --ink-trace: #3a3a3a;    /* 对应墨痕 */
+  --ink-heavy: #e8e6e3; /* 月白 - 对应亮色的浓墨 */
+  --ink-medium: #c7c5c2; /* 对应重墨 */
+  --ink-light: #a3a19e; /* 对应淡墨 */
+  --ink-faint: #757370; /* 对应清墨 */
+  --ink-trace: #3a3a3a; /* 对应墨痕 */
 
   /* 深邃背景 */
-  --paper-white: #0d0d0d;  /* 夜墨深底 */
-  --paper-soft: #1a1a1a;   /* 深灰区块 */
-  --paper-warm: #262626;   /* 高亮 */
+  --paper-white: #0d0d0d; /* 夜墨深底 */
+  --paper-soft: #1a1a1a; /* 深灰区块 */
+  --paper-warm: #262626; /* 高亮 */
 
   /* 变量重映射 */
   --vp-c-bg: var(--paper-white);
@@ -93,8 +96,10 @@
 
   --vp-home-hero-image-background-image: radial-gradient(
     circle at center,
-    rgba(255, 255, 255, 0.05) 0%,
-    transparent 70%
+    rgba(232, 230, 227, 0.3) 0%,
+    rgba(232, 230, 227, 0.15) 35%,
+    rgba(232, 230, 227, 0.05) 65%,
+    transparent 90%
   );
 }
 
@@ -148,7 +153,6 @@
 }
 
 .VPFeature .icon {
-  background-color: transparent !important; /* 移除图标背景色 */
   color: var(--ink-heavy);
 }
 
@@ -195,7 +199,9 @@
 }
 
 /* 7. 标题样式优化 */
-.vp-doc h1, .vp-doc h2, .vp-doc h3 {
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3 {
   font-weight: normal; /* 书法字体不需要过粗 */
 }
 
@@ -218,10 +224,36 @@
   opacity: 0.6;
 }
 
+/* 首页英雄区域背景增强 */
+.VPHero .image-bg {
+  /* 亮色模式：正片叠底，模拟墨汁渗入纸张 */
+  mix-blend-mode: multiply;
+  opacity: 0.85;
+}
+
+.dark .VPHero .image-bg {
+  /* 暗色模式：滤色，模拟亮墨在深纸上的效果 */
+  mix-blend-mode: screen;
+  opacity: 0.4;
+}
+
+.VPHero .image-container {
+  /* 确保溢出的墨晕不会被容器切掉 */
+  overflow: visible !important;
+}
+
+.VPFooter {
+  background-color: unset !important;
+}
+
 /* --- 自定义辅助类 --- */
 
-.text-ink { color: var(--ink-heavy); }
-.bg-paper { background-color: var(--paper-white); }
+.text-ink {
+  color: var(--ink-heavy);
+}
+.bg-paper {
+  background-color: var(--paper-white);
+}
 
 /* 滚动条美化 - 细长雅致 */
 ::-webkit-scrollbar {

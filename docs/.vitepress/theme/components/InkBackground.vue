@@ -86,8 +86,10 @@
 
 .ink-mark {
   position: absolute;
-  color: var(--ink-heavy); /* 使用浓墨色，通过 opacity 控制深浅 */
-  mix-blend-mode: multiply; /* 正片叠底，模拟墨汁渗入纸张 */
+  /* 使用浓墨色，通过 opacity 控制深浅 */
+  color: var(--ink-heavy);
+  /* 正片叠底，模拟墨汁渗入纸张 */
+  mix-blend-mode: multiply;
 }
 
 .ink-svg {
@@ -137,12 +139,6 @@
 /* 暗色模式适配 */
 :global(.dark) .ink-mark {
   color: var(--ink-light); /* 暗色模式下使用淡墨色 */
-  mix-blend-mode: normal; /* 暗色模式不适合 multiply */
-  opacity: 0.05;
-}
-
-:global(.dark) .ink-background {
-  /* 暗色模式下的噪点稍微明显一点点 */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  mix-blend-mode: screen; /* 暗色模式下使用 screen 模式，模拟白墨在黑纸上的晕染 */
 }
 </style>

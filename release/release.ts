@@ -11,6 +11,7 @@ import {
   type BumpType,
   type RollbackContext
 } from '@cat-kit/maintenance/src'
+import { GROUPS_BUILD } from './build'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -25,7 +26,7 @@ const __dirname = path.dirname(__filename)
 async function runTests(): Promise<void> {
   console.log(chalk.bold('\n🧪 运行测试...'))
   await $({
-    cwd: path.resolve(__dirname, '../packages/tests'),
+    cwd: path.resolve(__dirname, '../packages/tests')
   })`bun run test`
   console.log(chalk.green('✓ 测试通过'))
 }
@@ -44,7 +45,9 @@ function validate(): void {
     throw new Error('存在循环依赖')
   }
   if (inconsistentDeps.length) {
-    throw new Error('存在不一致的依赖: ' + inconsistentDeps.map(d => d.name).join(', '))
+    throw new Error(
+      '存在不一致的依赖: ' + inconsistentDeps.map(d => d.name).join(', ')
+    )
   }
 }
 
@@ -55,10 +58,23 @@ async function chooseGroup(): Promise<'main' | 'maintenance' | 'tsconfig'> {
   const value = await select({
     message: '选择要发布的组',
     choices: [
-      { value: 'main' as const, name: 'main', description: '@cat-kit/core, @cat-kit/fe, @cat-kit/be, @cat-kit/http, @cat-kit/excel' },
-      { value: 'maintenance' as const, name: 'maintenance', description: '@cat-kit/maintenance' },
-      { value: 'tsconfig' as const, name: 'tsconfig', description: '@cat-kit/tsconfig' },
-    ],
+      {
+        value: 'main' as const,
+        name: 'main',
+        description:
+          '@cat-kit/core, @cat-kit/fe, @cat-kit/be, @cat-kit/http, @cat-kit/excel'
+      },
+      {
+        value: 'maintenance' as const,
+        name: 'maintenance',
+        description: '@cat-kit/maintenance'
+      },
+      {
+        value: 'tsconfig' as const,
+        name: 'tsconfig',
+        description: '@cat-kit/tsconfig'
+      }
+    ]
   })
 
   return value
@@ -81,15 +97,16 @@ const BUMP_TYPES: BumpType[] = [
 /**
  * 交互式选择版本类型
  */
-async function chooseVersion(currentVersion: string): Promise<BumpType
-  | 'current'> {
+async function chooseVersion(
+  currentVersion: string
+): Promise<BumpType | 'current'> {
   console.log(chalk.bold(`\n📦 当前版本: ${chalk.cyan(currentVersion)}`))
 
   const choices = BUMP_TYPES.map(type => {
     const nextVersion = incrementVersion(currentVersion, type)
     return {
       value: type,
-      name: `${type.padEnd(12)} → ${nextVersion}`,
+      name: `${type.padEnd(12)} → ${nextVersion}`
     }
   })
 
@@ -97,8 +114,11 @@ async function chooseVersion(currentVersion: string): Promise<BumpType
     message: '选择版本类型',
     choices: [
       ...choices,
-      { value: 'current' as const, name: `${'current'.padEnd(12)} → ${currentVersion}`, },
-    ],
+      {
+        value: 'current' as const,
+        name: `${'current'.padEnd(12)} → ${currentVersion}`
+      }
+    ]
   })
 
   return bumpType
@@ -117,7 +137,7 @@ function createRollbackContext(
 ): RollbackContext {
   return {
     originalVersion,
-    packageDirs: workspaces.map(ws => ws.dir),
+    packageDirs: workspaces.map(ws => ws.dir)
   }
 }
 
@@ -151,7 +171,6 @@ async function gitReset(commitHash: string): Promise<void> {
   console.log(chalk.green('✓ Git 已重置（保留工作区更改）'))
 }
 
-
 // ============================================================================
 // 发布流程
 // ============================================================================
@@ -159,28 +178,15 @@ async function gitReset(commitHash: string): Promise<void> {
 const GROUP_MAP = {
   main,
   maintenance,
-  tsconfig,
-}
-
-const GROUPS_BUILD = {
-  main() {
-    return main.build({
-      '@cat-kit/be': { platform: 'node' },
-      '@cat-kit/excel': { platform: 'browser' },
-    })
-  },
-
-  maintenance() {
-    return maintenance.build({
-      '@cat-kit/maintenance': { platform: 'node' },
-    })
-  }
+  tsconfig
 }
 
 /**
  * 发布指定组
  */
-async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Promise<void> {
+async function releaseGroup(
+  groupName: 'main' | 'maintenance' | 'tsconfig'
+): Promise<void> {
   const builder = GROUPS_BUILD[groupName]
 
   // 1. 构建
@@ -231,7 +237,7 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
   try {
     const commitResult = await commitAndPush({
       cwd: repo.root.dir,
-      message: `chore(release): v${nextVersion}`,
+      message: `chore(release): v${nextVersion}`
     })
     rollbackCtx.commitHash = commitResult.commitHash
     console.log(chalk.green(`✓ 已提交: chore(release): v${nextVersion}`))
@@ -245,7 +251,7 @@ async function releaseGroup(groupName: 'main' | 'maintenance' | 'tsconfig'): Pro
   console.log(chalk.bold('\n🚀 正式发布中...'))
   try {
     await group.publish({
-      access: 'public',
+      access: 'public'
     })
   } catch (err) {
     console.log(chalk.red('\n⚠ 发布失败'))

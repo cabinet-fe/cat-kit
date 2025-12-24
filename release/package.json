@@ -13,6 +13,7 @@
   },
   "scripts": {
     "release": "bun release.ts",
-    "analyze": "bun stats.tsx"
+    "analyze": "bun stats.tsx",
+    "bundle": "bun bundle.ts"
   }
 }

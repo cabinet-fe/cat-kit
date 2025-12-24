@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vitepress dev .",
+    "dev": "vitepress dev",
     "preview": "vitepress preview .",
-    "build": "vitepress build ."
+    "build": "vitepress build"
   },
   "devDependencies": {
     "@cat-kit/be": "workspace:*",

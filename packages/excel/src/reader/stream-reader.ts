@@ -625,7 +625,7 @@ class StreamXLSXReader {
   }
 
   private concatChunks(chunks: Uint8Array[]): Uint8Array {
-    if (chunks.length === 1) return chunks[0]
+    if (chunks.length === 1) return chunks[0]!
     const total = chunks.reduce((sum, c) => sum + c.length, 0)
     const out = new Uint8Array(total)
     let offset = 0
