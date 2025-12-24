@@ -128,12 +128,11 @@ function formatEntry(
     level: entry.level.toUpperCase().padEnd(5),
     name: entry.name ? `[${entry.name}] ` : '',
     message: entry.message,
-    meta: entry.meta && Object.keys(entry.meta).length
-      ? ` ${JSON.stringify(entry.meta)}`
-      : '',
-    error: entry.error
-      ? ` ${entry.error.stack ?? entry.error.message}`
-      : ''
+    meta:
+      entry.meta && Object.keys(entry.meta).length
+        ? ` ${JSON.stringify(entry.meta)}`
+        : '',
+    error: entry.error ? ` ${entry.error.stack ?? entry.error.message}` : ''
   }
 
   // 如果是函数，直接调用
@@ -223,9 +222,9 @@ export class Logger {
     const mergedMeta =
       meta || this.context
         ? {
-          ...this.context,
-          ...meta
-        }
+            ...this.context,
+            ...meta
+          }
         : undefined
 
     return {
@@ -236,9 +235,9 @@ export class Logger {
       meta: mergedMeta,
       error: error
         ? {
-          message: error.message,
-          stack: error.stack
-        }
+            message: error.message,
+            stack: error.stack
+          }
         : undefined
     }
   }
@@ -248,7 +247,9 @@ export class Logger {
 
     await Promise.all(
       this.transports
-        .filter(transport => shouldLog(transport.level ?? this.level, entry.level))
+        .filter(transport =>
+          shouldLog(transport.level ?? this.level, entry.level)
+        )
         .map(transport => transport.write(entry, formatted, this.format))
     )
   }

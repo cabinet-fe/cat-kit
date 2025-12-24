@@ -106,14 +106,13 @@ class StreamXLSXReader {
   private styles: CellStyle[] = []
   private numFmts: Map<number, string> = new Map()
   private options: StreamReadOptions
-  private workbookSheets:
-    | Array<{ name: string; path: string; index: number }>
-    | null = null
+  private workbookSheets: Array<{
+    name: string
+    path: string
+    index: number
+  }> | null = null
 
-  constructor(
-    zipBytes: Uint8Array,
-    options: StreamReadOptions = {}
-  ) {
+  constructor(zipBytes: Uint8Array, options: StreamReadOptions = {}) {
     this.zipBytes = zipBytes
     this.options = options
     this.parser = new XMLParser({
@@ -177,10 +176,7 @@ class StreamXLSXReader {
           row
         }
 
-        if (
-          this.options.batchSize &&
-          counter % this.options.batchSize === 0
-        ) {
+        if (this.options.batchSize && counter % this.options.batchSize === 0) {
           await Promise.resolve()
         }
       }
@@ -283,11 +279,13 @@ class StreamXLSXReader {
   /**
    * 解析工作簿结构
    */
-  private async parseWorkbookStructure(): Promise<Array<{
-    name: string
-    path: string
-    index: number
-  }>> {
+  private async parseWorkbookStructure(): Promise<
+    Array<{
+      name: string
+      path: string
+      index: number
+    }>
+  > {
     if (this.workbookSheets) return this.workbookSheets
 
     const workbookFile = await this.readZipEntry('xl/workbook.xml')
@@ -394,8 +392,7 @@ class StreamXLSXReader {
     rels: Map<string, string>
   ): string {
     const target =
-      (relId ? rels.get(relId) : undefined) ||
-      `worksheets/sheet${sheetId}.xml`
+      (relId ? rels.get(relId) : undefined) || `worksheets/sheet${sheetId}.xml`
 
     const cleaned = target.startsWith('/') ? target.slice(1) : target
     return cleaned.startsWith('xl/') ? cleaned : `xl/${cleaned}`
@@ -533,9 +530,7 @@ class StreamXLSXReader {
   /**
    * 流式读取工作表的 row XML 片段
    */
-  private async *streamSheetRowXml(
-    sheetPath: string
-  ): AsyncGenerator<string> {
+  private async *streamSheetRowXml(sheetPath: string): AsyncGenerator<string> {
     const normalized = this.normalizePath(sheetPath)
     const decoder = new TextDecoder()
     let buffer = ''

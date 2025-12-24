@@ -21,7 +21,8 @@
     "vitest": "^4.0.16"
   },
   "devDependencies": {
-    "@cat-kit/tsconfig": "workspace:*"
+    "@cat-kit/tsconfig": "workspace:*",
+    "fake-indexeddb": "^6.2.5"
   },
   "peerDependencies": {
     "@cat-kit/tsconfig": "1.0.0"

@@ -1,4 +1,4 @@
-import { isObj } from '@cat-kit/core/src'
+import { isObj } from '@cat-kit/core'
 
 type Mergeable = Record<string, any>
 

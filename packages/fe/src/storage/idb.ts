@@ -38,6 +38,7 @@ class Store<T extends StoreDefinition, Data = {
   private name: string
   private schema: StoreDefinition
   private db: IDBDatabase | null = null
+  private dbReady: Promise<IDBDatabase> | null = null
   private primaryKey: string | null = null
 
   /**
@@ -64,6 +65,13 @@ class Store<T extends StoreDefinition, Data = {
    */
   setDB(db: IDBDatabase): void {
     this.db = db
+  }
+
+  /**
+   * 设置数据库就绪 Promise（用于连接时序队列化）
+   */
+  setDBReady(dbReady: Promise<IDBDatabase>): void {
+    this.dbReady = dbReady
   }
 
   /**
@@ -131,9 +139,12 @@ class Store<T extends StoreDefinition, Data = {
    * @param mode 事务模式
    * @returns 事务对象
    */
-  private getTransaction(
+  private async getTransaction(
     mode: IDBTransactionMode = 'readonly'
-  ): IDBObjectStore {
+  ): Promise<IDBObjectStore> {
+    if (!this.db && this.dbReady) {
+      this.db = await this.dbReady
+    }
     if (!this.db) {
       throw new Error('数据库未连接')
     }
@@ -162,19 +173,11 @@ class Store<T extends StoreDefinition, Data = {
    * @returns 数据总数
    */
   async count(): Promise<number> {
-    return new Promise((resolve, reject) => {
-      try {
-        const store = this.getTransaction()
-        const countRequest = store.count()
-        countRequest.onsuccess = () => {
-          resolve(countRequest.result)
-        }
-        countRequest.onerror = event => {
-          reject(event)
-        }
-      } catch (error) {
-        reject(error)
-      }
+    const store = await this.getTransaction()
+    const request = store.count()
+    return await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error ?? new Error('count failed'))
     })
   }
 
@@ -184,20 +187,12 @@ class Store<T extends StoreDefinition, Data = {
    * @returns 新增数据的键值
    */
   async add(data: Data): Promise<IDBValidKey> {
-    return new Promise((resolve, reject) => {
-      try {
-        const validatedData = this.validateData(data)
-        const store = this.getTransaction('readwrite')
-        const request = store.add(validatedData)
-        request.onsuccess = () => {
-          resolve(request.result)
-        }
-        request.onerror = event => {
-          reject(event)
-        }
-      } catch (error) {
-        reject(error)
-      }
+    const validatedData = this.validateData(data)
+    const store = await this.getTransaction('readwrite')
+    const request = store.add(validatedData)
+    return await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error ?? new Error('add failed'))
     })
   }
 
@@ -208,30 +203,28 @@ class Store<T extends StoreDefinition, Data = {
    */
   async find(query: Query): Promise<any> {
     return new Promise((resolve, reject) => {
-      try {
-        const store = this.getTransaction()
-        const request = store.openCursor()
-        const filter = this.buildQuery(query)
+      this.getTransaction()
+        .then(store => {
+          const request = store.openCursor()
+          const filter = this.buildQuery(query)
 
-        request.onsuccess = event => {
-          const cursor = (event.target as IDBRequest)
-            .result as IDBCursorWithValue
-          if (cursor) {
-            if (filter(cursor.value)) {
-              resolve(cursor.value)
-              return
+          request.onsuccess = event => {
+            const cursor = (event.target as IDBRequest)
+              .result as IDBCursorWithValue
+            if (cursor) {
+              if (filter(cursor.value)) {
+                resolve(cursor.value)
+                return
+              }
+              cursor.continue()
+            } else {
+              resolve(null)
             }
-            cursor.continue()
-          } else {
-            resolve(null)
           }
-        }
-        request.onerror = event => {
-          reject(event)
-        }
-      } catch (error) {
-        reject(error)
-      }
+          request.onerror = () =>
+            reject(request.error ?? new Error('find failed'))
+        })
+        .catch(reject)
     })
   }
 
@@ -242,30 +235,28 @@ class Store<T extends StoreDefinition, Data = {
    */
   async findMany(query: Query): Promise<any[]> {
     return new Promise((resolve, reject) => {
-      try {
-        const store = this.getTransaction()
-        const request = store.openCursor()
-        const filter = this.buildQuery(query)
-        const results: any[] = []
+      this.getTransaction()
+        .then(store => {
+          const request = store.openCursor()
+          const filter = this.buildQuery(query)
+          const results: any[] = []
 
-        request.onsuccess = event => {
-          const cursor = (event.target as IDBRequest)
-            .result as IDBCursorWithValue
-          if (cursor) {
-            if (filter(cursor.value)) {
-              results.push(cursor.value)
+          request.onsuccess = event => {
+            const cursor = (event.target as IDBRequest)
+              .result as IDBCursorWithValue
+            if (cursor) {
+              if (filter(cursor.value)) {
+                results.push(cursor.value)
+              }
+              cursor.continue()
+            } else {
+              resolve(results)
             }
-            cursor.continue()
-          } else {
-            resolve(results)
           }
-        }
-        request.onerror = event => {
-          reject(event)
-        }
-      } catch (error) {
-        reject(error)
-      }
+          request.onerror = () =>
+            reject(request.error ?? new Error('findMany failed'))
+        })
+        .catch(reject)
     })
   }
 
@@ -277,34 +268,28 @@ class Store<T extends StoreDefinition, Data = {
    */
   async update(key: IDBValidKey, data: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      try {
-        const store = this.getTransaction('readwrite')
-        const request = store.get(key)
+      this.getTransaction('readwrite')
+        .then(store => {
+          const request = store.get(key)
 
-        request.onsuccess = () => {
-          if (!request.result) {
-            resolve(false)
-            return
+          request.onsuccess = () => {
+            if (!request.result) {
+              resolve(false)
+              return
+            }
+
+            const updatedData = { ...request.result, ...data }
+            const putRequest = store.put(updatedData)
+
+            putRequest.onsuccess = () => resolve(true)
+            putRequest.onerror = () =>
+              reject(putRequest.error ?? new Error('update failed'))
           }
 
-          const updatedData = { ...request.result, ...data }
-          const putRequest = store.put(updatedData)
-
-          putRequest.onsuccess = () => {
-            resolve(true)
-          }
-
-          putRequest.onerror = event => {
-            reject(event)
-          }
-        }
-
-        request.onerror = event => {
-          reject(event)
-        }
-      } catch (error) {
-        reject(error)
-      }
+          request.onerror = () =>
+            reject(request.error ?? new Error('update failed'))
+        })
+        .catch(reject)
     })
   }
 
@@ -315,28 +300,19 @@ class Store<T extends StoreDefinition, Data = {
    * @returns 是否替换成功
    */
   async put(key: IDBValidKey, data: any): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      try {
-        const validatedData = this.validateData(data)
-        const store = this.getTransaction('readwrite')
+    const validatedData = this.validateData(data)
+    const store = await this.getTransaction('readwrite')
 
-        // 设置键值
-        if (this.primaryKey) {
-          validatedData[this.primaryKey] = key
-        }
+    // 设置键值
+    if (this.primaryKey) {
+      validatedData[this.primaryKey] = key
+    }
 
-        const request = store.put(validatedData)
+    const request = store.put(validatedData)
 
-        request.onsuccess = () => {
-          resolve(true)
-        }
-
-        request.onerror = event => {
-          reject(event)
-        }
-      } catch (error) {
-        reject(error)
-      }
+    return await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(true)
+      request.onerror = () => reject(request.error ?? new Error('put failed'))
     })
   }
 
@@ -355,23 +331,22 @@ class Store<T extends StoreDefinition, Data = {
               return
             }
 
-            const store = this.getTransaction('readwrite')
-            const key = this.primaryKey ? data[this.primaryKey] : null
+            this.getTransaction('readwrite')
+              .then(store => {
+                const key = this.primaryKey ? data[this.primaryKey] : null
 
-            if (!key) {
-              reject(new Error('无法确定删除键值'))
-              return
-            }
+                if (!key) {
+                  reject(new Error('无法确定删除键值'))
+                  return
+                }
 
-            const request = store.delete(key)
+                const request = store.delete(key)
 
-            request.onsuccess = () => {
-              resolve(true)
-            }
-
-            request.onerror = event => {
-              reject(event)
-            }
+                request.onsuccess = () => resolve(true)
+                request.onerror = () =>
+                  reject(request.error ?? new Error('delete failed'))
+              })
+              .catch(reject)
           })
           .catch(reject)
       } catch (error) {
@@ -395,35 +370,26 @@ class Store<T extends StoreDefinition, Data = {
               return
             }
 
-            const store = this.getTransaction('readwrite')
-            let deleted = 0
-            let error: any = null
+            this.getTransaction('readwrite')
+              .then(store => {
+                const deletes = dataList.map(data => {
+                  const key = this.primaryKey ? data[this.primaryKey] : null
+                  if (!key) {
+                    throw new Error('无法确定删除键值')
+                  }
+                  const req = store.delete(key)
+                  return new Promise<void>((res, rej) => {
+                    req.onsuccess = () => res()
+                    req.onerror = () =>
+                      rej(req.error ?? new Error('deleteMany failed'))
+                  })
+                })
 
-            dataList.forEach(data => {
-              const key = this.primaryKey ? data[this.primaryKey] : null
-
-              if (!key) {
-                error = new Error('无法确定删除键值')
-                return
-              }
-
-              const request = store.delete(key)
-
-              request.onsuccess = () => {
-                deleted++
-                if (deleted === dataList.length) {
-                  resolve(deleted)
-                }
-              }
-
-              request.onerror = event => {
-                error = event
-              }
-            })
-
-            if (error) {
-              reject(error)
-            }
+                Promise.all(deletes)
+                  .then(() => resolve(deletes.length))
+                  .catch(reject)
+              })
+              .catch(reject)
           })
           .catch(reject)
       } catch (error) {
@@ -437,21 +403,11 @@ class Store<T extends StoreDefinition, Data = {
    * @returns 是否清空成功
    */
   async clear(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      try {
-        const store = this.getTransaction('readwrite')
-        const request = store.clear()
-
-        request.onsuccess = () => {
-          resolve(true)
-        }
-
-        request.onerror = event => {
-          reject(event)
-        }
-      } catch (error) {
-        reject(error)
-      }
+    const store = await this.getTransaction('readwrite')
+    const request = store.clear()
+    return await new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(true)
+      request.onerror = () => reject(request.error ?? new Error('clear failed'))
     })
   }
 }
@@ -461,6 +417,8 @@ export class IDB {
   private config: IDBConfig
   private db: IDBDatabase | null = null
   private isConnected: boolean = false
+  private connecting: Promise<IDBDatabase> | null = null
+  readonly ready: Promise<IDBDatabase>
 
   /**
    * 定义存储对象
@@ -480,7 +438,9 @@ export class IDB {
   constructor(name: string, config: IDBConfig) {
     this.name = name
     this.config = config
-    this.connect()
+    this.ready = this.connect()
+    // 让 Store 方法在连接尚未完成时也能排队等待
+    this.config.stores.forEach(store => store.setDBReady(this.ready))
   }
 
   /**
@@ -488,7 +448,14 @@ export class IDB {
    * @returns Promise对象
    */
   private connect(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
+    if (this.isConnected && this.db) {
+      return Promise.resolve(this.db)
+    }
+    if (this.connecting) {
+      return this.connecting
+    }
+
+    this.connecting = new Promise((resolve, reject) => {
       if (this.isConnected && this.db) {
         resolve(this.db)
         return
@@ -498,15 +465,42 @@ export class IDB {
 
       request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result
+        const tx = (event.target as IDBOpenDBRequest).transaction
 
         // 创建或更新存储对象
         this.config.stores.forEach(store => {
           const storeName = store.getName()
           const primaryKey = store.getPrimaryKey()
 
-          // 如果存储对象已存在则删除
+          // 如果存储对象已存在：默认不做破坏性变更（保护数据）
           if (db.objectStoreNames.contains(storeName)) {
-            db.deleteObjectStore(storeName)
+            if (!tx) return
+            const existing = tx.objectStore(storeName)
+            const existingKeyPath = existing.keyPath
+            const existingAutoIncrement = existing.autoIncrement
+
+            const desiredKeyPath = primaryKey ?? null
+            const desiredAutoIncrement = primaryKey
+              ? Boolean(store.getSchema()[primaryKey]?.autoIncrement)
+              : false
+
+            // keyPath 可能为 string | string[] | null，这里只支持 string | null
+            if (
+              (existingKeyPath !== null && typeof existingKeyPath !== 'string') ||
+              (desiredKeyPath !== null && typeof desiredKeyPath !== 'string')
+            ) {
+              throw new Error(
+                `IndexedDB 升级不支持 "${storeName}" 的复合 keyPath，请提供迁移方案或更换数据库名`
+              )
+            }
+
+            if (existingKeyPath !== desiredKeyPath || existingAutoIncrement !== desiredAutoIncrement) {
+              throw new Error(
+                `IndexedDB 升级不支持变更 "${storeName}" 的 keyPath/autoIncrement（为保护数据已中止升级）`
+              )
+            }
+
+            return
           }
 
           // 创建存储对象
@@ -529,6 +523,7 @@ export class IDB {
       request.onsuccess = event => {
         this.db = (event.target as IDBOpenDBRequest).result
         this.isConnected = true
+        this.connecting = null
 
         // 为每个存储对象设置数据库实例
         this.config.stores.forEach(store => {
@@ -539,9 +534,12 @@ export class IDB {
       }
 
       request.onerror = event => {
-        reject(event)
+        this.connecting = null
+        reject(request.error ?? event)
       }
     })
+
+    return this.connecting
   }
 
   /**

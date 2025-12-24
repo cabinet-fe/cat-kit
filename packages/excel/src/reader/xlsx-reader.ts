@@ -24,14 +24,18 @@ import { isBlob, isArrayBuffer, isUint8Array } from '@cat-kit/core'
 //#region XML Interfaces
 interface SharedStringsXML {
   sst?: {
-    si?: Array<{ t?: string | { '#text': string }; r?: any }> | { t?: string | { '#text': string }; r?: any }
+    si?:
+      | Array<{ t?: string | { '#text': string }; r?: any }>
+      | { t?: string | { '#text': string }; r?: any }
   }
 }
 
 interface StylesXML {
   styleSheet?: {
     numFmts?: {
-      numFmt?: Array<{ '@_numFmtId': string; '@_formatCode': string }> | { '@_numFmtId': string; '@_formatCode': string }
+      numFmt?:
+        | Array<{ '@_numFmtId': string; '@_formatCode': string }>
+        | { '@_numFmtId': string; '@_formatCode': string }
     }
     fonts?: {
       font?: Array<any> | any
@@ -51,7 +55,9 @@ interface StylesXML {
 interface WorkbookXML {
   workbook?: {
     sheets?: {
-      sheet?: Array<{ '@_name': string; '@_sheetId': string; '@_r:id': string }> | { '@_name': string; '@_sheetId': string; '@_r:id': string }
+      sheet?:
+        | Array<{ '@_name': string; '@_sheetId': string; '@_r:id': string }>
+        | { '@_name': string; '@_sheetId': string; '@_r:id': string }
     }
   }
 }
@@ -198,8 +204,10 @@ class XLSXReader {
         }
         // 处理富文本 (r)
         if (item.r) {
-            const runs = Array.isArray(item.r) ? item.r : [item.r]
-            return runs.map((run: any) => run.t?.['#text'] || run.t || '').join('')
+          const runs = Array.isArray(item.r) ? item.r : [item.r]
+          return runs
+            .map((run: any) => run.t?.['#text'] || run.t || '')
+            .join('')
         }
         return ''
       })
@@ -489,8 +497,7 @@ class XLSXReader {
     rels: Map<string, string>
   ): string {
     const target =
-      (relId ? rels.get(relId) : undefined) ||
-      `worksheets/sheet${sheetId}.xml`
+      (relId ? rels.get(relId) : undefined) || `worksheets/sheet${sheetId}.xml`
 
     const cleaned = target.startsWith('/') ? target.slice(1) : target
     return cleaned.startsWith('xl/') ? cleaned : `xl/${cleaned}`
@@ -612,14 +619,18 @@ class XLSXReader {
   /**
    * 解析行级选项（高度、隐藏）
    */
-  private parseRowOptions(rowElement: any): { height?: number; hidden?: boolean } {
+  private parseRowOptions(rowElement: any): {
+    height?: number
+    hidden?: boolean
+  } {
     const options: { height?: number; hidden?: boolean } = {}
     if (rowElement['@_ht']) {
       const height = parseFloat(rowElement['@_ht'])
       if (!isNaN(height)) options.height = height
     }
     if (rowElement['@_hidden'] !== undefined) {
-      options.hidden = rowElement['@_hidden'] === '1' || rowElement['@_hidden'] === true
+      options.hidden =
+        rowElement['@_hidden'] === '1' || rowElement['@_hidden'] === true
     }
     return options
   }
@@ -722,7 +733,8 @@ class XLSXReader {
    */
   private parseCellStyle(styleIndex?: number): CellStyle | undefined {
     if (styleIndex === undefined || styleIndex === null) return undefined
-    const index = typeof styleIndex === 'number' ? styleIndex : parseInt(styleIndex)
+    const index =
+      typeof styleIndex === 'number' ? styleIndex : parseInt(styleIndex)
     return this.styles[index]
   }
 

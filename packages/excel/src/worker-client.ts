@@ -1,5 +1,10 @@
 import type { ExcelWorkerMessage, ExcelWorkerResponse } from './worker'
-import type { Workbook } from './core/workbook'
+import { Workbook } from './core/workbook'
+import {
+  rebuildWorkbook,
+  serializeWorkbook,
+  type SerializedWorkbook
+} from './worker-codec'
 
 /**
  * Excel Worker 客户端
@@ -11,23 +16,41 @@ export class ExcelWorkerClient {
     { resolve: (value: any) => void; reject: (reason: any) => void }
   >()
 
-  constructor(workerScriptUrl: string | URL) {
-    this.worker = new Worker(workerScriptUrl, { type: 'module' })
+  constructor(workerScriptUrl: string | URL)
+  constructor(worker: Worker)
+  constructor(workerOrScript: string | URL | Worker) {
+    if (typeof Worker !== 'undefined' && workerOrScript instanceof Worker) {
+      this.worker = workerOrScript
+    } else {
+      this.worker = new Worker(workerOrScript as string | URL, { type: 'module' })
+    }
     this.worker.onmessage = this.handleMessage.bind(this)
   }
 
   /**
    * 在 Worker 中读取 Excel 文件
    */
-  async readWorkbook(data: Blob | ArrayBuffer | Uint8Array): Promise<any> {
-    return this.request({ type: 'read', data, id: this.generateId() })
+  async readWorkbook(data: Blob | ArrayBuffer | Uint8Array): Promise<Workbook> {
+    const result = (await this.request({
+      type: 'read',
+      data,
+      id: this.generateId()
+    })) as SerializedWorkbook
+
+    return rebuildWorkbook(result)
   }
 
   /**
    * 在 Worker 中写入 Excel 文件
    */
-  async writeWorkbook(workbook: Workbook | any): Promise<Blob> {
-    return this.request({ type: 'write', workbook, id: this.generateId() })
+  async writeWorkbook(workbook: Workbook | SerializedWorkbook): Promise<Blob> {
+    const payload =
+      workbook instanceof Workbook ? serializeWorkbook(workbook) : workbook
+    return (await this.request({
+      type: 'write',
+      workbook: payload,
+      id: this.generateId()
+    })) as Blob
   }
 
   /**

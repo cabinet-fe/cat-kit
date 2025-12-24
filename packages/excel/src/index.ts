@@ -81,3 +81,7 @@ export {
 // Worker 支持
 export type { ExcelWorkerMessage, ExcelWorkerResponse } from './worker'
 export { ExcelWorkerClient } from './worker-client'
+
+// Worker codec（用于在主线程/Worker 之间传输 Workbook）
+export type { SerializedWorkbook } from './worker-codec'
+export { serializeWorkbook, rebuildWorkbook } from './worker-codec'
