@@ -1,6 +1,18 @@
 <script setup lang="ts">
 import { ref, computed, type DefineComponent, onUnmounted } from 'vue'
 import { clipboard } from '@cat-kit/fe'
+import {
+  X,
+  Check,
+  Copy,
+  Code,
+  Eye,
+  Maximize2,
+  AlertCircle,
+  Terminal,
+  Ban
+} from 'lucide-vue-next'
+import Console from './Console.vue'
 
 const props = defineProps<{
   is?: DefineComponent
@@ -10,10 +22,17 @@ const props = defineProps<{
   lineCount?: number
 }>()
 
-const containerRef = ref<HTMLElement | null>(null)
 const viewMode = ref<'preview' | 'code'>('preview')
 const isFullscreen = ref(false)
 const copied = ref(false)
+const showConsoleInFullscreen = ref(false)
+const consoleHeight = ref(280)
+const fullscreenConsoleRef = ref<InstanceType<typeof Console>>()
+
+// 拖拽相关
+const isDragging = ref(false)
+const startY = ref(0)
+const startHeight = ref(0)
 
 const decodedCode = computed(() =>
   props.code ? decodeURIComponent(props.code) : ''
@@ -25,6 +44,10 @@ const decodedHighlightCode = computed(() =>
 const lineNumbers = computed(() => {
   const count = props.lineCount || 1
   return Array.from({ length: count }, (_, i) => i + 1)
+})
+
+const consoleLogsCount = computed(() => {
+  return fullscreenConsoleRef.value?.logs?.length ?? 0
 })
 
 const copyCode = async () => {
@@ -41,93 +64,25 @@ const toggleView = () => {
   viewMode.value = viewMode.value === 'preview' ? 'code' : 'preview'
 }
 
-// 记录原始样式，用于恢复
-let originalRect: DOMRect | null = null
+const toggleFullscreenConsole = () => {
+  showConsoleInFullscreen.value = !showConsoleInFullscreen.value
+}
 
-const enterFullscreen = async () => {
-  if (!containerRef.value) return
+const clearConsole = () => {
+  fullscreenConsoleRef.value?.clearLogs()
+}
 
-  // 1. 记录当前位置
-  const el = containerRef.value
-  originalRect = el.getBoundingClientRect()
-
-  // 2. 创建占位元素（保持文档流高度）
-  const placeholder = document.createElement('div')
-  placeholder.style.width = `${originalRect.width}px`
-  placeholder.style.height = `${originalRect.height}px`
-  placeholder.style.margin = getComputedStyle(el).margin
-  placeholder.id = 'demo-placeholder'
-  el.parentElement?.insertBefore(placeholder, el)
-
-  // 3. 设置初始 fixed 状态（在原位置）
-  el.style.position = 'fixed'
-  el.style.top = `${originalRect.top}px`
-  el.style.left = `${originalRect.left}px`
-  el.style.width = `${originalRect.width}px`
-  el.style.height = `${originalRect.height}px`
-  el.style.margin = '0'
-  el.style.zIndex = '1000'
-  el.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-
-  // 4. 强制重排
-  el.getBoundingClientRect()
-
-  // 5. 切换到全屏状态
+const enterFullscreen = () => {
   isFullscreen.value = true
   document.body.style.overflow = 'hidden'
   window.addEventListener('keydown', onKeydown)
-
-  // 6. 动画到全屏位置
-  requestAnimationFrame(() => {
-    el.style.top = '0'
-    el.style.left = '0'
-    el.style.width = '100vw'
-    el.style.height = '100vh'
-    el.style.borderRadius = '0'
-  })
 }
 
 const exitFullscreen = () => {
-  if (!containerRef.value || !originalRect) return
-
-  const el = containerRef.value
-
-  // 1. 动画回到原位置
-  el.style.top = `${originalRect.top}px`
-  el.style.left = `${originalRect.left}px`
-  el.style.width = `${originalRect.width}px`
-  el.style.height = `${originalRect.height}px`
-  el.style.borderRadius = '6px'
-
   isFullscreen.value = false
-
-  const onTransitionEnd = () => {
-    // 移除事件监听
-    el.removeEventListener('transitionend', onTransitionEnd)
-
-    // 恢复样式
-    el.style.position = ''
-    el.style.top = ''
-    el.style.left = ''
-    el.style.width = ''
-    el.style.height = ''
-    el.style.margin = ''
-    el.style.zIndex = ''
-    el.style.transition = ''
-    el.style.borderRadius = ''
-
-    // 移除占位符
-    const placeholder = document.getElementById('demo-placeholder')
-    if (placeholder) {
-      placeholder.remove()
-    }
-
-    document.body.style.overflow = ''
-    window.removeEventListener('keydown', onKeydown)
-    originalRect = null
-  }
-
-  el.addEventListener('transitionend', onTransitionEnd)
+  showConsoleInFullscreen.value = false
+  document.body.style.overflow = ''
+  window.removeEventListener('keydown', onKeydown)
 }
 
 const onKeydown = (e: KeyboardEvent) => {
@@ -136,43 +91,60 @@ const onKeydown = (e: KeyboardEvent) => {
   }
 }
 
+// 拖拽处理
+const onDragStart = (e: MouseEvent) => {
+  isDragging.value = true
+  startY.value = e.clientY
+  startHeight.value = consoleHeight.value
+  document.addEventListener('mousemove', onDragMove)
+  document.addEventListener('mouseup', onDragEnd)
+  document.body.style.cursor = 'ns-resize'
+  document.body.style.userSelect = 'none'
+}
+
+const onDragMove = (e: MouseEvent) => {
+  if (!isDragging.value) return
+  const deltaY = startY.value - e.clientY
+  consoleHeight.value = Math.max(80, Math.min(500, startHeight.value + deltaY))
+}
+
+const onDragEnd = () => {
+  isDragging.value = false
+  document.removeEventListener('mousemove', onDragMove)
+  document.removeEventListener('mouseup', onDragEnd)
+  document.body.style.cursor = ''
+  document.body.style.userSelect = ''
+}
+
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
+  document.removeEventListener('mousemove', onDragMove)
+  document.removeEventListener('mouseup', onDragEnd)
   document.body.style.overflow = ''
 })
 </script>
-<route lang="ts">
-export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
-</route>
 
 <template>
-  <div
-    ref="containerRef"
-    class="demo-container"
-    :class="{ fullscreen: isFullscreen }"
-  >
-    <!-- 全屏关闭按钮 -->
-    <button
-      v-if="isFullscreen"
-      class="fullscreen-close"
-      @click="exitFullscreen"
-      title="退出全屏 (ESC)"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+  <div class="demo-container" :class="{ fullscreen: isFullscreen }">
+    <!-- 全屏顶部操作按钮 -->
+    <div v-if="isFullscreen" class="fullscreen-actions">
+      <button
+        class="fullscreen-btn-item"
+        :class="{ copied }"
+        @click="copyCode"
+        :title="copied ? '已复制' : '复制代码'"
       >
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
+        <Check v-if="copied" :size="20" />
+        <Copy v-else :size="20" />
+      </button>
+      <button
+        class="fullscreen-btn-item close"
+        @click="exitFullscreen"
+        title="退出全屏 (ESC)"
+      >
+        <X :size="20" />
+      </button>
+    </div>
 
     <!-- 操作栏 (调整到顶部) -->
     <div class="demo-actions">
@@ -184,37 +156,8 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
           @click="copyCode"
           :title="copied ? '已复制' : '复制代码'"
         >
-          <svg
-            v-if="copied"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path
-              d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-            ></path>
-          </svg>
+          <Check v-if="copied" :size="16" />
+          <Copy v-else :size="16" />
         </button>
         <button
           class="demo-btn"
@@ -222,57 +165,16 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
           @click="toggleView"
           :title="viewMode === 'preview' ? '查看源码' : '查看示例'"
         >
-          <!-- 查看源码图标 -->
-          <svg
-            v-if="viewMode === 'preview'"
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="16 18 22 12 16 6"></polyline>
-            <polyline points="8 6 2 12 8 18"></polyline>
-          </svg>
-          <!-- 查看示例图标 -->
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
-          </svg>
+          <Code v-if="viewMode === 'preview'" :size="16" />
+          <Eye v-else :size="16" />
         </button>
-        <!-- 最大化按钮 -->
-        <button class="demo-btn" @click="enterFullscreen" title="全屏查看">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M15 3h6v6"></path>
-            <path d="M9 21H3v-6"></path>
-            <path d="M21 3l-7 7"></path>
-            <path d="M3 21l7-7"></path>
-          </svg>
+        <!-- 最大化按钮（移动端隐藏） -->
+        <button
+          class="demo-btn fullscreen-btn"
+          @click="enterFullscreen"
+          title="全屏查看"
+        >
+          <Maximize2 :size="16" />
         </button>
       </div>
     </div>
@@ -283,29 +185,57 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
         class="demo-preview-panel"
         v-show="isFullscreen || viewMode === 'preview'"
       >
-        <div v-if="!is" class="demo-error">
-          <span class="error-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+        <div class="demo-preview-wrapper">
+          <div v-if="!is" class="demo-error">
+            <span class="error-icon">
+              <AlertCircle :size="18" />
+            </span>
+            <span
+              >Demo 文件不存在: <code>examples/{{ path }}</code></span
             >
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-          </span>
-          <span
-            >Demo 文件不存在: <code>examples/{{ path }}</code></span
-          >
+          </div>
+          <component v-else :is="is" />
         </div>
-        <component v-else :is="is" />
+        <!-- 全屏模式下的控制台区域 -->
+        <div v-if="isFullscreen" class="fullscreen-console-area">
+          <!-- 拖拽条 -->
+          <div
+            v-if="showConsoleInFullscreen"
+            class="console-drag-bar"
+            @mousedown="onDragStart"
+          ></div>
+          <!-- 控制台工具栏 -->
+          <div class="console-toolbar">
+            <button
+              class="console-toggle-btn"
+              :class="{ active: showConsoleInFullscreen }"
+              @click="toggleFullscreenConsole"
+              :title="showConsoleInFullscreen ? '关闭控制台' : '打开控制台'"
+            >
+              <Terminal :size="12" />
+              <span>控制台</span>
+              <span v-if="consoleLogsCount > 0" class="console-count">{{
+                consoleLogsCount
+              }}</span>
+            </button>
+            <button
+              v-if="showConsoleInFullscreen"
+              class="console-clear-btn"
+              @click="clearConsole"
+              title="清空控制台"
+              :disabled="consoleLogsCount === 0"
+            >
+              <Ban :size="12" />
+            </button>
+          </div>
+          <!-- 控制台内容 -->
+          <Console
+            v-if="showConsoleInFullscreen"
+            ref="fullscreenConsoleRef"
+            :active="showConsoleInFullscreen"
+            :style="{ height: consoleHeight + 'px' }"
+          />
+        </div>
       </div>
 
       <!-- 代码区域 -->
@@ -335,6 +265,8 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .demo-container:hover {
@@ -344,33 +276,57 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
 
 /* 全屏样式 */
 .demo-container.fullscreen {
-  /* position: fixed; 由 JS 控制过渡期间的样式，这里只作为状态标记 */
-  z-index: 1000; /* 确保优先级 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  border-radius: 0;
+  z-index: 1000;
 }
 
-.fullscreen-close {
+/* 全屏顶部操作按钮组 */
+.fullscreen-actions {
   position: absolute;
   top: 16px;
   right: 16px;
   z-index: 1010;
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.fullscreen-btn-item {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   background-color: var(--vp-c-bg);
   border: 1px solid var(--ink-trace);
   color: var(--vp-c-text-2);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: color 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.fullscreen-close:hover {
+.fullscreen-btn-item:hover {
   color: var(--vp-c-text-1);
   background-color: var(--vp-c-bg-soft);
-  transform: scale(1.1);
+  border-color: var(--ink-light);
+}
+
+.fullscreen-btn-item.copied {
+  color: var(--vp-c-green-1);
+  border-color: var(--vp-c-green-1);
+}
+
+.fullscreen-btn-item.close:hover {
+  color: var(--vp-c-danger-1);
+  border-color: var(--vp-c-danger-1);
 }
 
 .demo-content {
@@ -387,18 +343,116 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
 /* 预览区域 */
 .demo-preview-panel {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--vp-c-bg);
+  overflow: hidden;
+  max-height: 500px;
+}
+
+.demo-preview-wrapper {
+  flex: 1;
   padding: 20px;
   background-image: radial-gradient(var(--ink-trace) 1px, transparent 1px);
   background-size: 20px 20px;
-  background-color: var(--vp-c-bg);
   overflow: auto;
-  max-height: 500px;
 }
 
 .fullscreen .demo-preview-panel {
   border-left: 1px solid var(--ink-trace);
-  height: 100%;
   max-height: none;
+}
+
+/* 全屏模式控制台区域 */
+.fullscreen-console-area {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--ink-trace);
+}
+
+/* 控制台拖拽条 */
+.console-drag-bar {
+  height: 4px;
+  cursor: ns-resize;
+  background-color: var(--ink-trace);
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.console-drag-bar:hover {
+  background-color: var(--vp-c-brand-1);
+}
+
+/* 控制台工具栏 */
+.console-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  background-color: var(--vp-c-bg);
+  flex-shrink: 0;
+}
+
+.console-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  color: var(--ink-light);
+  font-size: 11px;
+  font-family: var(--vp-font-family-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.console-toggle-btn:hover {
+  color: var(--ink-heavy);
+}
+
+.console-toggle-btn.active {
+  color: var(--vp-c-brand-1);
+}
+
+.console-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--vp-c-bg);
+  background-color: var(--ink-light);
+  border-radius: 8px;
+}
+
+.console-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--ink-light);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.console-clear-btn:hover:not(:disabled) {
+  color: var(--ink-heavy);
+  background-color: var(--vp-c-bg-soft);
+}
+
+.console-clear-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .demo-error {
@@ -428,6 +482,7 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
 
 /* 代码区域 */
 .demo-source-panel {
+  position: relative;
   flex: 1;
   background-color: var(--vp-c-bg);
   overflow: hidden;
@@ -437,13 +492,10 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
 }
 
 .fullscreen .demo-source-panel {
-  border-top: none;
-  height: 100%;
   max-height: none;
 }
 
 .demo-source {
-  position: relative;
   background-color: var(--vp-c-bg-alt);
   height: 100%;
   overflow: auto;
@@ -452,13 +504,10 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
 }
 
 .line-numbers-wrapper {
+  position: relative;
   flex-shrink: 0;
   width: 32px;
   padding-top: 20px;
-  position: relative;
-  top: unset;
-  bottom: unset;
-  left: unset;
   text-align: center;
   font-family: var(--vp-font-family-mono);
   line-height: var(--vp-code-line-height);
@@ -466,7 +515,6 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
   color: var(--ink-light);
   border-right: 1px solid var(--ink-trace);
   user-select: none;
-  height: auto;
 }
 
 .line-number {
@@ -480,8 +528,6 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
 }
 
 .code-content :deep(pre) {
-  position: relative;
-  z-index: 1;
   margin: 0;
   padding: 20px 0;
   background: transparent;
@@ -510,10 +556,6 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
   padding: 8px 12px;
   background-color: var(--vp-c-bg);
   border-bottom: 1px solid var(--ink-trace);
-  border-radius: 6px 6px 0 0;
-  z-index: 10;
-  position: sticky;
-  top: 0;
 }
 
 .fullscreen .demo-actions {
@@ -547,7 +589,8 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
   border: 1px solid transparent;
   border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: color 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .demo-btn:hover {
@@ -567,12 +610,12 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
 
 /* 响应式 */
 @media (max-width: 640px) {
-  .demo-preview-panel {
-    padding: 16px;
+  .fullscreen-btn {
+    display: none;
   }
 
-  .demo-source {
-    padding-left: 0;
+  .demo-preview-panel {
+    padding: 16px;
   }
 
   .line-numbers-wrapper {
@@ -586,15 +629,6 @@ export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
 
   .code-content :deep(code) {
     padding: 0 16px;
-  }
-
-  .fullscreen .demo-content {
-    flex-direction: column;
-  }
-
-  .fullscreen .demo-source-panel {
-    border-top: 1px solid var(--ink-trace);
-    border-left: none;
   }
 }
 </style>
