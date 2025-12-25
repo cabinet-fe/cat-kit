@@ -4,6 +4,12 @@
  */
 
 :root {
+  /* --- 国潮点缀色 (Guochao Accent System) --- */
+  --guochao-vermilion: #e54d42; /* 朱砂红 - 印章 */
+  --guochao-gold: #c9a86c; /* 鎏金 - 强调 */
+  --guochao-jade: #68b88e; /* 青玉 - 点缀 */
+  --guochao-indigo: #2f4f7f; /* 靛蓝 - 装饰 */
+
   /* --- 墨色系统 (Ink System) --- */
   /* 浓墨 - 主标题、强调 */
   --ink-heavy: #1a1a1a;
@@ -47,9 +53,9 @@
   --vp-c-border: var(--ink-trace);
 
   /* 字体配置 - 霞鹜文楷优先 */
-  --vp-font-family-base: 'Punctuation SC', 'Inter', ui-sans-serif, system-ui,
-    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    'Noto Color Emoji';
+  --vp-font-family-base: 'LXGW WenKai', 'Punctuation SC', 'Inter', ui-sans-serif,
+    system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
 
   --vp-font-family-mono: 'Fira Code', monospace;
 
@@ -74,6 +80,12 @@
 
 /* --- 暗色模式 (Night Ink) --- */
 .dark {
+  /* 国潮点缀色 - 暗色适配 */
+  --guochao-vermilion: #ff6b6b;
+  --guochao-gold: #e6c88d;
+  --guochao-jade: #8edcb5;
+  --guochao-indigo: #5c7cb0;
+
   /* 夜墨系统 */
   --ink-heavy: #e8e6e3; /* 月白 - 对应亮色的浓墨 */
   --ink-medium: #c7c5c2; /* 对应重墨 */
@@ -134,28 +146,52 @@
   background-color: var(--vp-c-bg-soft);
 }
 
-/* 2. 特性卡片 - 宣纸质感 */
-.VPFeature {
-  background-color: transparent;
-  border: 1px solid var(--ink-trace);
-  border-radius: 6px;
-  transition: all 0.4s ease;
+/* 2. 特性卡片 - 极简水墨风格 */
+.VPFeatures .VPFeature {
+  background-color: transparent !important;
+  border: 1px solid var(--ink-trace) !important;
+  border-radius: 6px !important;
+  transition: all 0.3s ease !important;
 }
 
-.VPFeature:hover {
-  background-color: var(--paper-warm);
-  border-color: var(--ink-light);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06); /* 淡淡的阴影 */
+/* 悬浮状态 - 仅做微小上浮和颜色加深 */
+.VPFeatures .VPFeature:hover {
+  background-color: var(--vp-c-bg-soft) !important;
+  border-color: var(--ink-medium) !important;
+  transform: translateY(-2px) !important;
 }
 
-.dark .VPFeature:hover {
-  background-color: var(--paper-soft);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+/* 移除所有复杂的背景和伪元素装饰 */
+.VPFeatures .VPFeature::before,
+.VPFeatures .VPFeature::after {
+  display: none !important;
 }
 
-.VPFeature .icon {
-  color: var(--ink-heavy);
+/* 图标 - 保持默认，仅在悬浮时微变色 */
+.VPFeatures .VPFeature .icon {
+  background-color: transparent !important;
+  color: var(--ink-heavy) !important;
+  transition: color 0.3s ease !important;
+}
+
+.VPFeatures .VPFeature:hover .icon {
+  color: var(--guochao-vermilion) !important;
+  transform: none !important; /* 移除旋转缩放 */
+}
+
+/* 文字颜色保持水墨色系 */
+.VPFeatures .VPFeature .title {
+  color: var(--ink-heavy) !important;
+}
+
+.VPFeatures .VPFeature .details {
+  color: var(--ink-light) !important;
+}
+
+/* 暗色模式适配 */
+.dark .VPFeatures .VPFeature:hover {
+  background-color: var(--vp-c-bg-soft) !important;
+  border-color: var(--ink-light) !important;
 }
 
 /* 3. 导航栏 - 磨砂玻璃感减弱，更像纸张 */
@@ -246,6 +282,7 @@
 
 .VPFooter {
   background-color: unset !important;
+  border-top: 1px solid var(--ink-trace);
 }
 
 /* --- 自定义辅助类 --- */
