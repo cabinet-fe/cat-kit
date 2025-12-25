@@ -507,7 +507,7 @@ onUnmounted(() => {
   position: relative;
   flex-shrink: 0;
   width: 32px;
-  padding-top: 20px;
+  padding: 20px 0;
   text-align: center;
   font-family: var(--vp-font-family-mono);
   line-height: var(--vp-code-line-height);
