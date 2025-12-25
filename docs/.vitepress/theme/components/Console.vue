@@ -1,43 +1,23 @@
 <script setup lang="ts">
-import { ref, onUnmounted, nextTick, watch } from 'vue'
+import { ref, toRef } from 'vue'
 import { Circle, Info, AlertTriangle, XCircle, Bug } from 'lucide-vue-next'
-
-interface LogEntry {
-  id: number
-  type: 'log' | 'warn' | 'error' | 'info' | 'debug'
-  args: unknown[]
-  timestamp: number
-}
-
-type ConsoleMethod = 'log' | 'warn' | 'error' | 'info' | 'debug'
-
-// 全局存储原始 console 方法，防止被多次拦截覆盖
-const ORIGINAL_CONSOLE_KEY = '__catkit_original_console__'
-const getOriginalConsole = (): Record<ConsoleMethod, typeof console.log> => {
-  const win = window as unknown as Record<string, unknown>
-  if (!win[ORIGINAL_CONSOLE_KEY]) {
-    win[ORIGINAL_CONSOLE_KEY] = {
-      log: console.log.bind(console),
-      warn: console.warn.bind(console),
-      error: console.error.bind(console),
-      info: console.info.bind(console),
-      debug: console.debug.bind(console)
-    }
-  }
-  return win[ORIGINAL_CONSOLE_KEY] as Record<ConsoleMethod, typeof console.log>
-}
+import { useConsoleInterceptor, type LogEntry } from '../composables'
 
 const props = defineProps<{
   active?: boolean
 }>()
 
-const logs = ref<LogEntry[]>([])
 const consoleRef = ref<HTMLElement>()
 
-let logId = 0
-let isIntercepting = false
+const { logs, clearLogs } = useConsoleInterceptor({
+  active: toRef(() => props.active ?? false),
+  containerRef: consoleRef
+})
 
-const formatValue = (value: unknown): string => {
+/**
+ * 格式化日志值为可显示的字符串
+ */
+function formatValue(value: unknown): string {
   if (value === null) return 'null'
   if (value === undefined) return 'undefined'
   if (typeof value === 'string') return value
@@ -45,87 +25,33 @@ const formatValue = (value: unknown): string => {
     return String(value)
   if (typeof value === 'function') return `ƒ ${value.name || 'anonymous'}()`
   if (value instanceof Error) return `${value.name}: ${value.message}`
-  if (Array.isArray(value)) {
-    try {
-      return JSON.stringify(value, null, 2)
-    } catch {
-      return '[Array]'
-    }
-  }
+
+  // 对象和数组尝试 JSON 序列化
   if (typeof value === 'object') {
     try {
       return JSON.stringify(value, null, 2)
     } catch {
-      return '[Object]'
+      return Array.isArray(value) ? '[Array]' : '[Object]'
     }
   }
   return String(value)
 }
 
-const createInterceptor = (type: ConsoleMethod) => {
-  const originalConsole = getOriginalConsole()
-  return (...args: unknown[]) => {
-    if (isIntercepting) {
-      logs.value.push({
-        id: logId++,
-        type,
-        args,
-        timestamp: Date.now()
-      })
-      nextTick(() => {
-        if (consoleRef.value) {
-          consoleRef.value.scrollTop = consoleRef.value.scrollHeight
-        }
-      })
-    }
-    originalConsole[type](...args)
+/**
+ * 获取日志类型对应的图标组件
+ */
+function getLogIcon(type: LogEntry['type']) {
+  const icons = {
+    log: Circle,
+    info: Info,
+    warn: AlertTriangle,
+    error: XCircle,
+    debug: Bug
   }
+  return icons[type]
 }
 
-const setupInterceptors = () => {
-  if (isIntercepting) return
-  isIntercepting = true
-  const methods: ConsoleMethod[] = ['log', 'warn', 'error', 'info', 'debug']
-  methods.forEach(method => {
-    console[method] = createInterceptor(method)
-  })
-}
-
-const restoreConsole = () => {
-  if (!isIntercepting) return
-  isIntercepting = false
-  const originalConsole = getOriginalConsole()
-  const methods: ConsoleMethod[] = ['log', 'warn', 'error', 'info', 'debug']
-  methods.forEach(method => {
-    console[method] = originalConsole[method]
-  })
-}
-
-const clearLogs = () => {
-  logs.value = []
-}
-
-// 暴露给父组件
-defineExpose({
-  clearLogs,
-  logs
-})
-
-watch(
-  () => props.active,
-  active => {
-    if (active) {
-      setupInterceptors()
-    } else {
-      restoreConsole()
-    }
-  },
-  { immediate: true }
-)
-
-onUnmounted(() => {
-  restoreConsole()
-})
+defineExpose({ clearLogs, logs })
 </script>
 
 <template>
@@ -134,15 +60,11 @@ onUnmounted(() => {
     <div
       v-for="log in logs"
       :key="log.id"
-      class="console-log-entry"
-      :class="'log-' + log.type"
+      class="console-entry"
+      :class="`log-${log.type}`"
     >
       <span class="log-icon">
-        <Circle v-if="log.type === 'log'" :size="12" />
-        <Info v-else-if="log.type === 'info'" :size="12" />
-        <AlertTriangle v-else-if="log.type === 'warn'" :size="12" />
-        <XCircle v-else-if="log.type === 'error'" :size="12" />
-        <Bug v-else :size="12" />
+        <component :is="getLogIcon(log.type)" :size="12" />
       </span>
       <span class="log-content">
         <template v-for="(arg, index) in log.args" :key="index">
@@ -171,7 +93,7 @@ onUnmounted(() => {
   font-size: 13px;
 }
 
-.console-log-entry {
+.console-entry {
   display: flex;
   align-items: flex-start;
   padding: 4px 12px;
@@ -179,7 +101,7 @@ onUnmounted(() => {
   gap: 8px;
 }
 
-.console-log-entry:hover {
+.console-entry:hover {
   background-color: var(--vp-c-bg-soft);
 }
 
@@ -216,11 +138,9 @@ onUnmounted(() => {
 .log-warn {
   background-color: rgba(234, 179, 8, 0.08);
 }
-
 .log-warn .log-icon {
   color: #eab308;
 }
-
 .log-warn .log-value {
   color: #ca8a04;
 }
@@ -228,11 +148,9 @@ onUnmounted(() => {
 .log-error {
   background-color: rgba(239, 68, 68, 0.08);
 }
-
 .log-error .log-icon {
   color: #ef4444;
 }
-
 .log-error .log-value {
   color: #dc2626;
 }
@@ -240,25 +158,21 @@ onUnmounted(() => {
 .log-debug .log-icon {
   color: #8b5cf6;
 }
-
 .log-debug .log-value {
   color: #7c3aed;
 }
 
-/* 滚动条样式 */
+/* 滚动条 */
 .console-logs::-webkit-scrollbar {
   width: 6px;
 }
-
 .console-logs::-webkit-scrollbar-track {
   background: transparent;
 }
-
 .console-logs::-webkit-scrollbar-thumb {
   background-color: var(--ink-trace);
   border-radius: 3px;
 }
-
 .console-logs::-webkit-scrollbar-thumb:hover {
   background-color: var(--ink-light);
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, type DefineComponent, onUnmounted } from 'vue'
+import { ref, computed, type DefineComponent } from 'vue'
 import { clipboard } from '@cat-kit/fe'
 import {
   X,
@@ -13,6 +13,8 @@ import {
   Ban
 } from 'lucide-vue-next'
 import Console from './Console.vue'
+import CodeViewer from './CodeViewer.vue'
+import { useFullscreen, useDraggable } from '../composables'
 
 const props = defineProps<{
   is?: DefineComponent
@@ -22,18 +24,27 @@ const props = defineProps<{
   lineCount?: number
 }>()
 
+// 视图状态
 const viewMode = ref<'preview' | 'code'>('preview')
-const isFullscreen = ref(false)
 const copied = ref(false)
-const showConsoleInFullscreen = ref(false)
-const consoleHeight = ref(280)
-const fullscreenConsoleRef = ref<InstanceType<typeof Console>>()
+const showConsole = ref(false)
+const consoleRef = ref<InstanceType<typeof Console>>()
 
-// 拖拽相关
-const isDragging = ref(false)
-const startY = ref(0)
-const startHeight = ref(0)
+// 全屏模式
+const {
+  isFullscreen,
+  enter: enterFullscreen,
+  exit: exitFullscreen
+} = useFullscreen()
 
+// 控制台高度拖拽
+const { value: consoleHeight, onDragStart } = useDraggable({
+  initial: 280,
+  min: 80,
+  max: 500
+})
+
+// 解码后的代码
 const decodedCode = computed(() =>
   props.code ? decodeURIComponent(props.code) : ''
 )
@@ -41,16 +52,11 @@ const decodedHighlightCode = computed(() =>
   props.highlightCode ? decodeURIComponent(props.highlightCode) : ''
 )
 
-const lineNumbers = computed(() => {
-  const count = props.lineCount || 1
-  return Array.from({ length: count }, (_, i) => i + 1)
-})
+// 控制台日志数量
+const consoleLogsCount = computed(() => consoleRef.value?.logs?.length ?? 0)
 
-const consoleLogsCount = computed(() => {
-  return fullscreenConsoleRef.value?.logs?.length ?? 0
-})
-
-const copyCode = async () => {
+// 操作方法
+async function copyCode() {
   try {
     await clipboard.copy(decodedCode.value)
     copied.value = true
@@ -60,68 +66,22 @@ const copyCode = async () => {
   }
 }
 
-const toggleView = () => {
+function toggleView() {
   viewMode.value = viewMode.value === 'preview' ? 'code' : 'preview'
 }
 
-const toggleFullscreenConsole = () => {
-  showConsoleInFullscreen.value = !showConsoleInFullscreen.value
+function toggleConsole() {
+  showConsole.value = !showConsole.value
 }
 
-const clearConsole = () => {
-  fullscreenConsoleRef.value?.clearLogs()
+function clearConsole() {
+  consoleRef.value?.clearLogs()
 }
 
-const enterFullscreen = () => {
-  isFullscreen.value = true
-  document.body.style.overflow = 'hidden'
-  window.addEventListener('keydown', onKeydown)
+function handleExitFullscreen() {
+  exitFullscreen()
+  showConsole.value = false
 }
-
-const exitFullscreen = () => {
-  isFullscreen.value = false
-  showConsoleInFullscreen.value = false
-  document.body.style.overflow = ''
-  window.removeEventListener('keydown', onKeydown)
-}
-
-const onKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape') {
-    exitFullscreen()
-  }
-}
-
-// 拖拽处理
-const onDragStart = (e: MouseEvent) => {
-  isDragging.value = true
-  startY.value = e.clientY
-  startHeight.value = consoleHeight.value
-  document.addEventListener('mousemove', onDragMove)
-  document.addEventListener('mouseup', onDragEnd)
-  document.body.style.cursor = 'ns-resize'
-  document.body.style.userSelect = 'none'
-}
-
-const onDragMove = (e: MouseEvent) => {
-  if (!isDragging.value) return
-  const deltaY = startY.value - e.clientY
-  consoleHeight.value = Math.max(80, Math.min(500, startHeight.value + deltaY))
-}
-
-const onDragEnd = () => {
-  isDragging.value = false
-  document.removeEventListener('mousemove', onDragMove)
-  document.removeEventListener('mouseup', onDragEnd)
-  document.body.style.cursor = ''
-  document.body.style.userSelect = ''
-}
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', onKeydown)
-  document.removeEventListener('mousemove', onDragMove)
-  document.removeEventListener('mouseup', onDragEnd)
-  document.body.style.overflow = ''
-})
 </script>
 
 <template>
@@ -131,30 +91,30 @@ onUnmounted(() => {
       <button
         class="fullscreen-btn-item"
         :class="{ copied }"
-        @click="copyCode"
         :title="copied ? '已复制' : '复制代码'"
+        @click="copyCode"
       >
         <Check v-if="copied" :size="20" />
         <Copy v-else :size="20" />
       </button>
       <button
         class="fullscreen-btn-item close"
-        @click="exitFullscreen"
         title="退出全屏 (ESC)"
+        @click="handleExitFullscreen"
       >
         <X :size="20" />
       </button>
     </div>
 
-    <!-- 操作栏 (调整到顶部) -->
+    <!-- 操作栏 -->
     <div class="demo-actions">
       <span class="demo-lang">vue</span>
       <div class="demo-btns">
         <button
           class="demo-btn"
           :class="{ copied }"
-          @click="copyCode"
           :title="copied ? '已复制' : '复制代码'"
+          @click="copyCode"
         >
           <Check v-if="copied" :size="16" />
           <Copy v-else :size="16" />
@@ -162,17 +122,16 @@ onUnmounted(() => {
         <button
           class="demo-btn"
           :class="{ active: viewMode === 'code' }"
-          @click="toggleView"
           :title="viewMode === 'preview' ? '查看源码' : '查看示例'"
+          @click="toggleView"
         >
           <Code v-if="viewMode === 'preview'" :size="16" />
           <Eye v-else :size="16" />
         </button>
-        <!-- 最大化按钮（移动端隐藏） -->
         <button
           class="demo-btn fullscreen-btn"
-          @click="enterFullscreen"
           title="全屏查看"
+          @click="enterFullscreen"
         >
           <Maximize2 :size="16" />
         </button>
@@ -182,57 +141,53 @@ onUnmounted(() => {
     <div class="demo-content">
       <!-- 预览区域 -->
       <div
-        class="demo-preview-panel"
         v-show="isFullscreen || viewMode === 'preview'"
+        class="demo-preview-panel"
       >
         <div class="demo-preview-wrapper">
           <div v-if="!is" class="demo-error">
-            <span class="error-icon">
-              <AlertCircle :size="18" />
-            </span>
+            <AlertCircle :size="18" />
             <span
               >Demo 文件不存在: <code>examples/{{ path }}</code></span
             >
           </div>
           <component v-else :is="is" />
         </div>
-        <!-- 全屏模式下的控制台区域 -->
-        <div v-if="isFullscreen" class="fullscreen-console-area">
-          <!-- 拖拽条 -->
+
+        <!-- 全屏模式控制台 -->
+        <div v-if="isFullscreen" class="console-area">
           <div
-            v-if="showConsoleInFullscreen"
+            v-if="showConsole"
             class="console-drag-bar"
             @mousedown="onDragStart"
-          ></div>
-          <!-- 控制台工具栏 -->
+          />
           <div class="console-toolbar">
             <button
               class="console-toggle-btn"
-              :class="{ active: showConsoleInFullscreen }"
-              @click="toggleFullscreenConsole"
-              :title="showConsoleInFullscreen ? '关闭控制台' : '打开控制台'"
+              :class="{ active: showConsole }"
+              :title="showConsole ? '关闭控制台' : '打开控制台'"
+              @click="toggleConsole"
             >
               <Terminal :size="12" />
               <span>控制台</span>
-              <span v-if="consoleLogsCount > 0" class="console-count">{{
-                consoleLogsCount
-              }}</span>
+              <span v-if="consoleLogsCount > 0" class="console-count">
+                {{ consoleLogsCount }}
+              </span>
             </button>
             <button
-              v-if="showConsoleInFullscreen"
+              v-if="showConsole"
               class="console-clear-btn"
-              @click="clearConsole"
               title="清空控制台"
               :disabled="consoleLogsCount === 0"
+              @click="clearConsole"
             >
               <Ban :size="12" />
             </button>
           </div>
-          <!-- 控制台内容 -->
           <Console
-            v-if="showConsoleInFullscreen"
-            ref="fullscreenConsoleRef"
-            :active="showConsoleInFullscreen"
+            v-if="showConsole"
+            ref="consoleRef"
+            :active="showConsole"
             :style="{ height: consoleHeight + 'px' }"
           />
         </div>
@@ -240,17 +195,13 @@ onUnmounted(() => {
 
       <!-- 代码区域 -->
       <div
-        class="demo-source-panel"
         v-show="isFullscreen || viewMode === 'code'"
+        class="demo-source-panel"
       >
-        <div class="demo-source">
-          <div class="line-numbers-wrapper" aria-hidden="true">
-            <span v-for="n in lineNumbers" :key="n" class="line-number">{{
-              n
-            }}</span>
-          </div>
-          <div class="code-content" v-html="decodedHighlightCode"></div>
-        </div>
+        <CodeViewer
+          :highlighted-code="decodedHighlightCode"
+          :line-count="lineCount || 1"
+        />
       </div>
     </div>
   </div>
@@ -277,16 +228,12 @@ onUnmounted(() => {
 /* 全屏样式 */
 .demo-container.fullscreen {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
   margin: 0;
   border-radius: 0;
   z-index: 1000;
 }
 
-/* 全屏顶部操作按钮组 */
 .fullscreen-actions {
   position: absolute;
   top: 16px;
@@ -308,8 +255,7 @@ onUnmounted(() => {
   border: 1px solid var(--ink-trace);
   color: var(--vp-c-text-2);
   cursor: pointer;
-  transition: color 0.2s ease, background-color 0.2s ease,
-    border-color 0.2s ease;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -329,6 +275,7 @@ onUnmounted(() => {
   border-color: var(--vp-c-danger-1);
 }
 
+/* 内容区域 */
 .demo-content {
   flex: 1;
   display: flex;
@@ -350,6 +297,11 @@ onUnmounted(() => {
   max-height: 500px;
 }
 
+.fullscreen .demo-preview-panel {
+  border-left: 1px solid var(--ink-trace);
+  max-height: none;
+}
+
 .demo-preview-wrapper {
   flex: 1;
   padding: 20px;
@@ -358,19 +310,32 @@ onUnmounted(() => {
   overflow: auto;
 }
 
-.fullscreen .demo-preview-panel {
-  border-left: 1px solid var(--ink-trace);
-  max-height: none;
+.demo-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: var(--vp-c-danger-soft);
+  border-radius: 4px;
+  color: var(--vp-c-danger-1);
+  font-size: 14px;
 }
 
-/* 全屏模式控制台区域 */
-.fullscreen-console-area {
+.demo-error code {
+  padding: 2px 6px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 13px;
+}
+
+/* 控制台区域 */
+.console-area {
   display: flex;
   flex-direction: column;
   border-top: 1px solid var(--ink-trace);
 }
 
-/* 控制台拖拽条 */
 .console-drag-bar {
   height: 4px;
   cursor: ns-resize;
@@ -383,7 +348,6 @@ onUnmounted(() => {
   background-color: var(--vp-c-brand-1);
 }
 
-/* 控制台工具栏 */
 .console-toolbar {
   display: flex;
   align-items: center;
@@ -455,31 +419,6 @@ onUnmounted(() => {
   cursor: not-allowed;
 }
 
-.demo-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background-color: var(--vp-c-danger-soft);
-  border-radius: 4px;
-  color: var(--vp-c-danger-1);
-  font-size: 14px;
-}
-
-.demo-error code {
-  padding: 2px 6px;
-  background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  font-family: var(--vp-font-family-mono);
-  font-size: 13px;
-}
-
-.error-icon {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
 /* 代码区域 */
 .demo-source-panel {
   position: relative;
@@ -493,59 +432,6 @@ onUnmounted(() => {
 
 .fullscreen .demo-source-panel {
   max-height: none;
-}
-
-.demo-source {
-  background-color: var(--vp-c-bg-alt);
-  height: 100%;
-  overflow: auto;
-  display: flex;
-  align-items: flex-start;
-}
-
-.line-numbers-wrapper {
-  position: relative;
-  flex-shrink: 0;
-  width: 32px;
-  padding: 20px 0;
-  text-align: center;
-  font-family: var(--vp-font-family-mono);
-  line-height: var(--vp-code-line-height);
-  font-size: var(--vp-code-font-size);
-  color: var(--ink-light);
-  border-right: 1px solid var(--ink-trace);
-  user-select: none;
-}
-
-.line-number {
-  display: block;
-  line-height: var(--vp-code-line-height);
-}
-
-.code-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.code-content :deep(pre) {
-  margin: 0;
-  padding: 20px 0;
-  background: transparent;
-  overflow-x: auto;
-}
-
-.code-content :deep(code) {
-  display: block;
-  padding: 0 24px;
-  width: fit-content;
-  min-width: 100%;
-  line-height: var(--vp-code-line-height);
-  font-size: var(--vp-code-font-size);
-  color: var(--vp-c-text-2);
-}
-
-.code-content :deep(.shiki) {
-  background: transparent !important;
 }
 
 /* 操作栏 */
@@ -589,8 +475,7 @@ onUnmounted(() => {
   border: 1px solid transparent;
   border-radius: 4px;
   cursor: pointer;
-  transition: color 0.2s ease, background-color 0.2s ease,
-    border-color 0.2s ease;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s;
 }
 
 .demo-btn:hover {
@@ -614,21 +499,8 @@ onUnmounted(() => {
     display: none;
   }
 
-  .demo-preview-panel {
+  .demo-preview-wrapper {
     padding: 16px;
-  }
-
-  .line-numbers-wrapper {
-    width: 28px;
-    padding-top: 16px;
-  }
-
-  .code-content :deep(pre) {
-    padding: 16px 0;
-  }
-
-  .code-content :deep(code) {
-    padding: 0 16px;
   }
 }
 </style>
