@@ -1,5 +1,5 @@
 <template>
-  <div class="demo-container">
+  <div>
     <div class="demo-section">
       <h3>Token 插件示例</h3>
       <p>演示如何自动在请求中添加 Token</p>
@@ -29,14 +29,15 @@
         </div>
         <div class="info-row">
           <span class="label">状态:</span>
-          <span class="value" :class="lastRequest.success ? 'success' : 'error'">
+          <span
+            class="value"
+            :class="lastRequest.success ? 'success' : 'error'"
+          >
             {{ lastRequest.success ? '✅ 成功' : '❌ 失败' }}
           </span>
         </div>
       </div>
-      <div v-else class="empty-state">
-        暂无请求记录
-      </div>
+      <div v-else class="empty-state">暂无请求记录</div>
     </div>
   </div>
 </template>
@@ -70,7 +71,9 @@ async function sendAuthRequest() {
   }
 
   try {
-    const response = await http.get('https://jsonplaceholder.typicode.com/posts/1')
+    const response = await http.get(
+      'https://jsonplaceholder.typicode.com/posts/1'
+    )
 
     lastRequest.value = {
       headers: `Authorization: Bearer ${token.value}`,

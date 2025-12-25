@@ -39,6 +39,9 @@ const toggleSource = () => {
   showSource.value = !showSource.value
 }
 </script>
+<route lang="ts">
+export default [{ path: 'fe/storage/basic.vue', name: '存储示例' }]
+</route>
 
 <template>
   <div class="demo-container">
@@ -206,8 +209,6 @@ const toggleSource = () => {
 
 .demo-source {
   position: relative;
-  /* max-height: 400px; */
-  overflow: auto;
   padding-left: 32px;
   background-color: var(--vp-c-bg);
 }
@@ -324,7 +325,6 @@ const toggleSource = () => {
   }
 
   .demo-source {
-    max-height: 300px;
     padding-left: 28px;
   }
 

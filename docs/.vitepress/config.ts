@@ -18,15 +18,7 @@ export default defineConfig({
 
   head: [
     ['link', { rel: 'icon', type: 'image/png', href: '/logo.png' }],
-    // 霞鹜文楷字体
-    ['link', { rel: 'preconnect', href: 'https://cdn.jsdelivr.net' }],
-    [
-      'link',
-      {
-        rel: 'stylesheet',
-        href: 'https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css'
-      }
-    ],
+
     ['meta', { name: 'theme-color', content: '#1a1a1a' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:locale', content: 'zh' }],
@@ -127,6 +119,7 @@ export default defineConfig({
 
     config: md => {
       md.use(demoContainer)
+      // @ts-ignore
       md.use(copyOrDownloadAsMarkdownButtons)
     }
   },

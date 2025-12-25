@@ -1,5 +1,5 @@
 <template>
-  <div class="demo-container">
+  <div>
     <div class="demo-section">
       <h3>加载状态示例</h3>
       <p>点击下方按钮发起请求，观察加载条效果</p>
@@ -77,10 +77,7 @@ function addLog(message: string) {
 
 // 创建 HTTP 客户端
 const http = new HTTPClient('', {
-  plugins: [
-    LoadingPlugin(),
-    MessagePlugin()
-  ]
+  plugins: [LoadingPlugin(), MessagePlugin()]
 })
 
 // 发起单个请求

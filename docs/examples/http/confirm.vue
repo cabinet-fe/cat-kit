@@ -1,5 +1,5 @@
 <template>
-  <div class="demo-container">
+  <div>
     <div class="demo-section">
       <h3>交互式确认对话框</h3>
       <p>演示在执行删除操作前弹出确认对话框</p>
@@ -23,9 +23,7 @@
         <div v-for="(log, index) in logs" :key="index" class="log-item">
           {{ log }}
         </div>
-        <div v-if="logs.length === 0" class="empty-state">
-          暂无操作记录
-        </div>
+        <div v-if="logs.length === 0" class="empty-state">暂无操作记录</div>
       </div>
     </div>
   </div>
@@ -44,8 +42,6 @@ const items = ref([
 ])
 
 const logs = ref<string[]>([])
-
-
 
 // 确认删除插件
 function ConfirmDeletePlugin(): ClientPlugin {
@@ -107,12 +103,6 @@ async function deleteItem(id: number) {
 </script>
 
 <style scoped>
-.demo-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
 .demo-section {
   display: flex;
   flex-direction: column;
