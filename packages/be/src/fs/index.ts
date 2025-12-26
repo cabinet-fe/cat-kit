@@ -5,3 +5,6 @@ export * from './remove'
 export * from './write-file'
 export * from './empty-dir'
 export * from './move'
+
+export { readFile, cp, copyFile } from 'node:fs/promises'
+export { existsSync } from 'node:fs'

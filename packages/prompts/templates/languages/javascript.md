@@ -2,9 +2,7 @@
 
 ## 文件命名
 
-- 普通文件：**kebab-case**：`user-service.js`
-- 组件文件：**PascalCase**：`UserProfile.jsx`
-- 测试文件：`*.test.js`
+遵循**kebab-case**命名法，例如：'user-manage.js'
 
 ## 项目约定
 

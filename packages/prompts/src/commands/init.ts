@@ -1,24 +1,28 @@
 import { join, basename } from 'node:path'
-import { ensureDir, writeFile } from '@cat-kit/be'
-import { existsSync } from 'node:fs'
+import {
+  ensureDir,
+  writeFile,
+  existsSync,
+  copyFile,
+  readFile
+} from '@cat-kit/be'
 import {
   getDevPromptsDir,
   getAgentsPath,
   getTemplatesDir,
   getLanguageTemplatesDir
-} from '../utils/fs.js'
+} from '../utils/fs'
 import {
   askUserConfig,
   type UserConfig,
   type SupportedLanguage
-} from '../utils/questions.js'
+} from '../utils/questions'
 import {
   hasAgentsBlock,
   generateAgentsBlock,
   updateAgentsContent,
   generateDefaultAgentsContent
-} from '../utils/templates.js'
-import { copyFile, readFile } from 'node:fs/promises'
+} from '../utils/templates'
 
 /** 检测结果 */
 interface DetectionResult {

@@ -2,8 +2,7 @@
 
 ## 文件命名
 
-- 模块文件：**snake_case**：`user_service.py`
-- 测试文件：`test_*.py`
+遵循**snake_case-case**命名法，例如：`user_service.py`
 
 ## 项目约定
 

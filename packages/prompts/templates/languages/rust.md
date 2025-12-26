@@ -2,7 +2,7 @@
 
 ## 文件命名
 
-- 源文件：**snake_case**：`user_service.rs`
+遵循**snake_case**命名法，例如：`user_service.rs`
 
 ## 项目约定
 

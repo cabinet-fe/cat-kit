@@ -1,4 +1,4 @@
-import { join, dirname } from 'node:path'
+import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -13,10 +13,7 @@ const __dirname = dirname(__filename)
  * @returns 模板目录的绝对路径
  */
 export function getTemplatesDir(): string {
-  // 从 src/utils/fs.ts 或 dist/index.js 回溯到包根目录
-  // __dirname 在开发时是 src/utils，在构建后是 dist
-  const packageRoot = join(__dirname, '..', '..')
-  return join(packageRoot, 'templates')
+  return resolve(__dirname, '../../templates')
 }
 
 /**

@@ -2,8 +2,7 @@
 
 ## 文件命名
 
-- 源文件：**snake_case**：`user_service.go`
-- 测试文件：`*_test.go`
+遵循**snake_case**命名法，例如：`user_service.go`
 
 ## 项目约定
 

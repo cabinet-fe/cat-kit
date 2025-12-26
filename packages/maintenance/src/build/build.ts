@@ -1,5 +1,5 @@
 import { build } from 'tsdown'
-import type { BuildConfig } from "./types"
+import type { BuildConfig } from './types'
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -38,6 +38,11 @@ export async function buildLib(config: BuildConfig) {
       platform,
       minify: true,
       logLevel: 'warn',
+
+      outputOptions: {
+        preserveModules: true
+      },
+
       plugins: [
         visualizer({
           filename: path.resolve(dir, outDir, 'stats.html'),
