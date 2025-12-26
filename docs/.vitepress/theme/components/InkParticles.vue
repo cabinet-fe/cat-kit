@@ -9,7 +9,8 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 let ctx: CanvasRenderingContext2D | null = null
 let animationId: number
 let particles: Particle[] = []
-let mouse = { x: 0, y: 0 }
+let observer: MutationObserver | null = null
+const mouse = { x: 0, y: 0 }
 let width = 0
 let height = 0
 
@@ -17,6 +18,12 @@ let height = 0
 const PARTICLE_COUNT = 30
 const INK_COLORS = ['#1a1a1a', '#333333', '#666666']
 const DARK_INK_COLORS = ['#e8e6e3', '#c7c5c2', '#a3a19e']
+
+/** 获取当前主题对应的颜色 */
+function getCurrentColors(): string[] {
+  const isDark = document.documentElement.classList.contains('dark')
+  return isDark ? DARK_INK_COLORS : INK_COLORS
+}
 
 class Particle {
   x: number
@@ -29,12 +36,13 @@ class Particle {
   originalAlpha: number
 
   constructor() {
+    const colors = getCurrentColors()
     this.x = Math.random() * width
     this.y = Math.random() * height
     this.size = Math.random() * 3 + 1
     this.speedX = Math.random() * 0.5 - 0.25
     this.speedY = Math.random() * 0.5 + 0.1 // 缓慢下落
-    this.color = INK_COLORS[Math.floor(Math.random() * INK_COLORS.length)]
+    this.color = colors[Math.floor(Math.random() * colors.length)]!
     this.alpha = Math.random() * 0.5 + 0.1
     this.originalAlpha = this.alpha
   }
@@ -82,20 +90,11 @@ class Particle {
   }
 }
 
-function init() {
-  if (!canvasRef.value) return
-  resize()
-
-  // 初始化粒子
-  particles = []
-  for (let i = 0; i < PARTICLE_COUNT; i++) {
-    particles.push(new Particle())
-  }
-
-  animate()
-
-  window.addEventListener('resize', resize)
-  window.addEventListener('mousemove', handleMouseMove)
+function updateParticleColors() {
+  const colors = getCurrentColors()
+  particles.forEach(p => {
+    p.color = colors[Math.floor(Math.random() * colors.length)]!
+  })
 }
 
 function resize() {
@@ -104,13 +103,7 @@ function resize() {
   height = window.innerHeight
   canvasRef.value.width = width
   canvasRef.value.height = height
-
-  // 检查暗色模式更新颜色 (简化处理，实际应监听变化)
-  const isDark = document.documentElement.classList.contains('dark')
-  const colors = isDark ? DARK_INK_COLORS : INK_COLORS
-  particles.forEach(p => {
-    p.color = colors[Math.floor(Math.random() * colors.length)]
-  })
+  updateParticleColors()
 }
 
 function handleMouseMove(e: MouseEvent) {
@@ -130,16 +123,32 @@ function animate() {
   animationId = requestAnimationFrame(animate)
 }
 
+function init() {
+  if (!canvasRef.value) return
+  resize()
+
+  // 初始化粒子
+  particles = []
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push(new Particle())
+  }
+
+  animate()
+
+  window.addEventListener('resize', resize)
+  window.addEventListener('mousemove', handleMouseMove)
+}
+
 onMounted(() => {
   if (canvasRef.value) {
     ctx = canvasRef.value.getContext('2d')
     init()
 
     // 监听暗色模式变化
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
+    observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
         if (mutation.attributeName === 'class') {
-          resize()
+          updateParticleColors()
         }
       })
     })
@@ -151,6 +160,7 @@ onUnmounted(() => {
   cancelAnimationFrame(animationId)
   window.removeEventListener('resize', resize)
   window.removeEventListener('mousemove', handleMouseMove)
+  observer?.disconnect()
 })
 </script>
 
@@ -165,4 +175,3 @@ onUnmounted(() => {
   z-index: 0;
 }
 </style>
-

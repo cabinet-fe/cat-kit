@@ -6,6 +6,7 @@ import CloudPatterns from './components/CloudPatterns.vue'
 import SealStamp from './components/SealStamp.vue'
 import InkParticles from './components/InkParticles.vue'
 import BrushStrokes from './components/BrushStrokes.vue'
+import SolarTerms from './components/SolarTerms.vue'
 
 // 将解构出的 Layout 重命名为 DefaultLayout，避免与当前组件名冲突
 const { Layout: DefaultLayout } = DefaultTheme
@@ -26,6 +27,7 @@ const { frontmatter } = useData()
     </template>
 
     <template #home-hero-after>
+      <SolarTerms />
     </template>
 
     <template #home-features-before>
