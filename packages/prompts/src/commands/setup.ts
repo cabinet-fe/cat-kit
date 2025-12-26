@@ -58,8 +58,7 @@ async function generateUserPromptContent(cli?: CLIConfig): Promise<string> {
 async function askCLISelection(): Promise<CLIConfig[]> {
   const choices = CLI_CONFIGS.map(cli => ({
     name: cli.name,
-    value: cli.id,
-    checked: true // 默认全选
+    value: cli.id
   }))
 
   const selectedIds = await checkbox<SupportedCLI>({

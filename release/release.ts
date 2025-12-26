@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { writeFileSync, readFileSync } from 'node:fs'
-import { main, maintenance, tsconfig, repo } from './repo'
+import { main, maintenance, tsconfig, prompts, repo } from './repo'
 import { $ } from 'execa'
 import { select } from '@inquirer/prompts'
 import chalk from 'chalk'
@@ -54,7 +54,7 @@ function validate(): void {
 /**
  * 选择发布组
  */
-async function chooseGroup(): Promise<'main' | 'maintenance' | 'tsconfig'> {
+async function chooseGroup() {
   const value = await select({
     message: '选择要发布的组',
     choices: [
@@ -73,6 +73,11 @@ async function chooseGroup(): Promise<'main' | 'maintenance' | 'tsconfig'> {
         value: 'tsconfig' as const,
         name: 'tsconfig',
         description: '@cat-kit/tsconfig'
+      },
+      {
+        value: 'prompts' as const,
+        name: 'prompts',
+        description: '@cat-kit/prompts'
       }
     ]
   })
@@ -178,15 +183,14 @@ async function gitReset(commitHash: string): Promise<void> {
 const GROUP_MAP = {
   main,
   maintenance,
-  tsconfig
+  tsconfig,
+  prompts
 }
 
 /**
  * 发布指定组
  */
-async function releaseGroup(
-  groupName: 'main' | 'maintenance' | 'tsconfig'
-): Promise<void> {
+async function releaseGroup(groupName: string): Promise<void> {
   const builder = GROUPS_BUILD[groupName]
 
   // 1. 构建
