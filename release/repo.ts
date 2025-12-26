@@ -14,6 +14,8 @@ export const main = repo.group([
   '@cat-kit/excel',
 ])
 
+export const prompts = repo.group(['@cat-kit/prompts'])
+
 export const tsconfig = repo.group(['@cat-kit/tsconfig'])
 
 export const maintenance = repo.group(['@cat-kit/maintenance'])

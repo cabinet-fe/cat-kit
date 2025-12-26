@@ -1,4 +1,4 @@
-import { main, maintenance } from './repo'
+import { main, maintenance, prompts } from './repo'
 
 export const GROUPS_BUILD = {
   main() {
@@ -11,6 +11,12 @@ export const GROUPS_BUILD = {
   maintenance() {
     return maintenance.build({
       '@cat-kit/maintenance': { platform: 'node' }
+    })
+  },
+
+  prompts() {
+    return prompts.build({
+      '@cat-kit/prompts': { platform: 'node' }
     })
   }
 }

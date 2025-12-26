@@ -1,0 +1,29 @@
+{
+  "name": "@cat-kit/prompts",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "AI 开发提示词管理工具",
+  "bin": {
+    "dp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "src",
+    "templates"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./src": "./src/index.ts"
+  },
+  "dependencies": {
+    "commander": "^14.0.0",
+    "@inquirer/prompts": "^7.5.1"
+  },
+  "devDependencies": {
+    "@cat-kit/tsconfig": "workspace:*",
+    "@types/node": "^24.10.1"
+  }
+}
