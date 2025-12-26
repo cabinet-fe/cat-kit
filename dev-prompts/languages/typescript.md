@@ -2,16 +2,16 @@
 
 ## 文件命名
 
-- 普通文件：**kebab-case**：`user-service.ts`
-- 组件文件：**PascalCase**：`UserProfile.tsx`
-- 测试文件：`*.test.ts`
+遵循**kebab-case**命名法，例如：'user-manage.ts'
 
 ## 项目约定
 
 ### 类型定义偏好
 
+- 严格类型定义，不要使用`any`类型
 - 对象结构优先使用 `interface`（可扩展）
 - 联合类型、工具类型使用 `type`
+- 不得存在类型错误
 
 ### 导出偏好
 

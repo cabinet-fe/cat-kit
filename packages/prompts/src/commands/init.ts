@@ -1,4 +1,4 @@
-import { join, basename } from 'node:path'
+import { join } from 'node:path'
 import {
   ensureDir,
   writeFile,
@@ -9,7 +9,6 @@ import {
 import {
   getDevPromptsDir,
   getAgentsPath,
-  getTemplatesDir,
   getLanguageTemplatesDir
 } from '../utils/fs'
 import {
@@ -93,17 +92,6 @@ async function copyLanguageFiles(
 }
 
 /**
- * 复制开发权重模型文件
- */
-async function copyWeightModelFile(devPromptsDir: string): Promise<void> {
-  const sourcePath = join(getTemplatesDir(), 'weight-model.md')
-  const destPath = join(devPromptsDir, 'weight-model.md')
-
-  await copyFile(sourcePath, destPath)
-  console.log('  ✅ 复制开发权重模型')
-}
-
-/**
  * 更新或创建 AGENTS.md 文件
  */
 async function updateAgentsFile(
@@ -112,15 +100,11 @@ async function updateAgentsFile(
   cwd: string
 ): Promise<void> {
   const agentsPath = getAgentsPath(cwd)
-  const projectName = basename(cwd)
 
   if (detection.agentsFileExists && detection.agentsContent) {
     if (detection.hasAgentsBlock) {
       // 更新现有引导块
-      const newBlock = await generateAgentsBlock(
-        config.languages,
-        config.useWeightModel
-      )
+      const newBlock = await generateAgentsBlock(config.languages)
       const updatedContent = updateAgentsContent(
         detection.agentsContent,
         newBlock
@@ -128,10 +112,7 @@ async function updateAgentsFile(
       await writeFile(agentsPath, updatedContent)
     } else {
       // AGENTS.md 存在但没有引导块，追加引导块
-      const newBlock = await generateAgentsBlock(
-        config.languages,
-        config.useWeightModel
-      )
+      const newBlock = await generateAgentsBlock(config.languages)
       const updatedContent = updateAgentsContent(
         detection.agentsContent,
         newBlock
@@ -140,11 +121,7 @@ async function updateAgentsFile(
     }
   } else {
     // 创建新文件
-    const content = await generateDefaultAgentsContent(
-      projectName,
-      config.languages,
-      config.useWeightModel
-    )
+    const content = await generateDefaultAgentsContent(config.languages)
     await writeFile(agentsPath, content)
     console.log('  ✅ 创建 AGENTS.md 文件')
   }
@@ -179,11 +156,6 @@ export async function initCommand(): Promise<void> {
   // 复制语言提示词
   await copyLanguageFiles(config, devPromptsDir)
 
-  // 复制开发权重模型
-  if (config.useWeightModel) {
-    await copyWeightModelFile(devPromptsDir)
-  }
-
   // 更新 AGENTS.md
   await updateAgentsFile(config, detection, cwd)
 
@@ -194,9 +166,6 @@ export async function initCommand(): Promise<void> {
   console.log('  ├── languages/')
   for (const lang of config.languages) {
     console.log(`  │   └── ${getLanguageFileName(lang)}`)
-  }
-  if (config.useWeightModel) {
-    console.log('  └── weight-model.md')
   }
   console.log('  AGENTS.md')
   console.log()

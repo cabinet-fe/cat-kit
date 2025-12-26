@@ -16,12 +16,12 @@ export const languageNames: Record<SupportedLanguage, string> = {
 /**
  * AGENTS.md 引导块的开始标识符
  */
-export const AGENTS_BLOCK_START = '<!-- dev-prompts:start -->'
+export const AGENTS_BLOCK_START = '<!-- DEV_PROMPTS:START -->'
 
 /**
  * AGENTS.md 引导块的结束标识符
  */
-export const AGENTS_BLOCK_END = '<!-- dev-prompts:end -->'
+export const AGENTS_BLOCK_END = '<!-- DEV_PROMPTS:END -->'
 
 /**
  * 读取 agents-block.md 模板文件
@@ -48,41 +48,20 @@ function generateLanguageList(languages: SupportedLanguage[]): string {
 }
 
 /**
- * 生成开发权重模型章节
- * @param useWeightModel - 是否使用开发权重模型
- * @returns 权重模型章节 Markdown，如果不使用则返回空字符串
- */
-function generateWeightModelSection(useWeightModel: boolean): string {
-  if (!useWeightModel) {
-    return ''
-  }
-
-  return `### 开发权重模型
-
-在进行设计和实现决策时，请参考开发权重模型，它定义了正确性、安全性、性能、可扩展性和前瞻性之间的优先级关系：
-
-- [开发权重模型](dev-prompts/weight-model.md)
-`
-}
-
-/**
  * 生成 AGENTS.md 引导块内容
  * @param languages - 选择的编程语言
- * @param useWeightModel - 是否使用开发权重模型
  * @returns 引导块内容
  */
 export async function generateAgentsBlock(
-  languages: SupportedLanguage[],
-  useWeightModel: boolean
+  languages: SupportedLanguage[]
 ): Promise<string> {
   const template = await readAgentsBlockTemplate()
 
   const languageList = generateLanguageList(languages)
-  const weightModelSection = generateWeightModelSection(useWeightModel)
 
-  return template
-    .replace('{{LANGUAGE_LIST}}', languageList)
-    .replace('{{WEIGHT_MODEL_SECTION}}', weightModelSection)
+  const prompts = template.replace('{{LANGUAGE_LIST}}', languageList)
+
+  return AGENTS_BLOCK_START + '\n\n' + prompts + '\n\n' + AGENTS_BLOCK_END
 }
 
 /**
@@ -140,34 +119,13 @@ export function updateAgentsContent(content: string, newBlock: string): string {
 
 /**
  * 生成默认的 AGENTS.md 内容
- * @param projectName - 项目名称
  * @param languages - 选择的编程语言
- * @param useWeightModel - 是否使用开发权重模型
  * @returns 完整的 AGENTS.md 内容
  */
 export async function generateDefaultAgentsContent(
-  projectName: string,
-  languages: SupportedLanguage[],
-  useWeightModel: boolean
+  languages: SupportedLanguage[]
 ): Promise<string> {
-  const block = await generateAgentsBlock(languages, useWeightModel)
+  const block = await generateAgentsBlock(languages)
 
-  return `# ${projectName}
-
-本文件为智能体提供项目级别的开发指导。
-
-## 项目概述
-
-请在此描述项目的基本信息和目标。
-
-## 技术栈
-
-请在此列出项目使用的主要技术和框架。
-
-## 开发指南
-
-请在此添加项目特定的开发指南和规范。
-
-${block}
-`
+  return block
 }

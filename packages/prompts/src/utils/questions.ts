@@ -1,4 +1,4 @@
-import { checkbox, confirm } from '@inquirer/prompts'
+import { checkbox } from '@inquirer/prompts'
 
 /** 支持的编程语言 */
 export type SupportedLanguage =
@@ -23,8 +23,6 @@ const languageChoices: Array<{ name: string; value: SupportedLanguage }> = [
 export interface UserConfig {
   /** 选择的编程语言 */
   languages: SupportedLanguage[]
-  /** 是否使用开发权重模型 */
-  useWeightModel: boolean
 }
 
 /**
@@ -38,14 +36,8 @@ export async function askUserConfig(): Promise<UserConfig> {
     required: true
   })
 
-  const useWeightModel = await confirm({
-    message: '是否启用开发权重模型？（用于指导 AI 在正确性/性能/扩展性/安全性/前瞻性之间的权衡）',
-    default: true
-  })
-
   return {
-    languages,
-    useWeightModel
+    languages
   }
 }
 
