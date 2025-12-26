@@ -1,6 +1,4 @@
 import { readFile } from 'node:fs/promises'
-import { dirname } from 'node:path'
-import { ensureDir } from './ensure-dir'
 import { writeFile } from './write-file'
 
 /**

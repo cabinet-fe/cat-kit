@@ -1,23 +1,24 @@
 import { join, basename } from 'node:path'
+import { ensureDir, writeFile } from '@cat-kit/be'
+import { existsSync } from 'node:fs'
 import {
-  pathExists,
-  ensureDir,
-  readFileContent,
-  writeFileContent,
-  copyFileContent,
   getDevPromptsDir,
   getAgentsPath,
   getTemplatesDir,
   getLanguageTemplatesDir
 } from '../utils/fs.js'
-import { askUserConfig, type UserConfig, type SupportedLanguage } from '../utils/questions.js'
 import {
-  languageNames,
+  askUserConfig,
+  type UserConfig,
+  type SupportedLanguage
+} from '../utils/questions.js'
+import {
   hasAgentsBlock,
   generateAgentsBlock,
   updateAgentsContent,
   generateDefaultAgentsContent
 } from '../utils/templates.js'
+import { copyFile, readFile } from 'node:fs/promises'
 
 /** 检测结果 */
 interface DetectionResult {
@@ -38,10 +39,10 @@ async function detectCurrentState(cwd: string): Promise<DetectionResult> {
   const devPromptsDir = getDevPromptsDir(cwd)
   const agentsPath = getAgentsPath(cwd)
 
-  const devPromptsDirExists = await pathExists(devPromptsDir)
-  const agentsFileExists = await pathExists(agentsPath)
+  const agentsFileExists = existsSync(agentsPath)
+  const devPromptsDirExists = existsSync(devPromptsDir)
   const agentsContent = agentsFileExists
-    ? await readFileContent(agentsPath)
+    ? await readFile(agentsPath, 'utf-8')
     : null
 
   return {
@@ -83,8 +84,7 @@ async function copyLanguageFiles(
     const sourcePath = join(sourceDir, fileName)
     const destPath = join(languagesDir, fileName)
 
-    await copyFileContent(sourcePath, destPath)
-    console.log(`  ✅ 复制 ${languageNames[lang]} 代码风格指南`)
+    await copyFile(sourcePath, destPath)
   }
 }
 
@@ -95,7 +95,7 @@ async function copyWeightModelFile(devPromptsDir: string): Promise<void> {
   const sourcePath = join(getTemplatesDir(), 'weight-model.md')
   const destPath = join(devPromptsDir, 'weight-model.md')
 
-  await copyFileContent(sourcePath, destPath)
+  await copyFile(sourcePath, destPath)
   console.log('  ✅ 复制开发权重模型')
 }
 
@@ -111,22 +111,37 @@ async function updateAgentsFile(
   const projectName = basename(cwd)
 
   if (detection.agentsFileExists && detection.agentsContent) {
-    // 更新现有文件
-    const newBlock = generateAgentsBlock(
-      config.languages,
-      config.useWeightModel
-    )
-    const updatedContent = updateAgentsContent(detection.agentsContent, newBlock)
-    await writeFileContent(agentsPath, updatedContent)
-    console.log('  ✅ 更新 AGENTS.md 引导块')
+    if (detection.hasAgentsBlock) {
+      // 更新现有引导块
+      const newBlock = await generateAgentsBlock(
+        config.languages,
+        config.useWeightModel
+      )
+      const updatedContent = updateAgentsContent(
+        detection.agentsContent,
+        newBlock
+      )
+      await writeFile(agentsPath, updatedContent)
+    } else {
+      // AGENTS.md 存在但没有引导块，追加引导块
+      const newBlock = await generateAgentsBlock(
+        config.languages,
+        config.useWeightModel
+      )
+      const updatedContent = updateAgentsContent(
+        detection.agentsContent,
+        newBlock
+      )
+      await writeFile(agentsPath, updatedContent)
+    }
   } else {
     // 创建新文件
-    const content = generateDefaultAgentsContent(
+    const content = await generateDefaultAgentsContent(
       projectName,
       config.languages,
       config.useWeightModel
     )
-    await writeFileContent(agentsPath, content)
+    await writeFile(agentsPath, content)
     console.log('  ✅ 创建 AGENTS.md 文件')
   }
 }
@@ -153,9 +168,6 @@ export async function initCommand(): Promise<void> {
   // 2. 询问用户配置
   console.log('📝 配置选项：\n')
   const config = await askUserConfig()
-
-  // 3. 复制文件
-  console.log('\n📂 复制文件：\n')
 
   const devPromptsDir = getDevPromptsDir(cwd)
   await ensureDir(devPromptsDir)
@@ -184,6 +196,8 @@ export async function initCommand(): Promise<void> {
   }
   console.log('  AGENTS.md')
   console.log()
-  console.log('💡 提示：AGENTS.md 中的链接使用相对路径引用，AI 助手会按需读取对应的提示词文件。')
+  console.log(
+    '💡 提示：AGENTS.md 中的链接使用相对路径引用，AI 助手会按需读取对应的提示词文件。'
+  )
   console.log()
 }

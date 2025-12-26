@@ -19,8 +19,9 @@
     "./src": "./src/index.ts"
   },
   "dependencies": {
-    "commander": "^14.0.0",
-    "@inquirer/prompts": "^7.5.1"
+    "@cat-kit/be": "workspace:*",
+    "@inquirer/prompts": "^8.1.0",
+    "commander": "^14.0.0"
   },
   "devDependencies": {
     "@cat-kit/tsconfig": "workspace:*",
