@@ -1,36 +1,21 @@
 <template>
   <div class="seal-stamp" aria-hidden="true">
     <svg width="120" height="120" viewBox="0 0 100 100" class="seal-svg">
-      <defs>
-        <filter id="seal-noise">
-          <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="noise" />
-          <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.6 -0.2" in="noise" result="alphaNoise" />
-          <feComposite operator="out" in="SourceGraphic" in2="alphaNoise" />
-        </filter>
-        <!-- 印泥质感 -->
-        <filter id="rough-paper">
-          <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5" result="noise"/>
-          <feDiffuseLighting in="noise" lighting-color="#fff" surfaceScale="2">
-            <feDistantLight azimuth="45" elevation="60"/>
-          </feDiffuseLighting>
-        </filter>
-      </defs>
-
-      <g filter="url(#seal-noise)" transform="rotate(-5, 50, 50)">
+      <!-- 移除 seal-noise 和 rough-paper 滤镜，保留印章图形 -->
+      <g transform="rotate(-5, 50, 50)">
         <!-- 印章边框 -->
         <rect x="5" y="5" width="90" height="90" rx="4" fill="none" stroke="currentColor" stroke-width="4" />
         <rect x="12" y="12" width="76" height="76" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
 
         <!-- 印章文字：喵喵工具 -->
-        <!-- 使用简单的几何形状模拟篆刻感，因为不能依赖特殊字体 -->
         <g fill="currentColor">
           <!-- 喵 (左上) -->
           <path d="M20,20 h25 v25 h-25 z M24,24 v17 h17 v-17 z" />
           <rect x="28" y="28" width="9" height="9" />
 
           <!-- 喵 (右上) -->
-           <path d="M55,20 h25 v25 h-25 z M59,24 v17 h17 v-17 z" />
-           <rect x="63" y="28" width="9" height="9" />
+          <path d="M55,20 h25 v25 h-25 z M59,24 v17 h17 v-17 z" />
+          <rect x="63" y="28" width="9" height="9" />
 
           <!-- 工 (左下) -->
           <rect x="20" y="55" width="25" height="4" />
@@ -71,18 +56,25 @@
   }
 }
 
+/* 移除 hover 无限脉冲动画，改为 CSS transition */
 .seal-stamp:hover {
-  animation: sealPulse 2s infinite;
-}
-
-@keyframes sealPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
 }
 
 :global(.dark) .seal-stamp {
   mix-blend-mode: normal;
   opacity: 0.9;
 }
-</style>
 
+/* 尊重用户减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .seal-stamp {
+    animation: none;
+    opacity: 0.85;
+  }
+  .seal-stamp:hover {
+    transform: none;
+  }
+}
+</style>

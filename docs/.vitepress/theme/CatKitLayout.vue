@@ -1,37 +1,48 @@
 <script setup lang="ts">
 import DefaultTheme from 'vitepress/theme'
 import { useData } from 'vitepress'
-import InkBackground from './components/InkBackground.vue'
-import CloudPatterns from './components/CloudPatterns.vue'
-import SealStamp from './components/SealStamp.vue'
-import InkParticles from './components/InkParticles.vue'
-import BrushStrokes from './components/BrushStrokes.vue'
-import SolarTerms from './components/SolarTerms.vue'
+import { computed, defineAsyncComponent } from 'vue'
 
-// 将解构出的 Layout 重命名为 DefaultLayout，避免与当前组件名冲突
+// 异步加载装饰组件，减少首屏 JS 体积
+const InkBackground = defineAsyncComponent(
+  () => import('./components/InkBackground.vue')
+)
+const CloudPatterns = defineAsyncComponent(
+  () => import('./components/CloudPatterns.vue')
+)
+const SealStamp = defineAsyncComponent(
+  () => import('./components/SealStamp.vue')
+)
+const BrushStrokes = defineAsyncComponent(
+  () => import('./components/BrushStrokes.vue')
+)
+const SolarTerms = defineAsyncComponent(
+  () => import('./components/SolarTerms.vue')
+)
+
 const { Layout: DefaultLayout } = DefaultTheme
 const { frontmatter } = useData()
+
+// 只在首页显示首页专用装饰
+const isHomePage = computed(() => frontmatter.value.layout === 'home')
 </script>
 
 <template>
   <DefaultLayout>
-    <!-- 全局装饰：动态墨滴粒子 -->
-    <template #layout-top>
-      <InkParticles />
-    </template>
-
-    <!-- 首页专用装饰 -->
+    <!-- 首页专用装饰 - 添加条件渲染 -->
     <template #home-hero-before>
-      <CloudPatterns position="top" />
-      <SealStamp />
+      <template v-if="isHomePage">
+        <CloudPatterns position="top" />
+        <SealStamp />
+      </template>
     </template>
 
     <template #home-hero-after>
-      <SolarTerms />
+      <SolarTerms v-if="isHomePage" />
     </template>
 
     <template #home-features-before>
-      <BrushStrokes />
+      <BrushStrokes v-if="isHomePage" />
     </template>
 
     <!-- 底部背景层 -->
@@ -40,3 +51,17 @@ const { frontmatter } = useData()
     </template>
   </DefaultLayout>
 </template>
+
+<style>
+/* 全局 prefers-reduced-motion 支持 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
