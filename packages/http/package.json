@@ -1,7 +1,7 @@
 {
   "name": "@cat-kit/http",
   "type": "module",
-  "version": "2.0.0-pre.0",
+  "version": "1.0.0",
   "description": "HTTP 请求工具",
   "exports": {
     ".": {
@@ -16,12 +16,10 @@
   "files": [
     "dist"
   ],
-  "devDependencies": {
-    "@cat-kit/core": "workspace:*",
-    "@cat-kit/tsconfig": "workspace:*"
+  "dependencies": {
+    "@cat-kit/core": "workspace:*"
   },
-  "peerDependencies": {
-    "@cat-kit/core": ">=2.0.0-pre.0",
-    "@cat-kit/tsconfig": "1.0.0"
+  "devDependencies": {
+    "@cat-kit/tsconfig": "workspace:*"
   }
 }

@@ -190,7 +190,9 @@ const GROUP_MAP = {
 /**
  * 发布指定组
  */
-async function releaseGroup(groupName: string): Promise<void> {
+async function releaseGroup(
+  groupName: 'main' | 'maintenance' | 'tsconfig' | 'prompts'
+): Promise<void> {
   const builder = GROUPS_BUILD[groupName]
 
   // 1. 构建

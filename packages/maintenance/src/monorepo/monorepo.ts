@@ -19,7 +19,10 @@ import { bumpVersion, syncPeerDependencies, syncDependencies } from '../version'
 import { publishPackage } from '../release'
 import { checkCircularDependencies } from '../deps/circular'
 import { checkVersionConsistency } from '../deps/consistency'
-import { buildDependencyGraph as buildDepGraph, visualizeDependencyGraph } from '../deps/graph'
+import {
+  buildDependencyGraph as buildDepGraph,
+  visualizeDependencyGraph
+} from '../deps/graph'
 import { readJsonSync, matchWorkspaces, getPeerDevExternal } from './helpers'
 
 /**
@@ -35,7 +38,9 @@ class WorkspaceGroup<Workspaces extends string> {
     this.#repo = repo
     // 过滤出匹配的工作区
     const nameSet = new Set(workspaceNames)
-    this.#workspaces = repo.workspaces.filter(ws => nameSet.has(ws.name as Workspaces))
+    this.#workspaces = repo.workspaces.filter(ws =>
+      nameSet.has(ws.name as Workspaces)
+    )
   }
 
   /**
@@ -46,12 +51,14 @@ class WorkspaceGroup<Workspaces extends string> {
   }
 
   /**
-   * 构建
+   * 构建工作区
+   *
+   *
    *
    * @param configs - 工作区配置, 如果传入将会被合并
    */
   async build(
-    configs?: Partial<Record<Workspaces, WorkspaceBuildConfig>>,
+    configs?: Partial<Record<Workspaces, WorkspaceBuildConfig>>
   ): Promise<void> {
     const start = Date.now()
     const workspaces = this.#workspaces
@@ -76,7 +83,9 @@ class WorkspaceGroup<Workspaces extends string> {
         ...(ws.pkg.devDependencies || {}),
         ...(ws.pkg.peerDependencies || {})
       }
-      const internalDeps = Object.keys(allDeps).filter(dep => internalNames.has(dep))
+      const internalDeps = Object.keys(allDeps).filter(dep =>
+        internalNames.has(dep)
+      )
       depsMap.set(ws.name, internalDeps)
     }
 
@@ -85,9 +94,10 @@ class WorkspaceGroup<Workspaces extends string> {
     const built = new Set<string>()
 
     while (built.size < workspaces.length) {
-      const batch = workspaces.filter(ws =>
-        !built.has(ws.name) &&
-        (depsMap.get(ws.name) || []).every(dep => built.has(dep))
+      const batch = workspaces.filter(
+        ws =>
+          !built.has(ws.name) &&
+          (depsMap.get(ws.name) || []).every(dep => built.has(dep))
       )
 
       if (batch.length === 0) {
@@ -115,7 +125,11 @@ class WorkspaceGroup<Workspaces extends string> {
             const duration = Date.now() - wsStart
 
             if (result.success) {
-              console.log(`  ${chalk.green('✓')} ${chalk.cyan(ws.name)} ${chalk.dim(`${duration}ms`)}`)
+              console.log(
+                `  ${chalk.green('✓')} ${chalk.cyan(ws.name)} ${chalk.dim(
+                  `${duration}ms`
+                )}`
+              )
             } else {
               console.log(`  ${chalk.red('✗')} ${chalk.red(ws.name)}`)
               if (result.error) console.error(result.error)
@@ -150,11 +164,20 @@ class WorkspaceGroup<Workspaces extends string> {
     const failedCount = results.length - successCount
 
     const totalDuration = Date.now() - start
-    console.log(chalk.bold(chalk.green(`✨ 构建完成: ${successCount} 成功, ${failedCount} 失败 ${totalDuration}ms`)))
+    console.log(
+      chalk.bold(
+        chalk.green(
+          `✨ 构建完成: ${successCount} 成功, ${failedCount} 失败 ${totalDuration}ms`
+        )
+      )
+    )
 
     // 如果有构建失败，抛出错误阻止后续流程
     if (failedCount > 0) {
-      const failedNames = results.filter(r => !r.success).map(r => r.name).join(', ')
+      const failedNames = results
+        .filter(r => !r.success)
+        .map(r => r.name)
+        .join(', ')
       throw new Error(`构建失败: ${failedNames}`)
     }
   }
@@ -358,15 +381,15 @@ export class Monorepo {
       }
     }
 
-
-
     return workspaces
   }
 
   /**
    * 按工作区名称分组
    */
-  group<const T extends readonly string[]>(names: T): WorkspaceGroup<T[number]> {
+  group<const T extends readonly string[]>(
+    names: T
+  ): WorkspaceGroup<T[number]> {
     return new WorkspaceGroup(this, [...names])
   }
 
@@ -392,7 +415,9 @@ export class Monorepo {
     return {
       valid: !circularResult.hasCircular && consistencyResult.consistent,
       hasCircular: circularResult.hasCircular,
-      circularChains: circularResult.cycles.map((c: { chain: string[] }) => c.chain),
+      circularChains: circularResult.cycles.map(
+        (c: { chain: string[] }) => c.chain
+      ),
       inconsistentDeps: consistencyResult.inconsistent
     }
   }
@@ -400,10 +425,12 @@ export class Monorepo {
   /**
    * 构建依赖关系图
    */
-  buildDependencyGraph(options: {
-    /** 是否包含外部依赖 */
-    includeExternal?: boolean
-  } = {}): DependencyGraphResult {
+  buildDependencyGraph(
+    options: {
+      /** 是否包含外部依赖 */
+      includeExternal?: boolean
+    } = {}
+  ): DependencyGraphResult {
     const { includeExternal = false } = options
     const workspaces = this.workspaces
 
@@ -425,9 +452,9 @@ export class Monorepo {
     const edges = includeExternal
       ? graph.edges
       : graph.edges.filter(edge => {
-        const targetNode = graph.nodes.find(n => n.id === edge.to)
-        return targetNode && !targetNode.external
-      })
+          const targetNode = graph.nodes.find(n => n.id === edge.to)
+          return targetNode && !targetNode.external
+        })
 
     // 生成 Mermaid 图
     const mermaid = visualizeDependencyGraph(
