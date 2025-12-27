@@ -29,17 +29,3 @@ export function matchWorkspaces(patterns: string[], cwd: string): string[] {
   // 返回目录路径（移除 /package.json 后缀）
   return matches.map(match => match.replace(/\/package\.json$/, ''))
 }
-
-/**
- * 获取同时在 peerDependencies 和 devDependencies 中的依赖作为 external
- */
-export function getPeerDevExternal(pkg: PackageJson): string[] {
-  const peerDeps = pkg.peerDependencies || {}
-  const devDeps = pkg.devDependencies || {}
-  const devDepsSet = new Set(Object.keys(devDeps))
-
-  return Object.keys(peerDeps).filter(dep =>
-    devDepsSet.has(dep) && devDeps[dep]?.startsWith('workspace:')
-  )
-}
-

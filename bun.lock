@@ -38,67 +38,54 @@
     },
     "packages/be": {
       "name": "@cat-kit/be",
-      "version": "2.0.0-pre.0",
+      "version": "1.0.0",
       "dependencies": {
+        "@cat-kit/core": "workspace:*",
         "chalk": "^5.6.2",
         "js-yaml": "^4.1.1",
         "smol-toml": "^1.6.0",
       },
       "devDependencies": {
-        "@cat-kit/core": "workspace:*",
         "@cat-kit/tsconfig": "workspace:*",
-      },
-      "peerDependencies": {
-        "@cat-kit/core": ">=2.0.0-pre.0",
-        "@cat-kit/tsconfig": "1.0.0",
       },
     },
     "packages/core": {
       "name": "@cat-kit/core",
-      "version": "2.0.0-pre.0",
+      "version": "1.0.0",
       "devDependencies": {
         "@cat-kit/tsconfig": "workspace:*",
-      },
-      "peerDependencies": {
-        "@cat-kit/tsconfig": "1.0.0",
       },
     },
     "packages/excel": {
       "name": "@cat-kit/excel",
-      "version": "2.0.0-pre.0",
-      "devDependencies": {
+      "version": "1.0.0",
+      "dependencies": {
         "@cat-kit/core": "workspace:*",
+      },
+      "devDependencies": {
         "@cat-kit/tsconfig": "workspace:*",
         "fast-xml-parser": "^5.3.3",
         "fflate": "^0.8.2",
       },
-      "peerDependencies": {
-        "@cat-kit/core": ">=2.0.0-pre.0",
-        "@cat-kit/tsconfig": "1.0.0",
-      },
     },
     "packages/fe": {
       "name": "@cat-kit/fe",
-      "version": "2.0.0-pre.0",
-      "devDependencies": {
+      "version": "1.0.0",
+      "dependencies": {
         "@cat-kit/core": "workspace:*",
-        "@cat-kit/tsconfig": "workspace:*",
       },
-      "peerDependencies": {
-        "@cat-kit/core": ">=2.0.0-pre.0",
-        "@cat-kit/tsconfig": "1.0.0",
+      "devDependencies": {
+        "@cat-kit/tsconfig": "workspace:*",
       },
     },
     "packages/http": {
       "name": "@cat-kit/http",
-      "version": "2.0.0-pre.0",
-      "devDependencies": {
+      "version": "1.0.0",
+      "dependencies": {
         "@cat-kit/core": "workspace:*",
-        "@cat-kit/tsconfig": "workspace:*",
       },
-      "peerDependencies": {
-        "@cat-kit/core": ">=2.0.0-pre.0",
-        "@cat-kit/tsconfig": "1.0.0",
+      "devDependencies": {
+        "@cat-kit/tsconfig": "workspace:*",
       },
     },
     "packages/maintenance": {
@@ -113,9 +100,6 @@
       },
       "devDependencies": {
         "@cat-kit/tsconfig": "workspace:*",
-      },
-      "peerDependencies": {
-        "@cat-kit/tsconfig": "1.0.0",
       },
     },
     "packages/prompts": {
@@ -151,9 +135,6 @@
       "devDependencies": {
         "@cat-kit/tsconfig": "workspace:*",
         "fake-indexeddb": "^6.2.5",
-      },
-      "peerDependencies": {
-        "@cat-kit/tsconfig": "1.0.0",
       },
     },
     "packages/tsconfig": {

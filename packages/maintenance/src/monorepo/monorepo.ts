@@ -23,7 +23,7 @@ import {
   buildDependencyGraph as buildDepGraph,
   visualizeDependencyGraph
 } from '../deps/graph'
-import { readJsonSync, matchWorkspaces, getPeerDevExternal } from './helpers'
+import { readJsonSync, matchWorkspaces } from './helpers'
 
 /**
  * 工作区分组类
@@ -65,11 +65,9 @@ class WorkspaceGroup<Workspaces extends string> {
 
     // 生成构建配置
     function getBuildConfig(ws: MonorepoWorkspace): BuildConfig {
-      const autoExternal = getPeerDevExternal(ws.pkg)
-      const { external = [], ...config } = configs?.[ws.name] || {}
+      const config = configs?.[ws.name] || {}
       return {
         dir: ws.dir,
-        external: [...new Set([...autoExternal, ...external])],
         ...config
       }
     }
