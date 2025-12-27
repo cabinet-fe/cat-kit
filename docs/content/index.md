@@ -48,20 +48,20 @@ features:
 
 /* 吉祥物图片动画 */
 .VPHero .image-container {
-  animation: inkFadeIn 1.2s ease-out 0.2s both;
+  /* animation: inkFadeIn 1.2s ease-out 0.2s both; */
 }
 
 /* 呼吸效果 - 极缓 */
 .VPHero .image-container .image-bg {
-  animation: mistPulse 3s ease-in-out infinite;
+  /* animation: mistPulse 3s ease-in-out infinite; */
 }
 
 .VPHero .image-container .image-src {
-  animation: gentleFloat 3s ease-in-out infinite;
+  /* animation: gentleFloat 3s ease-in-out infinite; */
 }
 
 .VPHero .image-container:hover .image-src {
-  animation-play-state: paused;
+  /* animation-play-state: paused; */
 }
 
 /* 特性卡片交错入场 */
