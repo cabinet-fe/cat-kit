@@ -224,6 +224,9 @@ class WorkspaceGroup<Workspaces extends string> {
    * 使用 npm 原生的 --workspace 参数发布指定工作区。
    * npm 会自动处理发布顺序和依赖关系。
    *
+   * 自动处理 `workspace:` 和 `catalog:` 协议，类似 pnpm 和 bun 的行为。
+   * 协议解析仅在发布时临时进行，不会修改源代码中的版本号。
+   *
    * @param options - 发布选项
    * @throws {PublishError} 当发布失败时
    */
@@ -263,12 +266,24 @@ class WorkspaceGroup<Workspaces extends string> {
       console.log(chalk.dim(`  - ${ws.name}@${ws.version}`))
     }
 
+    // 构建协议解析选项
+    // 使用所有工作区信息（不仅仅是待发布的）以便正确解析 workspace 协议
+    const allWorkspaces = this.#repo.workspaces.map(ws => ({
+      name: ws.name,
+      version: ws.version
+    }))
+
     // 使用 npm 原生的 --workspace 参数批量发布
     await publishPackage({
       cwd: this.#repo.root.dir,
       workspace: toPublish.map(ws => ws.name),
       ...publishOptions,
-      tag
+      tag,
+      // 自动传递协议解析选项
+      resolveProtocol: {
+        workspaces: allWorkspaces
+      },
+      resolveProtocolDirs: toPublish.map(ws => ws.dir)
     })
 
     console.log(chalk.green(`✓ 发布完成`))

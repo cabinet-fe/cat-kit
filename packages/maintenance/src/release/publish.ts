@@ -1,6 +1,7 @@
 import { $ } from 'execa'
 import { PublishError } from '../errors'
 import type { PublishOptions, PublishResult } from './types'
+import { withResolvedProtocols, withResolvedProtocolsBatch } from './protocol'
 
 /**
  * 发布 npm 包
@@ -12,17 +13,30 @@ import type { PublishOptions, PublishResult } from './types'
  *
  * 使用实时输出模式，让用户可以看到发布进度。
  *
+ * 类似 pnpm 和 bun，此函数会自动处理 `workspace:` 和 `catalog:` 协议：
+ * - `workspace:*` -> 精确版本 (如 "1.0.0")
+ * - `workspace:^` -> caret 范围 (如 "^1.0.0")
+ * - `workspace:~` -> tilde 范围 (如 "~1.0.0")
+ * - `catalog:` -> 从 catalog 定义中解析版本
+ *
+ * 协议解析仅在发布时临时进行，不会修改源代码中的版本号。
+ *
  * @param options - 发布配置
  * @returns 发布结果
  * @throws {PublishError} 当发布失败时
  *
  * @example
  * ```ts
- * // 单包发布
+ * // 单包发布（自动解析协议）
  * await publishPackage({
  *   cwd: '/path/to/pkg',
  *   registry: 'https://registry.npmmirror.com',
- *   tag: 'next'
+ *   tag: 'next',
+ *   resolveProtocol: {
+ *     workspaces: [
+ *       { name: '@cat-kit/core', version: '1.0.0' }
+ *     ]
+ *   }
  * })
  *
  * // 发布指定工作区
@@ -54,7 +68,9 @@ export async function publishPackage(
     dryRun = false,
     access,
     provenance = false,
-    provenanceFile
+    provenanceFile,
+    resolveProtocol,
+    resolveProtocolDirs
   } = options
 
   // 验证 provenance 和 provenanceFile 互斥
@@ -81,22 +97,43 @@ export async function publishPackage(
 
   const command = `npm publish ${args.join(' ')}`.trim()
 
-  try {
-    // 使用 stdio: 'inherit' 实时输出发布进度到控制台
-    await $({ cwd, stdio: 'inherit' })`npm publish ${args}`
-    return { output: '' }
-  } catch (error) {
-    // 提取 execa 错误中的 stderr 信息
-    const execaError = error as { stderr?: string; message?: string }
-    const stderr = execaError.stderr?.trim()
-    const errorMessage = stderr || execaError.message || '未知错误'
+  // 定义实际的发布操作
+  const doPublish = async (): Promise<PublishResult> => {
+    try {
+      // 使用 stdio: 'inherit' 实时输出发布进度到控制台
+      await $({ cwd, stdio: 'inherit' })`npm publish ${args}`
+      return { output: '' }
+    } catch (error) {
+      // 提取 execa 错误中的 stderr 信息
+      const execaError = error as { stderr?: string; message?: string }
+      const stderr = execaError.stderr?.trim()
+      const errorMessage = stderr || execaError.message || '未知错误'
 
-    throw new PublishError(
-      `npm 命令执行失败: ${command}\n${errorMessage}`,
-      command,
-      error as Error
-    )
+      throw new PublishError(
+        `npm 命令执行失败: ${command}\n${errorMessage}`,
+        command,
+        error as Error
+      )
+    }
   }
+
+  // 如果提供了协议解析选项，则包装发布流程
+  if (resolveProtocol) {
+    // 批量发布模式：使用 resolveProtocolDirs 指定的目录列表
+    if ((workspace || workspaces) && resolveProtocolDirs?.length) {
+      return withResolvedProtocolsBatch(
+        resolveProtocolDirs,
+        resolveProtocol,
+        doPublish
+      )
+    }
+    // 单包发布模式：直接使用 cwd
+    if (!workspace && !workspaces) {
+      return withResolvedProtocols(cwd, resolveProtocol, doPublish)
+    }
+  }
+
+  return doPublish()
 }
 
 /**

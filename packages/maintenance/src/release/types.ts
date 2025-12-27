@@ -36,6 +36,8 @@ export interface GitCommitAndPushOptions {
   pushTags?: boolean
 }
 
+import type { ProtocolResolveOptions } from './protocol'
+
 /**
  * npm 发布选项
  *
@@ -100,6 +102,61 @@ export interface PublishOptions {
   provenance?: boolean
   /** provenance 文件路径（与 provenance 互斥） */
   provenanceFile?: string
+  /**
+   * 协议解析选项
+   *
+   * 类似 pnpm 和 bun 的行为，在发布时自动将 `workspace:` 和 `catalog:` 协议
+   * 替换为实际的版本范围。
+   *
+   * - `workspace:*` -> 精确版本 (如 "1.0.0")
+   * - `workspace:^` -> caret 范围 (如 "^1.0.0")
+   * - `workspace:~` -> tilde 范围 (如 "~1.0.0")
+   * - `catalog:` -> 从 catalog 定义中解析版本
+   *
+   * 协议解析仅在发布时临时进行，不会修改源代码中的版本号。
+   *
+   * @example
+   * ```ts
+   * await publishPackage({
+   *   cwd: '/path/to/pkg',
+   *   resolveProtocol: {
+   *     workspaces: [
+   *       { name: '@cat-kit/core', version: '1.0.0' },
+   *       { name: '@cat-kit/fe', version: '1.0.0' }
+   *     ],
+   *     catalogs: {
+   *       default: { react: '^18.2.0' }
+   *     }
+   *   }
+   * })
+   * ```
+   */
+  resolveProtocol?: ProtocolResolveOptions
+  /**
+   * 需要解析协议的包目录列表（批量发布模式）
+   *
+   * 当使用 `workspace` 或 `workspaces` 参数批量发布时，
+   * 需要提供此列表以指定哪些包的 package.json 需要处理协议。
+   *
+   * @example
+   * ```ts
+   * await publishPackage({
+   *   cwd: '/path/to/monorepo',
+   *   workspace: ['@cat-kit/core', '@cat-kit/fe'],
+   *   resolveProtocol: {
+   *     workspaces: [
+   *       { name: '@cat-kit/core', version: '1.0.0' },
+   *       { name: '@cat-kit/fe', version: '1.0.0' }
+   *     ]
+   *   },
+   *   resolveProtocolDirs: [
+   *     '/path/to/monorepo/packages/core',
+   *     '/path/to/monorepo/packages/fe'
+   *   ]
+   * })
+   * ```
+   */
+  resolveProtocolDirs?: string[]
 }
 
 /**

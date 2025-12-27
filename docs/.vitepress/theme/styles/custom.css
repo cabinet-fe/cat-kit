@@ -285,15 +285,6 @@
   border-top: 1px solid var(--ink-trace);
 }
 
-/* --- 自定义辅助类 --- */
-
-.text-ink {
-  color: var(--ink-heavy);
-}
-.bg-paper {
-  background-color: var(--paper-white);
-}
-
 /* 滚动条美化 - 细长雅致 */
 ::-webkit-scrollbar {
   width: 6px;

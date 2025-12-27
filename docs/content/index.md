@@ -48,20 +48,20 @@ features:
 
 /* 吉祥物图片动画 */
 .VPHero .image-container {
-  /* animation: inkFadeIn 1.2s ease-out 0.2s both; */
+  animation: inkFadeIn 1.2s ease-out 0.2s both;
 }
 
 /* 呼吸效果 - 极缓 */
 .VPHero .image-container .image-bg {
-  /* animation: mistPulse 3s ease-in-out infinite; */
+  animation: mistPulse 3s ease-in-out infinite;
 }
 
 .VPHero .image-container .image-src {
-  /* animation: gentleFloat 3s ease-in-out infinite; */
+  animation: gentleFloat 3s ease-in-out infinite;
 }
 
 .VPHero .image-container:hover .image-src {
-  /* animation-play-state: paused; */
+  animation-play-state: paused;
 }
 
 /* 特性卡片交错入场 */
@@ -90,20 +90,6 @@ features:
 
 .VPFeatures .VPFeature:hover .icon {
   transform: translateY(-2px);
-}
-
-/* 动画关键帧 - 水墨晕染 */
-@keyframes inkSpread {
-  from {
-    opacity: 0;
-    transform: scale(0.98) translateY(10px);
-    filter: blur(4px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0);
-  }
 }
 
 @keyframes inkUp {
