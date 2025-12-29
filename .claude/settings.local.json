@@ -15,7 +15,11 @@
       "Bash(bun i:*)",
       "Bash(bun run test --help:*)",
       "Bash(bun run test:*)",
-      "mcp__Relace__relace_search"
+      "mcp__Relace__relace_search",
+      "WebFetch(domain:cn.vite.dev)",
+      "Bash(dir C:Codescat-kitopenspec)",
+      "Bash(cmd /c dir \"C:\\\\Codes\\\\cat-kit\\\\openspec\")",
+      "Bash(cmd /c mkdir \"C:\\\\Codes\\\\cat-kit\\\\openspec\\\\changes\\\\update-homepage-layout\\\\specs\\\\homepage-layout\")"
     ],
     "deny": [],
     "ask": []

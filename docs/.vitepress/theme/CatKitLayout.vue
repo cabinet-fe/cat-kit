@@ -37,9 +37,9 @@ const isHomePage = computed(() => frontmatter.value.layout === 'home')
       </template>
     </template>
 
-    <template #home-hero-after>
+    <!-- <template #home-hero-after>
       <SolarTerms v-if="isHomePage" />
-    </template>
+    </template> -->
 
     <template #home-features-before>
       <BrushStrokes v-if="isHomePage" />
