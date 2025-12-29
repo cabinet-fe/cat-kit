@@ -13,6 +13,7 @@ export default defineConfig({
   lang: 'zh-CN',
   lastUpdated: true,
   cleanUrls: true,
+  base: '/cat-kit/',
 
   srcDir: 'content',
 
