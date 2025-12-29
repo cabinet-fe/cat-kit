@@ -1,7 +1,7 @@
 {
   "name": "@cat-kit/prompts",
   "type": "module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "AI 开发提示词管理工具",
   "bin": {
     "dp": "./dist/index.js"

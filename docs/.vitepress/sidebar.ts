@@ -223,7 +223,7 @@ function parseFrontMatterBlock(raw: string): FrontMatterData {
     const parsedValue = parseScalar(rawValue ?? '')
     if (parsedValue !== null) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ; (data as any)[key] = parsedValue
+      ;(data as any)[key] = parsedValue
     }
   }
 
@@ -281,7 +281,7 @@ function resolveDisplayText({
   return (
     data.sidebarTitle ||
     data.sidebarLabel ||
-    (filename === 'index' ? '概览' : null) ||
+    (filename === 'index' ? '介绍' : null) ||
     data.title ||
     extractFirstHeading(body) ||
     formatFromSlug(filename)
