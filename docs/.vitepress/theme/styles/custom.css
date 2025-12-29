@@ -117,6 +117,13 @@
   );
 }
 
+body {
+  background: url(texture.jpg) repeat;
+}
+
+html.dark body {
+  background: var(--vp-c-bg);
+}
 /* --- 组件样式优化 --- */
 
 /* 1. 按钮 - 朴素的墨色风格 */
@@ -146,52 +153,109 @@
   background-color: var(--vp-c-bg-soft);
 }
 
-/* 2. 特性卡片 - 极简水墨风格 */
+/* 2. 特性卡片 - 无界错落布局 */
+
+/* 容器：左右错落网格 */
+.VPFeatures .VPFeatures {
+  /* max-width: 960px !important; */
+  margin: 0 auto !important;
+}
+
+/* 卡片本体 - 无界设计 */
 .VPFeatures .VPFeature {
-  background-color: transparent !important;
-  border: 1px solid var(--ink-trace) !important;
-  border-radius: 6px !important;
-  transition: all 0.3s ease !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 16px 12px !important;
+  position: relative !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
-/* 悬浮状态 - 仅做微小上浮和颜色加深 */
-.VPFeatures .VPFeature:hover {
-  background-color: var(--vp-c-bg-soft) !important;
-  border-color: var(--ink-medium) !important;
-  transform: translateY(-2px) !important;
+/* 左侧墨痕装饰 - 仅奇数项 */
+.VPFeatures .VPFeature::before {
+  content: '' !important;
+  display: block !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 3px !important;
+  height: 0 !important;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--ink-trace) 20%,
+    var(--ink-light) 50%,
+    var(--ink-trace) 80%,
+    transparent 100%
+  ) !important;
+  opacity: 0 !important;
+  transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
-/* 移除所有复杂的背景和伪元素装饰 */
-.VPFeatures .VPFeature::before,
+.VPFeatures .VPFeature:hover::before {
+  height: 60% !important;
+  opacity: 1 !important;
+}
+
+/* 移除 ::after 伪元素 */
 .VPFeatures .VPFeature::after {
   display: none !important;
 }
 
-/* 图标 - 保持默认，仅在悬浮时微变色 */
-.VPFeatures .VPFeature .icon {
-  background-color: transparent !important;
-  color: var(--ink-heavy) !important;
-  transition: color 0.3s ease !important;
+/* 悬浮状态 - 微妙的墨晕 */
+.VPFeatures .VPFeature:hover {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(26, 26, 26, 0.03) 0%,
+    transparent 70%
+  ) !important;
 }
 
-.VPFeatures .VPFeature:hover .icon {
-  color: var(--guochao-vermilion) !important;
-  transform: none !important; /* 移除旋转缩放 */
+.dark .VPFeatures .VPFeature:hover {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(232, 230, 227, 0.04) 0%,
+    transparent 70%
+  ) !important;
 }
 
-/* 文字颜色保持水墨色系 */
+/* 标题 */
 .VPFeatures .VPFeature .title {
   color: var(--ink-heavy) !important;
+  font-size: 1.1em !important;
+  font-weight: normal !important;
+  letter-spacing: 0.02em !important;
+  margin-bottom: 8px !important;
 }
 
+/* 描述文字 */
 .VPFeatures .VPFeature .details {
   color: var(--ink-light) !important;
+  font-size: 0.95em !important;
+  line-height: 1.7 !important;
 }
 
-/* 暗色模式适配 */
-.dark .VPFeatures .VPFeature:hover {
-  background-color: var(--vp-c-bg-soft) !important;
-  border-color: var(--ink-light) !important;
+/* 暗色模式墨痕 */
+.dark .VPFeatures .items > .item:nth-child(odd) .VPFeature::before,
+.dark .VPFeatures .items > .item:nth-child(even) .VPFeature::before {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--ink-trace) 20%,
+    var(--ink-faint) 50%,
+    var(--ink-trace) 80%,
+    transparent 100%
+  ) !important;
+}
+
+/* 响应式：小屏幕居中对齐 */
+@media (max-width: 640px) {
+  .VPFeatures .items > .item {
+    width: 100% !important;
+    justify-self: center !important;
+    margin: 0 !important;
+  }
 }
 
 /* 3. 导航栏 - 磨砂玻璃感减弱，更像纸张 */

@@ -3,10 +3,6 @@ import DefaultTheme from 'vitepress/theme'
 import { useData } from 'vitepress'
 import { computed, defineAsyncComponent } from 'vue'
 
-// 异步加载装饰组件，减少首屏 JS 体积
-const InkBackground = defineAsyncComponent(
-  () => import('./components/InkBackground.vue')
-)
 const CloudPatterns = defineAsyncComponent(
   () => import('./components/CloudPatterns.vue')
 )
@@ -36,11 +32,6 @@ const isHomePage = computed(() => frontmatter.value.layout === 'home')
 
     <template #home-features-before>
       <BrushStrokes v-if="isHomePage" />
-    </template>
-
-    <!-- 底部背景层 -->
-    <template #layout-bottom>
-      <InkBackground />
     </template>
   </DefaultLayout>
 </template>

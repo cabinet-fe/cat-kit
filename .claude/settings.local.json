@@ -22,7 +22,8 @@
       "Bash(cmd /c mkdir \"C:\\\\Codes\\\\cat-kit\\\\openspec\\\\changes\\\\update-homepage-layout\\\\specs\\\\homepage-layout\")",
       "Skill(frontend-design:frontend-design)",
       "Bash(bun run build:docs:*)",
-      "Bash(bun run:*)"
+      "Bash(bun run:*)",
+      "Bash(timeout /t 5)"
     ],
     "deny": [],
     "ask": []
