@@ -49,6 +49,7 @@ features:
 /* 吉祥物图片动画 */
 .VPHero .image-container {
   animation: inkFadeIn 1.2s ease-out 0.2s both;
+  will-change: opacity, transform;
 }
 
 /* 呼吸效果 - 极缓 */
@@ -58,6 +59,7 @@ features:
 
 .VPHero .image-container .image-src {
   animation: gentleFloat 3s ease-in-out infinite;
+  will-change: transform;
 }
 
 .VPHero .image-container:hover .image-src {
@@ -104,18 +106,20 @@ features:
 }
 
 @keyframes inkFadeIn {
-  from { opacity: 0; filter: blur(8px); }
-  to { opacity: 1; filter: blur(0); }
+  /* 避免动画 filter（尤其是 blur），它通常会触发昂贵的重绘 */
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes gentleFloat {
-  0%, 100% { transform: translate(-50%, -50%); }
-  50% { transform: translate(-50%, -56%); }
+  /* 使用 translate3d 促进合成层，减少主线程绘制压力 */
+  0%, 100% { transform: translate3d(-50%, -50%, 0); }
+  50% { transform: translate3d(-50%, -56%, 0); }
 }
 
 @keyframes mistPulse {
-  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.02); }
+  0%, 100% { opacity: 0.6; transform: translate3d(-50%, -50%, 0) scale(1); }
+  50% { opacity: 0.8; transform: translate3d(-50%, -50%, 0) scale(1.02); }
 }
 
 /* 减少动画偏好的用户 */
