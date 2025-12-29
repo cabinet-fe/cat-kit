@@ -37,6 +37,23 @@ features:
     details: 详尽易读的文档、完整的类型定义和 LLM 上下文支持，人机协作开发体验俱佳。
 ---
 
+## 安装
+
+```bash
+bun install @cat-kit/core
+```
+
+[查看](/packages/core/)所有可用的包。
+
+## 使用
+
+```ts
+import { $n } from '@cat-kit/core'
+$n.calc('1 + 3 * (2 + 1)')
+```
+
+如果你使用 vite 做前端开发, 可以使用 [unplugin-auto-import](https://github.com/unplugin/unplugin-auto-import) 插件， 这样可以免写导入语句。
+
 <style lang="css">
 /* Hero 动画 */
 .VPHero .image-container { animation: fadeIn .8s ease-out both; }

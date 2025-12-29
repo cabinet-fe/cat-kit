@@ -4,12 +4,6 @@
  */
 
 :root {
-  /* --- 国潮点缀色 (Guochao Accent System) --- */
-  --guochao-vermilion: #e54d42; /* 朱砂红 - 印章 */
-  --guochao-gold: #c9a86c; /* 鎏金 - 强调 */
-  --guochao-jade: #68b88e; /* 青玉 - 点缀 */
-  --guochao-indigo: #2f4f7f; /* 靛蓝 - 装饰 */
-
   /* --- 墨色系统 (Ink System) --- */
   /* 浓墨 - 主标题、强调 */
   --ink-heavy: #1a1a1a;
@@ -19,16 +13,14 @@
   --ink-light: #666666;
   /* 清墨 - 辅助信息 */
   --ink-faint: #999999;
-  /* 墨痕 - 边框分隔 */
-  --ink-trace: #d4d0c8;
+  /* 墨痕 - 边框分隔（配合宣纸底色的灰褐调） */
+  --ink-trace: #ccc9c0;
 
   /* --- 纸张系统 (Paper System) --- */
-  /* 宣纸白 - 主背景 */
-  --paper-white: #f8f6f1;
-  /* 素笺 - 卡片/区块背景 */
-  --paper-soft: #eeebe5;
-  /* 暖白 - 高亮/悬浮 */
-  --paper-warm: #fffefb;
+  /* 宣纸白 - 主背景（匹配 texture.jpg 的灰绿白调） */
+  --paper-white: #eae8e2;
+  /* 素笺 - 卡片/区块背景（半透明以透出纹理） */
+  --paper-soft: rgba(226, 223, 216, 0.85);
 
   /* --- VitePress 变量覆盖 --- */
 
@@ -80,12 +72,6 @@
 
 /* --- 暗色模式 (Night Ink) --- */
 .dark {
-  /* 国潮点缀色 - 暗色适配 */
-  --guochao-vermilion: #ff6b6b;
-  --guochao-gold: #e6c88d;
-  --guochao-jade: #8edcb5;
-  --guochao-indigo: #5c7cb0;
-
   /* 夜墨系统 */
   --ink-heavy: #e8e6e3; /* 月白 - 对应亮色的浓墨 */
   --ink-medium: #c7c5c2; /* 对应重墨 */
@@ -96,7 +82,6 @@
   /* 深邃背景 */
   --paper-white: #0d0d0d; /* 夜墨深底 */
   --paper-soft: #1a1a1a; /* 深灰区块 */
-  --paper-warm: #262626; /* 高亮 */
 
   /* 变量重映射 */
   --vp-c-bg: var(--paper-white);
@@ -155,23 +140,14 @@ html.dark body {
 
 /* 2. 特性卡片 - 无界错落布局 */
 
-/* 容器：左右错落网格 */
-.VPFeatures .VPFeatures {
-  /* max-width: 960px !important; */
-  margin: 0 auto !important;
-}
-
 /* 卡片本体 - 无界设计 */
 .VPFeatures .VPFeature {
   background: transparent !important;
   border: none !important;
-  border-radius: 0 !important;
-  padding: 16px 12px !important;
   position: relative !important;
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
 }
 
-/* 左侧墨痕装饰 - 仅奇数项 */
 .VPFeatures .VPFeature::before {
   content: '' !important;
   display: block !important;
@@ -203,11 +179,11 @@ html.dark body {
   display: none !important;
 }
 
-/* 悬浮状态 - 微妙的墨晕 */
+/* 悬浮状态 - 微妙的墨晕，配合宣纸底色 */
 .VPFeatures .VPFeature:hover {
   background: radial-gradient(
     ellipse at center,
-    rgba(26, 26, 26, 0.03) 0%,
+    rgba(204, 201, 192, 0.35) 0%,
     transparent 70%
   ) !important;
 }
@@ -237,8 +213,7 @@ html.dark body {
 }
 
 /* 暗色模式墨痕 */
-.dark .VPFeatures .items > .item:nth-child(odd) .VPFeature::before,
-.dark .VPFeatures .items > .item:nth-child(even) .VPFeature::before {
+.dark .VPFeatures .VPFeature::before {
   background: linear-gradient(
     180deg,
     transparent 0%,
@@ -258,46 +233,87 @@ html.dark body {
   }
 }
 
-/* 3. 导航栏 - 磨砂玻璃感减弱，更像纸张 */
+/* 3. 导航栏 - 半透明纸张质感 */
 .VPNavBar {
-  border-bottom: 1px solid var(--ink-trace);
+  background-color: rgba(234, 232, 226, 0.85) !important;
+  backdrop-filter: blur(8px);
+}
+
+.VPNavBar.top {
+  background-color: transparent !important;
+  backdrop-filter: none;
+}
+
+.dark .VPNavBar {
+  background-color: rgba(13, 13, 13, 0.9) !important;
+  backdrop-filter: blur(12px);
 }
 
 .VPNavBar.has-sidebar .content {
   border-bottom-color: var(--ink-trace);
 }
 
-/* 4. 侧边栏 */
+/* 4. 侧边栏 - 半透明以透出纹理 */
 .VPSidebar {
   border-right: 1px solid var(--ink-trace);
-  background-color: var(--vp-c-bg-alt); /* 侧边栏微深，区分层级 */
+  background-color: transparent !important;
+  backdrop-filter: blur(8px);
 }
 
-/* 5. 代码块 - 极简风格 */
+.VPNavBarTitle.has-sidebar .title {
+  border-bottom-color: transparent !important;
+}
+
+.aside-curtain {
+  background: none !important;
+}
+
+.dark .VPSidebar {
+  background-color: var(--vp-c-bg-alt);
+  backdrop-filter: none;
+}
+
+/* 5. 代码块 - 极简风格，半透明底 */
 .vp-doc div[class*='language-'] {
   border-radius: 6px;
   border: 1px solid var(--ink-trace);
   box-shadow: none;
+  background-color: rgba(226, 223, 216, 0.6);
+}
+
+.dark .vp-doc div[class*='language-'] {
   background-color: var(--vp-c-bg-alt);
 }
 
-/* 6. 提示框 - 淡雅配色 */
+/* 6. 提示框 - 淡雅配色，透出纹理 */
 .vp-doc .custom-block.tip {
   border-color: var(--ink-light);
-  background-color: var(--vp-c-bg-soft);
+  background-color: rgba(218, 215, 206, 0.5);
   color: var(--ink-medium);
 }
 
 .vp-doc .custom-block.warning {
-  border-color: #dcbfa3; /* 枯茶色 */
-  background-color: rgba(220, 191, 163, 0.1);
-  color: #8b5a2b;
+  border-color: #c9b49a; /* 枯茶色 - 调暖配合纸张 */
+  background-color: rgba(201, 180, 154, 0.2);
+  color: #7a5028;
 }
 
 .vp-doc .custom-block.danger {
-  border-color: #cfb1b1; /* 藕荷色 */
+  border-color: #c4a5a5; /* 藕荷色 */
+  background-color: rgba(196, 165, 165, 0.2);
+  color: #7d4242;
+}
+
+.dark .vp-doc .custom-block.tip {
+  background-color: var(--vp-c-bg-soft);
+}
+
+.dark .vp-doc .custom-block.warning {
+  background-color: rgba(220, 191, 163, 0.1);
+}
+
+.dark .vp-doc .custom-block.danger {
   background-color: rgba(207, 177, 177, 0.1);
-  color: #8a4a4a;
 }
 
 /* 7. 标题样式优化 */
@@ -345,8 +361,22 @@ html.dark body {
 }
 
 .VPFooter {
-  background-color: unset !important;
+  background-color: transparent !important;
   border-top: 1px solid var(--ink-trace);
+}
+
+/* 内容区域 - 确保透出纹理 */
+.VPContent {
+  background-color: transparent !important;
+}
+
+.VPDoc {
+  background-color: transparent !important;
+}
+
+/* 首页背景透明 */
+.VPHome {
+  background-color: transparent !important;
 }
 
 /* 滚动条美化 - 细长雅致 */
@@ -362,4 +392,63 @@ html.dark body {
 
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* 8. 侧边栏 Active 状态 - 墨痕标记 */
+.VPSidebarItem.is-active > .item > .link {
+  position: relative;
+  color: var(--ink-heavy) !important;
+  font-weight: 500;
+}
+
+/* 左侧墨痕装饰线 */
+.VPSidebarItem.is-active > .item > .link::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 70%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--ink-light) 20%,
+    var(--ink-heavy) 50%,
+    var(--ink-light) 80%,
+    transparent 100%
+  );
+  border-radius: 2px;
+}
+
+/* 淡墨晕背景 */
+.VPSidebarItem.is-active > .item > .link > .text {
+  background: linear-gradient(
+    90deg,
+    rgba(26, 26, 26, 0.08) 0%,
+    transparent 100%
+  );
+  padding: 2px 8px 2px 4px;
+  margin-left: -4px;
+  border-radius: 2px;
+}
+
+/* 暗色模式适配 */
+.dark .VPSidebarItem.is-active > .item > .link::before {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--ink-faint) 20%,
+    var(--ink-medium) 50%,
+    var(--ink-faint) 80%,
+    transparent 100%
+  );
+}
+
+.dark .VPSidebarItem.is-active > .item > .link > .text {
+  background: linear-gradient(
+    90deg,
+    rgba(232, 230, 227, 0.1) 0%,
+    transparent 100%
+  );
 }
