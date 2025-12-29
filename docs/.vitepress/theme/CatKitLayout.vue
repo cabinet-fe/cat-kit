@@ -16,9 +16,6 @@ const SealStamp = defineAsyncComponent(
 const BrushStrokes = defineAsyncComponent(
   () => import('./components/BrushStrokes.vue')
 )
-const SolarTerms = defineAsyncComponent(
-  () => import('./components/SolarTerms.vue')
-)
 
 const { Layout: DefaultLayout } = DefaultTheme
 const { frontmatter } = useData()
@@ -36,10 +33,6 @@ const isHomePage = computed(() => frontmatter.value.layout === 'home')
         <SealStamp />
       </template>
     </template>
-
-    <!-- <template #home-hero-after>
-      <SolarTerms v-if="isHomePage" />
-    </template> -->
 
     <template #home-features-before>
       <BrushStrokes v-if="isHomePage" />

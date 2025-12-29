@@ -19,7 +19,10 @@
       "WebFetch(domain:cn.vite.dev)",
       "Bash(dir C:Codescat-kitopenspec)",
       "Bash(cmd /c dir \"C:\\\\Codes\\\\cat-kit\\\\openspec\")",
-      "Bash(cmd /c mkdir \"C:\\\\Codes\\\\cat-kit\\\\openspec\\\\changes\\\\update-homepage-layout\\\\specs\\\\homepage-layout\")"
+      "Bash(cmd /c mkdir \"C:\\\\Codes\\\\cat-kit\\\\openspec\\\\changes\\\\update-homepage-layout\\\\specs\\\\homepage-layout\")",
+      "Skill(frontend-design:frontend-design)",
+      "Bash(bun run build:docs:*)",
+      "Bash(bun run:*)"
     ],
     "deny": [],
     "ask": []
