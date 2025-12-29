@@ -46,6 +46,9 @@ jobs:
       - name: 安装依赖
         run: bun install
 
+      - name: 构建工具
+        run: bun run --cwd release bundle
+
       - name: 构建文档
         run: bun run --cwd docs build
 
