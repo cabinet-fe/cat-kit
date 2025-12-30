@@ -38,13 +38,23 @@ describe('树结构', () => {
       root.children = [child1, child2]
 
       const visited: number[] = []
-      root.bfs(node => {
+      root.bfs((node, index, parent) => {
         visited.push(node.data.id)
+        if (node === root) {
+          expect(index).toBe(0)
+          expect(parent).toBeUndefined()
+        }
+        if (node === child1) {
+          expect(index).toBe(0)
+          expect(parent).toBe(root)
+        }
+        if (node === child2) {
+          expect(index).toBe(1)
+          expect(parent).toBe(root)
+        }
       })
 
-      expect(visited).toContain(1)
-      expect(visited).toContain(2)
-      expect(visited).toContain(3)
+      expect(visited).toEqual([1, 2, 3])
     })
 
     it('应该支持遍历中断', () => {
@@ -79,6 +89,7 @@ describe('树结构', () => {
       expect(root.children).toHaveLength(1)
       expect(root.children![0]).toBe(child2)
       expect(child2.index).toBe(0)
+      expect(child1.parent).toBeUndefined()
     })
   })
 
@@ -98,6 +109,10 @@ describe('树结构', () => {
 
       expect(tree.root.data.id).toBe(1)
       expect(tree.root.children).toHaveLength(2)
+      expect(tree.root.depth).toBe(0)
+      expect(tree.root.isLeaf).toBe(false)
+      expect(tree.root.children![0]!.depth).toBe(1)
+      expect(tree.root.children![0]!.isLeaf).toBe(true)
     })
 
     it('应该查找节点', () => {

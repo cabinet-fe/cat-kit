@@ -30,16 +30,21 @@ function bfs<Data extends Record<string, any>>(
   callback: (item: Data, index: number, parent?: Data) => boolean | void,
   childrenKey = 'children'
 ): boolean | void {
-  const queue = [data]
+  // 用 head 指针模拟队列，避免 Array#shift 带来的 O(n^2) 退化
+  const queue: Array<{ item: Data; index: number; parent?: Data }> = [
+    { item: data, index: 0 }
+  ]
+  let head = 0
 
-  while (queue.length) {
-    const item = queue.shift()!
-    const index = queue.length
-    const result = callback(item, index)
+  while (head < queue.length) {
+    const { item, index, parent } = queue[head++]!
+    const result = callback(item, index, parent)
     if (result === false) return result
     const children = o(item).get(childrenKey)
     if (Array.isArray(children)) {
-      children.forEach(child => queue.push(child))
+      for (let i = 0; i < children.length; i++) {
+        queue.push({ item: children[i]!, index: i, parent: item })
+      }
     }
   }
 }
@@ -68,13 +73,22 @@ export class TreeNode<T extends Record<string, any> = Record<string, any>> {
 
   /** 移除当前节点 */
   remove(): void {
-    const { parent, index } = this
-    if (!parent) return
-    const children = parent.children!
-    children.splice(index, 1)
-    for (let i = index; i < children.length; i++) {
-      children[i]!.index = i
+    const parent = this.parent
+    if (!parent?.children?.length) return
+
+    // index 可能因外部对 children 的插入/排序而过期；这里做一次兜底校验
+    let index = this.index
+    if (parent.children[index] !== this) {
+      index = parent.children.indexOf(this)
+      if (index === -1) return
     }
+
+    parent.children.splice(index, 1)
+    for (let i = index; i < parent.children.length; i++) {
+      parent.children[i]!.index = i
+    }
+    parent.isLeaf = parent.children.length === 0
+    this.parent = undefined
   }
 }
 
@@ -91,17 +105,25 @@ export function createNode<
   const { data, getNode, childrenKey, parent, index = 0 } = options
   const node = getNode(data)
   node.index = index
-  if (parent) {
-    node.parent = parent
-    parent.children?.push(node)
-  }
-  const childrenData = o(data).get(childrenKey)
+  node.parent = parent
+  node.depth = parent ? parent.depth + 1 : 0
+
+  const childrenData = o(data).get(childrenKey) as unknown
   if (Array.isArray(childrenData) && childrenData.length) {
-    const nodes = childrenData.map((data, index) => {
-      return createNode({ data, getNode, childrenKey, parent: node, index })
-    })
-    node.children = nodes
+    node.children = []
+    for (let i = 0; i < childrenData.length; i++) {
+      const childData = childrenData[i] as Data
+      const child = createNode({
+        data: childData,
+        getNode,
+        childrenKey,
+        parent: node,
+        index: i
+      })
+      node.children.push(child)
+    }
   }
+  node.isLeaf = !node.children?.length
   return node
 }
 
@@ -121,13 +143,13 @@ export class Tree<
   readonly root: Node
 
   constructor(options: TreeOptions<Data, Node>) {
-    const { data, TreeNode, childrenKey = 'children' } = options
+    const { data, TreeNode: TreeNodeCtor, childrenKey = 'children' } = options
 
     this.root = createNode({
       data,
       childrenKey,
       getNode: (data: Data) => {
-        return new TreeNode(data)
+        return new TreeNodeCtor(data)
       }
     })
   }
