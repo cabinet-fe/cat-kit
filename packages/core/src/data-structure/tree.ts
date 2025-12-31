@@ -1,37 +1,50 @@
-import { o } from '../data'
+type Obj = object
 
-type Callback<Node extends TreeNode<any>> = (
+type Callback<Node extends Obj> = (
   node: Node,
   index: number,
   parent?: Node
 ) => void | boolean
 
-function dfs<Data extends Record<string, any>>(
-  data: Data,
-  cb: (item: Data, index: number, parent?: Data) => boolean | void,
-  childrenKey = 'children',
-  index = 0,
-  parent?: Data
+export function dfs<T extends Obj>(
+  data: T,
+  cb: Callback<T>,
+  childrenKey = 'children'
 ): boolean | void {
-  const result = cb(data, index, parent)
-  if (result === false) return result
-  const children = o(data).get(childrenKey)
-  if (Array.isArray(children)) {
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i]
-      const result = dfs(child, cb, childrenKey, i, data)
-      if (result === false) return result
+  const nodeStack: T[] = [data]
+  const indexStack: number[] = [0]
+  const parentStack: Array<T | undefined> = [undefined]
+
+  let sp = 1
+  while (sp) {
+    sp--
+    const node = nodeStack[sp]!
+    const index = indexStack[sp]!
+    const parent = parentStack[sp]
+
+    const result = cb(node, index, parent)
+    if (result === true) return true
+
+    const children = node[childrenKey]
+    if (Array.isArray(children)) {
+      // 倒序压栈，保证弹栈访问顺序与递归版一致（0 -> n-1）
+      for (let i = children.length - 1; i >= 0; i--) {
+        nodeStack[sp] = children[i] as T
+        indexStack[sp] = i
+        parentStack[sp] = node
+        sp++
+      }
     }
   }
 }
 
-function bfs<Data extends Record<string, any>>(
-  data: Data,
-  callback: (item: Data, index: number, parent?: Data) => boolean | void,
+export function bfs<T extends Record<string, any>>(
+  data: T,
+  callback: (item: T, index: number, parent?: T) => boolean | void,
   childrenKey = 'children'
 ): boolean | void {
   // 用 head 指针模拟队列，避免 Array#shift 带来的 O(n^2) 退化
-  const queue: Array<{ item: Data; index: number; parent?: Data }> = [
+  const queue: Array<{ item: T; index: number; parent?: T }> = [
     { item: data, index: 0 }
   ]
   let head = 0
@@ -40,7 +53,7 @@ function bfs<Data extends Record<string, any>>(
     const { item, index, parent } = queue[head++]!
     const result = callback(item, index, parent)
     if (result === false) return result
-    const children = o(item).get(childrenKey)
+    const children = item[childrenKey]
     if (Array.isArray(children)) {
       for (let i = 0; i < children.length; i++) {
         queue.push({ item: children[i]!, index: i, parent: item })
@@ -108,7 +121,7 @@ export function createNode<
   node.parent = parent
   node.depth = parent ? parent.depth + 1 : 0
 
-  const childrenData = o(data).get(childrenKey) as unknown
+  const childrenData = data[childrenKey] as unknown
   if (Array.isArray(childrenData) && childrenData.length) {
     node.children = []
     for (let i = 0; i < childrenData.length; i++) {
@@ -195,5 +208,81 @@ export class Tree<
     })
 
     return result
+  }
+}
+
+export interface TreeManagerOptions<
+  T extends Record<string, any>,
+  Node extends Record<string, any>
+> {
+  childrenKey?: string
+  createNode?: (data: T) => Node
+}
+export class TreeManager<
+  T extends Record<string, any>,
+  Node extends Record<string, any> = T
+> {
+  protected _root: Node
+
+  get root(): Node {
+    return this._root
+  }
+
+  protected createNode?: (data: T) => Node
+  protected childrenKey = 'children'
+
+  constructor(data: T, options?: TreeManagerOptions<T, Node>) {
+    if (options) {
+      if (options.childrenKey) {
+        this.childrenKey = options.childrenKey
+      }
+      if (options.createNode) {
+        this.createNode = options.createNode
+      }
+    }
+
+    if (!this.createNode) {
+      this._root = data as unknown as Node
+    } else {
+      this._root = this.buildTree(data)
+    }
+  }
+
+  protected buildTree(data: T): Node {
+    const createNode = this.createNode
+    if (!createNode) {
+      // 构造函数已兜底；这里再做一次保护，避免未来重构引入隐蔽 bug
+      return data as unknown as Node
+    }
+
+    const childrenKey = this.childrenKey
+    const root = createNode(data)
+
+    // 采用显式栈，避免递归（深树会导致调用栈溢出）
+    const dataStack: T[] = [data]
+    const nodeStack: Node[] = [root]
+
+    while (dataStack.length) {
+      const curData = dataStack.pop()!
+      const curNode = nodeStack.pop()!
+
+      const childrenData = curData[childrenKey] as unknown
+      if (Array.isArray(childrenData) && childrenData.length) {
+        const childrenNodes = new Array(childrenData.length) as Node[]
+        ;(curNode as Record<string, unknown>)[childrenKey] = childrenNodes
+
+        // 倒序创建并压栈，保证遍历顺序与数组顺序一致
+        for (let i = childrenData.length - 1; i >= 0; i--) {
+          const childData = childrenData[i] as T
+          const childNode = createNode(childData)
+          childrenNodes[i] = childNode
+
+          dataStack.push(childData)
+          nodeStack.push(childNode)
+        }
+      }
+    }
+
+    return root
   }
 }

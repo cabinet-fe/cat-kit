@@ -30,6 +30,31 @@ describe('树结构', () => {
       expect(visited).toEqual([1, 2, 3])
     })
 
+    it('深度优先遍历应提供正确的 index 与 parent', () => {
+      const root = new TreeNode({ id: 1, name: 'root' })
+      const child1 = new TreeNode({ id: 2, name: 'child1' })
+      const child2 = new TreeNode({ id: 3, name: 'child2' })
+
+      root.children = [child1, child2]
+      child1.parent = root
+      child2.parent = root
+
+      root.dfs((node, index, parent) => {
+        if (node === root) {
+          expect(index).toBe(0)
+          expect(parent).toBeUndefined()
+        }
+        if (node === child1) {
+          expect(index).toBe(0)
+          expect(parent).toBe(root)
+        }
+        if (node === child2) {
+          expect(index).toBe(1)
+          expect(parent).toBe(root)
+        }
+      })
+    })
+
     it('应该广度优先遍历', () => {
       const root = new TreeNode({ id: 1, name: 'root' })
       const child1 = new TreeNode({ id: 2, name: 'child1' })

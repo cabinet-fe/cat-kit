@@ -1,18 +1,29 @@
 <template>
   <div class="excel-card">
     <p class="excel-card__hint">
-      选择 .xlsx 文件，使用 <code>readWorkbookStream</code> 逐行解析（示例仅读取首个工作表）。
+      选择 .xlsx 文件，使用
+      <code>readWorkbookStream</code> 逐行解析（示例仅读取首个工作表）。
     </p>
 
     <div class="excel-card__actions">
-      <input ref="fileInput" class="file-input" type="file" accept=".xlsx" @change="handleFile" />
-      <var-button type="primary" :loading="reading" @click="triggerFile">选择文件</var-button>
+      <input
+        ref="fileInput"
+        class="file-input"
+        type="file"
+        accept=".xlsx"
+        @change="handleFile"
+      />
+      <var-button type="primary" :loading="reading" @click="triggerFile"
+        >选择文件</var-button
+      >
       <span v-if="summary" class="excel-card__summary">{{ summary }}</span>
     </div>
 
     <div v-if="rows.length" class="stream-list">
       <div v-for="item in rows" :key="item.id" class="stream-list__item">
-        <div class="stream-list__title">{{ item.sheet }} · 第 {{ item.row }} 行</div>
+        <div class="stream-list__title">
+          {{ item.sheet }} · 第 {{ item.row }} 行
+        </div>
         <div class="stream-list__cells">{{ item.cells }}</div>
       </div>
     </div>
@@ -49,7 +60,9 @@ function formatCells(values: any[]) {
     .map(value => {
       if (value instanceof Date) return value.toISOString().slice(0, 10)
       if (value && typeof value === 'object' && 'type' in value) {
-        return value.type === 'formula' ? `=${value.formula}` : value.error || ''
+        return value.type === 'formula'
+          ? `=${value.formula}`
+          : value.error || ''
       }
       return value ?? ''
     })
