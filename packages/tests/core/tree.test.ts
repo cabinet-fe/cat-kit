@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { TreeNode, Tree } from '@cat-kit/core/src'
+import { TreeNode, TreeManager } from '@cat-kit/core/src'
 
 describe('树结构', () => {
   describe('TreeNode', () => {
@@ -92,7 +92,7 @@ describe('树结构', () => {
       const visited: number[] = []
       root.dfs(node => {
         visited.push(node.data.id)
-        if (node.data.id === 2) return false
+        if (node.data.id === 2) return true // 返回 true 终止 dfs
       })
 
       expect(visited).toEqual([1, 2])
@@ -116,11 +116,62 @@ describe('树结构', () => {
       expect(child2.index).toBe(0)
       expect(child1.parent).toBeUndefined()
     })
+
+    it('应该插入子节点到末尾', () => {
+      const root = new TreeNode({ id: 1 })
+      const child1 = new TreeNode({ id: 2 })
+      const child2 = new TreeNode({ id: 3 })
+
+      root.insert(child1)
+      root.insert(child2)
+
+      expect(root.children).toHaveLength(2)
+      expect(root.children![0]).toBe(child1)
+      expect(root.children![1]).toBe(child2)
+      expect(child1.index).toBe(0)
+      expect(child2.index).toBe(1)
+      expect(child1.parent).toBe(root)
+      expect(child2.parent).toBe(root)
+      expect(child1.depth).toBe(1)
+      expect(root.isLeaf).toBe(false)
+    })
+
+    it('应该插入子节点到指定位置', () => {
+      const root = new TreeNode({ id: 1 })
+      const child1 = new TreeNode({ id: 2 })
+      const child2 = new TreeNode({ id: 3 })
+      const child3 = new TreeNode({ id: 4 })
+
+      root.insert(child1)
+      root.insert(child3)
+      root.insert(child2, 1) // 插入到中间
+
+      expect(root.children).toHaveLength(3)
+      expect(root.children![0]).toBe(child1)
+      expect(root.children![1]).toBe(child2)
+      expect(root.children![2]).toBe(child3)
+      expect(child1.index).toBe(0)
+      expect(child2.index).toBe(1)
+      expect(child3.index).toBe(2)
+    })
+
+    it('插入已有父节点的节点时应先移除', () => {
+      const root1 = new TreeNode({ id: 1 })
+      const root2 = new TreeNode({ id: 2 })
+      const child = new TreeNode({ id: 3 })
+
+      root1.insert(child)
+      expect(root1.children).toHaveLength(1)
+
+      root2.insert(child)
+      expect(root1.children).toHaveLength(0)
+      expect(root2.children).toHaveLength(1)
+      expect(child.parent).toBe(root2)
+    })
   })
 
-
-  describe('Tree', () => {
-    it('应该创建树', () => {
+  describe('TreeManager', () => {
+    it('应该直接使用原始数据创建树（不传 createNode）', () => {
       const data = {
         id: 1,
         name: 'root',
@@ -130,26 +181,42 @@ describe('树结构', () => {
         ]
       }
 
-      const tree = new Tree({ data, TreeNode })
+      const tree = new TreeManager(data)
 
+      expect(tree.root).toBe(data) // 直接使用原始数据
+      expect(tree.root.id).toBe(1)
+    })
+
+    it('应该使用 createNode 构建自定义节点树', () => {
+      const data = {
+        id: 1,
+        name: 'root',
+        children: [
+          { id: 2, name: 'child1' },
+          { id: 3, name: 'child2' }
+        ]
+      }
+
+      const tree = new TreeManager(data, {
+        createNode: (d, i) => new TreeNode(d)
+      })
+
+      expect(tree.root).toBeInstanceOf(TreeNode)
       expect(tree.root.data.id).toBe(1)
       expect(tree.root.children).toHaveLength(2)
-      expect(tree.root.depth).toBe(0)
-      expect(tree.root.isLeaf).toBe(false)
-      expect(tree.root.children![0]!.depth).toBe(1)
-      expect(tree.root.children![0]!.isLeaf).toBe(true)
+      expect(tree.root.children![0]!.data.id).toBe(2)
+      expect(tree.root.children![1]!.data.id).toBe(3)
     })
 
     it('应该查找节点', () => {
       const data = {
         id: 1,
-        children: [
-          { id: 2 },
-          { id: 3, children: [{ id: 4 }] }
-        ]
+        children: [{ id: 2 }, { id: 3, children: [{ id: 4 }] }]
       }
 
-      const tree = new Tree({ data, TreeNode })
+      const tree = new TreeManager(data, {
+        createNode: (d, i) => new TreeNode(d)
+      })
       const found = tree.find(node => node.data.id === 4)
 
       expect(found).not.toBeNull()
@@ -158,7 +225,9 @@ describe('树结构', () => {
 
     it('应该返回 null 当未找到节点', () => {
       const data = { id: 1, children: [{ id: 2 }] }
-      const tree = new Tree({ data, TreeNode })
+      const tree = new TreeManager(data, {
+        createNode: (d, i) => new TreeNode(d)
+      })
       const found = tree.find(node => node.data.id === 999)
 
       expect(found).toBeNull()
@@ -175,7 +244,9 @@ describe('树结构', () => {
         ]
       }
 
-      const tree = new Tree({ data, TreeNode })
+      const tree = new TreeManager(data, {
+        createNode: (d, i) => new TreeNode(d)
+      })
       const files = tree.findAll(node => node.data.type === 'file')
 
       expect(files).toHaveLength(2)
@@ -188,14 +259,46 @@ describe('树结构', () => {
         items: [{ id: 2 }, { id: 3 }]
       }
 
-      const tree = new Tree({
-        data,
-        TreeNode,
+      const tree = new TreeManager(data, {
+        createNode: (d, i) => new TreeNode(d),
         childrenKey: 'items'
       })
 
       expect(tree.root.children).toHaveLength(2)
     })
+
+    it('应该碾平节点', () => {
+      const data = {
+        id: 1,
+        children: [{ id: 2 }, { id: 3, children: [{ id: 4 }] }]
+      }
+
+      const tree = new TreeManager(data, {
+        createNode: (d, i) => new TreeNode(d)
+      })
+      const flattened = tree.flatten()
+
+      expect(flattened).toHaveLength(4)
+      expect(flattened.map(n => n.data.id)).toEqual([1, 2, 3, 4])
+    })
+
+    it('应该支持碾平时过滤', () => {
+      const data = {
+        id: 1,
+        type: 'folder',
+        children: [
+          { id: 2, type: 'file' },
+          { id: 3, type: 'folder', children: [{ id: 4, type: 'file' }] }
+        ]
+      }
+
+      const tree = new TreeManager(data, {
+        createNode: (d, i) => new TreeNode(d)
+      })
+      const files = tree.flatten(node => node.data.type === 'file')
+
+      expect(files).toHaveLength(2)
+      expect(files.map(n => n.data.id)).toEqual([2, 4])
+    })
   })
 })
-

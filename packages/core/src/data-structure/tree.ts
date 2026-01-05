@@ -1,4 +1,4 @@
-type Obj = object
+type Obj = Record<string, unknown>
 
 type Callback<Node extends Obj> = (
   node: Node,
@@ -38,50 +38,76 @@ export function dfs<T extends Obj>(
   }
 }
 
-export function bfs<T extends Record<string, any>>(
+export function bfs<T extends Obj>(
   data: T,
-  callback: (item: T, index: number, parent?: T) => boolean | void,
+  cb: Callback<T>,
   childrenKey = 'children'
 ): boolean | void {
-  // 用 head 指针模拟队列，避免 Array#shift 带来的 O(n^2) 退化
-  const queue: Array<{ item: T; index: number; parent?: T }> = [
-    { item: data, index: 0 }
-  ]
-  let head = 0
+  // 三个独立数组代替对象数组，避免对象创建和解构的 GC 开销
+  const nodeQueue: T[] = [data]
+  const indexQueue: number[] = [0]
+  const parentQueue: Array<T | undefined> = [undefined]
 
-  while (head < queue.length) {
-    const { item, index, parent } = queue[head++]!
-    const result = callback(item, index, parent)
+  // head: 出队指针，tail: 入队指针
+  let head = 0
+  let tail = 1
+
+  while (head < tail) {
+    const node = nodeQueue[head]!
+    const index = indexQueue[head]!
+    const parent = parentQueue[head]
+    head++
+
+    const result = cb(node, index, parent)
     if (result === false) return result
-    const children = item[childrenKey]
+
+    const children = node[childrenKey]
     if (Array.isArray(children)) {
       for (let i = 0; i < children.length; i++) {
-        queue.push({ item: children[i]!, index: i, parent: item })
+        nodeQueue[tail] = children[i] as T
+        indexQueue[tail] = i
+        parentQueue[tail] = node
+        tail++
       }
     }
   }
 }
 
-export class TreeNode<T extends Record<string, any> = Record<string, any>> {
-  /** 父节点 */
+export interface ITreeNode<T extends Obj = Obj> {
+  data?: T
+  depth: number
+  index: number
+  isLeaf: boolean
   parent?: this
+  children?: this[]
+  [key: string]: any
+}
+
+export class TreeNode<
+  T extends Obj = Obj,
+  Self extends TreeNode<T, Self> = TreeNode<T, any>
+> {
+  data: T
+  /** 父节点 */
+  parent?: Self
   /** 子节点 */
   children?: this[]
-  /** 在树中的深度 */
-  depth = 0
+  /**
+   * 在树中的深度，从零开始
+   */
+  depth: number
   /** 是否叶子节点 */
   isLeaf = false
   /** 在树中的索引 */
-  index: number = 0
+  index: number
 
-  constructor(public data: T) {}
-
-  dfs(cb: Callback<this>): boolean | void {
-    return dfs(this, cb)
-  }
-
-  bfs(cb: Callback<this>): boolean | void {
-    return bfs(this, cb)
+  constructor(data: T, index: number, depth: number, parent?: Self) {
+    this.data = data
+    this.index = index
+    this.depth = depth
+    if (parent) {
+      this.parent = parent
+    }
   }
 
   /** 移除当前节点 */
@@ -89,12 +115,7 @@ export class TreeNode<T extends Record<string, any> = Record<string, any>> {
     const parent = this.parent
     if (!parent?.children?.length) return
 
-    // index 可能因外部对 children 的插入/排序而过期；这里做一次兜底校验
-    let index = this.index
-    if (parent.children[index] !== this) {
-      index = parent.children.indexOf(this)
-      if (index === -1) return
-    }
+    const { index } = this
 
     parent.children.splice(index, 1)
     for (let i = index; i < parent.children.length; i++) {
@@ -103,132 +124,52 @@ export class TreeNode<T extends Record<string, any> = Record<string, any>> {
     parent.isLeaf = parent.children.length === 0
     this.parent = undefined
   }
-}
 
-export function createNode<
-  Data extends Record<string, any>,
-  Node extends TreeNode<Data>
->(options: {
-  data: Data
-  getNode: (data: Data) => Node
-  childrenKey: string
-  index?: number
-  parent?: Node
-}): Node {
-  const { data, getNode, childrenKey, parent, index = 0 } = options
-  const node = getNode(data)
-  node.index = index
-  node.parent = parent
-  node.depth = parent ? parent.depth + 1 : 0
-
-  const childrenData = data[childrenKey] as unknown
-  if (Array.isArray(childrenData) && childrenData.length) {
-    node.children = []
-    for (let i = 0; i < childrenData.length; i++) {
-      const childData = childrenData[i] as Data
-      const child = createNode({
-        data: childData,
-        getNode,
-        childrenKey,
-        parent: node,
-        index: i
-      })
-      node.children.push(child)
+  /**
+   * 插入子节点
+   * @param node - 要插入的节点
+   * @param index - 插入位置，默认追加到末尾
+   */
+  insert(node: this, index?: number): void {
+    if (!this.children) {
+      this.children = []
     }
+
+    const insertIndex = index ?? this.children.length
+    const clampedIndex = Math.min(insertIndex, this.children.length)
+
+    this.children.splice(clampedIndex, 0, node)
+
+    // 更新插入位置及之后节点的 index
+    for (let i = clampedIndex; i < this.children.length; i++) {
+      this.children[i]!.index = i
+    }
+
+    node.parent = this as unknown as Self
+    node.depth = this.depth + 1
+    this.isLeaf = false
   }
-  node.isLeaf = !node.children?.length
-  return node
 }
 
-export interface TreeOptions<
-  Data extends Record<string, any>,
-  Node extends TreeNode<Data>
-> {
-  data: Data
-  TreeNode: new (data: Data) => Node
+export type NodeCreator<T extends Obj, Node extends Obj = T> = (
+  data: T,
+  index: number,
+  depth: number,
+  parent?: Node
+) => Node
+
+export interface TreeManagerOptions<T extends Obj, Node extends Obj> {
   childrenKey?: string
+  createNode?: NodeCreator<T, Node>
 }
-
-export class Tree<
-  Data extends Record<string, any>,
-  Node extends TreeNode<Data>
-> {
-  readonly root: Node
-
-  constructor(options: TreeOptions<Data, Node>) {
-    const { data, TreeNode: TreeNodeCtor, childrenKey = 'children' } = options
-
-    this.root = createNode({
-      data,
-      childrenKey,
-      getNode: (data: Data) => {
-        return new TreeNodeCtor(data)
-      }
-    })
-  }
-
-  dfs(cb: Callback<Node>): boolean | void {
-    return this.root.dfs(cb)
-  }
-
-  bfs(cb: Callback<Node>): boolean | void {
-    return this.root.bfs(cb)
-  }
-
-  /**
-   * 查找第一个满足条件的节点
-   * @param predicate 条件
-   * @returns 满足条件的节点或 null
-   */
-  find(predicate: (node: Node) => boolean): Node | null {
-    let result: Node | null = null
-
-    this.root.bfs(node => {
-      if (predicate(node)) {
-        result = node
-        return false
-      }
-    })
-
-    return result
-  }
-
-  /**
-   * 查找所有满足条件的节点
-   * @param predicate 条件
-   * @returns 满足条件的节点数组
-   */
-  findAll(predicate: (node: Node) => boolean): Node[] {
-    const result: Node[] = []
-
-    this.root.dfs(node => {
-      if (predicate(node)) {
-        result.push(node)
-      }
-    })
-
-    return result
-  }
-}
-
-export interface TreeManagerOptions<
-  T extends Record<string, any>,
-  Node extends Record<string, any>
-> {
-  childrenKey?: string
-  createNode?: (data: T) => Node
-}
-export class TreeManager<
-  T extends Record<string, any>,
-  Node extends Record<string, any> = T
-> {
+export class TreeManager<T extends Obj, Node extends Obj = T> {
   protected _root: Node
 
   get root(): Node {
     return this._root
   }
 
-  protected createNode?: (data: T) => Node
+  protected createNode?: NodeCreator<T, Node>
   protected childrenKey = 'children'
 
   constructor(data: T, options?: TreeManagerOptions<T, Node>) {
@@ -248,41 +189,131 @@ export class TreeManager<
     }
   }
 
-  protected buildTree(data: T): Node {
-    const createNode = this.createNode
+  private buildTree(data: T): Node {
+    const { createNode, childrenKey } = this
     if (!createNode) {
-      // 构造函数已兜底；这里再做一次保护，避免未来重构引入隐蔽 bug
       return data as unknown as Node
     }
 
-    const childrenKey = this.childrenKey
-    const root = createNode(data)
+    const root = createNode(data, 0, 0)
 
-    // 采用显式栈，避免递归（深树会导致调用栈溢出）
+    // 显式栈 + 栈指针，避免 push/pop 开销
     const dataStack: T[] = [data]
     const nodeStack: Node[] = [root]
+    let sp = 1
 
-    while (dataStack.length) {
-      const curData = dataStack.pop()!
-      const curNode = nodeStack.pop()!
+    while (sp) {
+      sp--
+      const curData = dataStack[sp]!
+      const curNode = nodeStack[sp]!
 
-      const childrenData = curData[childrenKey] as unknown
-      if (Array.isArray(childrenData) && childrenData.length) {
-        const childrenNodes = new Array(childrenData.length) as Node[]
-        ;(curNode as Record<string, unknown>)[childrenKey] = childrenNodes
+      const dataChildren = curData[childrenKey]
+      if (Array.isArray(dataChildren) && dataChildren.length) {
+        const childrenNodes = new Array(dataChildren.length) as Node[]
+        ;(curNode as Record<string, unknown>).children = childrenNodes
 
-        // 倒序创建并压栈，保证遍历顺序与数组顺序一致
-        for (let i = childrenData.length - 1; i >= 0; i--) {
-          const childData = childrenData[i] as T
-          const childNode = createNode(childData)
+        // 倒序压栈，保证遍历顺序与数组顺序一致
+        for (let i = dataChildren.length - 1; i >= 0; i--) {
+          const childData = dataChildren[i]
+          const childNode = createNode(childData, i, curNode.depth + 1, curNode)
           childrenNodes[i] = childNode
 
-          dataStack.push(childData)
-          nodeStack.push(childNode)
+          dataStack[sp] = childData
+          nodeStack[sp] = childNode
+          sp++
         }
       }
     }
 
     return root
   }
+
+  flatten(filter?: (node: Node) => boolean): Node[] {
+    const childrenKey = this.childrenKey
+    const result: Node[] = []
+
+    if (filter) {
+      dfs(
+        this.root,
+        node => {
+          if (filter(node)) {
+            result.push(node)
+          }
+        },
+        childrenKey
+      )
+    } else {
+      dfs(
+        this.root,
+        node => {
+          result.push(node)
+        },
+        childrenKey
+      )
+    }
+
+    return result
+  }
+
+  /**
+   * 查找单个节点
+   * @param predicate - 匹配函数
+   * @returns 第一个符合条件的节点，未找到返回 null
+   */
+  find(predicate: (node: Node) => boolean): Node | null {
+    let found: Node | null = null
+    dfs(
+      this.root,
+      node => {
+        if (predicate(node)) {
+          found = node
+          return true // 提前终止
+        }
+      },
+      this.childrenKey
+    )
+    return found
+  }
+
+  /**
+   * 查找所有符合条件的节点
+   * @param predicate - 匹配函数
+   * @returns 所有符合条件的节点数组
+   */
+  findAll(predicate: (node: Node) => boolean): Node[] {
+    const result: Node[] = []
+    dfs(
+      this.root,
+      node => {
+        if (predicate(node)) {
+          result.push(node)
+        }
+      },
+      this.childrenKey
+    )
+    return result
+  }
 }
+
+// 下面的代码仅用作测试，将在稍后移除
+type DataItem = {
+  id: number
+  children?: DataItem[]
+}
+const data: DataItem = {
+  id: 1,
+  children: [{ id: 2 }, { id: 3 }]
+}
+const tree = new TreeManager(data, {
+  createNode: (data, index, depth, parent): ITreeNode => {
+    return {
+      data,
+      index,
+      depth,
+      get isLeaf() {
+        return !data.children?.length
+      },
+      parent
+    }
+  }
+})
