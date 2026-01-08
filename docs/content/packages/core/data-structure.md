@@ -69,7 +69,7 @@ import { Tree } from '@cat-kit/core'
 // DFS 遍历
 tree.dfs(node => {
   console.log(node.label)
-  // 可以返回 false 提前终止遍历
+  // 可以返回 true 提前终止遍历
 })
 
 // 带层级信息的遍历
@@ -367,7 +367,7 @@ class MenuManager {
           ids.unshift(current.id)
           current = current.parent
         }
-        return false // 终止遍历
+        return true // 终止遍历
       }
     })
     return ids
@@ -522,6 +522,6 @@ function createNode<T>(data: { id: number; children?: any[] } & T): TreeNode<T>
 
 1. **类型安全**：使用 TypeScript 定义节点数据类型
 2. **不可变性**：操作树时考虑创建新节点而非修改原节点
-3. **遍历终止**：在回调中返回 false 可以提前终止遍历
+3. **遍历终止**：在回调中返回 true 可以提前终止遍历
 4. **边界检查**：操作前检查节点是否存在
 5. **单元测试**：为树操作编写完善的测试用例
