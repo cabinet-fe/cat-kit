@@ -1,10 +1,6 @@
 type Obj = Record<string, unknown>
 
-type Callback<Node extends Obj> = (
-  node: Node,
-  index: number,
-  parent?: Node
-) => void | boolean
+type Callback<Node extends Obj> = (node: Node, index: number, parent?: Node) => void | boolean
 
 /**
  * 深度优先遍历
@@ -124,8 +120,10 @@ export interface ITreeNode<T extends Obj = Obj, Self = ITreeNode<T, unknown>> {
  *   extra: string = ''
  * }
  */
-export class TreeNode<T extends Obj = Obj, Self extends TreeNode<T, Self> = TreeNode<T, any>>
-  implements ITreeNode<T, Self> {
+export class TreeNode<
+  T extends Obj = Obj,
+  Self extends TreeNode<T, Self> = TreeNode<T, any>
+> implements ITreeNode<T, Self> {
   data: T
   /** 父节点 */
   parent?: Self
@@ -332,8 +330,7 @@ export interface TreeManagerOptionsBase {
 /**
  * TreeManager 配置选项（带 createNode）
  */
-export interface TreeManagerOptionsWithCreator<T extends Obj, Node>
-  extends TreeManagerOptionsBase {
+export interface TreeManagerOptionsWithCreator<T extends Obj, Node> extends TreeManagerOptionsBase {
   createNode: NodeCreator<T, Node>
 }
 
@@ -375,10 +372,7 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
    * 构造函数 - 使用 createNode
    */
   constructor(data: T, options: TreeManagerOptionsWithCreator<T, Node>)
-  constructor(
-    data: T,
-    options?: TreeManagerOptionsBase | TreeManagerOptionsWithCreator<T, Node>
-  ) {
+  constructor(data: T, options?: TreeManagerOptionsBase | TreeManagerOptionsWithCreator<T, Node>) {
     if (options?.childrenKey) {
       this.childrenKey = options.childrenKey
     }
@@ -415,8 +409,8 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
       const dataChildren = curData[childrenKey]
       if (Array.isArray(dataChildren) && dataChildren.length) {
         const depth = (curNode as { depth?: number }).depth ?? 0
-        const childrenNodes = new Array<Node>(dataChildren.length)
-          ; (curNode as Record<string, unknown>).children = childrenNodes
+        const childrenNodes = Array.from<Node>({ length: dataChildren.length })
+        ;(curNode as Record<string, unknown>).children = childrenNodes
 
         // 倒序压栈，保证遍历顺序与数组顺序一致
         for (let i = dataChildren.length - 1; i >= 0; i--) {
@@ -460,7 +454,7 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
 
     dfs(
       this.root,
-      node => {
+      (node) => {
         if (!filter || filter(node)) {
           result.push(node)
         }
@@ -480,7 +474,7 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
     let found: Node | null = null
     dfs(
       this.root,
-      node => {
+      (node) => {
         if (predicate(node)) {
           found = node
           return true // 提前终止
@@ -500,7 +494,7 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
     const result: Node[] = []
     dfs(
       this.root,
-      node => {
+      (node) => {
         if (predicate(node)) {
           result.push(node)
         }
@@ -514,7 +508,7 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
    * 获取所有叶子节点
    */
   getLeaves(): Node[] {
-    return this.findAll(node => {
+    return this.findAll((node) => {
       const children = (node as Record<string, unknown>)[this.childrenKey]
       return !Array.isArray(children) || children.length === 0
     })
@@ -525,7 +519,7 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
    * @param depth - 目标深度
    */
   getNodesAtDepth(depth: number): Node[] {
-    return this.findAll(node => (node as { depth?: number }).depth === depth)
+    return this.findAll((node) => (node as { depth?: number }).depth === depth)
   }
 
   /**
@@ -535,7 +529,7 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
     let maxDepth = 0
     dfs(
       this.root,
-      node => {
+      (node) => {
         const nodeDepth = (node as { depth?: number }).depth ?? 0
         if (nodeDepth > maxDepth) {
           maxDepth = nodeDepth
@@ -558,15 +552,10 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
    * const descendants = tree.getVisibleDescendants(node, n => n.expanded)
    * flatList.splice(nodeIndex + 1, 0, ...descendants)
    */
-  getVisibleDescendants(
-    node: Node,
-    isExpanded: (node: Node) => boolean
-  ): Node[] {
+  getVisibleDescendants(node: Node, isExpanded: (node: Node) => boolean): Node[] {
     const { childrenKey } = this
     const result: Node[] = []
-    const children = (node as Record<string, unknown>)[childrenKey] as
-      | Node[]
-      | undefined
+    const children = (node as Record<string, unknown>)[childrenKey] as Node[] | undefined
 
     if (!Array.isArray(children) || !children.length) return result
 
@@ -579,9 +568,7 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
       const cur = stack.pop()!
       result.push(cur)
 
-      const curChildren = (cur as Record<string, unknown>)[childrenKey] as
-        | Node[]
-        | undefined
+      const curChildren = (cur as Record<string, unknown>)[childrenKey] as Node[] | undefined
       if (Array.isArray(curChildren) && curChildren.length && isExpanded(cur)) {
         for (let i = curChildren.length - 1; i >= 0; i--) {
           stack.push(curChildren[i]!)
@@ -604,15 +591,10 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
    * const count = tree.getVisibleDescendantCount(node, n => n.expanded)
    * flatList.splice(nodeIndex + 1, count)
    */
-  getVisibleDescendantCount(
-    node: Node,
-    isExpanded: (node: Node) => boolean
-  ): number {
+  getVisibleDescendantCount(node: Node, isExpanded: (node: Node) => boolean): number {
     const { childrenKey } = this
     let count = 0
-    const children = (node as Record<string, unknown>)[childrenKey] as
-      | Node[]
-      | undefined
+    const children = (node as Record<string, unknown>)[childrenKey] as Node[] | undefined
 
     if (!Array.isArray(children) || !children.length) return count
 
@@ -622,9 +604,7 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
       const cur = stack.pop()!
       count++
 
-      const curChildren = (cur as Record<string, unknown>)[childrenKey] as
-        | Node[]
-        | undefined
+      const curChildren = (cur as Record<string, unknown>)[childrenKey] as Node[] | undefined
       if (Array.isArray(curChildren) && curChildren.length && isExpanded(cur)) {
         stack.push(...curChildren)
       }
@@ -653,9 +633,7 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
       const node = stack.pop()!
       result.push(node)
 
-      const children = (node as Record<string, unknown>)[childrenKey] as
-        | Node[]
-        | undefined
+      const children = (node as Record<string, unknown>)[childrenKey] as Node[] | undefined
       if (Array.isArray(children) && children.length && isExpanded(node)) {
         for (let i = children.length - 1; i >= 0; i--) {
           stack.push(children[i]!)
@@ -666,4 +644,3 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
     return result
   }
 }
-
