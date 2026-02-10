@@ -1,6 +1,24 @@
 # 配置管理
 
-配置管理模块提供了环境变量加载、配置文件解析和配置合并等功能，帮助你统一管理应用配置，支持多环境部署和类型安全的配置访问。
+## 介绍
+
+本页介绍 `@cat-kit/be` 的配置能力：环境变量加载与校验、配置文件读取、配置合并，适用于多环境部署。
+
+## 快速使用
+
+```typescript
+import { loadEnv, parseEnv, loadConfig, mergeConfig } from '@cat-kit/be'
+
+const envRaw = await loadEnv({ mode: 'production' })
+const env = parseEnv({ PORT: { type: 'number', default: 3000 } }, envRaw)
+
+const fileConfig = await loadConfig('./app.config.json')
+const finalConfig = mergeConfig(fileConfig, { port: env.PORT })
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 概述
 
@@ -53,7 +71,7 @@ const env = await loadEnv({
 })
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function loadEnv(options?: LoadEnvOptions): Promise<EnvRecord>
@@ -163,7 +181,7 @@ const config = parseEnv(
 )
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function parseEnv<T extends Record<string, any>>(
@@ -314,7 +332,7 @@ const config = await loadConfig('./config.json', {
 })
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function loadConfig<T extends Record<string, unknown> = Record<string, unknown>>(
@@ -380,7 +398,7 @@ const merged = mergeConfig(
 // { items: [3, 4] }
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function mergeConfig<T extends Record<string, any>>(

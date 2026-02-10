@@ -1,6 +1,26 @@
 # 性能优化
 
-提供并行处理、防抖节流、安全执行等性能优化工具。
+## 介绍
+
+本页介绍 `@cat-kit/core` 的性能优化工具，包括并发执行、定时控制（防抖/节流）与安全执行。
+
+## 快速使用
+
+```typescript
+import { parallel, debounce, throttle, safeRun } from '@cat-kit/core'
+
+await parallel([() => Promise.resolve(1), () => Promise.resolve(2)])
+
+const onInput = debounce((v: string) => console.log(v), 300)
+const onScroll = throttle(() => console.log('scroll'), 100)
+
+const result = safeRun(() => JSON.parse('{"ok":true}'))
+console.log(onInput, onScroll, result)
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 并行处理
 
@@ -13,9 +33,9 @@ import { parallel } from '@cat-kit/core'
 
 // 并行执行多个异步任务
 const results = await parallel([
-  fetch('/api/users'),
-  fetch('/api/posts'),
-  fetch('/api/comments')
+  () => fetch('/api/users'),
+  () => fetch('/api/posts'),
+  () => fetch('/api/comments')
 ])
 
 // results: [Response, Response, Response]
@@ -28,9 +48,9 @@ import { parallel } from '@cat-kit/core'
 
 async function loadDashboardData() {
   const [users, stats, notifications] = await parallel([
-    fetchUsers(),
-    fetchStatistics(),
-    fetchNotifications()
+    () => fetchUsers(),
+    () => fetchStatistics(),
+    () => fetchNotifications()
   ])
 
   return {
@@ -303,7 +323,7 @@ hideLoading()
 
 ## 安全执行
 
-使用 `safeRun` 安全执行可能抛出错误的函数。
+使用 `safeRun` 包装**同步**逻辑，避免 `try/catch` 模板代码。
 
 ### 基本用法
 
@@ -311,33 +331,26 @@ hideLoading()
 import { safeRun } from '@cat-kit/core'
 
 // 安全执行同步函数
-const result = safeRun(() => {
-  return JSON.parse(jsonString)
-})
+const parsed = safeRun(() => JSON.parse(jsonString))
 
-if (result.success) {
-  console.log('解析成功:', result.data)
+if (parsed !== undefined) {
+  console.log('解析成功:', parsed)
 } else {
-  console.error('解析失败:', result.error)
+  console.error('解析失败')
 }
 ```
 
-### 异步安全执行
+### 默认值回退
 
 ```typescript
 import { safeRun } from '@cat-kit/core'
 
-// 安全执行异步函数
-const result = await safeRun(async () => {
-  const response = await fetch('/api/data')
-  return await response.json()
-})
+const config = safeRun(
+  () => JSON.parse(localStorage.getItem('app-config') ?? '{}'),
+  { theme: 'light', lang: 'zh-CN' }
+)
 
-if (result.success) {
-  console.log('数据:', result.data)
-} else {
-  console.error('请求失败:', result.error)
-}
+console.log(config.theme)
 ```
 
 ### 表单验证
@@ -346,20 +359,13 @@ if (result.success) {
 import { safeRun } from '@cat-kit/core'
 
 function validateEmail(email: string): boolean {
-  const result = safeRun(() => {
+  return safeRun(() => {
     if (!email) throw new Error('邮箱不能为空')
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new Error('邮箱格式不正确')
     }
     return true
-  })
-
-  if (!result.success) {
-    showError(result.error.message)
-    return false
-  }
-
-  return true
+  }, false)
 }
 ```
 
@@ -369,25 +375,24 @@ function validateEmail(email: string): boolean {
 import { safeRun } from '@cat-kit/core'
 
 function parseUserData(data: string) {
-  const parseResult = safeRun(() => JSON.parse(data))
+  const parsed = safeRun(() => JSON.parse(data) as { id?: number; name?: string })
 
-  if (!parseResult.success) {
+  if (!parsed) {
     return { error: '数据格式错误' }
   }
 
-  const validateResult = safeRun(() => {
-    const user = parseResult.data
-    if (!user.id || !user.name) {
+  const user = safeRun(() => {
+    if (!parsed.id || !parsed.name) {
       throw new Error('缺少必要字段')
     }
-    return user
+    return parsed
   })
 
-  if (!validateResult.success) {
-    return { error: validateResult.error.message }
+  if (!user) {
+    return { error: '缺少必要字段' }
   }
 
-  return { user: validateResult.data }
+  return { user }
 }
 ```
 
@@ -407,18 +412,17 @@ class SearchSuggestion {
       return this.cache.get(query)
     }
 
-    // 安全请求
-    const result = await safeRun(async () => {
+    try {
       const response = await fetch(`/api/search/suggest?q=${query}`)
       if (!response.ok) throw new Error('请求失败')
-      return await response.json()
-    })
 
-    if (result.success) {
-      this.cache.set(query, result.data)
-      this.displaySuggestions(result.data)
-    } else {
-      console.error('获取建议失败:', result.error)
+      const text = await response.text()
+      const suggestions = safeRun(() => JSON.parse(text) as any[], [])
+
+      this.cache.set(query, suggestions)
+      this.displaySuggestions(suggestions)
+    } catch (error) {
+      console.error('获取建议失败:', error)
       this.displayError()
     }
   }, 300)
@@ -467,17 +471,21 @@ class DataSyncManager {
     const maxRetries = 3
 
     while (retries < maxRetries) {
-      const result = await safeRun(async () => {
-        return await fetch('/api/sync', {
-          method: 'POST',
-          body: JSON.stringify(dataToSync)
-        })
-      })
+      const payload = safeRun(() => JSON.stringify(dataToSync))
+      if (!payload) {
+        this.syncQueue.unshift(...dataToSync)
+        break
+      }
 
-      if (result.success) {
+      try {
+        await fetch('/api/sync', {
+          method: 'POST',
+          body: payload
+        })
+
         console.log('同步成功')
         break
-      } else {
+      } catch {
         retries++
         if (retries < maxRetries) {
           await sleep(Math.pow(2, retries) * 1000)
@@ -494,14 +502,15 @@ class DataSyncManager {
 }
 ```
 
-## API 参考
+## API详解
 
 ### parallel
 
 ```typescript
-function parallel<T extends readonly unknown[]>(
-  tasks: T
-): Promise<{ [K in keyof T]: Awaited<T[K]> }>
+function parallel<T>(
+  tasks: ReadonlyArray<() => T | Promise<T>>,
+  options?: { concurrency?: number }
+): Promise<T[]>
 ```
 
 并行执行多个 Promise 任务。
@@ -511,7 +520,8 @@ function parallel<T extends readonly unknown[]>(
 ```typescript
 function debounce<T extends (...args: any[]) => any>(
   fn: T,
-  delay: number
+  delay?: number,
+  immediate?: boolean
 ): (...args: Parameters<T>) => void
 ```
 
@@ -522,7 +532,8 @@ function debounce<T extends (...args: any[]) => any>(
 ```typescript
 function throttle<T extends (...args: any[]) => any>(
   fn: T,
-  delay: number
+  delay?: number,
+  cb?: (v: ReturnType<T>) => void
 ): (...args: Parameters<T>) => void
 ```
 
@@ -539,12 +550,11 @@ function sleep(ms: number): Promise<void>
 ### safeRun
 
 ```typescript
-function safeRun<T>(
-  fn: () => T | Promise<T>
-): Promise<{ success: true; data: T } | { success: false; error: Error }>
+function safeRun<T>(fn: () => T): T | undefined
+function safeRun<T>(fn: () => T, defaultVal: T): T
 ```
 
-安全执行函数，捕获错误并返回结果对象。
+安全执行同步函数，异常时返回 `undefined` 或指定默认值。
 
 ## 最佳实践
 

@@ -6,7 +6,25 @@ outline: deep
 
 # 构建工具
 
-构建模块基于 [tsdown](https://tsdown.dev/) 提供库构建功能，支持 TypeScript 类型声明生成和 Bundle 分析。
+## 介绍
+
+本页介绍 `@cat-kit/maintenance` 的构建能力，核心函数为 `buildLib`，用于单包构建与产物输出控制。
+
+## 快速使用
+
+```typescript
+import { buildLib } from '@cat-kit/maintenance'
+
+await buildLib({
+  dir: '/abs/path/to/package',
+  entry: 'src/index.ts',
+  output: { dir: 'dist' }
+})
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## buildLib
 

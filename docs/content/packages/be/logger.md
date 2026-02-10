@@ -1,6 +1,25 @@
 # 日志系统
 
-日志系统模块提供了结构化的日志记录功能，支持多种传输方式、日志级别和格式。帮助你更好地追踪应用运行状态、调试问题和监控性能。
+## 介绍
+
+本页介绍 `@cat-kit/be` 的日志能力，包含 `Logger` 与多种 `Transport`，支持文本或结构化日志输出。
+
+## 快速使用
+
+```typescript
+import { Logger, LogLevel, ConsoleTransport } from '@cat-kit/be'
+
+const logger = new Logger({
+  level: LogLevel.INFO,
+  transports: [new ConsoleTransport()]
+})
+
+await logger.info('service started', { port: 3000 })
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 概述
 
@@ -52,7 +71,7 @@ const logger = new Logger({
 })
 ```
 
-### API 参考
+### API参考
 
 ```typescript
 class Logger {

@@ -6,6 +6,27 @@ outline: deep
 
 # HTTP 客户端
 
+## 介绍
+
+本页介绍 `@cat-kit/http` 的 `HTTPClient`，用于构建可扩展的浏览器端请求客户端。
+
+## 快速使用
+
+```typescript
+import { HTTPClient } from '@cat-kit/http'
+
+const http = new HTTPClient('/api', {
+  timeout: 30_000,
+  headers: { 'Content-Type': 'application/json' }
+})
+
+const users = await http.get('/users')
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
+
 ## HTTPClient 类
 
 HTTP 请求客户端类，提供完整的 HTTP 请求功能。

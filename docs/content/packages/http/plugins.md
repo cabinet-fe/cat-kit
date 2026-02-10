@@ -1,6 +1,27 @@
 # 插件系统
 
-HTTP 客户端的插件系统提供了强大的扩展能力，可以在请求的不同阶段插入自定义逻辑。
+## 介绍
+
+本页介绍 `@cat-kit/http` 插件体系，内置 `TokenPlugin` 与 `MethodOverridePlugin`，支持请求/响应拦截扩展。
+
+## 快速使用
+
+```typescript
+import { HTTPClient, TokenPlugin, MethodOverridePlugin } from '@cat-kit/http'
+
+const http = new HTTPClient('/api', {
+  plugins: [
+    TokenPlugin({ getter: () => localStorage.getItem('token') }),
+    MethodOverridePlugin({ methods: ['DELETE', 'PUT'] })
+  ]
+})
+
+await http.delete('/users/1')
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 插件接口
 
@@ -29,6 +50,13 @@ interface ClientPlugin {
     url: string,
     config: RequestConfig
   ): Promise<HTTPResponse | void> | HTTPResponse | void
+
+  /**
+   * 错误钩子
+   * - 请求阶段任一错误都会触发
+   * - 适用于日志、上报、统一提示等场景
+   */
+  onError?(error: unknown, context: RequestContext): Promise<void> | void
 }
 
 interface PluginHookResult {
@@ -194,6 +222,12 @@ interface MethodOverridePluginOptions {
    * @default 'POST'
    */
   overrideMethod?: RequestMethod
+
+  /**
+   * 方法覆盖请求头名称
+   * @default 'X-HTTP-Method-Override'
+   */
+  headerName?: string
 }
 ```
 
@@ -212,7 +246,8 @@ MethodOverridePlugin()
 // 自定义重写规则
 MethodOverridePlugin({
   methods: ['PUT', 'PATCH'],
-  overrideMethod: 'POST'
+  overrideMethod: 'POST',
+  headerName: 'X-HTTP-Method-Override'
 })
 
 // 使用示例

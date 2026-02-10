@@ -44,26 +44,12 @@ export class ForestNode<
   }
 
   override remove(): void {
-    const { parent, index, forest } = this
-    if (parent) {
-      if (!parent.children?.length) return
-
-      // index 可能过期，做一次兜底校验
-      let removeIndex = index
-      if (parent.children[removeIndex] !== (this as unknown as Self)) {
-        removeIndex = parent.children.indexOf(this as unknown as Self)
-        if (removeIndex === -1) return
-      }
-
-      parent.children.splice(removeIndex, 1)
-      for (let i = removeIndex; i < parent.children.length; i++) {
-        parent.children[i]!.index = i
-      }
-      this.parent = undefined
+    if (this.parent) {
+      super.remove()
     } else {
       // 根节点：从 forest.roots 中移除
-      const { roots } = forest
-      let removeIndex = index
+      const { roots } = this.forest
+      let removeIndex = this.index
       if (roots[removeIndex] !== (this as unknown as Self)) {
         removeIndex = roots.indexOf(this as unknown as Self)
         if (removeIndex === -1) return
@@ -359,7 +345,10 @@ export class Forest<T extends Obj, Node extends Obj = T> {
 
     if (!Array.isArray(children) || !children.length) return count
 
-    const stack: Node[] = [...children]
+    const stack: Node[] = []
+    for (let i = children.length - 1; i >= 0; i--) {
+      stack.push(children[i]!)
+    }
 
     while (stack.length) {
       const cur = stack.pop()!
@@ -369,7 +358,9 @@ export class Forest<T extends Obj, Node extends Obj = T> {
         | Node[]
         | undefined
       if (Array.isArray(curChildren) && curChildren.length && isExpanded(cur)) {
-        stack.push(...curChildren)
+        for (let i = curChildren.length - 1; i >= 0; i--) {
+          stack.push(curChildren[i]!)
+        }
       }
     }
 

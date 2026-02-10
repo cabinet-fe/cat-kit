@@ -1,9 +1,4 @@
-import type {
-  ClientPlugin,
-  PluginHookResult,
-  RequestMethod,
-  RequestConfig
-} from '../types'
+import type { ClientPlugin, PluginHookResult, RequestMethod, RequestConfig } from '../types'
 
 /**
  * 方法重写插件配置
@@ -19,6 +14,12 @@ export interface MethodOverridePluginOptions {
    * - 默认为 'POST'
    */
   overrideMethod?: RequestMethod
+
+  /**
+   * 方法覆盖请求头名称
+   * - 默认为 'X-HTTP-Method-Override'
+   */
+  headerName?: string
 }
 
 /**
@@ -36,11 +37,12 @@ export interface MethodOverridePluginOptions {
  * })
  * ```
  */
-export function MethodOverridePlugin(
-  options: MethodOverridePluginOptions = {}
-): ClientPlugin {
-  const { methods = ['DELETE', 'PUT', 'PATCH'], overrideMethod = 'POST' } =
-    options
+export function MethodOverridePlugin(options: MethodOverridePluginOptions = {}): ClientPlugin {
+  const {
+    methods = ['DELETE', 'PUT', 'PATCH'],
+    overrideMethod = 'POST',
+    headerName = 'X-HTTP-Method-Override'
+  } = options
 
   return {
     beforeRequest(_url: string, config: RequestConfig): PluginHookResult {
@@ -52,19 +54,13 @@ export function MethodOverridePlugin(
       }
 
       // 创建新的请求头对象
-      const headers = { ...(config.headers || {}) }
+      const headers = { ...config.headers }
 
       // 添加原始方法到请求头
-      headers['X-HTTP-Method-Override'] = method
+      headers[headerName] = method
 
       // 返回修改后的请求选项
-      return {
-        config: {
-          ...config,
-          method: overrideMethod,
-          headers
-        }
-      }
+      return { config: { ...config, method: overrideMethod, headers } }
     }
   }
 }

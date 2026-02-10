@@ -1,6 +1,26 @@
 # 环境检测
 
-提供运行环境、操作系统、浏览器等信息的检测功能。
+## 介绍
+
+本页介绍 `@cat-kit/core` 的环境检测能力，覆盖运行时、操作系统、设备类型与浏览器信息判断。
+
+## 快速使用
+
+```typescript
+import { isInBrowser, getRuntime, getOSType, getDeviceType } from '@cat-kit/core'
+
+const runtime = getRuntime()
+const os = getOSType()
+const device = getDeviceType()
+
+if (isInBrowser()) {
+  console.log({ runtime, os, device })
+}
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 运行环境检测
 
@@ -363,7 +383,7 @@ window.addEventListener('error', event => {
 })
 ```
 
-## API 参考
+## API详解
 
 ### 运行环境
 

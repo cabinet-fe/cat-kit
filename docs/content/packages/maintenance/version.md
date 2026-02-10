@@ -6,7 +6,35 @@ outline: deep
 
 # 版本管理
 
-版本管理模块提供符合 [语义化版本 (semver)](https://semver.org/lang/zh-CN/) 规范的版本号操作功能。
+## 介绍
+
+本页介绍 `@cat-kit/maintenance` 的语义化版本能力，包含版本解析、比较、递增与依赖同步。
+
+## 快速使用
+
+```typescript
+import {
+  parseSemver,
+  compareSemver,
+  incrementVersion,
+  syncPeerDependencies
+} from '@cat-kit/maintenance'
+
+const parsed = parseSemver('1.2.3-alpha.1')
+const gt = compareSemver('1.2.3', '1.2.2') > 0
+const next = incrementVersion('1.2.3', 'minor')
+
+await syncPeerDependencies(
+  [{ dir: '/abs/path/to/packages/fe', name: '@cat-kit/fe' }],
+  '1.3.0'
+)
+
+console.log(parsed, gt, next)
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## parseSemver
 

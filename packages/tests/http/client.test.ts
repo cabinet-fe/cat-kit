@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { HTTPClient } from '@cat-kit/http/src'
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 
 // Mock 全局 fetch
 const mockFetch = vi.fn()
@@ -7,9 +7,7 @@ const mockFetch = vi.fn()
 // Mock window 对象（模拟浏览器环境）
 if (typeof window === 'undefined') {
   // @ts-ignore
-  global.window = {
-    fetch: mockFetch
-  }
+  global.window = { fetch: mockFetch }
 } else {
   window.fetch = mockFetch
 }
@@ -24,7 +22,6 @@ describe('HTTPClient', () => {
       ok: true,
       status: 200,
       headers: new Map([['content-type', 'application/json']]),
-      json: async () => ({ message: 'success' }),
       text: async () => '{"message": "success"}',
       blob: async () => new Blob(),
       arrayBuffer: async () => new ArrayBuffer(8)
@@ -47,10 +44,7 @@ describe('HTTPClient', () => {
     })
 
     it('应该能创建带配置的客户端实例', () => {
-      const client = new HTTPClient('/api', {
-        timeout: 5000,
-        headers: { 'X-Custom': 'value' }
-      })
+      const client = new HTTPClient('/api', { timeout: 5000, headers: { 'X-Custom': 'value' } })
       expect(client).toBeInstanceOf(HTTPClient)
     })
   })
@@ -60,19 +54,12 @@ describe('HTTPClient', () => {
       const client = new HTTPClient()
       await client.get('/users')
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/users',
-        expect.objectContaining({
-          method: 'GET'
-        })
-      )
+      expect(mockFetch).toHaveBeenCalledWith('/users', expect.objectContaining({ method: 'GET' }))
     })
 
     it('应该能处理查询参数', async () => {
       const client = new HTTPClient()
-      await client.get('/users', {
-        query: { name: 'test', age: 25 }
-      })
+      await client.get('/users', { query: { name: 'test', age: 25 } })
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('?name=test&age=25'),
@@ -82,9 +69,7 @@ describe('HTTPClient', () => {
 
     it('应该能合并 URL 中已有的查询参数', async () => {
       const client = new HTTPClient()
-      await client.get('/users?id=1', {
-        query: { name: 'test' }
-      })
+      await client.get('/users?id=1', { query: { name: 'test' } })
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('?id=1&name=test'),
@@ -103,10 +88,7 @@ describe('HTTPClient', () => {
       const client = new HTTPClient('/api')
       await client.get('https://example.com/users')
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://example.com/users',
-        expect.any(Object)
-      )
+      expect(mockFetch).toHaveBeenCalledWith('https://example.com/users', expect.any(Object))
     })
   })
 
@@ -119,10 +101,7 @@ describe('HTTPClient', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/users',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify(data)
-        })
+        expect.objectContaining({ method: 'POST', body: JSON.stringify(data) })
       )
     })
 
@@ -135,29 +114,18 @@ describe('HTTPClient', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/upload',
-        expect.objectContaining({
-          method: 'POST',
-          body: formData
-        })
+        expect.objectContaining({ method: 'POST', body: formData })
       )
     })
 
     it('应该能添加自定义头部', async () => {
       const client = new HTTPClient()
-      await client.post(
-        '/users',
-        { name: 'test' },
-        {
-          headers: { 'X-Custom-Header': 'value' }
-        }
-      )
+      await client.post('/users', { name: 'test' }, { headers: { 'X-Custom-Header': 'value' } })
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/users',
         expect.objectContaining({
-          headers: expect.objectContaining({
-            'X-Custom-Header': 'value'
-          })
+          headers: expect.objectContaining({ 'X-Custom-Header': 'value' })
         })
       )
     })
@@ -172,10 +140,7 @@ describe('HTTPClient', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/users/1',
-        expect.objectContaining({
-          method: 'PUT',
-          body: JSON.stringify(data)
-        })
+        expect.objectContaining({ method: 'PUT', body: JSON.stringify(data) })
       )
     })
   })
@@ -187,9 +152,7 @@ describe('HTTPClient', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/users/1',
-        expect.objectContaining({
-          method: 'DELETE'
-        })
+        expect.objectContaining({ method: 'DELETE' })
       )
     })
   })
@@ -203,10 +166,7 @@ describe('HTTPClient', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/users/1',
-        expect.objectContaining({
-          method: 'PATCH',
-          body: JSON.stringify(data)
-        })
+        expect.objectContaining({ method: 'PATCH', body: JSON.stringify(data) })
       )
     })
   })
@@ -216,12 +176,7 @@ describe('HTTPClient', () => {
       const client = new HTTPClient()
       await client.head('/users')
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/users',
-        expect.objectContaining({
-          method: 'HEAD'
-        })
-      )
+      expect(mockFetch).toHaveBeenCalledWith('/users', expect.objectContaining({ method: 'HEAD' }))
     })
   })
 
@@ -232,9 +187,7 @@ describe('HTTPClient', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/users',
-        expect.objectContaining({
-          method: 'OPTIONS'
-        })
+        expect.objectContaining({ method: 'OPTIONS' })
       )
     })
   })
@@ -253,28 +206,17 @@ describe('HTTPClient', () => {
 
       await userGroup.get('/profile')
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/api/users/profile',
-        expect.any(Object)
-      )
+      expect(mockFetch).toHaveBeenCalledWith('/api/users/profile', expect.any(Object))
     })
   })
 
   describe('请求配置合并', () => {
     it('应该能合并全局头部和请求头部', async () => {
       const client = new HTTPClient('/api', {
-        headers: {
-          'X-Global': 'global-value',
-          'X-Override': 'global'
-        }
+        headers: { 'X-Global': 'global-value', 'X-Override': 'global' }
       })
 
-      await client.get('/users', {
-        headers: {
-          'X-Custom': 'custom-value',
-          'X-Override': 'local'
-        }
-      })
+      await client.get('/users', { headers: { 'X-Custom': 'custom-value', 'X-Override': 'local' } })
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/api/users',
@@ -286,6 +228,27 @@ describe('HTTPClient', () => {
           })
         })
       )
+    })
+
+    it('不应该将客户端插件配置透传给 fetch', async () => {
+      const client = new HTTPClient('/api', {
+        plugins: [
+          {
+            beforeRequest() {
+              return
+            }
+          }
+        ],
+        timeout: 3000
+      })
+
+      await client.get('/users')
+
+      const [, requestInit] = mockFetch.mock.calls[0] as [string, RequestInit]
+
+      expect((requestInit as any).plugins).toBeUndefined()
+      expect((requestInit as any).origin).toBeUndefined()
+      expect(requestInit.signal).toBeDefined()
     })
   })
 
@@ -302,10 +265,32 @@ describe('HTTPClient', () => {
       const client = new HTTPClient()
 
       // 测试 text 类型
-      const textResponse = await client.get('/data', {
-        responseType: 'text'
-      })
+      const textResponse = await client.get('/data', { responseType: 'text' })
       expect(textResponse.data).toBeDefined()
+    })
+
+    it('应该保留原始响应对象', async () => {
+      const client = new HTTPClient()
+      const response = await client.get('/users')
+
+      expect(response.raw).toBeDefined()
+    })
+
+    it('空响应体在 json 模式下应返回 null', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 204,
+        headers: new Map([['content-type', 'application/json']]),
+        text: async () => '',
+        blob: async () => new Blob(),
+        arrayBuffer: async () => new ArrayBuffer(8)
+      })
+
+      const client = new HTTPClient()
+      const response = await client.get('/empty')
+
+      expect(response.data).toBeNull()
+      expect(response.code).toBe(204)
     })
   })
 
@@ -313,19 +298,11 @@ describe('HTTPClient', () => {
     it('应该能执行 beforeRequest 钩子', async () => {
       const beforeRequest = vi.fn(async (url, config) => {
         return {
-          config: {
-            ...config,
-            headers: {
-              ...config.headers,
-              'X-Plugin': 'added-by-plugin'
-            }
-          }
+          config: { ...config, headers: { ...config.headers, 'X-Plugin': 'added-by-plugin' } }
         }
       })
 
-      const client = new HTTPClient('/api', {
-        plugins: [{ beforeRequest }]
-      })
+      const client = new HTTPClient('/api', { plugins: [{ beforeRequest }] })
 
       await client.get('/users')
 
@@ -333,24 +310,17 @@ describe('HTTPClient', () => {
       expect(mockFetch).toHaveBeenCalledWith(
         '/api/users',
         expect.objectContaining({
-          headers: expect.objectContaining({
-            'X-Plugin': 'added-by-plugin'
-          })
+          headers: expect.objectContaining({ 'X-Plugin': 'added-by-plugin' })
         })
       )
     })
 
     it('应该能执行 afterRespond 钩子', async () => {
-      const afterRespond = vi.fn(async response => {
-        return {
-          ...response,
-          data: { ...response.data, modified: true }
-        }
+      const afterRespond = vi.fn(async (response) => {
+        return { ...response, data: { ...response.data, modified: true } }
       })
 
-      const client = new HTTPClient('/api', {
-        plugins: [{ afterRespond }]
-      })
+      const client = new HTTPClient('/api', { plugins: [{ afterRespond }] })
 
       const response = await client.get('/users')
 
@@ -375,24 +345,49 @@ describe('HTTPClient', () => {
         })
       }
 
-      const client = new HTTPClient('/api', {
-        plugins: [plugin1, plugin2]
-      })
+      const client = new HTTPClient('/api', { plugins: [plugin1, plugin2] })
 
       await client.get('/users')
 
       expect(order).toEqual([1, 2])
     })
+
+    it('请求失败时应触发 onError 钩子', async () => {
+      const onError = vi.fn()
+      const networkError = new Error('fetch failed')
+      mockFetch.mockRejectedValueOnce(networkError)
+
+      const client = new HTTPClient('/api', { plugins: [{ onError }] })
+
+      await expect(client.get('/users')).rejects.toThrow('网络错误')
+
+      expect(onError).toHaveBeenCalledTimes(1)
+      expect(onError.mock.calls[0]?.[1]).toMatchObject({
+        url: '/api/users',
+        config: expect.objectContaining({ method: 'GET' })
+      })
+    })
   })
 
   describe('URL 处理', () => {
-    it('应该能正确解码 URL', async () => {
+    it('应该保留传入 URL 的编码状态', async () => {
       const client = new HTTPClient()
       const encodedUrl = encodeURIComponent('/users/张三')
 
       await client.get(encodedUrl)
 
-      expect(mockFetch).toHaveBeenCalledWith('/users/张三', expect.any(Object))
+      expect(mockFetch).toHaveBeenCalledWith(`/${encodedUrl}`, expect.any(Object))
+    })
+
+    it('完整 URL 应保留编码路径', async () => {
+      const client = new HTTPClient('/api')
+
+      await client.get('https://example.com/%E8%B5%84%E6%BA%90')
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://example.com/%E8%B5%84%E6%BA%90',
+        expect.any(Object)
+      )
     })
 
     it('应该能正确拼接路径', async () => {
@@ -400,6 +395,17 @@ describe('HTTPClient', () => {
       await client.get('/users')
 
       expect(mockFetch).toHaveBeenCalledWith('/api/users', expect.any(Object))
+    })
+
+    it('数组查询参数应重复 key 并忽略 undefined', async () => {
+      const client = new HTTPClient()
+
+      await client.get('/users', { query: { tag: ['a', 'b'], skip: undefined, empty: null } })
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/users?tag=a&tag=b&empty=null'),
+        expect.any(Object)
+      )
     })
   })
 })

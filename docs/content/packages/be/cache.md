@@ -1,6 +1,25 @@
 # 缓存工具
 
-缓存工具模块提供了多种缓存实现，帮助你优化应用性能，减少重复计算和网络请求。所有缓存实现都支持 TTL（生存时间）过期机制，让你能够灵活控制数据的生命周期。
+## 介绍
+
+本页聚焦 `@cat-kit/be` 的缓存能力：内存 LRU、文件缓存与函数记忆化，适用于减少重复计算与 I/O。
+
+## 快速使用
+
+```typescript
+import { LRUCache, memoize } from '@cat-kit/be'
+
+const cache = new LRUCache<string, number>({ maxSize: 100, ttl: 60_000 })
+cache.set('answer', 42)
+
+const slowFn = async (id: string) => ({ id, ts: Date.now() })
+const fastFn = memoize(slowFn)
+await fastFn('u1')
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 概述
 
@@ -64,7 +83,7 @@ for (const value of cache.values()) {
 console.log(`缓存中有 ${cache.size} 项`)
 ```
 
-### API 参考
+### API参考
 
 ```typescript
 class LRUCache<K, V> {
@@ -148,7 +167,7 @@ await cache.delete('key')
 await cache.clear()
 ```
 
-### API 参考
+### API参考
 
 ```typescript
 class FileCache<V> {
@@ -251,7 +270,7 @@ const expensiveFunction = memoize(
 )
 ```
 
-### API 参考
+### API参考
 
 ```typescript
 function memoize<F extends (...args: any[]) => any>(

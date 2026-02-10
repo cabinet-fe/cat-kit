@@ -1,6 +1,25 @@
 # 系统监控
 
-系统监控模块提供了系统资源监控功能，帮助你了解服务器的 CPU、内存、磁盘和网络接口等运行状态。这对于应用性能监控、资源告警和容量规划非常有用。
+## 介绍
+
+本页介绍 `@cat-kit/be` 的系统信息采集能力，覆盖 CPU、内存、磁盘与网络接口。
+
+## 快速使用
+
+```typescript
+import { getCpuUsage, getMemoryInfo, getDiskInfo, getNetworkInterfaces } from '@cat-kit/be'
+
+const cpu = await getCpuUsage()
+const memory = await getMemoryInfo()
+const disk = await getDiskInfo()
+const nics = getNetworkInterfaces()
+
+console.log({ cpu, memory, disk, nics })
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 概述
 
@@ -41,7 +60,7 @@ console.log(`主频: ${cpuInfo.speed}MHz`)
 console.log(`平均负载: ${cpuInfo.loadAverage.join(', ')}`)
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function getCpuInfo(): CpuInfo
@@ -90,7 +109,7 @@ console.log(`空闲时间: ${usage.idle}ms`)
 const usage = await getCpuUsage(1000) // 采样 1 秒
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function getCpuUsage(interval?: number): Promise<CpuUsage>
@@ -139,7 +158,7 @@ console.log(`空闲内存: ${(memInfo.free / 1024 / 1024 / 1024).toFixed(2)}GB`)
 console.log(`使用率: ${memInfo.usedPercent.toFixed(2)}%`)
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function getMemoryInfo(): MemoryInfo
@@ -184,7 +203,7 @@ console.log(`使用率: ${diskInfo.usedPercent.toFixed(2)}%`)
 const diskInfo = await getDiskInfo('/var/log')
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function getDiskInfo(path?: string): Promise<DiskInfo>
@@ -241,7 +260,7 @@ interfaces.forEach(iface => {
 })
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function getNetworkInterfaces(

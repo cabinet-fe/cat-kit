@@ -1,6 +1,27 @@
 # 任务调度
 
-任务调度模块提供了灵活的任务调度功能，支持 Cron 表达式、延迟执行和定时执行。帮助你轻松实现定时任务、周期性任务和延迟任务。
+## 介绍
+
+本页介绍 `@cat-kit/be` 的任务调度能力，支持 Cron、延时任务与定时任务编排。
+
+## 快速使用
+
+```typescript
+import { Scheduler, parseCron } from '@cat-kit/be'
+
+const scheduler = new Scheduler()
+const cron = parseCron('*/5 * * * *')
+
+scheduler.schedule('health-check', cron, async () => {
+  console.log('running')
+})
+
+scheduler.start()
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 概述
 
@@ -116,7 +137,7 @@ if (nextRun) {
 const nextRun = cron.getNextDate(new Date('2024-01-01'))
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 class CronExpression {
@@ -184,7 +205,7 @@ scheduler.cancel('heartbeat')
 scheduler.stop()
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 class Scheduler {

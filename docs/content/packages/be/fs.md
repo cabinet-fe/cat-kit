@@ -1,6 +1,25 @@
 # 文件系统
 
-文件系统模块提供了增强的文件和目录操作功能，简化常见的文件系统任务。所有函数都支持异步操作，并提供完整的 TypeScript 类型支持。
+## 介绍
+
+本页介绍 `@cat-kit/be` 的文件系统工具，覆盖目录扫描、文件读写、JSON 处理、移动与删除等常见后端场景。
+
+## 快速使用
+
+```typescript
+import { readDir, ensureDir, writeFile, readJson, removePath } from '@cat-kit/be'
+
+await ensureDir('./tmp/reports')
+await writeFile('./tmp/reports/a.txt', 'hello')
+
+const entries = await readDir('./tmp', { recursive: true, onlyFiles: true })
+const pkg = await readJson('./package.json')
+await removePath('./tmp/reports/a.txt')
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 概述
 
@@ -72,7 +91,7 @@ const tsFiles = await readDir('./src', {
 })
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 // 返回详细信息数组（默认）
@@ -139,7 +158,7 @@ await ensureDir('./logs/app')
 // 如果 ./logs/app 不存在，会自动创建 ./logs 和 ./logs/app
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function ensureDir(dirPath: string): Promise<void>
@@ -180,7 +199,7 @@ await emptyDir('./cache')
 await emptyDir('./dist')
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function emptyDir(dirPath: string): Promise<void>
@@ -268,7 +287,7 @@ await downloadFile(
 )
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function writeFile(
@@ -339,7 +358,7 @@ const data = await readJson('./data.json', {
 })
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function readJson<T = unknown>(
@@ -396,7 +415,7 @@ await writeJson('./data.json', data, {
 })
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function writeJson(
@@ -455,7 +474,7 @@ import { movePath } from '@cat-kit/be'
 await movePath('C:/temp/file.txt', 'D:/backup/file.txt')
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function movePath(
@@ -510,7 +529,7 @@ await removePath('./temp')
 await removePath('./maybe-not-exist', { force: true })
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function removePath(targetPath: string, options?: RemoveOptions): Promise<void>

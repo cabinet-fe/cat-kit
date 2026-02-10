@@ -54,12 +54,7 @@ export interface TokenPluginOptions {
  * ```
  */
 export function TokenPlugin(options: TokenPluginOptions): ClientPlugin {
-  const {
-    getter,
-    authType = 'Bearer',
-    formatter,
-    headerName = 'Authorization'
-  } = options
+  const { getter, authType = 'Bearer', formatter, headerName = 'Authorization' } = options
 
   /**
    * 格式化令牌
@@ -76,10 +71,7 @@ export function TokenPlugin(options: TokenPluginOptions): ClientPlugin {
   }
 
   return {
-    async beforeRequest(
-      url: string,
-      config: RequestConfig
-    ): Promise<PluginHookResult> {
+    async beforeRequest(url: string, config: RequestConfig): Promise<PluginHookResult> {
       const token = await getToken()
 
       // 如果没有令牌，不做任何处理
@@ -88,18 +80,13 @@ export function TokenPlugin(options: TokenPluginOptions): ClientPlugin {
       }
 
       // 创建新的请求头对象
-      const headers = { ...(config.headers || {}) }
+      const headers = { ...config.headers }
 
       // 添加令牌到请求头
       headers[headerName] = token
 
       // 返回修改后的请求选项
-      return {
-        config: {
-          ...config,
-          headers
-        }
-      }
+      return { config: { ...config, headers } }
     }
   }
 }

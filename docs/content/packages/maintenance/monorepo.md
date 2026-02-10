@@ -6,7 +6,25 @@ outline: deep
 
 # Monorepo 管理
 
-`Monorepo` 类是统一的 monorepo 管理工具，提供工作区管理、依赖验证、批量构建、版本更新和发布功能。基于 [tsdown](https://tsdown.dev/) 实现高性能构建。
+## 介绍
+
+本页介绍 `@cat-kit/maintenance` 的 `Monorepo` 与 `WorkspaceGroup`，用于统一管理工作区、构建、版本与发布流程。
+
+## 快速使用
+
+```typescript
+import { Monorepo } from '@cat-kit/maintenance'
+
+const repo = new Monorepo('/path/to/repo')
+const validation = repo.validate()
+
+const group = repo.group(['@cat-kit/core', '@cat-kit/http'])
+await group.build()
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 特性
 
@@ -34,7 +52,7 @@ class Monorepo {
 import { Monorepo } from '@cat-kit/maintenance'
 
 const repo = new Monorepo()
-const repo = new Monorepo('/path/to/monorepo')
+const repoWithRoot = new Monorepo('/path/to/monorepo')
 ```
 
 ### root 属性

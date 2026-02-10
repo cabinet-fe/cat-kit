@@ -1,6 +1,31 @@
 # 存储
 
-提供了 WebStorage（LocalStorage/SessionStorage）、Cookie 和 IndexedDB 的封装。
+## 介绍
+
+本页介绍 `@cat-kit/fe` 的浏览器存储能力，覆盖 `WebStorage`、`cookie` 与 `IDB`。
+
+## 快速使用
+
+```typescript
+import { WebStorage, storageKey, cookie, IDB } from '@cat-kit/fe'
+
+const TOKEN = storageKey<string>('token')
+const local = new WebStorage(localStorage)
+local.set(TOKEN, 'abc')
+
+cookie.set('theme', 'dark')
+
+const users = IDB.defineStore('users', {
+  id: { type: Number, primary: true },
+  name: { type: String, required: true }
+})
+const db = new IDB('app-db', { version: 1, stores: [users] })
+await db.ready
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## WebStorage
 
@@ -15,7 +40,7 @@
 
 使用 `storageKey` 创建类型安全的存储键：
 
-```ts
+```typescript
 interface User {
   id: number
   name: string
@@ -163,240 +188,64 @@ interface CookieOptions {
 ### 定义数据库
 
 ```typescript
-import { Store, IDB } from '@cat-kit/fe'
+import { IDB } from '@cat-kit/fe'
 
-// 定义用户表结构
-const userStore = new Store('users', {
-  id: {
-    type: Number,
-    primary: true,
-    autoIncrement: true
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  email: {
-    type: String,
-    required: true
-  },
-  age: {
-    type: Number,
-    default: 18
-  },
-  createdAt: {
-    type: Date,
-    default: () => new Date()
-  }
-})
-
-// 定义文章表结构
-const postStore = new Store('posts', {
-  id: {
-    type: Number,
-    primary: true,
-    autoIncrement: true
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  content: {
-    type: String,
-    required: true
-  },
-  userId: {
-    type: Number,
-    required: true
-  }
-})
-
-// 创建数据库实例
-const db = new IDB('myapp', {
-  version: 1,
-  stores: [userStore, postStore]
-})
-
-// 连接数据库
-await db.connect()
-```
-
-### 字段类型定义
-
-```typescript
-interface FieldDefinition {
-  /** 字段类型 */
-  type:
-    | StringConstructor
-    | NumberConstructor
-    | ObjectConstructor
-    | ArrayConstructor
-    | BooleanConstructor
-    | DateConstructor
-  /** 是否必填 */
-  required?: boolean
-  /** 是否为主键 */
-  primary?: boolean
-  /** 是否自动递增（仅主键有效） */
-  autoIncrement?: boolean
-  /** 默认值（可以是值或函数） */
-  default?: any
-}
-```
-
-### CRUD 操作
-
-#### 添加数据
-
-```typescript
-// 添加单条数据
-const userId = await userStore.add({
-  name: 'Alice',
-  email: 'alice@example.com',
-  age: 25
-})
-
-// 添加多条数据
-const userIds = await userStore.addMany([
-  { name: 'Bob', email: 'bob@example.com' },
-  { name: 'Charlie', email: 'charlie@example.com' }
-])
-```
-
-#### 更新数据
-
-```typescript
-// 通过主键更新
-await userStore.put({
-  id: 1,
-  name: 'Alice Updated',
-  email: 'alice@example.com',
-  age: 26
-})
-
-// 更新多条数据
-await userStore.putMany([
-  { id: 1, name: 'Alice', email: 'alice@example.com', age: 26 },
-  { id: 2, name: 'Bob', email: 'bob@example.com', age: 30 }
-])
-```
-
-#### 查询数据
-
-```typescript
-// 通过主键获取
-const user = await userStore.get(1)
-
-// 通过主键获取多条
-const users = await userStore.getMany([1, 2, 3])
-
-// 获取所有数据
-const allUsers = await userStore.getAll()
-
-// 条件查询
-const adults = await userStore.find({
-  age: 25
-})
-
-// 获取第一条匹配的数据
-const firstAdult = await userStore.findOne({
-  age: 25
-})
-```
-
-#### 删除数据
-
-```typescript
-// 通过主键删除
-await userStore.delete(1)
-
-// 删除多条数据
-await userStore.deleteMany([1, 2, 3])
-
-// 条件删除
-await userStore.deleteBy({
-  age: 18
-})
-
-// 清空表
-await userStore.clear()
-```
-
-### 高级查询
-
-```typescript
-// 获取数据总数
-const count = await userStore.count()
-
-// 分页查询（手动实现）
-const page = 1
-const pageSize = 10
-const allUsers = await userStore.getAll()
-const pagedUsers = allUsers.slice((page - 1) * pageSize, page * pageSize)
-```
-
-### 完整示例
-
-```typescript
-import { Store, IDB } from '@cat-kit/fe'
-
-// 定义数据结构
-interface User {
-  id?: number
-  name: string
-  email: string
-  age?: number
-  createdAt?: Date
-}
-
-// 创建 Store
-const userStore = new Store('users', {
+const userStore = IDB.defineStore('users', {
   id: { type: Number, primary: true, autoIncrement: true },
   name: { type: String, required: true },
   email: { type: String, required: true },
-  age: { type: Number, default: 18 },
-  createdAt: { type: Date, default: () => new Date() }
+  age: { type: Number, default: 18 }
 })
 
-// 创建数据库
 const db = new IDB('myapp', {
   version: 1,
   stores: [userStore]
 })
 
-// 使用
-async function example() {
-  // 连接数据库
-  await db.connect()
-
-  // 添加用户
-  const userId = await userStore.add({
-    name: 'Alice',
-    email: 'alice@example.com',
-    age: 25
-  })
-
-  // 查询用户
-  const user = await userStore.get(userId)
-  console.log(user)
-
-  // 更新用户
-  await userStore.put({
-    id: userId,
-    name: 'Alice Updated',
-    email: 'alice@example.com',
-    age: 26
-  })
-
-  // 删除用户
-  await userStore.delete(userId)
-
-  // 关闭数据库
-  db.close()
-}
+await db.ready
 ```
 
-## API 参考
+### CRUD 操作
+
+```typescript
+// 添加数据
+const id = await userStore.add({ name: 'Alice', email: 'alice@example.com' })
+
+// 查询单条 / 多条
+const one = await userStore.find({ id })
+const many = await userStore.findMany({ age: 18 })
+
+// 按 key 更新 / 替换
+await userStore.update(id, { age: 26 })
+await userStore.put(id, {
+  id,
+  name: 'Alice Updated',
+  email: 'alice@example.com',
+  age: 26
+})
+
+// 删除
+await userStore.delete({ id })
+await userStore.deleteMany({ age: 18 })
+
+// 统计与清空
+const total = await userStore.count()
+await userStore.clear()
+
+console.log(one, many, total)
+```
+
+### 生命周期
+
+```typescript
+// 关闭连接
+db.close()
+
+// 删除整个数据库
+await IDB.deleteDatabase('myapp')
+```
+
+## API详解
 
 ### WebStorage
 
@@ -419,17 +268,12 @@ async function example() {
 
 ### Store (IndexedDB)
 
-- `add(data: any): Promise<IDBValidKey>` - 添加数据
-- `addMany(dataList: any[]): Promise<IDBValidKey[]>` - 批量添加
-- `get(key: IDBValidKey): Promise<any>` - 获取数据
-- `getMany(keys: IDBValidKey[]): Promise<any[]>` - 批量获取
-- `getAll(): Promise<any[]>` - 获取所有
-- `find(query: Query): Promise<any[]>` - 条件查询
-- `findOne(query: Query): Promise<any | null>` - 查询单条
-- `put(data: any): Promise<IDBValidKey>` - 更新数据
-- `putMany(dataList: any[]): Promise<IDBValidKey[]>` - 批量更新
-- `delete(key: IDBValidKey): Promise<void>` - 删除数据
-- `deleteMany(keys: IDBValidKey[]): Promise<void>` - 批量删除
-- `deleteBy(query: Query): Promise<void>` - 条件删除
-- `clear(): Promise<void>` - 清空表
-- `count(): Promise<number>` - 获取总数
+- `add(data): Promise<IDBValidKey>` - 添加一条数据
+- `find(query): Promise<any>` - 查询单条数据
+- `findMany(query): Promise<any[]>` - 查询多条数据
+- `update(key, data): Promise<boolean>` - 按 key 更新字段
+- `put(key, data): Promise<boolean>` - 按 key 替换整条
+- `delete(query): Promise<boolean>` - 删除单条匹配数据
+- `deleteMany(query): Promise<number>` - 删除多条匹配数据
+- `clear(): Promise<boolean>` - 清空 Store
+- `count(): Promise<number>` - 获取数量

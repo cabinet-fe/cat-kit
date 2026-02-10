@@ -6,7 +6,23 @@ outline: deep
 
 # 库构建指南
 
-在使用构建工具之前，了解以下概念将帮助你更好地理解库构建的配置和最佳实践。
+## 介绍
+
+本页是构建与依赖管理的概念指南，解释依赖类型与库构建策略，帮助你正确使用 `@cat-kit/maintenance`。
+
+## 快速使用
+
+```typescript
+import { Monorepo } from '@cat-kit/maintenance'
+
+const repo = new Monorepo()
+const group = repo.group(['@cat-kit/core', '@cat-kit/fe'])
+await group.build()
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 依赖类型
 
@@ -89,7 +105,7 @@ npm 将依赖分为三种类型，这种设计解决了以下核心问题：
 - 生成 TypeScript 类型声明
 - 典型工具: tsdown、tsup、Rollup
 
-```javascript
+```typescript
 // dist/index.js - 库的产物
 import { format } from 'date-fns'  // ← 保留导入，不打包
 

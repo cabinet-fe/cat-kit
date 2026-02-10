@@ -6,7 +6,26 @@ outline: deep
 
 # 类型定义
 
-本文档列出了 `@cat-kit/http` 包的所有 TypeScript 类型定义。
+## 介绍
+
+本页汇总 `@cat-kit/http` 的类型系统，涵盖客户端配置、请求配置、响应结构与插件类型。
+
+## 快速使用
+
+```typescript
+import type { ClientConfig, RequestConfig, HTTPResponse } from '@cat-kit/http'
+
+const clientConfig: ClientConfig = { timeout: 10_000 }
+const requestConfig: RequestConfig = { query: { page: 1 } }
+
+function unwrap<T>(res: HTTPResponse<T>): T {
+  return res.data
+}
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 核心类型
 
@@ -274,6 +293,14 @@ interface ClientPlugin {
     url: string,
     config: RequestConfig
   ): Promise<HTTPResponse | void> | HTTPResponse | void
+
+  /**
+   * 错误钩子
+   */
+  onError?(
+    error: unknown,
+    context: RequestContext
+  ): Promise<void> | void
 }
 ```
 
@@ -283,6 +310,34 @@ interface ClientPlugin {
 - 可以返回 Promise 以支持异步操作
 - `beforeRequest` 返回 `PluginHookResult` 或 `void`
 - `afterRespond` 返回 `HTTPResponse` 或 `void`
+- `onError` 用于请求错误监控和副作用处理
+
+### RequestContext
+
+插件错误钩子的上下文对象。
+
+```typescript
+interface RequestContext {
+  url: string
+  config: RequestConfig
+}
+```
+
+### HTTPError
+
+统一错误对象。
+
+```typescript
+type HttpErrorCode = 'TIMEOUT' | 'ABORTED' | 'NETWORK' | 'PARSE' | 'UNKNOWN'
+
+class HTTPError<T = any> extends Error {
+  code: HttpErrorCode
+  url?: string
+  config?: RequestConfig
+  response?: HTTPResponse<T>
+  cause?: unknown
+}
+```
 
 **使用示例：**
 

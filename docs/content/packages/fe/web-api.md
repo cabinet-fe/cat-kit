@@ -1,6 +1,24 @@
 # Web API
 
-提供了浏览器 Web API 的简化封装，包括剪贴板操作和权限查询。
+## 介绍
+
+本页介绍 `@cat-kit/fe` 对常用 Web API 的封装，包含剪贴板读写与权限查询。
+
+## 快速使用
+
+```typescript
+import { clipboard, queryPermission } from '@cat-kit/fe'
+
+await clipboard.copy('hello cat-kit')
+const text = await clipboard.readText()
+const hasClipboardRead = await queryPermission('clipboard-read')
+
+console.log(text, hasClipboardRead)
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## Clipboard - 剪贴板
 
@@ -316,7 +334,7 @@ async function requestNotificationPermission() {
 }
 ```
 
-## API 参考
+## API详解
 
 ### clipboard.copy
 
@@ -328,7 +346,7 @@ function copy(data: string | Blob | Array<string | Blob>): Promise<void>
 
 - `data`: 要复制的数据，可以是文本、Blob 或它们的数组
 
-**返回：**
+**返回值：**
 
 - `Promise<void>`: 复制完成
 
@@ -344,7 +362,7 @@ function copy(data: string | Blob | Array<string | Blob>): Promise<void>
 function read(): Promise<Blob[]>
 ```
 
-**返回：**
+**返回值：**
 
 - `Promise<Blob[]>`: 剪贴板中的所有项目（Blob 数组）
 
@@ -359,7 +377,7 @@ function read(): Promise<Blob[]>
 function readText(): Promise<string>
 ```
 
-**返回：**
+**返回值：**
 
 - `Promise<string>`: 剪贴板中的文本内容
 
@@ -378,7 +396,7 @@ function queryPermission(name: WebPermissionName): Promise<boolean>
 
 - `name`: 权限名称
 
-**返回：**
+**返回值：**
 
 - `Promise<boolean>`: 是否有权限（`true` 表示已授予，`false` 表示未授予或被拒绝）
 

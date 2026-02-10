@@ -66,6 +66,10 @@ export function bfs<T extends Obj>(
     const node = nodeQueue[head]!
     const index = indexQueue[head]!
     const parent = parentQueue[head]
+
+    // 释放已出队槽位的引用，允许 GC 回收
+    nodeQueue[head] = undefined as unknown as T
+    parentQueue[head] = undefined
     head++
 
     const result = cb(node, index, parent)
@@ -156,13 +160,17 @@ export class TreeNode<
 
     // index 可能过期，做一次兜底校验，避免删错节点
     let removeIndex = index
+    let staleIndex = false
     if (parent.children[removeIndex] !== (this as unknown as Self)) {
       removeIndex = parent.children.indexOf(this as unknown as Self)
       if (removeIndex === -1) return
+      staleIndex = true
     }
 
     parent.children.splice(removeIndex, 1)
-    for (let i = removeIndex; i < parent.children.length; i++) {
+    // 走 indexOf 兜底时，其他兄弟节点的 index 也可能过期，需从头重新编号
+    const reindexStart = staleIndex ? 0 : removeIndex
+    for (let i = reindexStart; i < parent.children.length; i++) {
       parent.children[i]!.index = i
     }
     this.parent = undefined
@@ -189,7 +197,21 @@ export class TreeNode<
     }
 
     node.parent = this as unknown as Self
-    node.depth = this.depth + 1
+
+    // 递归更新被插入子树中所有节点的 depth
+    const depthDelta = this.depth + 1 - node.depth
+    if (depthDelta) {
+      const stack: Self[] = [node]
+      while (stack.length) {
+        const cur = stack.pop()!
+        cur.depth += depthDelta
+        if (cur.children) {
+          for (let i = cur.children.length - 1; i >= 0; i--) {
+            stack.push(cur.children[i]!)
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -200,9 +222,10 @@ export class TreeNode<
     const path: Self[] = []
     let current: Self | undefined = this as unknown as Self
     while (current) {
-      path.unshift(current)
+      path.push(current)
       current = current.parent
     }
+    path.reverse()
     return path
   }
 
@@ -293,14 +316,19 @@ export class TreeNode<
     let count = 0
     if (!this.children?.length) return count
 
-    const stack: Self[] = [...this.children]
+    const stack: Self[] = []
+    for (let i = this.children.length - 1; i >= 0; i--) {
+      stack.push(this.children[i]!)
+    }
 
     while (stack.length) {
       const node = stack.pop()!
       count++
 
       if (node.children?.length && isExpanded(node)) {
-        stack.push(...node.children)
+        for (let i = node.children.length - 1; i >= 0; i--) {
+          stack.push(node.children[i]!)
+        }
       }
     }
 
@@ -598,7 +626,10 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
 
     if (!Array.isArray(children) || !children.length) return count
 
-    const stack: Node[] = [...children]
+    const stack: Node[] = []
+    for (let i = children.length - 1; i >= 0; i--) {
+      stack.push(children[i]!)
+    }
 
     while (stack.length) {
       const cur = stack.pop()!
@@ -606,7 +637,9 @@ export class TreeManager<T extends Obj, Node extends Obj = T> {
 
       const curChildren = (cur as Record<string, unknown>)[childrenKey] as Node[] | undefined
       if (Array.isArray(curChildren) && curChildren.length && isExpanded(cur)) {
-        stack.push(...curChildren)
+        for (let i = curChildren.length - 1; i >= 0; i--) {
+          stack.push(curChildren[i]!)
+        }
       }
     }
 

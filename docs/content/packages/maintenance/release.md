@@ -6,7 +6,23 @@ outline: deep
 
 # 发布与 Git
 
-发布模块提供 git tag、提交推送以及 npm 发布的封装，简化发布流水线。
+## 介绍
+
+本页介绍 `@cat-kit/maintenance` 的发布相关函数，覆盖 Git Tag、提交推送与 npm 发布流程。
+
+## 快速使用
+
+```typescript
+import { createGitTag, commitAndPush, publishPackage } from '@cat-kit/maintenance'
+
+await commitAndPush({ cwd: '/path/to/repo', message: 'release: v1.2.3' })
+await createGitTag({ cwd: '/path/to/repo', tag: 'v1.2.3', push: true })
+await publishPackage({ cwd: '/path/to/pkg', access: 'public' })
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## createGitTag
 

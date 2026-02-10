@@ -1,6 +1,28 @@
 # 虚拟化
 
-高性能的虚拟滚动实现，适用于大量数据列表渲染。
+## 介绍
+
+本页介绍 `@cat-kit/fe` 的虚拟化能力，核心为 `Virtualizer` 与 `VirtualContainer`，用于大列表渲染优化。
+
+## 快速使用
+
+```typescript
+import { Virtualizer, VirtualContainer } from '@cat-kit/fe'
+
+const vertical = new Virtualizer({
+  length: 10_000,
+  buffer: 8,
+  estimateSize: () => 36
+})
+
+const container = new VirtualContainer({ vertical })
+container.connect(document.querySelector('#list') as HTMLElement)
+console.log(vertical.getVisibleItems())
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 概述
 
@@ -155,13 +177,19 @@ container.disconnect()
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { Virtualizer, VirtualContainer, type VirtualItem } from '@cat-kit/fe'
+import { Virtualizer, VirtualContainer } from '@cat-kit/fe'
+
+type VisibleItem = {
+  index: number
+  start: number
+  size: number
+}
 
 // 数据
 const data = ref(Array.from({ length: 10000 }, (_, i) => `Item ${i + 1}`))
 
 // 虚拟滚动状态
-const visibleItems = ref<VirtualItem[]>([])
+const visibleItems = ref<VisibleItem[]>([])
 const totalSize = ref(0)
 
 // DOM 引用
@@ -223,10 +251,16 @@ onUnmounted(() => {
 
 ```typescript
 import { useEffect, useRef, useState } from 'react'
-import { Virtualizer, VirtualContainer, type VirtualItem } from '@cat-kit/fe'
+import { Virtualizer, VirtualContainer } from '@cat-kit/fe'
+
+type VisibleItem = {
+  index: number
+  start: number
+  size: number
+}
 
 function VirtualList({ data }: { data: string[] }) {
-  const [visibleItems, setVisibleItems] = useState<VirtualItem[]>([])
+  const [visibleItems, setVisibleItems] = useState<VisibleItem[]>([])
   const [totalSize, setTotalSize] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const virtualizerRef = useRef<Virtualizer>()
@@ -416,7 +450,7 @@ virtualizer.reset()
 4. **复用元素**：配合对象池模式复用 DOM 元素
 5. **懒加载图片**：配合 IntersectionObserver 懒加载图片
 
-## API 参考
+## API详解
 
 ### Virtualizer
 

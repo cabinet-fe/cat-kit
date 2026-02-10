@@ -98,6 +98,44 @@ export interface HTTPResponse<T = any> {
   raw?: Response | any
 }
 
+export type HttpErrorCode =
+  | 'TIMEOUT'
+  | 'ABORTED'
+  | 'NETWORK'
+  | 'PARSE'
+  | 'UNKNOWN'
+
+export interface HTTPErrorOptions<T = any> {
+  code: HttpErrorCode
+  url?: string
+  config?: RequestConfig
+  response?: HTTPResponse<T>
+  cause?: unknown
+}
+
+export class HTTPError<T = any> extends Error {
+  code: HttpErrorCode
+  url?: string
+  config?: RequestConfig
+  response?: HTTPResponse<T>
+  override cause?: unknown
+
+  constructor(message: string, options: HTTPErrorOptions<T>) {
+    super(message)
+    this.name = 'HTTPError'
+    this.code = options.code
+    this.url = options.url
+    this.config = options.config
+    this.response = options.response
+    this.cause = options.cause
+  }
+}
+
+export interface RequestContext {
+  url: string
+  config: RequestConfig
+}
+
 /**
  * 插件钩子返回类型
  */
@@ -133,4 +171,14 @@ export interface ClientPlugin {
     url: string,
     config: RequestConfig
   ): Promise<HTTPResponse | void> | HTTPResponse | void
+
+  /**
+   * 错误钩子
+   * - 请求链中出现错误时触发
+   * - 不返回值，仅用于记录、上报或副作用处理
+   */
+  onError?(
+    error: unknown,
+    context: RequestContext
+  ): Promise<void> | void
 }

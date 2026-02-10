@@ -1,6 +1,26 @@
 # 文件操作
 
-提供了浏览器端文件读取和保存的简单封装。
+## 介绍
+
+本页介绍 `@cat-kit/fe` 的文件能力，包含分块读取本地文件与多种下载保存方式。
+
+## 快速使用
+
+```typescript
+import { readFile, saveFromBlob, saveFromURL } from '@cat-kit/fe'
+
+await readFile(file, {
+  chunkSize: 1024 * 1024,
+  onChunk: (chunk) => console.log(chunk.byteLength)
+})
+
+saveFromBlob(new Blob(['hello']), 'output.txt')
+await saveFromURL('/report.csv', 'report.csv')
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## readFile - 分块读取文件
 
@@ -129,32 +149,36 @@ interface ReadFileConfig {
 }
 ```
 
-## saveFile - 保存文件到本地
+## saveFromBlob / saveFromStream / saveFromURL - 保存文件到本地
 
-`saveFile` 函数可以将 Blob 或 File 对象保存到用户本地。
+`@cat-kit/fe` 提供三种保存能力：
+
+- `saveFromBlob(blob, filename)`：直接保存 Blob
+- `saveFromStream(stream, filename, options?)`：从可读流保存
+- `saveFromURL(url, filename, options?)`：从 URL 下载并保存
 
 ### 基本用法
 
 ```typescript
-import { saveFile } from '@cat-kit/fe'
+import { saveFromBlob } from '@cat-kit/fe'
 
 // 保存 File 对象
 const file = new File(['Hello World'], 'hello.txt', { type: 'text/plain' })
-saveFile(file)
+saveFromBlob(file, file.name)
 
 // 保存 Blob 对象（需要指定文件名）
 const blob = new Blob(['Hello World'], { type: 'text/plain' })
-saveFile(blob, 'hello.txt')
+saveFromBlob(blob, 'hello.txt')
 ```
 
 ### 保存文本文件
 
 ```typescript
-import { saveFile } from '@cat-kit/fe'
+import { saveFromBlob } from '@cat-kit/fe'
 
 function saveTextFile(content: string, filename: string) {
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
-  saveFile(blob, filename)
+  saveFromBlob(blob, filename)
 }
 
 // 使用
@@ -164,12 +188,12 @@ saveTextFile('Hello, World!', 'greeting.txt')
 ### 保存 JSON 文件
 
 ```typescript
-import { saveFile } from '@cat-kit/fe'
+import { saveFromBlob } from '@cat-kit/fe'
 
 function saveJSON(data: any, filename: string) {
   const json = JSON.stringify(data, null, 2)
   const blob = new Blob([json], { type: 'application/json' })
-  saveFile(blob, filename)
+  saveFromBlob(blob, filename)
 }
 
 // 使用
@@ -180,12 +204,12 @@ saveJSON(data, 'user.json')
 ### 保存 Canvas 为图片
 
 ```typescript
-import { saveFile } from '@cat-kit/fe'
+import { saveFromBlob } from '@cat-kit/fe'
 
 function saveCanvasAsImage(canvas: HTMLCanvasElement, filename: string) {
   canvas.toBlob(blob => {
     if (blob) {
-      saveFile(blob, filename)
+      saveFromBlob(blob, filename)
     }
   }, 'image/png')
 }
@@ -200,12 +224,10 @@ if (canvas) {
 ### 下载远程文件
 
 ```typescript
-import { saveFile } from '@cat-kit/fe'
+import { saveFromURL } from '@cat-kit/fe'
 
 async function downloadRemoteFile(url: string, filename: string) {
-  const response = await fetch(url)
-  const blob = await response.blob()
-  saveFile(blob, filename)
+  await saveFromURL(url, filename)
 }
 
 // 使用
@@ -215,7 +237,7 @@ await downloadRemoteFile('https://example.com/file.pdf', 'document.pdf')
 ### 保存 CSV 文件
 
 ```typescript
-import { saveFile } from '@cat-kit/fe'
+import { saveFromBlob } from '@cat-kit/fe'
 
 function saveCSV(data: any[], filename: string) {
   // 生成 CSV 内容
@@ -226,7 +248,7 @@ function saveCSV(data: any[], filename: string) {
   ].join('\n')
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-  saveFile(blob, filename)
+  saveFromBlob(blob, filename)
 }
 
 // 使用
@@ -242,7 +264,7 @@ saveCSV(users, 'users.csv')
 ### 文件处理工作流
 
 ```typescript
-import { readFile, saveFile } from '@cat-kit/fe'
+import { readFile, saveFromBlob } from '@cat-kit/fe'
 
 // 1. 读取文件
 const input = document.querySelector<HTMLInputElement>('#fileInput')
@@ -277,11 +299,11 @@ input?.addEventListener('change', async e => {
 
   // 4. 保存处理后的文件
   const processedBlob = new Blob([result], { type: file.type })
-  saveFile(processedBlob, `processed_${file.name}`)
+  saveFromBlob(processedBlob, `processed_${file.name}`)
 })
 ```
 
-## API 参考
+## API详解
 
 ### readFile
 
@@ -303,21 +325,20 @@ function readFile(
 - `config.chunkSize`: 每块大小（字节），默认 10MB
 - `config.onChunk`: 每块读取完成的回调函数
 
-**返回：**
+**返回值：**
 
 - `Promise<void>`: 所有块读取完成
 
-### saveFile
+### saveFromBlob
 
 ```typescript
-function saveFile(file: File): void
-function saveFile(file: Blob, name: string): void
+function saveFromBlob(blob: Blob, filename: string): void
 ```
 
 **参数：**
 
-- `file`: File 对象或 Blob 对象
-- `name`: 文件名（当 file 为 Blob 时必需）
+- `blob`: 需要保存的 Blob 或 File 对象
+- `filename`: 下载文件名
 
 **行为：**
 

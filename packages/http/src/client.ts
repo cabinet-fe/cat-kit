@@ -1,13 +1,17 @@
+import { $str } from '@cat-kit/core'
+
 import type { HttpEngine } from './engine/engine'
-import { FetchEngine } from './engine/fetch'
-import { XHREngine } from './engine/xhr'
 import type {
   ClientConfig,
   RequestConfig,
   HTTPResponse,
-  AliasRequestConfig
+  AliasRequestConfig,
+  RequestContext
 } from './types'
-import { $str } from '@cat-kit/core'
+
+import { FetchEngine } from './engine/fetch'
+import { XHREngine } from './engine/xhr'
+import { TokenPlugin } from './plugins'
 
 /**
  * HTTP 请求客户端
@@ -55,16 +59,12 @@ export class HTTPClient {
     this.prefix = prefix
     this.config = config
 
-    this.engine =
-      typeof fetch === 'undefined' ? new XHREngine() : new FetchEngine()
+    this.engine = typeof fetch === 'undefined' ? new XHREngine() : new FetchEngine()
   }
 
   private getRequestUrl(url: string, config: RequestConfig): string {
-    // 解码URL
-    url = decodeURIComponent(url)
-
     // 如果已经是完整URL，直接返回
-    if (url.startsWith('http://') || url.startsWith('https://')) {
+    if (this.isAbsoluteUrl(url)) {
       return this.appendQueryParams(url, config)
     }
 
@@ -81,21 +81,46 @@ export class HTTPClient {
     return this.appendQueryParams(url, config)
   }
 
+  private isAbsoluteUrl(url: string): boolean {
+    return /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(url) || url.startsWith('//')
+  }
+
   private appendQueryParams(url: string, config: RequestConfig): string {
     // 处理查询参数（对所有请求方法都有效）
     if (config.query) {
-      const queryString = new URLSearchParams(
-        Object.entries(config.query).reduce((acc, [key, value]) => {
-          acc[key] =
-            typeof value === 'object' ? JSON.stringify(value) : String(value)
-          return acc
-        }, {} as Record<string, string>)
-      ).toString()
+      const searchParams = new URLSearchParams()
+
+      const appendValue = (key: string, value: unknown): void => {
+        if (value === undefined) {
+          return
+        }
+
+        if (value === null) {
+          searchParams.append(key, 'null')
+          return
+        }
+
+        if (typeof value === 'object') {
+          searchParams.append(key, JSON.stringify(value))
+          return
+        }
+
+        searchParams.append(key, String(value))
+      }
+
+      Object.entries(config.query).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((item) => appendValue(key, item))
+          return
+        }
+
+        appendValue(key, value)
+      })
+
+      const queryString = searchParams.toString()
 
       if (queryString) {
-        url = url.includes('?')
-          ? `${url}&${queryString}`
-          : `${url}?${queryString}`
+        url = url.includes('?') ? `${url}&${queryString}` : `${url}?${queryString}`
       }
     }
 
@@ -108,12 +133,29 @@ export class HTTPClient {
    * @returns 合并后的请求配置
    */
   private getRequestConfig(config: RequestConfig): RequestConfig {
-    return {
-      ...this.config,
-      ...config,
-      headers: {
-        ...this.config.headers,
-        ...config.headers
+    const { timeout, credentials, headers } = this.config
+
+    return { timeout, credentials, ...config, headers: { ...headers, ...config.headers } }
+  }
+
+  private mergeRequestConfig(current: RequestConfig, patch: RequestConfig): RequestConfig {
+    return { ...current, ...patch, headers: { ...current.headers, ...patch.headers } }
+  }
+
+  private async runOnErrorPlugins(error: unknown, context: RequestContext): Promise<void> {
+    if (!this.config.plugins?.length) {
+      return
+    }
+
+    for (const plugin of this.config.plugins) {
+      if (!plugin.onError) {
+        continue
+      }
+
+      try {
+        await plugin.onError(error, context)
+      } catch {
+        // 忽略插件错误，保留原始错误语义
       }
     }
   }
@@ -124,46 +166,47 @@ export class HTTPClient {
    * @param config 请求配置
    * @returns Promise<HTTPResponse>
    */
-  async request<T = any>(
-    url: string,
-    config: RequestConfig = {}
-  ): Promise<HTTPResponse<T>> {
-    let finalUrl = this.getRequestUrl(url, config)
+  async request<T = any>(url: string, config: RequestConfig = {}): Promise<HTTPResponse<T>> {
     let finalConfig = this.getRequestConfig(config)
+    let finalUrl = this.getRequestUrl(url, finalConfig)
 
-    // 执行插件的 beforeRequest 钩子
-    if (this.config.plugins?.length) {
-      for (const plugin of this.config.plugins) {
-        if (plugin.beforeRequest) {
-          const result = await plugin.beforeRequest(finalUrl, finalConfig)
-          if (result) {
-            if (result.url) finalUrl = result.url
-            if (result.config)
-              finalConfig = { ...finalConfig, ...result.config }
+    try {
+      // 执行插件的 beforeRequest 钩子
+      if (this.config.plugins?.length) {
+        for (const plugin of this.config.plugins) {
+          if (plugin.beforeRequest) {
+            const result = await plugin.beforeRequest(finalUrl, finalConfig)
+            if (result) {
+              if (result.url) {
+                finalUrl = result.url
+              }
+              if (result.config) {
+                finalConfig = this.mergeRequestConfig(finalConfig, result.config)
+              }
+            }
           }
         }
       }
-    }
 
-    let response = await this.engine.request<T>(finalUrl, finalConfig)
+      let response = await this.engine.request<T>(finalUrl, finalConfig)
 
-    // 执行插件的 afterRespond 钩子
-    if (this.config.plugins?.length) {
-      for (const plugin of this.config.plugins) {
-        if (plugin.afterRespond) {
-          const result = await plugin.afterRespond(
-            response,
-            finalUrl,
-            finalConfig
-          )
-          if (result) {
-            response = result
+      // 执行插件的 afterRespond 钩子
+      if (this.config.plugins?.length) {
+        for (const plugin of this.config.plugins) {
+          if (plugin.afterRespond) {
+            const result = await plugin.afterRespond(response, finalUrl, finalConfig)
+            if (result) {
+              response = result
+            }
           }
         }
       }
-    }
 
-    return response
+      return response
+    } catch (error) {
+      await this.runOnErrorPlugins(error, { url: finalUrl, config: finalConfig })
+      throw error
+    }
   }
 
   /**
@@ -172,10 +215,7 @@ export class HTTPClient {
    * @param config 请求选项
    * @returns Promise<HTTPResponse>
    */
-  get<T>(
-    url: string,
-    config: AliasRequestConfig = {}
-  ): Promise<HTTPResponse<T>> {
+  get<T>(url: string, config: AliasRequestConfig = {}): Promise<HTTPResponse<T>> {
     return this.request<T>(url, { ...config, method: 'GET' })
   }
 
@@ -243,10 +283,7 @@ export class HTTPClient {
    * @param config 请求选项
    * @returns Promise<HTTPResponse>
    */
-  head<T = any>(
-    url: string,
-    config: Omit<RequestConfig, 'method'> = {}
-  ): Promise<HTTPResponse<T>> {
+  head<T = any>(url: string, config: Omit<RequestConfig, 'method'> = {}): Promise<HTTPResponse<T>> {
     return this.request<T>(url, { ...config, method: 'HEAD' })
   }
 
@@ -289,11 +326,12 @@ export class HTTPClient {
    * ```
    */
   group(prefix: string): HTTPClient {
-    const group = new HTTPClient(
-      $str.joinUrlPath(this.prefix, prefix),
-      this.config
-    )
+    const group = new HTTPClient($str.joinUrlPath(this.prefix, prefix), this.config)
 
     return group
   }
 }
+
+new HTTPClient('/xxx', {
+  plugins: [TokenPlugin({ authType: 'Bearer', getter: () => 'test-token' })]
+})

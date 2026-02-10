@@ -1,6 +1,27 @@
 # 数据处理
 
-Core 包提供了丰富的数据处理工具，包括类型判断、对象操作、数组操作、字符串处理、数字处理和数据转换。
+## 介绍
+
+本页介绍 `@cat-kit/core` 的通用数据处理工具，包含类型判断、对象/数组/字符串/数字处理与数据转换。
+
+## 快速使用
+
+```typescript
+import { isString, o, union, $str, n, obj2query } from '@cat-kit/core'
+
+isString('cat')
+const picked = o({ a: 1, b: 2 }).pick(['a'])
+const merged = union([1, 2], [2, 3])
+const joined = $str.joinUrlPath('/api', 'users')
+const ranged = n(120).range(0, 100)
+const query = obj2query({ page: 1, size: 20 })
+
+console.log(picked, merged, joined, ranged, query)
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 类型判断
 
@@ -235,7 +256,7 @@ const users = arr([
   { id: 2, name: 'Bob', age: 30 }
 ])
 
-users.find({ age: 25 }) // [{ id: 1, name: 'Alice', age: 25 }]
+users.find({ age: 25 }) // { id: 1, name: 'Alice', age: 25 }
 
 // 移动元素
 list.move(0, 2) // 将索引 0 的元素移动到索引 2
@@ -252,7 +273,7 @@ users.groupBy(item => (item.age > 25 ? 'old' : 'young'))
 ### 命名转换
 
 ```typescript
-import { str, CatString } from '@cat-kit/core'
+import { str } from '@cat-kit/core'
 
 // 转换为小驼峰
 str('hello-world').camelCase() // 'helloWorld'
@@ -295,29 +316,28 @@ $str.joinUrlPath('/api', 'users', 'list/')
 ### 货币格式化
 
 ```typescript
-import { Num } from '@cat-kit/core'
+import { n } from '@cat-kit/core'
 
-const amount = new Num(1234567.89)
+const amount = n(1234567.89)
 
 // 格式化为人民币
-amount.format('CNY') // '¥1,234,567.89'
-amount.format('CNY', { decimals: 0 }) // '¥1,234,568'
+amount.currency('CNY', 2) // '￥1,234,567.89'
 
 // 格式化为中文大写金额
-amount.format('CNY_HAN')
+amount.currency('CNY_HAN', 2)
 // '壹佰贰拾叁万肆仟伍佰陆拾柒元捌角玖分'
 ```
 
 ### 精确小数
 
 ```typescript
-import { Num } from '@cat-kit/core'
+import { n } from '@cat-kit/core'
 
-const num = new Num(3.14159)
+const num = n(3.14159)
 
 // 精确到指定小数位
-num.toFixed(2) // 3.14
-num.toFixed(0) // 3
+num.fixed(2) // '3.14'
+num.fixed(0) // '3'
 ```
 
 ## 数据转换
@@ -495,16 +515,17 @@ buildApiUrl('https://api.example.com', 'users/search', {
 
 ### 字符串操作
 
-- `str(string)` - 创建 CatString 实例
+- `str(string)` - 创建字符串处理实例
 - `camelCase(type)` - 驼峰命名转换
 - `kebabCase()` - 连字符命名转换
 - `$str.joinUrlPath(...paths)` - URL 路径拼接
 
 ### 数字操作
 
-- `Num` 类
-- `format(type, options)` - 货币格式化
-- `toFixed(decimals)` - 精确小数
+- `n(number)` - 创建数字处理实例
+- `currency(type, precision)` - 货币格式化
+- `fixed(precision)` - 精确小数
+- `$n.plus/minus/mul/div/sum/calc` - 精确运算与表达式计算
 
 ### 数据转换
 

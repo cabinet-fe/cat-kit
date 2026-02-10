@@ -1,6 +1,23 @@
 # 网络工具
 
-网络工具模块提供了网络相关的实用工具函数，帮助你检查端口可用性、获取本机 IP 地址和网络接口信息。
+## 介绍
+
+本页介绍 `@cat-kit/be` 的网络工具，主要用于端口可用性检测与本机 IP 获取。
+
+## 快速使用
+
+```typescript
+import { isPortAvailable, getLocalIP } from '@cat-kit/be'
+
+const available = await isPortAvailable(3000)
+const ip = getLocalIP()
+
+console.log({ available, ip })
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 概述
 
@@ -41,7 +58,7 @@ const available = await isPortAvailable(3000, {
 })
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function isPortAvailable(
@@ -91,7 +108,7 @@ const ipv6 = getLocalIP({ family: 'IPv6' })
 const allIPs = getLocalIP({ includeInternal: true })
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function getLocalIP(
@@ -150,7 +167,7 @@ interfaces.forEach(iface => {
 const allInterfaces = getNetworkInterfaces({ includeInternal: true })
 ```
 
-#### API 参考
+#### API参考
 
 ```typescript
 function getNetworkInterfaces(

@@ -229,6 +229,42 @@ describe('树结构', () => {
       expect(child3.index).toBe(2)
     })
 
+    it('插入子树时应递归更新所有后代节点的 depth', () => {
+      const root = new TreeNode({ id: 1 }, 0, 0)
+      const child = new TreeNode({ id: 2 }, 0, 1, root)
+      root.children = [child]
+
+      // 构建一棵独立子树（depth 从 0 开始）
+      const subtreeRoot = new TreeNode({ id: 10 }, 0, 0)
+      const subtreeChild = new TreeNode({ id: 11 }, 0, 1, subtreeRoot)
+      const subtreeGrandchild = new TreeNode({ id: 12 }, 0, 2, subtreeChild)
+      subtreeRoot.children = [subtreeChild]
+      subtreeChild.children = [subtreeGrandchild]
+
+      // 将子树插入到 depth=1 的 child 节点下
+      child.insert(subtreeRoot)
+
+      // subtreeRoot 应该是 depth=2, subtreeChild 应该是 depth=3, subtreeGrandchild 应该是 depth=4
+      expect(subtreeRoot.depth).toBe(2)
+      expect(subtreeChild.depth).toBe(3)
+      expect(subtreeGrandchild.depth).toBe(4)
+      expect(subtreeRoot.parent).toBe(child)
+    })
+
+    it('插入 depth 已匹配的子树时不应改变 depth', () => {
+      const root = new TreeNode({ id: 1 }, 0, 0)
+
+      // 子树的 depth 恰好与目标位置一致
+      const subtreeRoot = new TreeNode({ id: 10 }, 0, 1)
+      const subtreeChild = new TreeNode({ id: 11 }, 0, 2, subtreeRoot)
+      subtreeRoot.children = [subtreeChild]
+
+      root.insert(subtreeRoot)
+
+      expect(subtreeRoot.depth).toBe(1)
+      expect(subtreeChild.depth).toBe(2)
+    })
+
     it('应该获取从根到当前节点的路径', () => {
       const root = new TreeNode({ id: 1 }, 0, 0)
       const child = new TreeNode({ id: 2 }, 0, 1, root)

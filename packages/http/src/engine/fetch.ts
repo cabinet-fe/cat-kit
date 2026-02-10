@@ -1,6 +1,8 @@
-import { HttpEngine } from './engine'
 import type { HTTPResponse, RequestConfig } from '../types'
-import { getDataType } from '@cat-kit/core'
+
+import { HTTPError } from '../types'
+import { HttpEngine } from './engine'
+import { buildRequestBody } from './shared'
 
 export class FetchEngine extends HttpEngine {
   private controllers: Set<AbortController> = new Set()
@@ -9,20 +11,19 @@ export class FetchEngine extends HttpEngine {
     super()
   }
 
-  async request<T = any>(
-    url: string,
-    config: RequestConfig
-  ): Promise<HTTPResponse<T>> {
-    const { method = 'GET', body, timeout, credentials, ...rest } = config
+  async request<T = any>(url: string, config: RequestConfig): Promise<HTTPResponse<T>> {
+    const { method = 'GET', body, timeout, responseType } = config
 
     // 创建新的 AbortController 实例用于此次请求
     const controller = new AbortController()
     this.controllers.add(controller)
+    let isTimeoutAbort = false
 
     // 处理超时
     let timeoutId: number | undefined = undefined
     if (timeout && timeout > 0) {
       timeoutId = setTimeout(() => {
+        isTimeoutAbort = true
         controller.abort()
       }, timeout) as unknown as number
     }
@@ -33,80 +34,91 @@ export class FetchEngine extends HttpEngine {
         method,
         signal: controller.signal,
         credentials: config.credentials === false ? 'omit' : 'include',
-        headers: config.headers || {},
-        ...rest
+        headers: { ...config.headers }
       }
 
       // 处理请求体
-      if (body && method !== 'GET' && method !== 'HEAD') {
-        if (getDataType(body) === 'object' || getDataType(body) === 'array') {
-          fetchOptions.body = JSON.stringify(body)
-          // 设置内容类型为 JSON
-          const headers = fetchOptions.headers as Record<string, string>
-          if (!headers['Content-Type']) {
-            headers['Content-Type'] = 'application/json'
-          }
-        } else {
-          fetchOptions.body = body as BodyInit
-        }
+      const headers = fetchOptions.headers as Record<string, string>
+      const requestBody = buildRequestBody(method, body, headers)
+      if (requestBody !== null) {
+        fetchOptions.body = requestBody
       }
 
       // 发送请求
       const response = await fetch(url, fetchOptions)
 
-      // 处理响应
-      let data: T
-      const responseType = config.responseType || 'json'
-
-      // 根据 responseType 处理响应数据
-      if (responseType === 'json') {
-        data = (await response.json()) as T
-      } else if (responseType === 'text') {
-        data = (await response.text()) as unknown as T
-      } else if (responseType === 'blob') {
-        data = (await response.blob()) as unknown as T
-      } else if (responseType === 'arraybuffer') {
-        data = (await response.arrayBuffer()) as unknown as T
-      } else {
-        // 如果未指定或不识别，尝试根据 Content-Type 判断
-        const contentType = response.headers.get('content-type')
-        if (contentType && contentType.includes('application/json')) {
-          data = (await response.json()) as T
-        } else if (contentType && contentType.includes('text/')) {
-          data = (await response.text()) as unknown as T
-        } else {
-          // 尝试解析为 JSON，如果失败则返回文本
-          try {
-            data = (await response.json()) as T
-          } catch (e) {
-            data = (await response.text()) as unknown as T
-          }
-        }
-      }
+      const rawData = await this.parseResponseData(response, responseType)
+      const data = rawData as T
 
       // 构建响应对象
       const httpResponse: HTTPResponse = {
         data,
         code: response.status,
-        headers: Object.fromEntries(response.headers.entries())
+        headers: Object.fromEntries(response.headers.entries()),
+        raw: response
       }
 
       return httpResponse
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
-        if (timeoutId) {
-          throw new Error('请求超时')
-        } else {
-          throw new Error('请求被中止')
-        }
+        throw new HTTPError(isTimeoutAbort ? '请求超时' : '请求被中止', {
+          code: isTimeoutAbort ? 'TIMEOUT' : 'ABORTED',
+          url,
+          config,
+          cause: error
+        })
       }
-      throw error
+
+      if (error instanceof HTTPError) {
+        throw error
+      }
+
+      throw new HTTPError('网络错误', { code: 'NETWORK', url, config, cause: error })
     } finally {
       // 清理资源
       if (timeoutId) {
         clearTimeout(timeoutId)
       }
       this.controllers.delete(controller)
+    }
+  }
+
+  private async parseResponseData(
+    response: Response,
+    responseType: RequestConfig['responseType']
+  ): Promise<unknown> {
+    const resolvedType = responseType || 'json'
+
+    if (resolvedType === 'text') {
+      return response.text()
+    }
+
+    if (resolvedType === 'blob') {
+      return response.blob()
+    }
+
+    if (resolvedType === 'arraybuffer') {
+      return response.arrayBuffer()
+    }
+
+    const text = await response.text()
+    if (!text) {
+      return null
+    }
+
+    try {
+      return JSON.parse(text)
+    } catch (error) {
+      throw new HTTPError('响应解析失败', {
+        code: 'PARSE',
+        response: {
+          data: text,
+          code: response.status,
+          headers: Object.fromEntries(response.headers.entries()),
+          raw: response
+        },
+        cause: error
+      })
     }
   }
 

@@ -1,6 +1,25 @@
 # 日期处理
 
-`Dater` 类和 `date` 工厂函数提供日期的构造、格式化、对齐、比较与判定等能力，适用于浏览器和 Node.js 环境。
+## 介绍
+
+本页介绍 `@cat-kit/core` 的日期工具 `date` / `Dater`，用于格式化、计算、比较与范围处理。
+
+## 快速使用
+
+```typescript
+import { date } from '@cat-kit/core'
+
+const now = date()
+const text = now.format('YYYY-MM-DD HH:mm:ss')
+const nextWeek = now.addDays(7)
+const inRange = now.isBetween('2026-01-01', '2026-12-31')
+
+console.log(text, nextWeek.timestamp, inRange)
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 基础知识
 
@@ -26,7 +45,7 @@
 
 ## 快速上手
 
-```ts
+```typescript
 import { date, Dater } from '@cat-kit/core'
 
 const d = date('2024-01-15 10:30:45')
@@ -41,7 +60,7 @@ d.clone().addDays(1).startOf('day').format() // 2024-01-16
 - 无效输入行为与 `new Date` 一致：返回 `Invalid Date`（时间戳为 `NaN`），不会抛错。
 - `clone()` 生成独立实例，避免共享可变引用。
 
-```ts
+```typescript
 const d1 = new Dater('2024-01-15')
 const d2 = date(1700000000000)
 const copy = d1.clone()
@@ -49,7 +68,7 @@ const copy = d1.clone()
 
 ## 获取属性
 
-```ts
+```typescript
 const d = date('2024-01-15 10:30:45')
 
 d.year    // 2024
@@ -68,7 +87,7 @@ d.raw       // 原生 Date
 - **可变**：`setYear`、`setMonth`、`setDay`、`setHours`、`setMinutes`、`setSeconds`、`setTime`，返回自身可链式调用。
 - **不可变**：`addDays`、`addWeeks`、`addMonths`、`addYears`、`calc` 返回新实例；`clone` 可配合使用。
 
-```ts
+```typescript
 const base = date('2024-01-15')
 
 base.setYear(2025).setMonth(6).setDay(20)
@@ -82,7 +101,7 @@ const nextWeek = base.clone().addWeeks(1) // base 未被修改
 ::: demo core/format-demo.vue
 :::
 
-```ts
+```typescript
 const d = date('2024-01-15 14:30:45')
 
 d.format() // 默认 'yyyy-MM-dd'
@@ -115,7 +134,7 @@ d.format('yyyy-MM-dd HH:mm:ss', { utc: true }) // 按 UTC 输出
 ::: demo core/parse-demo.vue
 :::
 
-```ts
+```typescript
 const parsed = Dater.parse('2024-03-05 14:20:10', 'yyyy-MM-dd HH:mm:ss')
 parsed.format('yyyy/MM/dd HH:mm') // 2024/03/05 14:20
 
@@ -132,7 +151,7 @@ Number.isNaN(invalid.timestamp) // true
 ::: demo core/calc-demo.vue
 :::
 
-```ts
+```typescript
 const d = date('2024-03-15 10:20:30')
 
 d.calc(7) // +7 天
@@ -154,7 +173,7 @@ date('2024-02-01 12:00').endOf('month').format('yyyy-MM-dd HH:mm:ss') // 2024-02
 ::: demo core/compare-demo.vue
 :::
 
-```ts
+```typescript
 const a = date('2024-01-15')
 const b = date('2024-01-20')
 
@@ -179,7 +198,7 @@ a.isLeapYear() // 2024 -> true
 
 ## 月份工具
 
-```ts
+```typescript
 const d = date('2024-02-15')
 
 d.toEndOfMonth() // 2024-02-29

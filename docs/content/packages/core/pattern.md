@@ -1,10 +1,28 @@
 # 设计模式
 
-当前提供观察者模式实现 `Observable`，用于轻量级可观察状态。
+## 介绍
+
+本页介绍 `@cat-kit/core` 的观察者模式实现 `Observable`，用于构建响应式状态与订阅机制。
+
+## 快速使用
+
+```typescript
+import { Observable } from '@cat-kit/core'
+
+const store = new Observable({ count: 0 })
+const unobserve = store.observe(['count'], ([count]) => console.log(count))
+
+store.setState({ count: 1 })
+unobserve()
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## 快速上手
 
-```ts
+```typescript
 import { Observable } from '@cat-kit/core'
 
 const counter = new Observable({ count: 0 })
@@ -23,7 +41,7 @@ stop() // 取消观察
 
 ## 后端示例：任务队列状态
 
-```ts
+```typescript
 import { Observable } from '@cat-kit/core'
 
 type QueueState = {

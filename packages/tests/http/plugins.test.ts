@@ -277,6 +277,20 @@ describe('MethodOverridePlugin', () => {
       expect(result?.config?.method).toBe('GET')
       expect(result?.config?.headers?.['X-HTTP-Method-Override']).toBe('DELETE')
     })
+
+    it('应该支持自定义方法覆盖请求头名称', async () => {
+      const plugin = MethodOverridePlugin({
+        headerName: 'X-Method-Override'
+      })
+
+      const config: RequestConfig = { method: 'DELETE' }
+      const result = await plugin.beforeRequest!('/api/users/1', config)
+
+      expect(result?.config?.headers?.['X-Method-Override']).toBe('DELETE')
+      expect(
+        result?.config?.headers?.['X-HTTP-Method-Override']
+      ).toBeUndefined()
+    })
   })
 
   describe('保留现有头部', () => {

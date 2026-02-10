@@ -6,7 +6,33 @@ outline: deep
 
 # 依赖管理
 
-依赖管理模块提供循环依赖检测、版本一致性检查和依赖图可视化功能。
+## 介绍
+
+本页介绍 `@cat-kit/maintenance` 的依赖分析能力，用于发现循环依赖、版本不一致并生成依赖图。
+
+## 快速使用
+
+```typescript
+import {
+  checkCircularDependencies,
+  checkVersionConsistency,
+  buildDependencyGraph
+} from '@cat-kit/maintenance'
+
+const packages = [
+  { name: '@cat-kit/core', version: '1.0.0', pkg: { name: '@cat-kit/core', version: '1.0.0' } },
+  { name: '@cat-kit/fe', version: '1.0.0', pkg: { name: '@cat-kit/fe', version: '1.0.0', dependencies: { '@cat-kit/core': '^1.0.0' } } }
+]
+
+const circular = checkCircularDependencies(packages)
+const consistency = checkVersionConsistency(packages)
+const graph = buildDependencyGraph(packages)
+console.log(circular, consistency, graph)
+```
+
+## API参考
+
+本节按模块列出 API 签名、参数、返回值与使用示例。
 
 ## checkCircularDependencies
 
