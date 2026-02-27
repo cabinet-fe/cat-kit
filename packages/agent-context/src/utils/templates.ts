@@ -1,7 +1,10 @@
-import { join } from 'node:path'
-import { getTemplatesDir } from './fs.js'
-import type { SupportedLanguage } from './questions.js'
 import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+
+import type { SupportedLanguage } from './questions.js'
+
+import { CONTEXT_DIR } from '../constants'
+import { getTemplatesDir } from './fs.js'
 
 /** 语言显示名称映射 */
 export const languageNames: Record<SupportedLanguage, string> = {
@@ -43,7 +46,7 @@ async function readAgentsBlockTemplate(): Promise<string> {
  */
 function generateLanguageList(languages: SupportedLanguage[]): string {
   return languages
-    .map(lang => `- [${languageNames[lang]}](dev-prompts/languages/${lang}.md)`)
+    .map((lang) => `- [${languageNames[lang]}](${CONTEXT_DIR}/languages/${lang}.md)`)
     .join('\n')
 }
 
@@ -52,9 +55,7 @@ function generateLanguageList(languages: SupportedLanguage[]): string {
  * @param languages - 选择的编程语言
  * @returns 引导块内容
  */
-export async function generateAgentsBlock(
-  languages: SupportedLanguage[]
-): Promise<string> {
+export async function generateAgentsBlock(languages: SupportedLanguage[]): Promise<string> {
   const template = await readAgentsBlockTemplate()
 
   const languageList = generateLanguageList(languages)
@@ -70,9 +71,7 @@ export async function generateAgentsBlock(
  * @returns 是否包含引导块
  */
 export function hasAgentsBlock(content: string): boolean {
-  return (
-    content.includes(AGENTS_BLOCK_START) && content.includes(AGENTS_BLOCK_END)
-  )
+  return content.includes(AGENTS_BLOCK_START) && content.includes(AGENTS_BLOCK_END)
 }
 
 /**
@@ -80,9 +79,7 @@ export function hasAgentsBlock(content: string): boolean {
  * @param content - AGENTS.md 文件内容
  * @returns 块的起始和结束位置，如果未找到返回 null
  */
-function findAgentsBlockPosition(
-  content: string
-): { start: number; end: number } | null {
+function findAgentsBlockPosition(content: string): { start: number; end: number } | null {
   const startIndex = content.indexOf(AGENTS_BLOCK_START)
   const endIndex = content.indexOf(AGENTS_BLOCK_END)
 
@@ -90,10 +87,7 @@ function findAgentsBlockPosition(
     return null
   }
 
-  return {
-    start: startIndex,
-    end: endIndex + AGENTS_BLOCK_END.length
-  }
+  return { start: startIndex, end: endIndex + AGENTS_BLOCK_END.length }
 }
 
 /**

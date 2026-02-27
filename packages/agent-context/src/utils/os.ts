@@ -18,24 +18,9 @@ export interface CLIConfig {
 
 /** 支持的 CLI 工具配置列表 */
 export const CLI_CONFIGS: CLIConfig[] = [
-  {
-    id: 'claude',
-    name: 'Claude Code',
-    dirName: '.claude',
-    fileName: 'CLAUDE.md'
-  },
-  {
-    id: 'codex',
-    name: 'Codex CLI',
-    dirName: '.codex',
-    fileName: 'AGENTS.md'
-  },
-  {
-    id: 'gemini',
-    name: 'Gemini CLI',
-    dirName: '.gemini',
-    fileName: 'GEMINI.md'
-  }
+  { id: 'claude', name: 'Claude Code', dirName: '.claude', fileName: 'CLAUDE.md' },
+  { id: 'codex', name: 'Codex CLI', dirName: '.codex', fileName: 'AGENTS.md' },
+  { id: 'gemini', name: 'Gemini CLI', dirName: '.gemini', fileName: 'GEMINI.md' }
 ]
 
 /**
@@ -99,5 +84,5 @@ export function getOSDescription(): string {
  * @returns CLI 配置，如果未找到返回 undefined
  */
 export function getCLIConfigById(id: SupportedCLI): CLIConfig | undefined {
-  return CLI_CONFIGS.find(cli => cli.id === id)
+  return CLI_CONFIGS.find((cli) => cli.id === id)
 }

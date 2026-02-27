@@ -1,13 +1,7 @@
 import { checkbox } from '@inquirer/prompts'
 
 /** 支持的编程语言 */
-export type SupportedLanguage =
-  | 'typescript'
-  | 'javascript'
-  | 'python'
-  | 'go'
-  | 'java'
-  | 'rust'
+export type SupportedLanguage = 'typescript' | 'javascript' | 'python' | 'go' | 'java' | 'rust'
 
 /** 语言选项配置 */
 const languageChoices: Array<{ name: string; value: SupportedLanguage }> = [
@@ -36,8 +30,5 @@ export async function askUserConfig(): Promise<UserConfig> {
     required: true
   })
 
-  return {
-    languages
-  }
+  return { languages }
 }
-

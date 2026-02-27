@@ -1,6 +1,8 @@
 import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { CONTEXT_DIR } from '../constants'
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
@@ -26,13 +28,13 @@ export function getLanguageTemplatesDir(): string {
 }
 
 /**
- * 获取 dev-prompts 目录路径
+ * 获取 CONTEXT_DIR 目录路径
  *
  * @param cwd - 当前工作目录，默认为 process.cwd()
- * @returns dev-prompts 目录的绝对路径
+ * @returns CONTEXT_DIR 目录的绝对路径
  */
 export function getDevPromptsDir(cwd: string = process.cwd()): string {
-  return join(cwd, 'dev-prompts')
+  return join(cwd, CONTEXT_DIR)
 }
 
 /**

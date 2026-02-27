@@ -1,21 +1,9 @@
+import { ensureDir, writeFile, existsSync, copyFile, readFile } from '@cat-kit/be'
 import { join } from 'node:path'
-import {
-  ensureDir,
-  writeFile,
-  existsSync,
-  copyFile,
-  readFile
-} from '@cat-kit/be'
-import {
-  getDevPromptsDir,
-  getAgentsPath,
-  getLanguageTemplatesDir
-} from '../utils/fs'
-import {
-  askUserConfig,
-  type UserConfig,
-  type SupportedLanguage
-} from '../utils/questions'
+
+import { CONTEXT_DIR } from '../constants'
+import { getDevPromptsDir, getAgentsPath, getLanguageTemplatesDir } from '../utils/fs'
+import { askUserConfig, type UserConfig, type SupportedLanguage } from '../utils/questions'
 import {
   hasAgentsBlock,
   generateAgentsBlock,
@@ -25,7 +13,7 @@ import {
 
 /** 检测结果 */
 interface DetectionResult {
-  /** dev-prompts 文件夹是否存在 */
+  /** agent-context 文件夹是否存在 */
   devPromptsDirExists: boolean
   /** AGENTS.md 文件是否存在 */
   agentsFileExists: boolean
@@ -44,9 +32,7 @@ async function detectCurrentState(cwd: string): Promise<DetectionResult> {
 
   const agentsFileExists = existsSync(agentsPath)
   const devPromptsDirExists = existsSync(devPromptsDir)
-  const agentsContent = agentsFileExists
-    ? await readFile(agentsPath, 'utf-8')
-    : null
+  const agentsContent = agentsFileExists ? await readFile(agentsPath, 'utf-8') : null
 
   return {
     devPromptsDirExists,
@@ -64,7 +50,7 @@ function printDetectionStatus(result: DetectionResult): void {
 
   const status = (ok: boolean) => (ok ? '✅' : '❌')
 
-  console.log(`  ${status(result.devPromptsDirExists)} dev-prompts 文件夹`)
+  console.log(`  ${status(result.devPromptsDirExists)} ${CONTEXT_DIR} 文件夹`)
   console.log(`  ${status(result.agentsFileExists)} AGENTS.md 文件`)
   console.log(`  ${status(result.hasAgentsBlock)} AGENTS.md 引导块`)
   console.log()
@@ -73,10 +59,7 @@ function printDetectionStatus(result: DetectionResult): void {
 /**
  * 复制语言提示词文件
  */
-async function copyLanguageFiles(
-  config: UserConfig,
-  devPromptsDir: string
-): Promise<void> {
+async function copyLanguageFiles(config: UserConfig, devPromptsDir: string): Promise<void> {
   const languagesDir = join(devPromptsDir, 'languages')
   await ensureDir(languagesDir)
 
@@ -105,18 +88,12 @@ async function updateAgentsFile(
     if (detection.hasAgentsBlock) {
       // 更新现有引导块
       const newBlock = await generateAgentsBlock(config.languages)
-      const updatedContent = updateAgentsContent(
-        detection.agentsContent,
-        newBlock
-      )
+      const updatedContent = updateAgentsContent(detection.agentsContent, newBlock)
       await writeFile(agentsPath, updatedContent)
     } else {
       // AGENTS.md 存在但没有引导块，追加引导块
       const newBlock = await generateAgentsBlock(config.languages)
-      const updatedContent = updateAgentsContent(
-        detection.agentsContent,
-        newBlock
-      )
+      const updatedContent = updateAgentsContent(detection.agentsContent, newBlock)
       await writeFile(agentsPath, updatedContent)
     }
   } else {
@@ -162,15 +139,13 @@ export async function initCommand(): Promise<void> {
   // 4. 完成提示
   console.log('\n✨ 初始化完成！\n')
   console.log('生成的文件结构：')
-  console.log('  dev-prompts/')
+  console.log(`  ${CONTEXT_DIR}/`)
   console.log('  ├── languages/')
   for (const lang of config.languages) {
     console.log(`  │   └── ${getLanguageFileName(lang)}`)
   }
   console.log('  AGENTS.md')
   console.log()
-  console.log(
-    '💡 提示：AGENTS.md 中的链接使用相对路径引用，AI 助手会按需读取对应的提示词文件。'
-  )
+  console.log('💡 提示：AGENTS.md 中的链接使用相对路径引用，AI 助手会按需读取对应的提示词文件。')
   console.log()
 }
