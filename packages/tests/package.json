@@ -6,8 +6,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "vitest --run",
-    "test:watch": "vitest --watch",
-    "test:ui": "vitest --ui"
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@cat-kit/be": "workspace:*",
@@ -16,12 +15,12 @@
     "@cat-kit/fe": "workspace:*",
     "@cat-kit/http": "workspace:*",
     "@cat-kit/maintenance": "workspace:*",
-    "@vitest/ui": "^4.0.16",
     "fflate": "^0.8.2",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.18"
   },
   "devDependencies": {
     "@cat-kit/tsconfig": "workspace:*",
-    "fake-indexeddb": "^6.2.5"
+    "fake-indexeddb": "^6.2.5",
+    "@vitest/coverage-v8": "^4.0.18"
   }
 }

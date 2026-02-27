@@ -1,10 +1,10 @@
 {
-  "name": "@cat-kit/prompts",
+  "name": "@cat-kit/agent-context",
   "type": "module",
   "version": "1.0.2",
-  "description": "AI 开发提示词管理工具",
+  "description": "代理上下文管理工具",
   "bin": {
-    "dp": "./dist/index.js"
+    "agent-context": "./dist/index.js"
   },
   "files": [
     "dist",
@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@cat-kit/be": "workspace:*",
-    "@inquirer/prompts": "^8.1.0",
-    "commander": "^14.0.0"
+    "@inquirer/prompts": "^8.3.0",
+    "commander": "^14.0.3"
   },
   "devDependencies": {
     "@cat-kit/tsconfig": "workspace:*",

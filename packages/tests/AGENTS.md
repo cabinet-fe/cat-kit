@@ -1,49 +1,45 @@
-# @cat-kit/tests - 集中测试套件
-
-本文件为 `packages/tests` 目录提供详细的测试指导。
-
-## 核心原则
-
-- **不要引入任何 package.json 中不存在的依赖**
+# 集中测试指南
 
 ## 概述
 
-`packages/tests` 是 Cat-Kit monorepo 的集中测试套件，包含所有包的测试用例。
+`packages/tests` 是 Cat-Kit monorepo 的集中测试应用。
 
-**目录位置**：`packages/tests/`
-**测试框架**：Vitest
-**运行环境**：Node.js
+### 测试范围
 
-## 目录结构
+- `packages/be`
+- `packages/core`
+- `packages/excel`
+- `packages/fe`
+- `packages/http`
+- `packages/maintenance`
 
-```
-packages/tests/
-├── core/              # @cat-kit/core 的测试
-│   ├── data/          # 数据处理工具测试
-│   ├── date/          # 日期工具测试
-│   ├── optimize/      # 性能优化测试
-│   └── ...
-├── fe/                # @cat-kit/fe 的测试
-│   ├── storage/       # 存储功能测试
-│   ├── virtualizer/   # 虚拟滚动测试
-│   └── ...
-├── http/              # @cat-kit/http 的测试
-│   ├── client.test.ts
-│   ├── plugins/
-│   └── ...
-├── excel/             # @cat-kit/excel 的测试
-│   ├── core/          # 核心类测试
-│   ├── reader/        # 读取功能测试
-│   ├── writer/        # 写入功能测试
-│   └── ...
-├── vitest.config.ts   # Vitest 配置
-├── package.json
-└── tsconfig.json
-```
+### 测试框架
+
+Vitest
+
+### 运行环境
+
+Node.js
 
 ## 测试组织原则
 
-> **📌 详细测试规范和最佳实践请参考根目录的 `AGENTS.md` 文件**
+### 引入测试目标
+
+引入测试目标时，统一使用源码路径，每个包的`package.json`文件的`exports`字段定义了源码路径如下:
+
+```json
+{
+  "exports": {
+    "./src": "./src/index.ts"
+  }
+}
+```
+
+引入示例：
+
+```ts
+import { o } from '@cat-kit/core/src'
+```
 
 ### 按包组织
 
@@ -52,181 +48,18 @@ packages/tests/
 ```
 packages/core/src/data/array.ts → packages/tests/core/data/array.test.ts
 ```
-
 ### 命名约定
 
 - 测试文件以 `.test.ts` 结尾
 - 测试文件名与被测试文件名对应
 
-## 编写测试
-
-> **📌 详细的测试最佳实践请参考根目录的 `AGENTS.md` 文件**
-
-基本测试模板参考根目录 `AGENTS.md` 中的示例。
-
-## 测试覆盖率
-
-> **📌 覆盖率目标和详细要求请参考根目录的 `AGENTS.md` 文件**
-
-运行覆盖率测试：
-
-```bash
-cd packages/tests
-bun run test -- --coverage
-```
-
-## 运行测试
-
-### 运行所有测试
-
-```bash
-cd packages/tests
-bun run test
-```
-
-### 运行特定包的测试
-
-```bash
-# 只测试 core 包
-cd packages/tests
-bun run test core/
-
-# 只测试 excel 包
-cd packages/tests
-bun run test excel/
-```
-
-### 运行特定文件
-
-```bash
-cd packages/tests
-bun run test core/data/array.test.ts
-```
-
-### 监听模式
-
-```bash
-cd packages/tests
-bun run test --watch
-```
-
-### UI 模式
-
-```bash
-cd packages/tests
-bun run test:ui
-```
-
-## Vitest 配置
-
-配置文件：`packages/tests/vitest.config.ts`
-
-```typescript
-import { defineConfig } from 'vitest/config'
-
-export default defineConfig({
-  test: {
-    globals: true, // 启用全局 API（describe, it, expect）
-    environment: 'node', // 默认测试环境
-    include: ['**/*.test.ts'], // 测试文件模式
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'dist/', '**/*.d.ts', '**/*.config.*']
-    }
-  }
-})
-```
-
 ## 测试最佳实践
 
-> **注意**：详细的测试最佳实践（AAA 模式、边界测试、测试隔离、描述性命名、避免测试实现细节等）请参考根目录的 `AGENTS.md` 文件。
+- 使用 AAA 模式
+- 使用 `async/await` 处理异步逻辑，确保不使用不稳定的定时器（除非使用 vi.useFakeTimers()）
+- 避免在测试中编写复杂的逻辑。如果测试代码本身需要复杂的 if/else，请简化它
+- 充分利用 Vitest 的类型支持，例如在 Mock 之后使用 vi.mocked(dependency) 来获得完整的 IDE 类型提示
 
-## 添加新测试
-
-### 步骤
-
-1. **确定位置**：根据被测试的包确定测试文件位置
-
-   - `@cat-kit/core` → `packages/tests/core/`
-   - `@cat-kit/fe` → `packages/tests/fe/`
-   - 等等
-
-2. **创建测试文件**：在对应位置创建 `.test.ts` 文件
-
-3. **编写测试**：遵循测试最佳实践
-
-4. **运行测试**：确保所有测试通过
-
-   ```bash
-   cd packages/tests
-   bun run test
-   ```
-
-5. **检查覆盖率**：确保覆盖率达标
-   ```bash
-   cd packages/tests
-   bun run test -- --coverage
-   ```
-
-## 调试测试
-
-### 使用 console.log
-
-```typescript
-it('should do something', () => {
-  const result = doSomething()
-  console.log('Result:', result) // 调试输出
-  expect(result).toBe(expected)
-})
-```
-
-### 使用 debugger
-
-```typescript
-it('should do something', () => {
-  debugger // 设置断点
-  const result = doSomething()
-  expect(result).toBe(expected)
-})
-```
-
-然后使用 Node.js 调试器运行：
-
-```bash
-node --inspect-brk ./node_modules/.bin/vitest
-```
-
-## 常见问题
-
-### 测试超时
-
-增加超时时间：
-
-```typescript
-it('should handle slow operation', async () => {
-  // 测试代码
-}, 10000) // 10 秒超时
-```
-
-### 异步测试未完成
-
-确保返回 Promise 或使用 async/await：
-
-```typescript
-// ✅ 正确
-it('should wait for async operation', async () => {
-  const result = await asyncFunction()
-  expect(result).toBe('done')
-})
-
-// ❌ 错误
-it('should wait for async operation', () => {
-  asyncFunction().then(result => {
-    expect(result).toBe('done') // 可能在测试结束后才执行
-  })
-})
-```
 
 ## 持续集成
 
@@ -257,7 +90,6 @@ describe('complex feature', () => {
 })
 ```
 
-## 参考资源
+## **约束**
 
-- [Vitest 官方文档](https://vitest.dev/)
-- [测试最佳实践](https://github.com/goldbergyoni/javascript-testing-best-practices)
+- 不要超出测试范围

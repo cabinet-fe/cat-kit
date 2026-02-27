@@ -54,7 +54,7 @@ export function getOSType(): OSType {
       return 'Android'
     }
 
-    if (/iphone|ipad|ipod/i.test(userAgent)) {
+    if (/iphone|ipad/i.test(userAgent)) {
       return 'iOS'
     }
 
@@ -315,3 +315,5 @@ export function getEnvironmentSummary(): Record<string, any> {
 
   return summary
 }
+
+

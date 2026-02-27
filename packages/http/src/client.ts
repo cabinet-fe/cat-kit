@@ -11,7 +11,6 @@ import type {
 
 import { FetchEngine } from './engine/fetch'
 import { XHREngine } from './engine/xhr'
-import { TokenPlugin } from './plugins'
 
 /**
  * HTTP 请求客户端
@@ -331,7 +330,3 @@ export class HTTPClient {
     return group
   }
 }
-
-new HTTPClient('/xxx', {
-  plugins: [TokenPlugin({ authType: 'Bearer', getter: () => 'test-token' })]
-})

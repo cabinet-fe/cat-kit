@@ -250,3 +250,4 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
 export function o<O extends Record<string, any>>(object: O): CatObject<O> {
   return new CatObject(object)
 }
+

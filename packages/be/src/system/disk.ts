@@ -23,12 +23,11 @@ const execFileAsync = promisify(execFile)
 
 async function getDiskInfoUnix(path: string): Promise<DiskInfo> {
   const stats = await statfs(path)
-  const blockSize = Number(stats.bsize ?? stats.f_bsize ?? 1)
-  const totalBlocks = Number(stats.blocks ?? stats.f_blocks ?? 0)
-  const freeBlocks = Number(stats.bfree ?? stats.f_bfree ?? 0)
 
-  const total = blockSize * totalBlocks
-  const free = blockSize * freeBlocks
+  const blockSize = Number(stats.bsize)
+  const total = blockSize * Number(stats.blocks)
+  // bavail: 非特权用户可用的空闲块数，与 df 输出一致
+  const free = blockSize * Number(stats.bavail)
   const used = Math.max(total - free, 0)
 
   return {
@@ -89,16 +88,5 @@ export async function getDiskInfo(path = process.cwd()): Promise<DiskInfo> {
     return getDiskInfoWindows(resolvedPath)
   }
 
-  try {
-    return await getDiskInfoUnix(resolvedPath)
-  } catch (error) {
-    if (
-      (error as NodeJS.ErrnoException).code === 'ERR_METHOD_NOT_IMPLEMENTED' &&
-      process.platform === 'win32'
-    ) {
-      return getDiskInfoWindows(resolvedPath)
-    }
-
-    throw error
-  }
+  return getDiskInfoUnix(resolvedPath)
 }

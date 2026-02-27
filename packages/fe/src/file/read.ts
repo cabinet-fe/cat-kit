@@ -48,7 +48,7 @@ export async function readFile(
     }
 
     // 文件读取成功的回调
-    reader.onload = e => {
+    reader.onload = (e) => {
       // 获取读取的ArrayBuffer数据
       const arrayBuffer = e.target?.result as ArrayBuffer
       // 转换为Uint8Array格式
@@ -68,7 +68,3 @@ export async function readFile(
     readChunk()
   })
 }
-
-// for await (const chunk of res.body) {
-
-// }
