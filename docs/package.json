@@ -14,19 +14,19 @@
     "@cat-kit/excel": "workspace:*",
     "@cat-kit/fe": "workspace:*",
     "@cat-kit/http": "workspace:*",
-    "@types/markdown-it-container": "^2.0.11",
-    "@varlet/import-resolver": "^3.12.3",
-    "unplugin-auto-import": "^20.3.0",
-    "unplugin-vue-components": "^30.0.0",
+    "@types/markdown-it-container": "^4.0.0",
+    "@varlet/import-resolver": "^3.13.1",
+    "unplugin-auto-import": "^21.0.0",
+    "unplugin-vue-components": "^31.0.0",
     "markdown-it-container": "^4.0.0",
-    "shiki": "^3.20.0",
-    "vitepress": "^2.0.0-alpha.15",
-    "vitepress-plugin-llms": "^1.9.3",
-    "vue": "^3.5.26",
-    "@varlet/ui": "^3.12.3",
+    "shiki": "^4.0.0",
+    "vitepress": "^2.0.0-alpha.16",
+    "vitepress-plugin-llms": "^1.11.0",
+    "vue": "^3.5.29",
+    "@varlet/ui": "^3.13.1",
     "@cat-kit/tsconfig": "workspace:*"
   },
   "dependencies": {
-    "lucide-vue-next": "^0.562.0"
+    "lucide-vue-next": "^0.575.0"
   }
 }

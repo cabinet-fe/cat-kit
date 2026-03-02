@@ -1,8 +1,8 @@
-<!-- DEV_PROMPTS:START -->
+<!-- AGENT_CONTEXT:START -->
 
-# DevPrompts Instructions
+# AGENT 上下文指南
 
-本说明为在当前项目中工作的 AI 助手 提供指导。
+为在当前项目中工作的`智能体/代理/子代理`提供指南。
 
 ## 目标优先级
 
@@ -26,4 +26,4 @@
 
 **每次**代码生成都要经过必要的审查，以符合上述规范。
 
-<!-- DEV_PROMPTS:END -->
+<!-- AGENT_CONTEXT:END -->
