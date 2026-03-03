@@ -8,25 +8,25 @@
     "preview": "vitepress preview .",
     "build": "vitepress build"
   },
+  "dependencies": {
+    "lucide-vue-next": "^0.575.0"
+  },
   "devDependencies": {
     "@cat-kit/be": "workspace:*",
     "@cat-kit/core": "workspace:*",
     "@cat-kit/excel": "workspace:*",
     "@cat-kit/fe": "workspace:*",
     "@cat-kit/http": "workspace:*",
+    "@cat-kit/tsconfig": "workspace:*",
     "@types/markdown-it-container": "^4.0.0",
     "@varlet/import-resolver": "^3.13.1",
-    "unplugin-auto-import": "^21.0.0",
-    "unplugin-vue-components": "^31.0.0",
+    "@varlet/ui": "^3.13.1",
     "markdown-it-container": "^4.0.0",
     "shiki": "^4.0.0",
+    "unplugin-auto-import": "^21.0.0",
+    "unplugin-vue-components": "^31.0.0",
     "vitepress": "^2.0.0-alpha.16",
     "vitepress-plugin-llms": "^1.11.0",
-    "vue": "^3.5.29",
-    "@varlet/ui": "^3.13.1",
-    "@cat-kit/tsconfig": "workspace:*"
-  },
-  "dependencies": {
-    "lucide-vue-next": "^0.575.0"
+    "vue": "^3.5.29"
   }
 }
