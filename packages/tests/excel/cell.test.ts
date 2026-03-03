@@ -1,213 +1,54 @@
-import { describe, it, expect } from 'vitest'
-import { Cell } from '@cat-kit/excel/src'
+import { describe, expect, it } from 'vitest'
+import { Cell, ExcelValueError } from '@cat-kit/excel/src'
 import type { CellStyle } from '@cat-kit/excel/src'
 
 describe('Cell', () => {
-  describe('构造函数', () => {
-    it('应该创建一个包含值的单元格', () => {
-      const cell = new Cell('Hello')
-      expect(cell.value).toBe('Hello')
-      expect(cell.style).toBeUndefined()
-    })
+  it('应支持设置基础值类型与公式值', () => {
+    const date = new Date('2024-02-01T00:00:00.000Z')
+    const formula = { formula: 'A1+B1', result: 3 } as const
 
-    it('应该创建一个包含值和样式的单元格', () => {
-      const style: CellStyle = {
-        font: { bold: true }
-      }
-      const cell = new Cell('Hello', style)
-      expect(cell.value).toBe('Hello')
-      expect(cell.style).toEqual(style)
-    })
-
-    it('应该创建不同类型的单元格', () => {
-      expect(new Cell('text').value).toBe('text')
-      expect(new Cell(42).value).toBe(42)
-      expect(new Cell(true).value).toBe(true)
-      expect(new Cell(null).value).toBeNull()
-
-      const date = new Date('2024-01-01')
-      expect(new Cell(date).value).toBe(date)
-    })
+    expect(new Cell('text').value).toBe('text')
+    expect(new Cell(42).value).toBe(42)
+    expect(new Cell(true).value).toBe(true)
+    expect(new Cell(null).value).toBeNull()
+    expect(new Cell(date).value).toEqual(date)
+    expect(new Cell(formula).value).toEqual(formula)
   })
 
-  describe('withValue', () => {
-    it('应该返回包含新值的新单元格实例', () => {
-      const cell1 = new Cell('Hello')
-      const cell2 = cell1.withValue('World')
+  it('setValue 应返回当前实例并覆盖值', () => {
+    const cell = new Cell('old')
+    const next = cell.setValue('new')
 
-      expect(cell1.value).toBe('Hello')
-      expect(cell2.value).toBe('World')
-      expect(cell1).not.toBe(cell2)
-    })
-
-    it('应该保留原有样式', () => {
-      const style: CellStyle = { font: { bold: true } }
-      const cell1 = new Cell('Hello', style)
-      const cell2 = cell1.withValue('World')
-
-      expect(cell2.style).toEqual(style)
-    })
-
-    it('应该支持改变值类型', () => {
-      const cell1 = new Cell('text')
-      const cell2 = cell1.withValue(42)
-
-      expect(cell2.value).toBe(42)
-    })
+    expect(next).toBe(cell)
+    expect(cell.value).toBe('new')
   })
 
-  describe('withStyle', () => {
-    it('应该返回包含新样式的新单元格实例', () => {
-      const cell1 = new Cell('Hello')
-      const style: CellStyle = { font: { bold: true } }
-      const cell2 = cell1.withStyle(style)
+  it('setStyle 应设置和清除样式', () => {
+    const style: CellStyle = { font: { bold: true } }
+    const cell = new Cell('v')
 
-      expect(cell1.style).toBeUndefined()
-      expect(cell2.style).toEqual(style)
-      expect(cell1).not.toBe(cell2)
-    })
+    cell.setStyle(style)
+    expect(cell.style).toEqual(style)
 
-    it('应该完全替换原有样式', () => {
-      const style1: CellStyle = { font: { bold: true } }
-      const style2: CellStyle = { font: { italic: true } }
-
-      const cell1 = new Cell('Hello', style1)
-      const cell2 = cell1.withStyle(style2)
-
-      expect(cell2.style).toEqual(style2)
-    })
-
-    it('应该保留原有值', () => {
-      const cell1 = new Cell('Hello')
-      const cell2 = cell1.withStyle({ font: { bold: true } })
-
-      expect(cell2.value).toBe('Hello')
-    })
+    cell.setStyle(undefined)
+    expect(cell.style).toBeUndefined()
   })
 
-  describe('mergeStyle', () => {
-    it('应该合并字体样式', () => {
-      const cell1 = new Cell('Hello', {
-        font: { bold: true, size: 12 }
-      })
-      const cell2 = cell1.mergeStyle({
-        font: { italic: true }
-      })
+  it('clone 应复制值，并对 Date 创建新实例', () => {
+    const date = new Date('2024-02-01T10:20:30.000Z')
+    const cell = new Cell(date, { numberFormat: 'yyyy-mm-dd' })
 
-      expect(cell2.style?.font).toEqual({
-        bold: true,
-        size: 12,
-        italic: true
-      })
-    })
-
-    it('应该合并边框样式', () => {
-      const cell1 = new Cell('Hello', {
-        border: { left: { style: 'thin' } }
-      })
-      const cell2 = cell1.mergeStyle({
-        border: { right: { style: 'thick' } }
-      })
-
-      expect(cell2.style?.border).toEqual({
-        left: { style: 'thin' },
-        right: { style: 'thick' }
-      })
-    })
-
-    it('应该合并填充样式', () => {
-      const cell1 = new Cell('Hello', {
-        fill: { fgColor: '#FF0000' }
-      })
-      const cell2 = cell1.mergeStyle({
-        fill: { patternType: 'solid' }
-      })
-
-      expect(cell2.style?.fill).toEqual({
-        fgColor: '#FF0000',
-        patternType: 'solid'
-      })
-    })
-
-    it('应该合并对齐样式', () => {
-      const cell1 = new Cell('Hello', {
-        alignment: { horizontal: 'left' }
-      })
-      const cell2 = cell1.mergeStyle({
-        alignment: { vertical: 'middle' }
-      })
-
-      expect(cell2.style?.alignment).toEqual({
-        horizontal: 'left',
-        vertical: 'middle'
-      })
-    })
-
-    it('应该覆盖数字格式', () => {
-      const cell1 = new Cell(42, {
-        numberFormat: '0.00'
-      })
-      const cell2 = cell1.mergeStyle({
-        numberFormat: '0.000'
-      })
-
-      expect(cell2.style?.numberFormat).toBe('0.000')
-    })
-
-    it('空样式合并不应报错', () => {
-      const cell1 = new Cell('Hello')
-      const cell2 = cell1.mergeStyle({})
-
-      expect(cell2.style).toBeDefined()
-    })
+    const cloned = cell.clone()
+    expect(cloned).not.toBe(cell)
+    expect(cloned.value).toBeInstanceOf(Date)
+    expect((cloned.value as Date).toISOString()).toBe(date.toISOString())
+    expect(cloned.value).not.toBe(cell.value)
+    expect(cloned.style).toEqual(cell.style)
   })
 
-  describe('isEmpty', () => {
-    it('null 值应该为空', () => {
-      expect(new Cell(null).isEmpty()).toBe(true)
-    })
-
-    it('undefined 值应该为空', () => {
-      expect(new Cell(undefined as any).isEmpty()).toBe(true)
-    })
-
-    it('空字符串不应该为空', () => {
-      expect(new Cell('').isEmpty()).toBe(false)
-    })
-
-    it('0 不应该为空', () => {
-      expect(new Cell(0).isEmpty()).toBe(false)
-    })
-
-    it('false 不应该为空', () => {
-      expect(new Cell(false).isEmpty()).toBe(false)
-    })
-  })
-
-  describe('getValueType', () => {
-    it('应该识别字符串类型', () => {
-      expect(new Cell('text').getValueType()).toBe('string')
-    })
-
-    it('应该识别数字类型', () => {
-      expect(new Cell(42).getValueType()).toBe('number')
-      expect(new Cell(3.14).getValueType()).toBe('number')
-      expect(new Cell(0).getValueType()).toBe('number')
-    })
-
-    it('应该识别日期类型', () => {
-      expect(new Cell(new Date()).getValueType()).toBe('date')
-    })
-
-    it('应该识别布尔类型', () => {
-      expect(new Cell(true).getValueType()).toBe('boolean')
-      expect(new Cell(false).getValueType()).toBe('boolean')
-    })
-
-    it('应该识别 null 类型', () => {
-      expect(new Cell(null).getValueType()).toBe('null')
-      expect(new Cell(undefined as any).getValueType()).toBe('null')
-    })
+  it('应拒绝非法值类型和非法日期', () => {
+    expect(() => new Cell(new Date('invalid'))).toThrowError(ExcelValueError)
+    expect(() => new Cell({ foo: 'bar' } as unknown as string)).toThrow('Unsupported cell value type')
+    expect(() => new Cell({ formula: '', result: 1 })).toThrow('Unsupported cell value type')
   })
 })
-

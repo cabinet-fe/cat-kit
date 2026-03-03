@@ -1,31 +1,54 @@
-import { describe, it, expect } from 'vitest'
-import {
-  Workbook,
-  Worksheet,
-  Row,
-  Cell,
-  rebuildWorkbook,
-  serializeWorkbook
-} from '@cat-kit/excel/src'
+import { describe, expect, it } from 'vitest'
+import { Workbook, readWorkbook, writeWorkbook, ExcelParseError } from '@cat-kit/excel/src'
 
-describe('Excel worker codec', () => {
-  it('structuredClone roundtrip 后 Date 应保持类型，并可重建为 Workbook 实例', () => {
-    const d = new Date('2024-01-02T03:04:05Z')
-    const sheet = new Worksheet('Sheet1', {
-      rows: [new Row([new Cell(d, { numberFormat: 'yyyy-mm-dd' })])]
-    })
-    const workbook = new Workbook('Book', { sheets: [sheet] })
+function toChunkedStream(data: Uint8Array, chunkSize = 5): ReadableStream<Uint8Array> {
+  let offset = 0
+  return new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (offset >= data.length) {
+        controller.close()
+        return
+      }
+      const next = data.slice(offset, offset + chunkSize)
+      offset += chunkSize
+      controller.enqueue(next)
+    }
+  })
+}
 
-    const serialized = serializeWorkbook(workbook)
-    const cloned = structuredClone(serialized)
-    const rebuilt = rebuildWorkbook(cloned)
+async function* toChunkedAsyncIterable(
+  data: Uint8Array,
+  chunkSize = 7
+): AsyncIterable<Uint8Array> {
+  for (let offset = 0; offset < data.length; offset += chunkSize) {
+    yield data.slice(offset, offset + chunkSize)
+  }
+}
 
-    expect(rebuilt).toBeInstanceOf(Workbook)
-    expect(rebuilt.getSheet(0)?.getCell('A1')?.value).toBeInstanceOf(Date)
-    expect((rebuilt.getSheet(0)?.getCell('A1')?.value as Date).toISOString()).toBe(
-      d.toISOString()
+describe('Workbook 输入通道兼容性', () => {
+  it('应支持 Uint8Array / ArrayBuffer / Blob / ReadableStream / AsyncIterable', async () => {
+    const workbook = new Workbook()
+    workbook.addWorksheet('Sheet1').setCell('A1', 'hello')
+    const bytes = writeWorkbook(workbook)
+
+    const inputs = [
+      bytes,
+      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+      new Blob([bytes]),
+      toChunkedStream(bytes),
+      toChunkedAsyncIterable(bytes)
+    ]
+
+    for (const input of inputs) {
+      const parsed = await readWorkbook(input)
+      expect(parsed.getWorksheet(0)?.getCell('A1')?.value).toBe('hello')
+    }
+  })
+
+  it('遇到不支持输入类型时应抛错', async () => {
+    await expect(readWorkbook(123 as unknown as Uint8Array)).rejects.toThrowError(ExcelParseError)
+    await expect(readWorkbook(123 as unknown as Uint8Array)).rejects.toThrow(
+      'Unsupported workbook input type'
     )
   })
 })
-
-

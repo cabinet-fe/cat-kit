@@ -1,7 +1,17 @@
+---
+title: Excel 表格包
+description: '@cat-kit/excel 提供 xlsx 读写、流式解析与地址/日期辅助工具'
+outline: deep
+---
+
 # Excel 表格包
 
-`@cat-kit/excel` 提供浏览器端 Excel 读写能力，包含工作簿模型、流式读写、Worker 支持与地址/日期辅助工具，适用于 Browser 环境。
+`@cat-kit/excel` 提供 TypeScript 的 Excel（xlsx）读写能力，包含工作簿模型、整包读写、流式事件解析与地址/日期辅助函数。
+
+适用环境：Browser / Node.js / Bun。
 
 ## 页面导航
 
-- 当前包文档暂以本页为主，后续将按主题拆分子页面。
+- [工作簿模型](./workbook)
+- [读写与流式解析](./read-write)
+- [地址与日期工具](./tools)

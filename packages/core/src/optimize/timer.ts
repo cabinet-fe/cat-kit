@@ -13,7 +13,7 @@ export function debounce<T extends any[]>(
   let timer: NodeJS.Timeout | number | undefined = undefined
 
   return function (this: any, ...args: T) {
-    timer !== undefined && clearTimeout(timer)
+    if (timer !== undefined) clearTimeout(timer)
 
     if (immediate) {
       // 空闲中
@@ -26,7 +26,9 @@ export function debounce<T extends any[]>(
       }
       timer = setTimeout(() => {
         timer = undefined
-        !hasCall && fn.call(this, ...args)
+        if (!hasCall) {
+          fn.call(this, ...args)
+        }
       }, delay)
     } else {
       timer = setTimeout(() => {
@@ -67,5 +69,5 @@ export function throttle<T extends any[], R>(
  * @returns
  */
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }

@@ -1,43 +1,64 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
   Workbook,
-  Worksheet,
-  Row,
-  Cell,
-  readWorkbookStream
+  readWorkbookStream,
+  writeWorkbook,
+  type StreamEvent
 } from '@cat-kit/excel/src'
 
-async function collectStreamRows(stream: ReadableStream<any>) {
-  const reader = stream.getReader()
-  const rows: any[] = []
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    rows.push(value)
+async function collectEvents(iterable: AsyncIterable<StreamEvent>): Promise<StreamEvent[]> {
+  const events: StreamEvent[] = []
+  for await (const event of iterable) {
+    events.push(event)
   }
-  return rows
+  return events
 }
 
 describe('readWorkbookStream', () => {
-  it('按 sheetNames 过滤并增量输出行', async () => {
-    const sheet1 = new Worksheet('S1', {
-      rows: [new Row([new Cell('A1'), new Cell('B1')]), new Row(['A2', 'B2'])]
-    })
-    const sheet2 = new Worksheet('Target', {
-      rows: [new Row([new Cell(1), new Cell(2)])]
-    })
-    const blob = await new Workbook('Book', {
-      sheets: [sheet1, sheet2]
-    }).write()
+  it('应按 sheet 名过滤，并在 includeEmptyRows=true 时补齐空行事件', async () => {
+    const workbook = new Workbook()
 
-    const stream = readWorkbookStream(blob, {
-      sheetNames: ['Target']
-    })
+    const skip = workbook.addWorksheet('Skip')
+    skip.setCell('A1', 'skip')
 
-    const rows = await collectStreamRows(stream)
-    expect(rows).toHaveLength(1)
-    expect(rows[0]?.sheetName).toBe('Target')
-    expect(rows[0]?.rowIndex).toBe(0)
-    expect(rows[0]?.row.getValues()).toEqual([1, 2])
+    const target = workbook.addWorksheet('Target')
+    target.row(1).setCell(1, 1).setCell(3, 3)
+    target.row(3).setCell(2, 'B3')
+
+    const bytes = writeWorkbook(workbook)
+
+    const events = await collectEvents(
+      readWorkbookStream(bytes, {
+        sheets: ['Target'],
+        includeEmptyRows: true
+      })
+    )
+
+    expect(events).toEqual([
+      { type: 'sheetStart', sheetName: 'Target', sheetIndex: 1 },
+      { type: 'row', sheetName: 'Target', sheetIndex: 1, rowIndex: 1, values: [1, null, 3] },
+      { type: 'row', sheetName: 'Target', sheetIndex: 1, rowIndex: 2, values: [] },
+      { type: 'row', sheetName: 'Target', sheetIndex: 1, rowIndex: 3, values: [null, 'B3'] },
+      { type: 'sheetEnd', sheetName: 'Target', sheetIndex: 1 }
+    ])
+  })
+
+  it('includeEmptyRows=false 时不应补齐缺失行', async () => {
+    const workbook = new Workbook()
+    const sheet = workbook.addWorksheet('S')
+    sheet.row(2).setCell(1, 'A2')
+
+    const bytes = writeWorkbook(workbook)
+    const events = await collectEvents(readWorkbookStream(bytes, { sheets: ['S'] }))
+
+    const rowEvents = events.filter(event => event.type === 'row')
+    expect(rowEvents).toHaveLength(1)
+    expect(rowEvents[0]).toEqual({
+      type: 'row',
+      sheetName: 'S',
+      sheetIndex: 0,
+      rowIndex: 2,
+      values: ['A2']
+    })
   })
 })

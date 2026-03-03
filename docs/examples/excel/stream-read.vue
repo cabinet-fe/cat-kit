@@ -1,106 +1,173 @@
 <template>
-  <div class="excel-card">
-    <p class="excel-card__hint">
-      选择 .xlsx 文件，使用
-      <code>readWorkbookStream</code> 逐行解析（示例仅读取首个工作表）。
-    </p>
-
-    <div class="excel-card__actions">
+  <div class="stream-card">
+    <div class="stream-card__toolbar">
+      <button type="button" class="btn btn-primary" :disabled="reading" @click="pickFile">
+        {{ reading ? '解析中...' : '选择 .xlsx 文件' }}
+      </button>
+      <label class="inline-field">
+        <input v-model="includeEmptyRows" type="checkbox" />
+        包含空行事件
+      </label>
+      <label class="inline-field">
+        工作表过滤
+        <input
+          v-model.trim="sheetFilter"
+          type="text"
+          placeholder="留空表示全部；例如 Sales"
+          :disabled="reading"
+        />
+      </label>
       <input
         ref="fileInput"
         class="file-input"
         type="file"
         accept=".xlsx"
-        @change="handleFile"
+        @change="handleFileChange"
       />
-      <var-button type="primary" :loading="reading" @click="triggerFile"
-        >选择文件</var-button
-      >
-      <span v-if="summary" class="excel-card__summary">{{ summary }}</span>
     </div>
 
-    <div v-if="rows.length" class="stream-list">
-      <div v-for="item in rows" :key="item.id" class="stream-list__item">
-        <div class="stream-list__title">
-          {{ item.sheet }} · 第 {{ item.row }} 行
-        </div>
-        <div class="stream-list__cells">{{ item.cells }}</div>
-      </div>
+    <div class="stream-card__stats">
+      <span>工作表: {{ stats.sheetCount }}</span>
+      <span>行事件: {{ stats.rowCount }}</span>
+      <span>空行: {{ stats.emptyRowCount }}</span>
+      <span v-if="message">{{ message }}</span>
     </div>
 
-    <p v-else class="placeholder">暂未读取数据，上传文件后展示前几行预览。</p>
+    <var-table v-if="rows.length" class="stream-table" :scroller-height="320" :elevation="0">
+      <thead>
+        <tr>
+          <th>Sheet</th>
+          <th>Row</th>
+          <th v-for="column in displayColumns" :key="column">C{{ column }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="row in rows" :key="row.id">
+          <td>{{ row.sheetName }}</td>
+          <td>{{ row.rowIndex }}</td>
+          <td
+            v-for="column in displayColumns"
+            :key="`${row.id}-${column}`"
+            class="cell-mono"
+          >
+            {{ row.values[column - 1] || '' }}
+          </td>
+        </tr>
+      </tbody>
+    </var-table>
+    <p v-else class="placeholder">上传文件后，这里会用表格展示读取结果（最多 30 行）。</p>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { readWorkbookStream } from '@cat-kit/excel'
+import { computed, reactive, ref } from 'vue'
+import { readWorkbookStream, type CellValue, type ReadStreamOptions } from '@cat-kit/excel'
 
-interface PreviewRow {
+interface RowPreview {
   id: string
-  sheet: string
-  row: number
-  cells: string
+  sheetName: string
+  rowIndex: number
+  values: string[]
 }
 
-const MAX_PREVIEW = 12
+const PREVIEW_LIMIT = 30
+const MAX_COLUMNS = 8
 
-const rows = ref<PreviewRow[]>([])
-const summary = ref('')
-const reading = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
+const includeEmptyRows = ref(false)
+const sheetFilter = ref('')
+const reading = ref(false)
+const message = ref('')
+const rows = ref<RowPreview[]>([])
 
-function triggerFile() {
+const stats = reactive({
+  sheetCount: 0,
+  rowCount: 0,
+  emptyRowCount: 0
+})
+
+function pickFile() {
   fileInput.value?.click()
 }
 
-function formatCells(values: any[]) {
-  return values
-    .slice(0, 6)
-    .map(value => {
-      if (value instanceof Date) return value.toISOString().slice(0, 10)
-      if (value && typeof value === 'object' && 'type' in value) {
-        return value.type === 'formula'
-          ? `=${value.formula}`
-          : value.error || ''
-      }
-      return value ?? ''
-    })
-    .join(' | ')
+function resetState() {
+  rows.value = []
+  message.value = ''
+  stats.sheetCount = 0
+  stats.rowCount = 0
+  stats.emptyRowCount = 0
 }
 
-async function handleFile(event: Event) {
+function formatCell(value: CellValue): string {
+  if (value === null) return 'null'
+  if (value instanceof Date) return value.toISOString()
+  if (typeof value === 'object' && value && 'formula' in value) {
+    return value.result === undefined
+      ? `=${value.formula}`
+      : `=${value.formula} (result: ${String(value.result)})`
+  }
+  return String(value)
+}
+
+function buildOptions(): ReadStreamOptions {
+  const options: ReadStreamOptions = {
+    includeEmptyRows: includeEmptyRows.value
+  }
+
+  const name = sheetFilter.value.trim()
+  if (name) {
+    options.sheets = [name]
+  }
+
+  return options
+}
+
+const displayColumns = computed(() => {
+  let max = 1
+  for (const row of rows.value) {
+    if (row.values.length > max) max = row.values.length
+  }
+  const limit = Math.min(max, MAX_COLUMNS)
+  return Array.from({ length: limit }, (_, index) => index + 1)
+})
+
+async function handleFileChange(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
 
-  rows.value = []
-  summary.value = ''
+  resetState()
   reading.value = true
 
   try {
-    const stream = readWorkbookStream(file, { sheetIndices: [0] })
-    const reader = stream.getReader()
+    for await (const item of readWorkbookStream(file, buildOptions())) {
+      if (item.type === 'sheetStart') {
+        stats.sheetCount += 1
+        continue
+      }
 
-    let total = 0
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
+      if (item.type === 'sheetEnd') {
+        continue
+      }
 
-      total++
-      if (rows.value.length < MAX_PREVIEW) {
+      stats.rowCount += 1
+      if (item.values.length === 0) {
+        stats.emptyRowCount += 1
+      }
+
+      if (rows.value.length < PREVIEW_LIMIT) {
         rows.value.push({
-          id: `${value.sheetIndex}-${value.rowIndex}`,
-          sheet: value.sheetName,
-          row: value.rowIndex + 1,
-          cells: formatCells(value.row.getValues())
+          id: `${item.sheetIndex}-${item.rowIndex}`,
+          sheetName: item.sheetName,
+          rowIndex: item.rowIndex,
+          values: item.values.slice(0, MAX_COLUMNS).map(formatCell)
         })
       }
     }
 
-    summary.value = `已流式读取 ${total} 行，展示前 ${rows.value.length} 行`
-  } catch (error: any) {
-    summary.value = error?.message || String(error)
+    message.value = `解析完成，已预览 ${rows.value.length} 行`
+  } catch (error) {
+    message.value = error instanceof Error ? error.message : String(error)
   } finally {
     reading.value = false
     input.value = ''
@@ -109,62 +176,86 @@ async function handleFile(event: Event) {
 </script>
 
 <style scoped>
-.excel-card {
-  background: var(--vt-c-bg-soft);
-  border: 1px solid var(--vt-c-divider);
+.stream-card {
+  border: 1px solid var(--vp-c-divider);
   border-radius: 12px;
   padding: 16px;
+  background: var(--vp-c-bg-soft);
 }
 
-.excel-card__hint {
-  margin: 0 0 10px;
-  color: var(--vt-c-text-2);
-  font-size: 14px;
-}
-
-.excel-card__actions {
+.stream-card__toolbar {
   display: flex;
-  align-items: center;
-  gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
+  gap: 10px;
+  align-items: center;
 }
 
-.excel-card__summary {
-  color: var(--vt-c-text-2);
+.inline-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--vp-c-text-2);
   font-size: 13px;
+}
+
+.inline-field input[type='text'] {
+  min-width: 220px;
+}
+
+.stream-card input[type='text'] {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-1);
 }
 
 .file-input {
   display: none;
 }
 
-.stream-list {
-  display: grid;
-  gap: 8px;
+.btn {
+  border: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-1);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
 }
 
-.stream-list__item {
-  padding: 10px 12px;
-  border: 1px solid var(--vt-c-divider);
-  border-radius: 10px;
-  background: var(--vt-c-bg);
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.stream-list__title {
-  font-weight: 600;
-  margin-bottom: 6px;
+.btn-primary {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #fff;
 }
 
-.stream-list__cells {
-  color: var(--vt-c-text-2);
-  font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Monaco,
-    Consolas, 'Liberation Mono', 'Courier New', monospace;
+.stream-card__stats {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   font-size: 13px;
+  color: var(--vp-c-text-2);
+}
+
+.stream-table {
+  margin-top: 12px;
+}
+
+.cell-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-size: 12px;
+  word-break: break-word;
 }
 
 .placeholder {
-  color: var(--vt-c-text-2);
+  margin-top: 12px;
+  color: var(--vp-c-text-2);
   font-size: 13px;
 }
 </style>
