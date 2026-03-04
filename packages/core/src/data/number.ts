@@ -27,10 +27,7 @@ type DecimalResult = [DecimalPart: string, RoundUp: boolean]
  * @param raw 小数部分的原始字符串
  * @param precision 精度
  */
-function getDecimalPartByPrecision(
-  raw: string,
-  precision: number
-): DecimalResult {
+function getDecimalPartByPrecision(raw: string, precision: number): DecimalResult {
   if (precision === 0) {
     return ['', Math.round(+`.${raw}`) > 0]
   }
@@ -39,9 +36,7 @@ function getDecimalPartByPrecision(
   if (raw.length < precision) {
     raw = raw.padEnd(precision, '0')
   } else if (raw.length > precision) {
-    raw = String(
-      Math.round(+(raw.slice(0, precision) + '.' + raw.slice(precision)))
-    )
+    raw = String(Math.round(+(raw.slice(0, precision) + '.' + raw.slice(precision))))
     if (raw.length > precision) {
       roundUp = true
       raw = raw.slice(1)
@@ -93,10 +88,7 @@ function getDecimalPart(raw: string, config: CurrencyConfig) {
     return getDecimalPartByPrecision(raw, precision)
   }
 
-  return getDecimalPartByMinMaxPrecision(raw, {
-    maxPrecision,
-    minPrecision
-  })
+  return getDecimalPartByMinMaxPrecision(raw, { maxPrecision, minPrecision })
 }
 
 // 0.35, 1 ->
@@ -105,10 +97,7 @@ function getDecimalPart(raw: string, config: CurrencyConfig) {
  * @param v 数字
  * @param precision 精度配置
  */
-function toFixed(
-  v: number,
-  precision: number | { maxPrecision?: number; minPrecision?: number }
-) {
+function toFixed(v: number, precision: number | { maxPrecision?: number; minPrecision?: number }) {
   let [int, decimal = ''] = String(v).split('.') as [string, string | undefined]
 
   const [decimalPart, roundUp] = getDecimalPart(
@@ -133,10 +122,7 @@ const CN_INT_UNITS = ['', '万', '亿', '兆']
 /** 中文数字小数单位 */
 const CN_DEC_UNITS = ['角', '分', '毫', '厘']
 
-const CurrencyFormatters: Record<
-  CurrencyType,
-  (num: number, config?: CurrencyConfig) => string
-> = {
+const CurrencyFormatters: Record<CurrencyType, (num: number, config?: CurrencyConfig) => string> = {
   /**
    * 人民币格式化 (例如: 1,234.56)
    * 使用千分位分隔符
@@ -146,10 +132,7 @@ const CurrencyFormatters: Record<
     const isNegative = num < 0
     num = Math.abs(num)
 
-    let [intPart, decimal = ''] = String(num).split('.') as [
-      string,
-      string | undefined
-    ]
+    let [intPart, decimal = ''] = String(num).split('.') as [string, string | undefined]
 
     const [decimalPart, roundUp] = getDecimalPart(decimal, config || {})
 
@@ -190,11 +173,7 @@ const CurrencyFormatters: Record<
 
     let [intPart, decPart] = toFixed(
       num,
-      config?.precision !== undefined
-        ? config.precision > 4
-          ? 4
-          : config.precision
-        : 4
+      config?.precision !== undefined ? (config.precision > 4 ? 4 : config.precision) : 4
     ).split('.') as [string, string | undefined]
 
     if (isNegative) {
@@ -273,14 +252,9 @@ class Num {
    * @returns 格式化后的货币字符串
    * @example n(1234.56).currency('CNY') // '1,234.56'
    */
-  currency(
-    currencyType: CurrencyType,
-    config?: CurrencyConfig | number
-  ): string {
+  currency(currencyType: CurrencyType, config?: CurrencyConfig | number): string {
     if (typeof config === 'number') {
-      config = {
-        precision: config
-      }
+      config = { precision: config }
     }
     return CurrencyFormatters[currencyType](this.v, config)
   }
@@ -387,8 +361,8 @@ interface NumberFormatterOptions {
  * 例如: [0.1, 0.02] -> ints: [10, 2], factor: 100
  */
 function int(numbers: number[]) {
-  const numberStrings = numbers.map(n => String(n))
-  const numStringsLen = numberStrings.map(ns => {
+  const numberStrings = numbers.map((n) => String(n))
+  const numStringsLen = numberStrings.map((ns) => {
     if (ns.includes('e') || ns.includes('E')) {
       // 处理科学计数法, 如 1e-7
       const [mantissa, exponent] = ns.split(/[eE]/)
@@ -404,7 +378,7 @@ function int(numbers: number[]) {
 
   return {
     /** 整数 */
-    ints: numbers.map(n => Math.round(n * factor)),
+    ints: numbers.map((n) => Math.round(n * factor)),
     /** 让所有数值成为整数的最小系数 */
     factor
   }
@@ -421,10 +395,7 @@ export const $n = {
       style: options.style,
       maximumFractionDigits: options.maximumFractionDigits ?? options.precision,
       minimumFractionDigits: options.minimumFractionDigits ?? options.precision,
-      currency:
-        options.style === 'currency'
-          ? options.currency ?? 'CNY'
-          : options.currency
+      currency: options.style === 'currency' ? (options.currency ?? 'CNY') : options.currency
     })
 
     return formatter
@@ -528,11 +499,7 @@ type Token = { type: TokenType; value: string }
  * @param expr 表达式字符串
  */
 function tokenize(expr: string): Token[] {
-  function readNumber(
-    source: string,
-    start: number,
-    prefix = ''
-  ): { value: string; next: number } {
+  function readNumber(source: string, start: number, prefix = ''): { value: string; next: number } {
     let num = prefix
     let i = start
 
@@ -543,11 +510,7 @@ function tokenize(expr: string): Token[] {
         i++
         continue
       }
-      if (
-        (c === 'e' || c === 'E') &&
-        i + 1 < source.length &&
-        /[0-9+-]/.test(source[i + 1]!)
-      ) {
+      if ((c === 'e' || c === 'E') && i + 1 < source.length && /[0-9+-]/.test(source[i + 1]!)) {
         num += c
         i++
         if (source[i] === '+' || source[i] === '-') {
@@ -617,12 +580,7 @@ function tokenize(expr: string): Token[] {
 }
 
 /** 运算符优先级 */
-const PRECEDENCE: Record<string, number> = {
-  '+': 1,
-  '-': 1,
-  '*': 2,
-  '/': 2
-}
+const PRECEDENCE: Record<string, number> = { '+': 1, '-': 1, '*': 2, '/': 2 }
 
 /**
  * 解析并计算词法单元数组
