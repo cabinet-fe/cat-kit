@@ -1,4 +1,4 @@
-import { code, type WorkflowContext } from './context.js'
+import { code, renderNextSteps, type WorkflowContext } from '../workflow-context'
 
 export function renderDone(c: WorkflowContext): string {
   return `${c.frontmatter('将当前已执行计划标记为真正完成并归档，必要时晋升 preparing 队列')}\
@@ -48,5 +48,9 @@ export function renderDone(c: WorkflowContext): string {
 - 当前计划状态为 ${code('未执行')} → 拒绝执行，提示先运行 ${code(c.cmd('implement'))}。
 - 用户未确认 → 中止执行，不归档。
 - 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。
-- 归档后校验失败（目录不完整或晋升后出现多个当前计划）→ 回滚并报错。`
+- 归档后校验失败（目录不完整或晋升后出现多个当前计划）→ 回滚并报错。
+
+${renderNextSteps(c, [
+  { command: 'plan', description: '创建新计划' }
+])}`
 }

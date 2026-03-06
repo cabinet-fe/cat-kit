@@ -1,4 +1,4 @@
-import { code, type WorkflowContext } from './context.js'
+import { code, renderNextSteps, type WorkflowContext } from '../workflow-context'
 
 export function renderReplan(c: WorkflowContext): string {
   return `${c.frontmatter('重规划未实施计划，保持单当前计划结构不变')}\
@@ -52,5 +52,9 @@ export function renderReplan(c: WorkflowContext): string {
 
 - 描述为空 → 拒绝执行，提示必须附带描述。
 - 无未实施计划可重规划 → 拒绝执行。
-- 重规划后违反单当前计划约束 → 回滚并报错。`
+- 重规划后违反单当前计划约束 → 回滚并报错。
+
+${renderNextSteps(c, [
+  { command: 'implement', description: '实施当前计划' }
+])}`
 }

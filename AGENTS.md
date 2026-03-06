@@ -18,11 +18,7 @@
 
 ## 工具目录映射
 
-- Claude Code: `.claude/commands`
-- Codex: `.codex/commands`
 - Cursor: `.cursor/commands`
-- Antigravity: `.agents`
-- GitHub Copilot: `.github/prompts`
 
 ## 计划目录语义
 

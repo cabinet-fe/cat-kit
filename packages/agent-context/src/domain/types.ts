@@ -23,7 +23,6 @@ export type WorkflowCommandName =
   | 'done'
 
 export interface WorkflowArtifacts {
-  workflowOverview: string
   commandFiles: Record<WorkflowCommandName, string>
 }
 

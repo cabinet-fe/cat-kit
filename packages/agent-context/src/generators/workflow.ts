@@ -1,6 +1,6 @@
 import { resolveWorkflowPaths } from '../adapters/tool-targets.js'
-import { renderWorkflowArtifacts } from '../domain/workflow-content.js'
 import type { FileMutation, ToolTarget, WorkflowCommandName } from '../domain/types.js'
+import { renderWorkflowArtifacts } from '../domain/workflow-content.js'
 
 const COMMAND_ORDER: WorkflowCommandName[] = [
   'init',
@@ -15,15 +15,10 @@ export function renderWorkflowMutations(target: ToolTarget, cwd: string): FileMu
   const artifacts = renderWorkflowArtifacts(target)
   const paths = resolveWorkflowPaths(target, cwd)
 
-  const mutations: FileMutation[] = [
-    { path: paths.overviewFile, body: artifacts.workflowOverview }
-  ]
+  const mutations: FileMutation[] = []
 
   for (const command of COMMAND_ORDER) {
-    mutations.push({
-      path: paths.commandFile(command),
-      body: artifacts.commandFiles[command]
-    })
+    mutations.push({ path: paths.commandFile(command), body: artifacts.commandFiles[command] })
   }
 
   return mutations

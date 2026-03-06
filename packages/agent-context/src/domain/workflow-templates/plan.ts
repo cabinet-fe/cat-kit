@@ -1,4 +1,4 @@
-import { code, fence, type WorkflowContext } from './context.js'
+import { code, fence, renderNextSteps, type WorkflowContext } from '../workflow-context'
 
 export function renderPlan(c: WorkflowContext): string {
   return `${c.frontmatter('创建新计划并维护单当前计划 + preparing 队列结构')}\
@@ -64,5 +64,10 @@ ${fence}
 - 描述为空 → 拒绝执行，提示必须附带描述。
 - 存在未归档的已实施当前计划 → 拒绝执行，提示先运行 ${code(c.cmd('done'))}。
 - 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。
-- 编号计算失败 → 拒绝执行，提示检查目录结构完整性。`
+- 编号计算失败 → 拒绝执行，提示检查目录结构完整性。
+
+${renderNextSteps(c, [
+  { command: 'implement', description: '实施当前计划' },
+  { command: 'replan', description: '重新规划（如需调整）' }
+])}`
 }

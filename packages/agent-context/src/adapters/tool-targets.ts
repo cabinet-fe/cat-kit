@@ -105,7 +105,6 @@ export function resolveToolTargets(tools?: ToolId[]): ToolTarget[] {
 // ── 工作流路径解析 ────────────────────────────────────
 
 export interface WorkflowPaths {
-  overviewFile: string
   commandFile(name: WorkflowCommandName): string
 }
 
@@ -123,13 +122,11 @@ export function resolveWorkflowPaths(target: ToolTarget, cwd: string): WorkflowP
   if (nested) {
     const nsDir = resolve(root, 'ac')
     return {
-      overviewFile: resolve(nsDir, `workflow${ext}`),
       commandFile: name => resolve(nsDir, `${name}${ext}`)
     }
   }
 
   return {
-    overviewFile: resolve(root, `workflow${ext}`),
     commandFile: name => resolve(root, `ac-${name}${ext}`)
   }
 }

@@ -1,4 +1,4 @@
-import { code, fence, type WorkflowContext } from './context.js'
+import { code, fence, renderNextSteps, type WorkflowContext } from '../workflow-context'
 
 export function renderPatch(c: WorkflowContext): string {
   return `${c.frontmatter('基于当前已执行计划创建补丁并回写历史记录')}\
@@ -78,5 +78,10 @@ ${fence}
 - 描述为空 → 拒绝执行，提示必须附带描述。
 - 当前计划不存在 → 拒绝执行，提示先运行 ${code(c.cmd('plan'))}。
 - 当前计划状态为 ${code('未执行')} → 拒绝执行，提示先运行 ${code(c.cmd('implement'))}。
-- 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。`
+- 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。
+
+${renderNextSteps(c, [
+  { command: 'done', description: '归档当前计划（确认完成时）' },
+  { command: 'patch', description: '继续执行补丁（仍有问题时）' }
+])}`
 }

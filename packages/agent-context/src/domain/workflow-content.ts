@@ -4,7 +4,6 @@ import {
   renderDone,
   renderImplement,
   renderInit,
-  renderOverview,
   renderPatch,
   renderPlan,
   renderReplan
@@ -14,7 +13,6 @@ export function renderWorkflowArtifacts(target: ToolTarget): WorkflowArtifacts {
   const ctx = createWorkflowContext(target)
 
   return {
-    workflowOverview: renderOverview(ctx),
     commandFiles: {
       init: renderInit(ctx),
       plan: renderPlan(ctx),

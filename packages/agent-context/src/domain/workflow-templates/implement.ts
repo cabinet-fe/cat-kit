@@ -1,4 +1,4 @@
-import { code, fence, type WorkflowContext } from './context.js'
+import { code, fence, renderNextSteps, type WorkflowContext } from '../workflow-context'
 
 export function renderImplement(c: WorkflowContext): string {
   return `${c.frontmatter('实施当前计划并将状态从未执行更新为已执行')}\
@@ -54,5 +54,10 @@ export function renderImplement(c: WorkflowContext): string {
 - 当前计划不存在 → 拒绝执行，提示先运行 ${code(c.cmd('plan'))}。
 - 当前计划状态为 ${code('已执行')} → 拒绝执行，提示使用 ${code(c.cmd('patch'))} 或 ${code(c.cmd('done'))}。
 - ${code('## 目标')} 或 ${code('## 内容')} 为空 → 拒绝执行，提示补充计划内容。
-- 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。`
+- 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。
+
+${renderNextSteps(c, [
+  { command: 'done', description: '归档当前计划（确认完成时）' },
+  { command: 'patch', description: '执行补丁修复（发现问题时）' }
+])}`
 }

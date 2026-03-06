@@ -1,4 +1,4 @@
-import { code, type WorkflowContext } from './context.js'
+import { code, renderNextSteps, type WorkflowContext } from '../workflow-context'
 
 export function renderInit(c: WorkflowContext): string {
   return `${c.frontmatter('初始化项目上下文，按新旧项目规则处理 AGENTS.md 与计划入口')}\
@@ -42,5 +42,9 @@ export function renderInit(c: WorkflowContext): string {
 ## 失败条件
 
 - 无法判断项目类型时 → 向用户提问澄清，不可假设。
-- AGENTS.md 生成后不满足质量标准 → 重新优化直至满足。`
+- AGENTS.md 生成后不满足质量标准 → 重新优化直至满足。
+
+${renderNextSteps(c, [
+  { command: 'plan', description: '创建新计划' }
+])}`
 }
