@@ -38,7 +38,7 @@ async function resolveTools(options: SetupCommandOptions): Promise<ToolId[] | un
     }
 
     const selectedTools = await checkbox<ToolId>({
-      message: '请选择要生成命令和 SKILLS 的工具（可多选）：',
+      message: '请选择要生成工作流命令的工具（可多选）：',
       choices: getToolChoices().map((tool) => ({ name: tool.name, value: tool.id })),
       required: true
     })

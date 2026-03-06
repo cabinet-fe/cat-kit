@@ -26,14 +26,6 @@ export interface WorkflowArtifacts {
   commandFiles: Record<WorkflowCommandName, string>
 }
 
-export interface SkillArtifacts {
-  directoryName: string
-  skillDocument: string
-  scriptPlaceholder: string
-  templatePlaceholder: string
-  referencePlaceholder: string
-}
-
 export interface FileMutation {
   path: string
   body: string

@@ -7,7 +7,7 @@ export function renderAgentsGuide(targets: ToolTarget[]): string {
 
   return `# AGENT 上下文指南
 
-本区块由 \`agent-context\` 自动维护，用于定义计划工作流与技能目录约束。
+本区块由 \`agent-context\` 自动维护，用于定义计划工作流约束。
 
 ## 目标优先级
 
@@ -59,11 +59,5 @@ ${tools}
 ## 影响范围
 
 ## 历史补丁
-\`\`\`
-
-## SKILLS
-
-- 技能目录：\`skills/<skill-name>/SKILL.md\`。
-- 首批技能：\`plan-validator\`、\`plan-replanner\`、\`impact-scope-deduper\`、\`patch-recorder\`、\`agents-quality-check\`。
-- setup 负责初始化命令工作流与 SKILLS；update 负责同步更新。`
+\`\`\``
 }

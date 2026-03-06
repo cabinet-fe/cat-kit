@@ -154,45 +154,7 @@ project
 - 内容精简，避免冗余上下文。
 - 大型单体仓库可按子包拆分维护本地 `AGENTS.md`。
 
-## SKILLS 规范
+## CLI 工具
 
-SKILLS 用于补充命令工作流，减少上下文损耗并提高执行稳定性。
-
-### 定位
-
-- 适合封装高复用任务：校验、模板生成、信息提取、批量检查。
-- 不替代主命令；优先服务 `plan/replan/implement/patch/done` 的关键步骤。
-
-### 目录结构
-
-```text
-skills/
-  <skill-name>/
-    SKILL.md
-    scripts/        # 可选：校验/提取脚本
-    templates/      # 可选：文档模板
-    references/     # 可选：补充说明
-```
-
-### `SKILL.md` 最小字段
-
-- `name`：技能名（与目录名一致）。
-- `purpose`：解决的问题与适用场景。
-- `inputs`：执行所需输入。
-- `steps`：执行步骤（可引用 `scripts/`）。
-- `outputs`：产出物与格式。
-- `constraints`：边界、失败条件、回退策略。
-
-### 首批内置 SKILLS
-
-- `plan-validator`：校验目录结构、编号递增、单活跃计划约束。
-- `plan-replanner`：根据目标范围重排未实施计划并生成新计划草案。
-- `impact-scope-deduper`：维护 `## 影响范围` 去重与归并。
-- `patch-recorder`：生成 `patch-{number}.md` 并回写 `## 历史补丁`。
-- `agents-quality-check`：检查 `AGENTS.md` 是否满足精简、结构、可执行性要求。
-
-### 演进原则
-
-- `setup` 负责初始化命令/工作流与 SKILLS。
-- `update` 负责批量更新命令/工作流与 SKILLS。
-- 不同工具可有不同落地目录，但技能语义与输入输出契约保持一致。
+- `setup`：交互式生成工作流命令与 AGENTS.md 受管区块。
+- `update`：批量更新工作流命令与 AGENTS.md 受管区块。

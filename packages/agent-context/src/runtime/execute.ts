@@ -3,7 +3,6 @@ import { resolve } from 'node:path'
 import { resolveToolTargets } from '../adapters/tool-targets.js'
 import type { FileMutation, RunOptions, RunResult, ToolId } from '../domain/types.js'
 import { renderAgentsGuide } from '../generators/agents.js'
-import { renderSkillMutations } from '../generators/skills.js'
 import { renderWorkflowMutations } from '../generators/workflow.js'
 import { applyManagedMutations } from '../shared/fs.js'
 
@@ -22,7 +21,6 @@ async function runInMode(mode: 'setup' | 'update', options: RunOptions): Promise
 
   const mutations: FileMutation[] = [
     ...targets.flatMap(target => renderWorkflowMutations(target, cwd)),
-    ...renderSkillMutations(cwd),
     {
       path: resolve(cwd, 'AGENTS.md'),
       body: renderAgentsGuide(targets)
