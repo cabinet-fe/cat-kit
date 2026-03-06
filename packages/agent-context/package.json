@@ -8,8 +8,7 @@
   },
   "files": [
     "dist",
-    "src",
-    "resources"
+    "src"
   ],
   "exports": {
     ".": {
