@@ -1,6 +1,7 @@
-import { Monorepo } from '@cat-kit/maintenance/src'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { Monorepo } from '@cat-kit/maintenance/src'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -11,12 +12,11 @@ export const main = repo.group([
   '@cat-kit/fe',
   '@cat-kit/be',
   '@cat-kit/http',
-  '@cat-kit/excel',
+  '@cat-kit/excel'
 ])
 
-export const prompts = repo.group(['@cat-kit/prompts'])
+export const prompts = repo.group(['@cat-kit/agent-context'])
 
 export const tsconfig = repo.group(['@cat-kit/tsconfig'])
 
 export const maintenance = repo.group(['@cat-kit/maintenance'])
-

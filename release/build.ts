@@ -9,14 +9,12 @@ export const GROUPS_BUILD = {
   },
 
   maintenance() {
-    return maintenance.build({
-      '@cat-kit/maintenance': { platform: 'node' }
-    })
+    return maintenance.build({ '@cat-kit/maintenance': { platform: 'node' } })
   },
 
   prompts() {
     return prompts.build({
-      '@cat-kit/prompts': { platform: 'node' }
+      '@cat-kit/agent-context': { platform: 'node', hooks: { afterBuild({ dir }) {} } }
     })
   }
 }

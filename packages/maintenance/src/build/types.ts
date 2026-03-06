@@ -1,5 +1,3 @@
-
-
 /**
  * 包构建配置
  */
@@ -31,7 +29,7 @@ export interface BuildConfig {
    * @description 'node' 表示构建产物只能在 Node.js 中使用。
    * @description 'browser' 表示构建产物只能在浏览器中使用。
    */
-  platform?: 'neutral' | 'node' | 'browser',
+  platform?: 'neutral' | 'node' | 'browser'
   /**
    * 输出配置
    */
@@ -47,8 +45,21 @@ export interface BuildConfig {
      */
     sourcemap?: boolean
   }
-}
 
+  /**
+   * 构建钩子
+   */
+  hooks?: {
+    /**
+     * 构建前钩子
+     */
+    beforeBuild?: (config: BuildConfig) => Promise<void> | void
+    /**
+     * 构建后钩子
+     */
+    afterBuild?: (config: BuildConfig) => Promise<void> | void
+  }
+}
 
 /**
  * 构建结果
@@ -61,4 +72,3 @@ export interface BuildResult {
   /** 错误信息（如果失败） */
   error?: Error
 }
-
