@@ -2,28 +2,68 @@
 
 # AGENT 上下文指南
 
-为在当前项目中工作的`智能体/代理/子代理`提供指南。
+本区块由 `agent-context` 自动维护，用于定义计划工作流与技能目录约束。
 
 ## 目标优先级
 
-**始终**按此顺序决策：
-
 正确性 → 安全性 → 可维护性 → 可读性 → 性能 → 简洁性
 
-## 通用开发规范
+## 命令工作流
 
-- **命名规范**：使用具有描述性的变量和函数名。
-- **模块化**：遵循 SOLID 原则，确保函数职责单一，避免“上帝类”或超长函数。
-- **注释艺术**：不要解释代码“在做什么”，而要解释“为什么这样做”以及任何非显而易见的逻辑。
-- **自解释**：代码本身应清晰易读，尽量减少对文档的依赖。
-- **避免死代码**：不得包含任何未使用或者不会被执行到的代码。
+- 命令语义固定为：`init`、`plan`、`replan`、`implement`、`patch`、`done`。
+- 命令文件命名采用 `ac-*`，例如 `ac-plan.md`。
+- 计划状态机仅允许：`未执行`、`已执行`。
+- 任意时刻最多一个当前计划目录：`.agent-context/plan-{number}`。
+- 计划编号全局递增且不可复用；补丁编号在单计划目录内递增且不可复用。
 
-## 特定语言规范
+## 工具目录映射
 
-- [TypeScript](dev-prompts/languages/typescript.md)
+- Claude Code: `.claude/commands`
+- Codex: `.codex/commands`
+- Cursor: `.cursor/commands`
+- Antigravity: `.agents`
+- GitHub Copilot: `.github/prompts`
 
-## 代码审查
+## 计划目录语义
 
-**每次**代码生成都要经过必要的审查，以符合上述规范。
+```text
+.agent-context/
+  plan-{number}/
+    plan.md
+    patch-{number}.md
+  preparing/
+    plan-{number}/
+      plan.md
+  done/
+    plan-{number}-{YYYYMMDD}/
+      plan.md
+      patch-{number}.md
+```
+
+## plan.md 最小格式
+
+```markdown
+# {计划名称}
+
+> 状态: 未执行
+
+## 目标
+
+{明确的目标描述}
+
+## 内容
+
+{详细实施步骤}
+
+## 影响范围
+
+## 历史补丁
+```
+
+## SKILLS
+
+- 技能目录：`skills/<skill-name>/SKILL.md`。
+- 首批技能：`plan-validator`、`plan-replanner`、`impact-scope-deduper`、`patch-recorder`、`agents-quality-check`。
+- setup 负责初始化命令工作流与 SKILLS；update 负责同步更新。
 
 <!-- AGENT_CONTEXT:END -->
