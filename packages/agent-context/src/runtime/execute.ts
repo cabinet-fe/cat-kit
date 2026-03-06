@@ -18,13 +18,10 @@ export async function runUpdate(options: RunOptions = {}): Promise<RunResult> {
 async function runInMode(mode: 'setup' | 'update', options: RunOptions): Promise<RunResult> {
   const cwd = options.cwd ?? process.cwd()
   const toolIds = normalizeTools(options.tools)
-  const targets = resolveToolTargets(cwd, toolIds)
-  const workflowMutations = await Promise.all(
-    targets.map(target => renderWorkflowMutations(target))
-  )
+  const targets = resolveToolTargets(toolIds)
 
   const mutations: FileMutation[] = [
-    ...workflowMutations.flat(),
+    ...targets.flatMap(target => renderWorkflowMutations(target, cwd)),
     ...renderSkillMutations(cwd),
     {
       path: resolve(cwd, 'AGENTS.md'),

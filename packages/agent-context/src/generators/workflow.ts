@@ -1,6 +1,5 @@
-import { resolve } from 'node:path'
-
-import { getWorkflowCommandFiles, renderWorkflowArtifacts } from '../domain/workflow-content.js'
+import { resolveWorkflowPaths } from '../adapters/tool-targets.js'
+import { renderWorkflowArtifacts } from '../domain/workflow-content.js'
 import type { FileMutation, ToolTarget, WorkflowCommandName } from '../domain/types.js'
 
 const COMMAND_ORDER: WorkflowCommandName[] = [
@@ -12,21 +11,17 @@ const COMMAND_ORDER: WorkflowCommandName[] = [
   'done'
 ]
 
-export async function renderWorkflowMutations(target: ToolTarget): Promise<FileMutation[]> {
-  const artifacts = await renderWorkflowArtifacts()
-  const fileNames = getWorkflowCommandFiles()
+export function renderWorkflowMutations(target: ToolTarget, cwd: string): FileMutation[] {
+  const artifacts = renderWorkflowArtifacts(target)
+  const paths = resolveWorkflowPaths(target, cwd)
 
   const mutations: FileMutation[] = [
-    {
-      path: target.workflowOverviewFile,
-      body: artifacts.workflowOverview
-    }
+    { path: paths.overviewFile, body: artifacts.workflowOverview }
   ]
 
   for (const command of COMMAND_ORDER) {
-    const fileName = fileNames[command]
     mutations.push({
-      path: resolve(target.workflowsDir, fileName),
+      path: paths.commandFile(command),
       body: artifacts.commandFiles[command]
     })
   }

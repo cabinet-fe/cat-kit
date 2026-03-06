@@ -1,4 +1,4 @@
-export { resolveToolTargets, parseToolIds } from './adapters/tool-targets.js'
+export { resolveToolTargets, parseToolIds, resolveWorkflowPaths } from './adapters/tool-targets.js'
 export { renderWorkflowArtifacts } from './domain/workflow-content.js'
 export { runSetup, runUpdate } from './runtime/execute.js'
 export type {

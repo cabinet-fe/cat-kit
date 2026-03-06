@@ -21,7 +21,7 @@ export const GROUPS_BUILD = {
           async afterBuild({ dir }) {
             await copyAssetsToDist({
               pkgDir: dir,
-              assets: ['workflow.md', 'workflows', 'skills']
+              assets: ['skills']
             })
           }
         }

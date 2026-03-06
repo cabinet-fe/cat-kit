@@ -1,32 +1,52 @@
 import { resolve } from 'node:path'
 
-import type { ToolId, ToolTarget } from '../domain/types.js'
+import type { ToolId, ToolTarget, WorkflowCommandName } from '../domain/types.js'
 
-const TOOL_TARGET_MAP: Record<ToolId, Omit<ToolTarget, 'workflowOverviewFile' | 'workflowsDir'>> = {
+const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
   claude: {
     id: 'claude',
     name: 'Claude Code',
-    rootDir: '.claude/commands'
+    rootDir: '.claude/commands',
+    fileExtension: '.md',
+    supportsFrontmatter: true,
+    commandSeparator: ':',
+    commandPrefix: '/'
   },
   codex: {
     id: 'codex',
     name: 'Codex',
-    rootDir: '.codex/commands'
+    rootDir: '.codex/commands',
+    fileExtension: '.md',
+    supportsFrontmatter: true,
+    commandSeparator: '-',
+    commandPrefix: '/'
   },
   cursor: {
     id: 'cursor',
     name: 'Cursor',
-    rootDir: '.cursor/commands'
+    rootDir: '.cursor/commands',
+    fileExtension: '.md',
+    supportsFrontmatter: false,
+    commandSeparator: '-',
+    commandPrefix: '/'
   },
   antigravity: {
     id: 'antigravity',
     name: 'Antigravity',
-    rootDir: '.agents'
+    rootDir: '.agents',
+    fileExtension: '.md',
+    supportsFrontmatter: true,
+    commandSeparator: '-',
+    commandPrefix: '/'
   },
   copilot: {
     id: 'copilot',
     name: 'GitHub Copilot',
-    rootDir: '.github/prompts'
+    rootDir: '.github/prompts',
+    fileExtension: '.prompt.md',
+    supportsFrontmatter: true,
+    commandSeparator: '-',
+    commandPrefix: '#'
   }
 }
 
@@ -77,19 +97,41 @@ export function parseToolIds(toolsText: string): ToolId[] {
   return uniqueIds
 }
 
-export function resolveToolTargets(cwd: string, tools?: ToolId[]): ToolTarget[] {
+export function resolveToolTargets(tools?: ToolId[]): ToolTarget[] {
   const selected = tools && tools.length > 0 ? tools : DEFAULT_TOOL_ORDER
+  return selected.map(id => ({ ...TOOL_TARGET_MAP[id] }))
+}
 
-  return selected.map((toolId) => {
-    const config = TOOL_TARGET_MAP[toolId]
-    const root = resolve(cwd, config.rootDir)
+// ── 工作流路径解析 ────────────────────────────────────
 
+export interface WorkflowPaths {
+  overviewFile: string
+  commandFile(name: WorkflowCommandName): string
+}
+
+/**
+ * 根据工具约束计算工作流文件输出路径
+ *
+ * - separator=':' (Claude) → 嵌套: .claude/commands/ac/init.md  → /ac:init
+ * - separator='-' (其他)   → 扁平: .cursor/commands/ac-init.md → /ac-init
+ */
+export function resolveWorkflowPaths(target: ToolTarget, cwd: string): WorkflowPaths {
+  const root = resolve(cwd, target.rootDir)
+  const ext = target.fileExtension
+  const nested = target.commandSeparator === ':'
+
+  if (nested) {
+    const nsDir = resolve(root, 'ac')
     return {
-      ...config,
-      workflowOverviewFile: resolve(root, 'workflow.md'),
-      workflowsDir: resolve(root, 'workflows')
+      overviewFile: resolve(nsDir, `workflow${ext}`),
+      commandFile: name => resolve(nsDir, `${name}${ext}`)
     }
-  })
+  }
+
+  return {
+    overviewFile: resolve(root, `workflow${ext}`),
+    commandFile: name => resolve(root, `ac-${name}${ext}`)
+  }
 }
 
 function isToolId(value: string): value is ToolId {
