@@ -15,12 +15,10 @@ export function createWorkflowContext(target: ToolTarget): WorkflowContext {
   const sep = target.commandSeparator
   const pre = target.commandPrefix
   return {
-    cmd: name => `ac${sep}${name}`,
-    invoke: name => `${pre}ac${sep}${name}`,
+    cmd: (name) => `ac${sep}${name}`,
+    invoke: (name) => `${pre}ac${sep}${name}`,
     cmdPrefix: () => `ac${sep}`,
-    frontmatter: desc => target.supportsFrontmatter
-      ? `---\ndescription: ${desc}\n---\n\n`
-      : ''
+    frontmatter: (desc) => (target.supportsFrontmatter ? `---\ndescription: ${desc}\n---\n\n` : '')
   }
 }
 
@@ -33,14 +31,18 @@ export interface NextStep {
 }
 
 export function renderNextSteps(c: WorkflowContext, steps: NextStep[]): string {
-  const items = steps
-    .map(s => `> - ${code(c.invoke(s.command))}：${s.description}`)
-    .join('\n')
+  const items = steps.map((s) => `${code(c.invoke(s.command))}（${s.description}）`).join(' | ')
 
-  return `## 完成提示
+  return `> **下一步：** ${items}`
+}
 
-执行完毕后，必须使用以下固定格式提示用户下一步操作：
+const LIFECYCLE_COMMANDS = ['init', 'plan', 'replan', 'implement', 'patch', 'done'] as const
 
-> **下一步建议：**
-${items}`
+export function renderPreamble(c: WorkflowContext, current: string, description: string): string {
+  const lifecycle = LIFECYCLE_COMMANDS.map((cmd) => {
+    const ref = code(c.cmd(cmd))
+    return cmd === current ? `**${ref}**` : ref
+  }).join(' → ')
+
+  return `${description}\n\n生命周期: ${lifecycle}。`
 }

@@ -1,54 +1,26 @@
-import { code, renderNextSteps, type WorkflowContext } from '../workflow-context'
+import { code, renderNextSteps, renderPreamble, type WorkflowContext } from '../workflow-context'
 
 export function renderDone(c: WorkflowContext): string {
   return `${c.frontmatter('将当前已执行计划标记为真正完成并归档，必要时晋升 preparing 队列')}\
 # ${c.invoke('done')}
 
-## 严格前置验证
+${renderPreamble(c, 'done', `确认当前已执行计划真正完成，归档到 ${code('.agent-context/done/')} 目录，并自动晋升 ${code('preparing/')} 队列中的下一个计划。`)}
 
-- 不可附带描述，带描述时拒绝执行。
-- 必须存在且仅存在一个当前计划（${code('.agent-context/plan-{number}')})。
-- 当前计划状态必须为 ${code('已执行')}（状态为 ${code('未执行')} 时拒绝执行，提示先运行 ${code(c.cmd('implement'))})。
-- 必须得到用户确认"任务已真正完成"后才可执行归档。
+## 前置规则
+
+- 带描述 → 拒绝执行。
+- 当前计划不存在 → 拒绝执行，提示先运行 ${code(c.cmd('plan'))}。
+- 当前计划状态为 ${code('未执行')} → 拒绝执行，提示先运行 ${code(c.cmd('implement'))}。
+- 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。
+- 必须得到用户确认后才可归档；用户未确认 → 中止。
 
 ## 执行步骤
 
 1. **用户确认**：向用户确认当前计划已真正完成，可以归档。
-2. **归档当前计划**：
-   - 将 ${code('.agent-context/plan-{number}')} 移动到 ${code('.agent-context/done/plan-{number}-{YYYYMMDD}')}。
-   - ${code('{YYYYMMDD}')} 为归档当日日期，格式固定（如 ${code('20260306')})。
-   - 归档目录包含完整的 ${code('plan.md')} 与所有 ${code('patch-{number}.md')}。
-3. **晋升 preparing 队列**：
-   - 检查 ${code('.agent-context/preparing/')} 是否非空。
-   - 若非空：将最小编号的计划目录移动到 ${code('.agent-context/')} 作为新的当前计划。
-   - 若为空：无操作，此时无当前计划。
-4. **校验结果**：
-   - 确认归档目录存在且完整。
-   - 确认晋升后仍满足"最多一个当前计划"约束。
-
-## 归档命名规则
-
-- 格式固定为 ${code('plan-{number}-{YYYYMMDD}')}。
-- ${code('{number}')} 为原计划编号，不可修改。
-- ${code('{YYYYMMDD}')} 为执行 ${code(c.cmd('done'))} 当日的日期。
-- 归档后计划编号不可被新计划复用。
-
-## 输出要求
-
-完成后向用户反馈：
-
-- 已归档的计划编号与归档路径。
-- 是否晋升了 preparing 计划，若是则告知晋升的计划编号。
-- 当前是否还有待执行计划。
-
-## 失败条件
-
-- 附带了描述 → 拒绝执行。
-- 当前计划不存在 → 拒绝执行，提示先运行 ${code(c.cmd('plan'))}。
-- 当前计划状态为 ${code('未执行')} → 拒绝执行，提示先运行 ${code(c.cmd('implement'))}。
-- 用户未确认 → 中止执行，不归档。
-- 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。
-- 归档后校验失败（目录不完整或晋升后出现多个当前计划）→ 回滚并报错。
+2. **归档当前计划**：将 ${code('.agent-context/plan-{number}')} 移动到 ${code('.agent-context/done/plan-{number}-{YYYYMMDD}')}（当日日期），包含完整 ${code('plan.md')} 与所有 ${code('patch-{number}.md')}。编号不可被新计划复用。
+3. **晋升 preparing 队列**：若 ${code('.agent-context/preparing/')} 非空，将最小编号计划移至 ${code('.agent-context/')} 作为新当前计划。
+4. **校验**：确认归档完整，晋升后仍满足单当前计划约束；失败则回滚。
+5. **输出反馈**：报告归档路径、是否晋升及晋升编号、是否还有待执行计划。
 
 ${renderNextSteps(c, [
   { command: 'plan', description: '创建新计划' }
