@@ -11,7 +11,7 @@ export interface BuildConfig {
    * - 先尝试 `join(dir, 'src/index.ts')`
    * - 如果不存在, 再尝试 `join(dir, 'index.ts')`
    */
-  entry?: string
+  entry?: string | string[]
   /**
    * 是否生成 d.ts 文件
    * @default true

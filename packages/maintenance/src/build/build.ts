@@ -1,7 +1,7 @@
 import { build } from 'tsdown'
 import type { BuildConfig } from './types'
 import path from 'node:path'
-import fs from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 export async function buildLib(config: BuildConfig) {
@@ -15,16 +15,21 @@ export async function buildLib(config: BuildConfig) {
 
   try {
     const outDir = output?.dir || 'dist'
-    let entry = path.resolve(dir, config.entry || 'src/index.ts')
-    if (!fs.exists(entry)) {
-      entry = path.resolve(dir, 'index.ts')
-      if (!fs.exists(entry)) {
-        throw new Error('入口文件未找到')
-      }
+    const requestedEntries = config.entry
+      ? Array.isArray(config.entry)
+        ? config.entry
+        : [config.entry]
+      : ['src/index.ts', 'index.ts']
+    const entries = requestedEntries
+      .map((entry) => path.resolve(dir, entry))
+      .filter((entry) => existsSync(entry))
+
+    if (entries.length === 0) {
+      throw new Error('入口文件未找到')
     }
 
     await build({
-      entry,
+      entry: entries.length === 1 ? entries[0] : entries,
       outDir,
       cwd: dir,
       dts: dts !== false,

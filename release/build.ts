@@ -13,10 +13,6 @@ export const GROUPS_BUILD = {
   },
 
   prompts() {
-    return prompts.build({
-      '@cat-kit/agent-context': {
-        platform: 'node'
-      }
-    })
+    return prompts.build({ '@cat-kit/agent-context': { platform: 'node', entry: 'src/cli.ts' } })
   }
 }

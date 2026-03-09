@@ -1,7 +1,6 @@
 {
   "name": "@cat-kit/agent-context",
-  "type": "module",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "代理上下文管理工具",
   "bin": {
     "agent-context": "./dist/cli.js"
@@ -11,13 +10,7 @@
     "src",
     "README.md"
   ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./src": "./src/index.ts"
-  },
+  "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist"
