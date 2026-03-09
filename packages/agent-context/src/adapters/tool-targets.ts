@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 
-import type { ToolId, ToolTarget, WorkflowCommandName } from '../domain/types.js'
+import type { ToolId, ToolTarget, WorkflowCommandName } from '../domain/types'
 
 const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
   claude: {

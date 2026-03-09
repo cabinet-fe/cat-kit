@@ -1,6 +1,6 @@
 import { relative } from 'node:path'
 
-import type { RunResult } from '../domain/types.js'
+import type { RunResult } from '../domain/types'
 
 export function printRunSummary(result: RunResult, cwd: string): void {
   const modeTitle = result.mode === 'setup' ? 'setup' : 'update'

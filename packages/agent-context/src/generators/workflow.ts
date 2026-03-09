@@ -1,6 +1,6 @@
-import { resolveWorkflowPaths } from '../adapters/tool-targets.js'
-import type { FileMutation, ToolTarget, WorkflowCommandName } from '../domain/types.js'
-import { renderWorkflowArtifacts } from '../domain/workflow-content.js'
+import { resolveWorkflowPaths } from '../adapters/tool-targets'
+import type { FileMutation, ToolTarget, WorkflowCommandName } from '../domain/types'
+import { renderWorkflowArtifacts } from '../domain/workflow-content'
 
 const COMMAND_ORDER: WorkflowCommandName[] = [
   'init',

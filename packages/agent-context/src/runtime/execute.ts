@@ -1,10 +1,10 @@
 import { resolve } from 'node:path'
 
-import { resolveToolTargets } from '../adapters/tool-targets.js'
-import type { FileMutation, RunOptions, RunResult, ToolId } from '../domain/types.js'
-import { renderAgentsGuide } from '../generators/agents.js'
-import { renderWorkflowMutations } from '../generators/workflow.js'
-import { applyManagedMutations } from '../shared/fs.js'
+import { resolveToolTargets } from '../adapters/tool-targets'
+import type { FileMutation, RunOptions, RunResult, ToolId } from '../domain/types'
+import { renderAgentsGuide } from '../generators/agents'
+import { renderWorkflowMutations } from '../generators/workflow'
+import { applyManagedMutations } from '../shared/fs'
 
 export async function runSetup(options: RunOptions = {}): Promise<RunResult> {
   return runInMode('setup', options)

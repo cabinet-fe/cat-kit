@@ -1,7 +1,7 @@
-import { parseToolIds } from '../adapters/tool-targets.js'
-import type { ToolId } from '../domain/types.js'
-import { runUpdate } from '../runtime/execute.js'
-import { printCheckResult, printRunSummary } from './shared.js'
+import { parseToolIds } from '../adapters/tool-targets'
+import type { ToolId } from '../domain/types'
+import { runUpdate } from '../runtime/execute'
+import { printCheckResult, printRunSummary } from './shared'
 
 export interface UpdateCommandOptions {
   tools?: string

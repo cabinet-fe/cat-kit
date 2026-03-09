@@ -1,4 +1,4 @@
-import type { ToolTarget, WorkflowArtifacts } from './types.js'
+import type { ToolTarget, WorkflowArtifacts } from './types'
 import {
   createWorkflowContext,
   renderDone,

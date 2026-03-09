@@ -2,8 +2,8 @@
 
 import { Command } from 'commander'
 
-import { setupCommand } from './commands/setup.js'
-import { updateCommand } from './commands/update.js'
+import { setupCommand } from './commands/setup'
+import { updateCommand } from './commands/update'
 
 const program = new Command()
 

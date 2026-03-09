@@ -1,4 +1,4 @@
-import type { ToolTarget } from '../domain/types.js'
+import type { ToolTarget } from '../domain/types'
 
 export function renderAgentsGuide(targets: ToolTarget[]): string {
   const tools = targets

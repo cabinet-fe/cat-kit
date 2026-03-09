@@ -1,9 +1,9 @@
 import { checkbox } from '@inquirer/prompts'
 
-import { DEFAULT_TOOL_ORDER, getToolChoices, parseToolIds } from '../adapters/tool-targets.js'
-import type { ToolId } from '../domain/types.js'
-import { runSetup } from '../runtime/execute.js'
-import { printCheckResult, printRunSummary } from './shared.js'
+import { DEFAULT_TOOL_ORDER, getToolChoices, parseToolIds } from '../adapters/tool-targets'
+import type { ToolId } from '../domain/types'
+import { runSetup } from '../runtime/execute'
+import { printCheckResult, printRunSummary } from './shared'
 
 export interface SetupCommandOptions {
   tools?: string

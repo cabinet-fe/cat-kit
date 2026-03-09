@@ -2,8 +2,7 @@ import { dirname } from 'node:path'
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 
-import type { ApplyMutationResult, FileMutation } from '../domain/types.js'
-import { upsertManagedBlock, wrapManagedBlock } from './managed-block.js'
+import type { ApplyMutationResult, FileMutation } from '../domain/types'
 
 export async function applyManagedMutations(
   mutations: FileMutation[],
@@ -46,14 +45,22 @@ async function resolveNextContent(
   mutation: FileMutation,
   fileExists: boolean
 ): Promise<{ content: string; changed: boolean }> {
+  const nextContent = normalizeTrailingNewline(mutation.body)
+
   if (!fileExists) {
-    const content = `${wrapManagedBlock(mutation.body)}\n`
     return {
-      content,
+      content: nextContent,
       changed: true
     }
   }
 
   const currentContent = await readFile(mutation.path, 'utf-8')
-  return upsertManagedBlock(currentContent, mutation.body)
+  return {
+    content: nextContent,
+    changed: currentContent !== nextContent
+  }
+}
+
+function normalizeTrailingNewline(content: string): string {
+  return content.endsWith('\n') ? content : `${content}\n`
 }

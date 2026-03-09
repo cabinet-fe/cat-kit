@@ -1,5 +1,3 @@
-<!-- AGENT_CONTEXT:START -->
-
 # AGENT 上下文指南
 
 本区块由 `agent-context` 自动维护，用于定义计划工作流约束。
@@ -18,7 +16,11 @@
 
 ## 工具目录映射
 
+- Claude Code: `.claude/commands`
+- Codex: `.codex/commands`
 - Cursor: `.cursor/commands`
+- Antigravity: `.agents`
+- GitHub Copilot: `.github/prompts`
 
 ## 计划目录语义
 
@@ -55,5 +57,3 @@
 
 ## 历史补丁
 ```
-
-<!-- AGENT_CONTEXT:END -->
