@@ -1,5 +1,4 @@
 import { main, maintenance, prompts } from './repo'
-import { copyAssetsToDist } from './copy-assets'
 
 export const GROUPS_BUILD = {
   main() {
@@ -16,15 +15,7 @@ export const GROUPS_BUILD = {
   prompts() {
     return prompts.build({
       '@cat-kit/agent-context': {
-        platform: 'node',
-        hooks: {
-          async afterBuild({ dir }) {
-            await copyAssetsToDist({
-              pkgDir: dir,
-              assets: ['skills']
-            })
-          }
-        }
+        platform: 'node'
       }
     })
   }
