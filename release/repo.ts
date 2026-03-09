@@ -15,7 +15,7 @@ export const main = repo.group([
   '@cat-kit/excel'
 ])
 
-export const prompts = repo.group(['@cat-kit/agent-context'])
+export const agentContext = repo.group(['@cat-kit/agent-context'])
 
 export const tsconfig = repo.group(['@cat-kit/tsconfig'])
 

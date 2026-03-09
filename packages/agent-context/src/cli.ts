@@ -1,13 +1,19 @@
 #!/usr/bin/env node
 
+import { readFileSync } from 'node:fs'
 import { Command } from 'commander'
 
 import { setupCommand } from './commands/setup'
 import { updateCommand } from './commands/update'
 
+const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
+  version?: string
+}
+const packageVersion = typeof packageJson.version === 'string' ? packageJson.version : '0.0.0'
+
 const program = new Command()
 
-program.name('agent-context').description('Agent Context 工作流生成工具').version('2.0.0')
+program.name('agent-context').description('Agent Context 工作流生成工具').version(packageVersion)
 
 program
   .command('setup')

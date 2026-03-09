@@ -1,17 +1,19 @@
-import { fileURLToPath } from 'node:url'
-import path from 'node:path'
 import { writeFileSync, readFileSync } from 'node:fs'
-import { main, maintenance, tsconfig, prompts, repo } from './repo'
-import { $ } from 'execa'
-import { select } from '@inquirer/prompts'
-import chalk from 'chalk'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
 import {
   incrementVersion,
   commitAndPush,
   type BumpType,
   type RollbackContext
 } from '@cat-kit/maintenance/src'
+import { select } from '@inquirer/prompts'
+import chalk from 'chalk'
+import { $ } from 'execa'
+
 import { GROUPS_BUILD } from './build'
+import { main, maintenance, tsconfig, agentContext, repo } from './repo'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -25,9 +27,7 @@ const __dirname = path.dirname(__filename)
  */
 async function runTests(): Promise<void> {
   console.log(chalk.bold('\n🧪 运行测试...'))
-  await $({
-    cwd: path.resolve(__dirname, '../packages/tests')
-  })`bun run test`
+  await $({ cwd: path.resolve(__dirname, '../packages/tests') })`bun run test`
   console.log(chalk.green('✓ 测试通过'))
 }
 
@@ -45,9 +45,7 @@ function validate(): void {
     throw new Error('存在循环依赖')
   }
   if (inconsistentDeps.length) {
-    throw new Error(
-      '存在不一致的依赖: ' + inconsistentDeps.map(d => d.name).join(', ')
-    )
+    throw new Error('存在不一致的依赖: ' + inconsistentDeps.map((d) => d.name).join(', '))
   }
 }
 
@@ -61,23 +59,14 @@ async function chooseGroup() {
       {
         value: 'main' as const,
         name: 'main',
-        description:
-          '@cat-kit/core, @cat-kit/fe, @cat-kit/be, @cat-kit/http, @cat-kit/excel'
+        description: '@cat-kit/core, @cat-kit/fe, @cat-kit/be, @cat-kit/http, @cat-kit/excel'
       },
+      { value: 'maintenance' as const, name: 'maintenance', description: '@cat-kit/maintenance' },
+      { value: 'tsconfig' as const, name: 'tsconfig', description: '@cat-kit/tsconfig' },
       {
-        value: 'maintenance' as const,
-        name: 'maintenance',
-        description: '@cat-kit/maintenance'
-      },
-      {
-        value: 'tsconfig' as const,
-        name: 'tsconfig',
-        description: '@cat-kit/tsconfig'
-      },
-      {
-        value: 'prompts' as const,
-        name: 'prompts',
-        description: '@cat-kit/prompts'
+        value: 'agentContext' as const,
+        name: 'agent-context',
+        description: '@cat-kit/agent-context'
       }
     ]
   })
@@ -102,27 +91,19 @@ const BUMP_TYPES: BumpType[] = [
 /**
  * 交互式选择版本类型
  */
-async function chooseVersion(
-  currentVersion: string
-): Promise<BumpType | 'current'> {
+async function chooseVersion(currentVersion: string): Promise<BumpType | 'current'> {
   console.log(chalk.bold(`\n📦 当前版本: ${chalk.cyan(currentVersion)}`))
 
-  const choices = BUMP_TYPES.map(type => {
+  const choices = BUMP_TYPES.map((type) => {
     const nextVersion = incrementVersion(currentVersion, type)
-    return {
-      value: type,
-      name: `${type.padEnd(12)} → ${nextVersion}`
-    }
+    return { value: type, name: `${type.padEnd(12)} → ${nextVersion}` }
   })
 
   const bumpType = await select({
     message: '选择版本类型',
     choices: [
       ...choices,
-      {
-        value: 'current' as const,
-        name: `${'current'.padEnd(12)} → ${currentVersion}`
-      }
+      { value: 'current' as const, name: `${'current'.padEnd(12)} → ${currentVersion}` }
     ]
   })
 
@@ -140,10 +121,7 @@ function createRollbackContext(
   workspaces: { dir: string }[],
   originalVersion: string
 ): RollbackContext {
-  return {
-    originalVersion,
-    packageDirs: workspaces.map(ws => ws.dir)
-  }
+  return { originalVersion, packageDirs: workspaces.map((ws) => ws.dir) }
 }
 
 /**
@@ -180,18 +158,13 @@ async function gitReset(commitHash: string): Promise<void> {
 // 发布流程
 // ============================================================================
 
-const GROUP_MAP = {
-  main,
-  maintenance,
-  tsconfig,
-  prompts
-}
+const GROUP_MAP = { main, maintenance, tsconfig, agentContext }
 
 /**
  * 发布指定组
  */
 async function releaseGroup(
-  groupName: 'main' | 'maintenance' | 'tsconfig' | 'prompts'
+  groupName: 'main' | 'maintenance' | 'tsconfig' | 'agentContext'
 ): Promise<void> {
   const builder = GROUPS_BUILD[groupName]
 
@@ -256,9 +229,7 @@ async function releaseGroup(
   // 8. 真正发布
   console.log(chalk.bold('\n🚀 正式发布中...'))
   try {
-    await group.publish({
-      access: 'public'
-    })
+    await group.publish({ access: 'public' })
   } catch (err) {
     console.log(chalk.red('\n⚠ 发布失败'))
     if (err instanceof Error) {
@@ -300,7 +271,7 @@ async function release(): Promise<void> {
 }
 
 // 执行
-release().catch(err => {
+release().catch((err) => {
   console.error(chalk.red('\n❌ 发布失败:'), err.message)
   process.exit(1)
 })

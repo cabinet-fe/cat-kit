@@ -1,4 +1,4 @@
-import { main, maintenance, prompts } from './repo'
+import { main, maintenance, agentContext } from './repo'
 
 export const GROUPS_BUILD = {
   main() {
@@ -12,7 +12,9 @@ export const GROUPS_BUILD = {
     return maintenance.build({ '@cat-kit/maintenance': { platform: 'node' } })
   },
 
-  prompts() {
-    return prompts.build({ '@cat-kit/agent-context': { platform: 'node', entry: 'src/cli.ts' } })
+  agentContext() {
+    return agentContext.build({
+      '@cat-kit/agent-context': { platform: 'node', entry: 'src/cli.ts' }
+    })
   }
 }
