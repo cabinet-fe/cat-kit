@@ -1,8 +1,5 @@
-import { resolve } from 'node:path'
-
 import { resolveToolTargets } from '../adapters/tool-targets'
 import type { FileMutation, RunOptions, RunResult, ToolId } from '../domain/types'
-import { renderAgentsGuide } from '../generators/agents'
 import { renderWorkflowMutations } from '../generators/workflow'
 import { applyManagedMutations } from '../shared/fs'
 
@@ -19,13 +16,7 @@ async function runInMode(mode: 'setup' | 'update', options: RunOptions): Promise
   const toolIds = normalizeTools(options.tools)
   const targets = resolveToolTargets(toolIds)
 
-  const mutations: FileMutation[] = [
-    ...targets.flatMap(target => renderWorkflowMutations(target, cwd)),
-    {
-      path: resolve(cwd, 'AGENTS.md'),
-      body: renderAgentsGuide(targets)
-    }
-  ]
+  const mutations: FileMutation[] = targets.flatMap(target => renderWorkflowMutations(target, cwd))
 
   const check = options.check ?? false
   const result = await applyManagedMutations(mutations, check)
