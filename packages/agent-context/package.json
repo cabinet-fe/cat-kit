@@ -1,14 +1,15 @@
 {
   "name": "@cat-kit/agent-context",
   "type": "module",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "代理上下文管理工具",
   "bin": {
     "agent-context": "./dist/cli.js"
   },
   "files": [
     "dist",
-    "src"
+    "src",
+    "README.md"
   ],
   "exports": {
     ".": {
