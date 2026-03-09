@@ -156,5 +156,5 @@ project
 
 ## CLI 工具
 
-- `setup`：交互式生成工作流命令与 AGENTS.md 受管区块。
-- `update`：批量更新工作流命令与 AGENTS.md 受管区块。
+- `setup`：交互式生成工作流命令。
+- `update`：批量更新工作流命令（仅针对已经存在的工具）。
