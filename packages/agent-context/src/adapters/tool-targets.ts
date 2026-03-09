@@ -1,4 +1,5 @@
 import { resolve } from 'node:path'
+import { existsSync } from 'node:fs'
 
 import type { ToolId, ToolTarget, WorkflowCommandName } from '../domain/types'
 
@@ -58,6 +59,15 @@ export const DEFAULT_TOOL_ORDER: ToolId[] = [
   'copilot'
 ]
 
+const WORKFLOW_COMMAND_ORDER: WorkflowCommandName[] = [
+  'init',
+  'plan',
+  'replan',
+  'implement',
+  'patch',
+  'done'
+]
+
 export interface ToolChoice {
   id: ToolId
   name: string
@@ -100,6 +110,17 @@ export function parseToolIds(toolsText: string): ToolId[] {
 export function resolveToolTargets(tools?: ToolId[]): ToolTarget[] {
   const selected = tools && tools.length > 0 ? tools : DEFAULT_TOOL_ORDER
   return selected.map(id => ({ ...TOOL_TARGET_MAP[id] }))
+}
+
+export function detectConfiguredToolIds(cwd: string): ToolId[] {
+  return DEFAULT_TOOL_ORDER.filter((toolId) => {
+    const target = TOOL_TARGET_MAP[toolId]
+    const workflowPaths = resolveWorkflowPaths(target, cwd)
+
+    return WORKFLOW_COMMAND_ORDER.some(command =>
+      existsSync(workflowPaths.commandFile(command))
+    )
+  })
 }
 
 // ── 工作流路径解析 ────────────────────────────────────
