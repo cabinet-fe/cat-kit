@@ -1,4 +1,4 @@
-export const ACTION_NAMES = ['init', 'plan', 'replan', 'implement', 'patch', 'done'] as const
+export const ACTION_NAMES = ['init', 'plan', 'replan', 'implement', 'patch', 'rush'] as const
 type ActionName = (typeof ACTION_NAMES)[number]
 
 export const ACTION_RENDERERS: Record<ActionName, () => string> = {
@@ -7,7 +7,7 @@ export const ACTION_RENDERERS: Record<ActionName, () => string> = {
   replan: renderReplan,
   implement: renderImplement,
   patch: renderPatch,
-  done: renderDone
+  rush: renderRush
 }
 
 function renderInit(): string {
@@ -56,8 +56,9 @@ function renderPlan(): string {
 
 ## 前置检查
 
+- 运行 \`agent-context validate\`，不通过则中止并报告错误。
 - 描述为空 → 拒绝执行。
-- 存在未归档的已执行当前计划 → 拒绝执行，提示先归档。
+- 存在未归档的已执行当前计划 → 拒绝执行，提示先运行 \`agent-context done\` 归档。
 - 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。
 
 ## 执行步骤
@@ -109,6 +110,7 @@ function renderReplan(): string {
 
 ## 前置检查
 
+- 运行 \`agent-context validate\`，不通过则中止并报告错误。
 - 描述为空 → 拒绝执行。
 - 无未实施计划 → 拒绝执行，提示使用 plan 创建。
 - 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。
@@ -141,9 +143,10 @@ function renderImplement(): string {
 
 ## 前置检查
 
+- 运行 \`agent-context validate\`，不通过则中止并报告错误。
 - 带描述 → 拒绝执行。
 - 当前计划不存在 → 拒绝执行，提示先创建计划。
-- 当前计划状态为 \`已执行\` → 拒绝执行，提示使用 patch 或归档。
+- 当前计划状态为 \`已执行\` → 拒绝执行，提示使用 patch 修补或运行 \`agent-context done\` 归档。
 - \`## 目标\` 或 \`## 内容\` 为空 → 拒绝执行，提示补充。
 - 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。
 - 仅操作当前计划，不直接操作 \`preparing/\` 中的计划。
@@ -172,6 +175,7 @@ function renderPatch(): string {
 
 ## 前置检查
 
+- 运行 \`agent-context validate\`，不通过则中止并报告错误。
 - 描述为空 → 拒绝执行。
 - 当前计划不存在 → 拒绝执行，提示先创建计划。
 - 当前计划状态为 \`未执行\` → 拒绝执行，提示先实施。
@@ -206,27 +210,29 @@ function renderPatch(): string {
 `
 }
 
-function renderDone(): string {
-  return `# done
+function renderRush(): string {
+  return `# rush
 
-确认当前已执行计划真正完成，归档到 \`.agent-context/done/\` 目录，并自动晋升下一个计划。
+快速通道：创建计划并立即实施，适合范围明确、无需多轮规划的任务。
 
-不接受额外描述。
+必须附带任务描述。
 
 ## 前置检查
 
-- 带描述 → 拒绝执行。
-- 当前计划不存在 → 拒绝执行，提示先创建计划。
-- 当前计划状态为 \`未执行\` → 拒绝执行，提示先实施。
-- 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。
-- 必须得到用户确认后才可归档。
+- 运行 \`agent-context validate\`，不通过则中止并报告错误。
+- 描述为空 → 拒绝执行。
+- 存在未归档的已执行当前计划 → 拒绝执行，提示先运行 \`agent-context done\` 归档。
+- 存在未实施的当前计划 → 拒绝执行，提示先 implement 或 replan。
 
 ## 执行步骤
 
-1. **用户确认**：向用户确认当前计划已真正完成。
-2. **归档**：将 \`.agent-context/plan-{number}\` 移动到 \`.agent-context/done/plan-{number}-{YYYYMMDD}\`（当日日期），包含完整 \`plan.md\` 与所有 \`patch-{number}.md\`。
-3. **晋升**：若 \`.agent-context/preparing/\` 非空，将最小编号计划移至 \`.agent-context/\` 作为新当前计划。
-4. **校验**：确认归档完整，晋升后仍满足单当前计划约束；失败则回滚。
-5. **反馈**：报告归档路径、是否晋升及晋升编号、是否还有待执行计划。
+1. 按 plan 协议创建单计划（不拆分，不进入 preparing 队列）。
+2. 无需用户确认计划内容，直接进入 implement 流程。
+3. 按 implement 协议执行全部步骤，包括验证循环：
+   a. 逐项对照 \`## 内容\` 确认每个步骤已实施。
+   b. 运行项目验证：类型检查 → lint → 测试。
+   c. 若存在失败项 → 修复后重新验证。
+   d. 全部通过 → 进入步骤 4。
+4. 更新 \`plan.md\` 状态行为 \`已执行\`，更新 \`## 影响范围\`。
 `
 }
