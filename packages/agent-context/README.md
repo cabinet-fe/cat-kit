@@ -1,12 +1,19 @@
 # Agent Context
 
-`@cat-kit/agent-context` 为主流 AI 编程助手生成统一的 `ac` 前缀工作流命令，让你用一套固定流程驱动 AI 完成从需求到交付的全过程。
+`@cat-kit/agent-context` 为主流 AI 编程助手安装统一的 `agent-context` Skill，让同一套计划生命周期协议在不同工具里保持一致。
 
 ## 它解决什么问题
 
-不同 AI 编程工具（Claude、Codex、Cursor、Copilot……）各有自己的命令格式和目录约定。当你同时使用多个工具时，需要为每个工具分别编写和维护工作流命令，内容重复且容易不一致。
+旧版 AI 工具通常依赖命令文件或 workflow 目录来驱动任务流程，但现在主流产品都在转向 Skills。  
+如果你同时使用 Claude、Codex、Cursor、Antigravity、GitHub Copilot，就需要为不同工具分别维护同一套计划规则，内容容易漂移。
 
-`agent-context` 只需一条命令，就能为你选择的所有工具生成格式正确、内容统一的工作流命令文件。
+`agent-context` v2 只维护一个核心 Skill，负责统一以下生命周期：
+
+```text
+init -> plan -> replan -> implement -> patch -> done
+```
+
+Skill 内部会约束 `.agent-context/` 目录、计划编号、`plan.md` 模板、实施验证和归档规则，用户不再需要依赖 `/ac-init` 这类命令触发。
 
 ## 安装
 
@@ -21,91 +28,81 @@ npm install -g @cat-kit/agent-context
 在项目根目录执行：
 
 ```bash
-agent-context setup
+agent-context install
 ```
 
-交互式选择你使用的 AI 工具后，工具会自动在项目中生成对应的命令文件。之后你就可以在 AI 助手中直接调用这些命令了。
+交互式选择目标工具后，CLI 会在对应的 Skills 目录下安装统一的 `agent-context` Skill。
 
-## 工作流
+安装完成后，你可以直接向 AI 助手表达自然语言意图，例如：
 
-Agent Context 定义了 6 个命令，覆盖一个计划从创建到归档的完整生命周期：
-
-```
-init → plan → replan → implement → patch → done
-```
-
-| 命令        | 作用             | 典型场景                           |
-| ----------- | ---------------- | ---------------------------------- |
-| `init`      | 初始化项目上下文 | 当你第一次在这个项目使用时         |
-| `plan`      | 创建新计划       | 开始一个新需求或任务               |
-| `replan`    | 重新规划         | 计划不合理或需求变更时调整         |
-| `implement` | 实施计划         | 让 AI 按计划逐步编码               |
-| `patch`     | 补丁修复         | 实施完成后发现需要小幅修改         |
-| `done`      | 归档计划         | 任务彻底完成，归档并进入下一个计划 |
-
-### 典型工作流示例
-
-**场景：为项目添加一个新功能**
-
-```
-1. /ac-init          ← 首次使用，初始化项目上下文
-2. /ac-plan          ← 描述需求，AI 生成实施计划
-3. /ac-implement     ← AI 按计划编码实施
-4. /ac-patch         ← 修复实施中遗漏的细节
-5. /ac-done          ← 确认完成，归档计划
-```
-
-**场景：计划不满意，需要调整**
-
-```
-1. /ac-plan          ← 创建计划
-2. /ac-replan        ← 描述调整方向，AI 重新规划
-3. /ac-implement     ← 按新计划实施
-4. /ac-done          ← 归档
-```
+- “初始化这个项目的 agent context”
+- “为这个需求出一个计划”
+- “重做当前计划”
+- “按当前计划开始实现”
+- “给当前计划补一个 patch”
+- “当前计划已经真正完成，归档它”
 
 ## 支持的工具
 
-| 工具           | 命令文件目录        | 调用方式示例 |
-| -------------- | ------------------- | ------------ |
-| Claude         | `.claude/commands/` | `/ac:init`   |
-| Codex          | `.codex/prompts/`   | `/ac-init`   |
-| Cursor         | `.cursor/commands/` | `/ac-init`   |
-| Antigravity    | `.agent/workflows/` | `/ac-init`   |
-| GitHub Copilot | `.github/prompts/`  | `#ac-init`   |
+| 工具 | Skill 目录 |
+| --- | --- |
+| Claude | `.claude/skills/agent-context/` |
+| Codex | `.codex/skills/agent-context/` |
+| Cursor | `.cursor/skills/agent-context/` |
+| Antigravity | `.agent/skills/agent-context/` |
+| GitHub Copilot | `.github/skills/agent-context/` |
+
+## 生成产物
+
+`agent-context` 会按工具生成对应官方支持的 Skill 产物：
+
+| 工具 | 产物 |
+| --- | --- |
+| Claude | `SKILL.md`，包含 `name`、`description`、`argument-hint` frontmatter |
+| Codex | `SKILL.md` + `agents/openai.yaml` |
+| Cursor | `SKILL.md` |
+| Antigravity | `SKILL.md` |
+| GitHub Copilot | `SKILL.md`，包含 `name`、`description`、`license` frontmatter |
 
 ## 命令参考
 
-### `agent-context setup`
+### `agent-context install`
 
-初始化工作流命令。交互式选择目标工具后，在项目中生成对应的命令文件。
+安装 `agent-context` Skill。
 
 ```bash
-# 交互式
-agent-context setup
+# 交互式选择工具
+agent-context install
 
-# 直接指定工具，跳过选择
-agent-context setup --tools claude,cursor,copilot
+# 指定工具
+agent-context install --tools claude,codex,cursor
+
+# 仅检查将产生哪些变更
+agent-context install --check --tools copilot
 ```
 
-### `agent-context update`
+### `agent-context sync`
 
-更新已有的工作流命令文件（仅更新已安装的工具，不新增）。适用于升级 `@cat-kit/agent-context` 版本后同步最新模板。
+同步已经安装的 `agent-context` Skill。适用于升级 `@cat-kit/agent-context` 版本后更新 Skill 内容。
 
 ```bash
-agent-context update
+# 同步当前已安装工具
+agent-context sync
 
-# 仅检查是否有待更新内容，不实际写入
-agent-context update --check
+# 同步指定工具
+agent-context sync --tools claude,cursor
+
+# 仅检查是否有待同步内容
+agent-context sync --check
 ```
 
 ### 通用选项
 
-| 选项              | 说明                   |
-| ----------------- | ---------------------- |
+| 选项 | 说明 |
+| --- | --- |
 | `--tools <tools>` | 指定目标工具，逗号分隔 |
-| `--yes`           | 非交互模式             |
-| `--check`         | 仅检查，不写入文件     |
+| `--check` | 仅检查，不写入文件 |
+| `--yes` | 仅 `install` 支持；非交互模式下优先复用已安装工具，否则安装全部工具 |
 
 ## License
 

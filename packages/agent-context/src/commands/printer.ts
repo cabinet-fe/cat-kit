@@ -1,10 +1,9 @@
 import { relative } from 'node:path'
 
-import type { RunResult } from '../domain/types'
+import type { RunResult } from '../types'
 
 export function printRunSummary(result: RunResult, cwd: string): void {
-  const modeTitle = result.mode === 'setup' ? 'setup' : 'update'
-  console.log(`\n✅ agent-context ${modeTitle} 完成`) // eslint-disable-line no-console
+  console.log(`\n✅ ac-workflow ${result.mode} 完成`) // eslint-disable-line no-console
 
   if (result.created.length > 0) {
     console.log(`\n新增 ${result.created.length} 个文件:`) // eslint-disable-line no-console
