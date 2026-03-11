@@ -4,11 +4,11 @@ import { readFileSync } from 'node:fs'
 
 import { Command } from 'commander'
 
-import { doneCommand } from './commands/done'
-import { installCommand } from './commands/install'
-import { statusCommand } from './commands/status'
-import { syncCommand } from './commands/sync'
-import { validateCommand } from './commands/validate'
+import { doneCommand } from './commands/done.js'
+import { installCommand } from './commands/install.js'
+import { statusCommand } from './commands/status.js'
+import { syncCommand } from './commands/sync.js'
+import { validateCommand } from './commands/validate.js'
 
 const packageJson = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8')

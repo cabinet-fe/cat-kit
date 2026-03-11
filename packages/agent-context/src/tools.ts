@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-import type { ToolId, ToolTarget } from './types'
+import type { ToolId, ToolTarget } from './types.js'
 
 const SKILL_FILE_NAME = 'SKILL.md'
 const SKILL_NAME = 'ac-workflow'

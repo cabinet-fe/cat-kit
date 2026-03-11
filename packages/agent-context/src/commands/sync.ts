@@ -1,7 +1,7 @@
-import { detectConfiguredToolIds, parseToolIds } from '../tools'
-import type { ToolId } from '../types'
-import { runSync } from '../runner'
-import { printCheckResult, printRunSummary } from './printer'
+import { detectConfiguredToolIds, parseToolIds } from '../tools.js'
+import type { ToolId } from '../types.js'
+import { runSync } from '../runner.js'
+import { printCheckResult, printRunSummary } from './printer.js'
 
 export interface SyncCommandOptions {
   tools?: string

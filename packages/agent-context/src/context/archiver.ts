@@ -1,7 +1,7 @@
 import { rename, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import type { ArchiveResult, ContextSnapshot } from '../types'
+import type { ArchiveResult, ContextSnapshot } from '../types.js'
 
 export async function archive(context: ContextSnapshot): Promise<ArchiveResult> {
   if (!context.currentPlan) {
@@ -20,8 +20,8 @@ export async function archive(context: ContextSnapshot): Promise<ArchiveResult> 
   await rename(context.currentPlan.dir, archivedTo)
 
   let promoted: number | null = null
-  if (context.preparing.length > 0) {
-    const first = context.preparing[0]
+  const first = context.preparing[0]
+  if (first) {
     const targetDir = join(context.root, `plan-${first.number}`)
     await rename(first.dir, targetDir)
     promoted = first.number

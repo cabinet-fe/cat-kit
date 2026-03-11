@@ -1,5 +1,5 @@
-import type { SkillArtifacts, ToolTarget } from '../types'
-import { ACTION_NAMES, ACTION_RENDERERS } from './actions'
+import type { SkillArtifacts, ToolTarget } from '../types.js'
+import { ACTION_NAMES, ACTION_RENDERERS } from './actions.js'
 
 const SKILL_NAME = 'ac-workflow'
 const SKILL_DESCRIPTION =

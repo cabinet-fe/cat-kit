@@ -1,6 +1,6 @@
 import { relative } from 'node:path'
 
-import type { RunResult } from '../types'
+import type { RunResult } from '../types.js'
 
 export function printRunSummary(result: RunResult, cwd: string): void {
   console.log(`\n✅ ac-workflow ${result.mode} 完成`) // eslint-disable-line no-console

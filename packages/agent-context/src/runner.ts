@@ -2,10 +2,10 @@ import { resolve, dirname } from 'node:path'
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 
-import type { SkillPaths } from './tools'
-import { resolveToolTargets, resolveSkillPaths } from './tools'
-import { renderSkillArtifacts } from './content'
-import type { ApplyMutationResult, FileMutation, RunOptions, RunResult, ToolId, ToolTarget } from './types'
+import type { SkillPaths } from './tools.js'
+import { resolveToolTargets, resolveSkillPaths } from './tools.js'
+import { renderSkillArtifacts } from './content/index.js'
+import type { ApplyMutationResult, FileMutation, RunOptions, RunResult, ToolId, ToolTarget } from './types.js'
 
 export async function runInstall(options: RunOptions = {}): Promise<RunResult> {
   return run('install', options)

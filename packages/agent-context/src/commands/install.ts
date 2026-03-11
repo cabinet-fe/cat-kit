@@ -1,9 +1,9 @@
 import { checkbox } from '@inquirer/prompts'
 
-import { runInstall } from '../runner'
-import { DEFAULT_TOOL_ORDER, detectConfiguredToolIds, getToolChoices, parseToolIds } from '../tools'
-import type { ToolId } from '../types'
-import { printCheckResult, printRunSummary } from './printer'
+import { runInstall } from '../runner.js'
+import { DEFAULT_TOOL_ORDER, detectConfiguredToolIds, getToolChoices, parseToolIds } from '../tools.js'
+import type { ToolId } from '../types.js'
+import { printCheckResult, printRunSummary } from './printer.js'
 
 export interface InstallCommandOptions {
   tools?: string

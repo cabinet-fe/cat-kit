@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
-import type { ContextSnapshot, ValidateResult } from '../types'
+import type { ContextSnapshot, ValidateResult } from '../types.js'
 
 export function validate(
   snapshot: ContextSnapshot | null,

@@ -2,7 +2,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
-import type { ContextSnapshot, PlanInfo, PlanStatus } from '../types'
+import type { ContextSnapshot, PlanInfo, PlanStatus } from '../types.js'
 
 const PLAN_DIR_RE = /^plan-(\d+)$/
 const STATUS_RE = /^>\s*状态:\s*(未执行|已执行)\s*$/m
@@ -60,7 +60,7 @@ async function readPlanDirs(parentDir: string): Promise<PlanInfo[]> {
   for (const entry of entries) {
     if (!entry.isDirectory()) continue
     const match = entry.name.match(PLAN_DIR_RE)
-    if (!match) continue
+    if (!match?.[1]) continue
     const number = parseInt(match[1], 10)
     const dir = join(parentDir, entry.name)
     const status = await readPlanStatus(dir)

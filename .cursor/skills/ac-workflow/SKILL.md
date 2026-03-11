@@ -1,6 +1,6 @@
 ---
 name: ac-workflow
-description: 管理 .agent-context 计划生命周期，按 init、plan、replan、implement、patch、done 协议推进任务。
+description: 管理 .agent-context 计划生命周期，按 init、plan、replan、implement、patch、rush、done 协议推进任务。
 ---
 
 
@@ -17,7 +17,8 @@ description: 管理 .agent-context 计划生命周期，按 init、plan、replan
 | 重做计划、调整方案 | replan | `actions/replan.md` |
 | 按计划开始做、实现当前计划 | implement | `actions/implement.md` |
 | 补一个小改动、在当前结果上修 | patch | `actions/patch.md` |
-| 任务彻底完成、归档当前计划 | done | `actions/done.md` |
+| 快速出计划并实施 | rush | `actions/rush.md` |
+| 任务彻底完成、归档当前计划 | done | 运行 `agent-context done` |
 
 ## 全局约束
 

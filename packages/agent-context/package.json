@@ -13,7 +13,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist node_modules/.cache/.tsbuildinfo"
   },
   "dependencies": {
     "@inquirer/prompts": "^8.3.0",
