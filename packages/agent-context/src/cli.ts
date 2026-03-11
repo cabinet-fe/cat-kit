@@ -4,8 +4,11 @@ import { readFileSync } from 'node:fs'
 
 import { Command } from 'commander'
 
+import { doneCommand } from './commands/done'
 import { installCommand } from './commands/install'
+import { statusCommand } from './commands/status'
 import { syncCommand } from './commands/sync'
+import { validateCommand } from './commands/validate'
 
 const packageJson = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8')
@@ -30,6 +33,22 @@ program
   .option('--tools <tools>', '指定目标工具，逗号分隔：claude,codex,cursor,antigravity,copilot')
   .option('--check', '仅检查是否存在待更新内容，不写入文件')
   .action(syncCommand)
+
+program
+  .command('validate')
+  .description('校验 .agent-context 目录结构')
+  .action(validateCommand)
+
+program
+  .command('status')
+  .description('查看当前 agent-context 状态')
+  .action(statusCommand)
+
+program
+  .command('done')
+  .description('归档当前已执行计划')
+  .option('--yes', '跳过确认，直接归档')
+  .action(doneCommand)
 
 program.parseAsync().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error)
