@@ -40,3 +40,32 @@ export interface RunResult extends ApplyMutationResult {
   mode: 'install' | 'sync'
   check: boolean
 }
+
+// ── Context types ────────────────────────────────────
+
+export type PlanStatus = '未执行' | '已执行'
+
+export interface PlanInfo {
+  number: number
+  status: PlanStatus
+  dir: string
+}
+
+export interface ContextSnapshot {
+  root: string
+  currentPlan: PlanInfo | null
+  preparing: PlanInfo[]
+  doneCount: number
+}
+
+export interface ValidateResult {
+  valid: boolean
+  errors: string[]
+  context: ContextSnapshot | null
+}
+
+export interface ArchiveResult {
+  archivedTo: string
+  promoted: number | null
+  remainingPreparing: number
+}
