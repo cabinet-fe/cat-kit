@@ -16,7 +16,7 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
   codex: {
     id: 'codex',
     name: 'Codex',
-    rootDir: '.codex/commands',
+    rootDir: '.codex/prompts',
     fileExtension: '.md',
     supportsFrontmatter: true,
     commandSeparator: '-',
@@ -34,7 +34,7 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
   antigravity: {
     id: 'antigravity',
     name: 'Antigravity',
-    rootDir: '.agents',
+    rootDir: '.agent/workflows',
     fileExtension: '.md',
     supportsFrontmatter: true,
     commandSeparator: '-',

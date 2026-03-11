@@ -69,9 +69,9 @@ init → plan → replan → implement → patch → done
 | 工具           | 命令文件目录        | 调用方式示例 |
 | -------------- | ------------------- | ------------ |
 | Claude         | `.claude/commands/` | `/ac:init`   |
-| Codex          | `.codex/commands/`  | `/ac-init`   |
+| Codex          | `.codex/prompts/`   | `/ac-init`   |
 | Cursor         | `.cursor/commands/` | `/ac-init`   |
-| Antigravity    | `.agents/`          | `/ac-init`   |
+| Antigravity    | `.agent/workflows/` | `/ac-init`   |
 | GitHub Copilot | `.github/prompts/`  | `#ac-init`   |
 
 ## 命令参考
