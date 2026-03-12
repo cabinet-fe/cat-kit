@@ -84,7 +84,7 @@ function renderFrontmatter(target: ToolTarget): string {
 
 function renderOpenAIMetadata(): string {
   return `interface:
-  display_name: "Agent Context"
+  display_name: "Agent Context Workflow"
   short_description: "统一管理 .agent-context 计划生命周期"
   default_prompt: "Use $ac-workflow to manage the current task through init, plan, replan, implement, patch, rush, or done."
 
