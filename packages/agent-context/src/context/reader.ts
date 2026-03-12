@@ -5,7 +5,9 @@ import { join } from 'node:path'
 import type { ContextSnapshot, PlanInfo, PlanStatus } from '../types.js'
 
 const PLAN_DIR_RE = /^plan-(\d+)$/
-const STATUS_RE = /^>\s*状态:\s*(未执行|已执行)\s*$/m
+const DONE_DIR_RE = /^plan-(\d+)(?:-\d{8})?$/
+const EXACT_STATUS_RE = /^>\s*状态:\s*(未执行|已执行)$/m
+const LOOSE_STATUS_RE = /^>?[ \t]*状态[：:].*$/m
 
 // ── Public API ───────────────────────────────────────
 
@@ -25,13 +27,13 @@ export async function readRawContext(
 
   const currentPlans = await readPlanDirs(root)
   const preparing = await readPlanDirs(join(root, 'preparing'))
-  const doneCount = await countDirs(join(root, 'done'))
+  const done = await readDonePlans(join(root, 'done'))
 
   const snapshot: ContextSnapshot = {
     root,
     currentPlan: currentPlans[0] ?? null,
     preparing,
-    doneCount
+    done
   }
 
   return { snapshot, currentPlanCount: currentPlans.length }
@@ -45,8 +47,17 @@ export async function readPlanStatus(planDir: string): Promise<PlanStatus> {
   }
 
   const content = await readFile(planFile, 'utf-8')
-  const match = content.match(STATUS_RE)
-  return match ? (match[1] as PlanStatus) : '未执行'
+  
+  const exactMatch = content.match(EXACT_STATUS_RE)
+  if (exactMatch) {
+    return exactMatch[1] as PlanStatus
+  }
+
+  if (LOOSE_STATUS_RE.test(content)) {
+    return '未知'
+  }
+
+  return '未执行'
 }
 
 // ── Helpers ──────────────────────────────────────────
@@ -70,8 +81,20 @@ async function readPlanDirs(parentDir: string): Promise<PlanInfo[]> {
   return plans.sort((a, b) => a.number - b.number)
 }
 
-async function countDirs(dir: string): Promise<number> {
-  if (!existsSync(dir)) return 0
-  const entries = await readdir(dir, { withFileTypes: true })
-  return entries.filter(e => e.isDirectory()).length
+async function readDonePlans(parentDir: string): Promise<Pick<PlanInfo, 'number' | 'dir'>[]> {
+  if (!existsSync(parentDir)) return []
+  const entries = await readdir(parentDir, { withFileTypes: true })
+  const plans: Pick<PlanInfo, 'number' | 'dir'>[] = []
+  
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue
+    const match = entry.name.match(DONE_DIR_RE)
+    if (!match?.[1]) continue
+    plans.push({
+      number: parseInt(match[1], 10),
+      dir: join(parentDir, entry.name)
+    })
+  }
+
+  return plans.sort((a, b) => a.number - b.number)
 }

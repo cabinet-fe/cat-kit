@@ -22,14 +22,12 @@ export async function statusCommand(): Promise<void> {
     ? `plan-${ctx.currentPlan.number} (${ctx.currentPlan.status})`
     : '无'
   const preparing =
-    ctx.preparing.length > 0
-      ? ctx.preparing.map((p) => `plan-${p.number}`).join(', ')
-      : '无'
+    ctx.preparing.length > 0 ? ctx.preparing.map((p) => `plan-${p.number}`).join(', ') : '无'
 
-  console.log('') // eslint-disable-line no-console
-  console.log('Agent Context Status') // eslint-disable-line no-console
-  console.log('────────────────────') // eslint-disable-line no-console
-  console.log(`当前计划:  ${current}`) // eslint-disable-line no-console
-  console.log(`待执行队列: ${preparing}`) // eslint-disable-line no-console
-  console.log(`已归档:    ${ctx.doneCount} 个`) // eslint-disable-line no-console
+  console.log('')
+  console.log('Agent Context Status')
+  console.log('────────────────────')
+  console.log(`当前计划:  ${current}`)
+  console.log(`待执行队列: ${preparing}`)
+  console.log(`已归档:    ${ctx.done.length} 个`)
 }

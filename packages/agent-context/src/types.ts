@@ -43,7 +43,7 @@ export interface RunResult extends ApplyMutationResult {
 
 // ── Context types ────────────────────────────────────
 
-export type PlanStatus = '未执行' | '已执行'
+export type PlanStatus = '未执行' | '已执行' | '未知'
 
 export interface PlanInfo {
   number: number
@@ -55,7 +55,7 @@ export interface ContextSnapshot {
   root: string
   currentPlan: PlanInfo | null
   preparing: PlanInfo[]
-  doneCount: number
+  done: Pick<PlanInfo, 'number' | 'dir'>[]
 }
 
 export interface ValidateResult {
