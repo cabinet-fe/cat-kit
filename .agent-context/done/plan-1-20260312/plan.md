@@ -1,6 +1,6 @@
 # 新建 @cat-kit/cli 包并实现可测试的 verify-commit 子命令
 
-> 状态: 未执行
+> 状态: 已执行
 
 ## 目标
 
@@ -56,7 +56,9 @@
 ### 步骤 5：集成到 Monorepo
 
 - 在根 `tsconfig.json` 的 `references` 中添加新包。
+- 在 `release/repo.ts` 中注册包组。
 - 在 `release/build.ts` 中添加构建配置。
+- 在 `packages/tests/package.json` 中添加依赖。
 
 ### 步骤 6：编写并运行单元测试
 
@@ -67,8 +69,11 @@
 
 ## 影响范围
 
-- 新增 `packages/cli`
-- 修改根 `tsconfig.json`
-- 修改 `release/build.ts`
+- `packages/cli/` (新增)
+- `packages/tests/cli/` (新增)
+- `tsconfig.json`
+- `release/repo.ts`
+- `release/build.ts`
+- `packages/tests/package.json`
 
 ## 历史补丁

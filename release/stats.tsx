@@ -1,7 +1,9 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+
 import { renderToString } from 'react-dom/server'
-import { main, maintenance } from './repo'
+
+import { main, maintenance } from './groups'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..')
@@ -17,7 +19,6 @@ async function getPackages(): Promise<Package[]> {
   const workspaces = [...main.workspaces, ...maintenance.workspaces]
   const packages = await Promise.all(
     workspaces.map(async ({ dir, name, pkg }) => {
-
       const dirName = path.basename(dir)
       return {
         name: name,
@@ -209,13 +210,11 @@ function HomePage({ packages }: { packages: Package[] }) {
           {packages.length > 0 ? (
             <>
               <div className='packages-list'>
-                {packages.map(pkg => (
+                {packages.map((pkg) => (
                   <a key={pkg.name} href={pkg.path} className='package-item'>
                     <div className='package-info'>
                       <div className='package-name'>{pkg.name}</div>
-                      <div className='package-description'>
-                        {pkg.description}
-                      </div>
+                      <div className='package-description'>{pkg.description}</div>
                     </div>
                   </a>
                 ))}
@@ -277,9 +276,7 @@ const server = Bun.serve({
         }
 
         return new Response(file, {
-          headers: {
-            'Content-Type': file.type || 'text/html; charset=utf-8'
-          }
+          headers: { 'Content-Type': file.type || 'text/html; charset=utf-8' }
         })
       } catch (error) {
         return new Response('Error reading file', { status: 500 })

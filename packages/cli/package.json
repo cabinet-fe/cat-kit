@@ -1,0 +1,22 @@
+{
+  "name": "@cat-kit/cli",
+  "version": "1.0.0",
+  "description": "CatKit CLI tools",
+  "type": "module",
+  "bin": {
+    "cat-cli": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "commander": "^14.0.3"
+  },
+  "devDependencies": {
+    "@cat-kit/tsconfig": "workspace:*",
+    "@types/node": "^24.12.0"
+  }
+}

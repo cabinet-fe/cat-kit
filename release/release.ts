@@ -12,8 +12,7 @@ import { select } from '@inquirer/prompts'
 import chalk from 'chalk'
 import { $ } from 'execa'
 
-import { GROUPS_BUILD } from './build'
-import { main, maintenance, tsconfig, agentContext, repo } from './repo'
+import { main, maintenance, tsconfig, agentContext, repo } from './groups'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

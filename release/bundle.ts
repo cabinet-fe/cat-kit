@@ -1,3 +1,3 @@
-import { GROUPS_BUILD } from './build'
+import { groups } from './groups'
 
-await Promise.all(Object.values(GROUPS_BUILD).map(fn => fn()))
+await Promise.all(Object.values(groups).map((item) => item.build?.()))
