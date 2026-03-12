@@ -16,9 +16,11 @@ description: 管理 .agent-context 计划生命周期，按 init、plan、replan
 | 给需求出计划、拆分任务 | plan | `actions/plan.md` |
 | 重做计划、调整方案 | replan | `actions/replan.md` |
 | 按计划开始做、实现当前计划 | implement | `actions/implement.md` |
-| 补一个小改动、在当前结果上修 | patch | `actions/patch.md` |
-| 快速出计划并实施 | rush | `actions/rush.md` |
+| 实施后不满意、追加需求、修补问题 | patch | `actions/patch.md` |
+| 无活跃计划时快速出计划并实施 | rush | `actions/rush.md` |
 | 任务彻底完成、归档当前计划 | done | 运行 `agent-context done` |
+
+> **消歧**：存在已执行的当前计划时，用户提出任何变更需求 → 一律走 **patch**，禁止走 plan / rush。
 
 ## 全局约束
 
