@@ -10,7 +10,7 @@ hero:
     alt: CatKit
   actions:
     - theme: brand
-      text: 快速开始
+      text: 指南总览
       link: /guide/getting-started
 
     - theme: alt
@@ -40,10 +40,10 @@ features:
 ## 安装
 
 ```bash
-bun install @cat-kit/core
+bun add @cat-kit/core
 ```
 
-[查看](/packages/core/)所有可用的包。
+[查看指南总览](/guide/getting-started)快速定位包与文档入口。
 
 ## 使用
 

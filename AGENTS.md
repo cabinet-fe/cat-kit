@@ -1,4 +1,4 @@
-# CatKit - Monorepo 开发指南
+# CatKit - 开发指南
 
 > 喵喵工具箱：面向浏览器和 Node.js 的 TypeScript 工具包集合。
 
@@ -70,16 +70,11 @@ cat-kit/
 - **导出**：如果一个包要导出，通过 `src/index.ts` 统一导出，除了包名导出还支持 `src` 源码导出
 - **包间引用**：开发时使用 `@cat-kit/<pkg>/src` 路径引用源码
 
-## 包依赖关系
+## 优先使用内部依赖
 
-```
-core ← http
-core ← fe
-core ← be
-core ← excel
-```
+本项目是一个**单体仓库**, 在编码时必须倾向于使用内部依赖（如果存在的话）。
 
-`core` 是基础包，其他包依赖 `core`，但彼此不交叉依赖。
+除了`@cat-kit/docs`、`@cat-kit/tests`、`build`包，任何包在使用内部依赖时不得使用`src`路径，必须使用`dist`路径。
 
 ## 测试约定
 
