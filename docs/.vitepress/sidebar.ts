@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync, type Dirent } from 'node:fs'
 import { basename, extname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
 import type { DefaultTheme } from 'vitepress'
 
 interface SidebarGroupConfig {
@@ -63,11 +64,7 @@ function generateSidebar(sourceMap: SidebarSourceMap): DefaultTheme.Sidebar {
     for (const group of groups) {
       const items = collectItems(group.dir)
       if (items.length > 0) {
-        sidebarItems.push({
-          text: group.text,
-          collapsed: group.collapsed,
-          items
-        })
+        sidebarItems.push({ text: group.text, collapsed: group.collapsed, items })
       }
     }
 
@@ -103,16 +100,8 @@ function collectInternalItems(relativeDir: string): SidebarItemInternal[] {
         continue
       }
 
-      items.push({
-        text: formatFromSlug(entry.name),
-        items: nestedItems,
-        order: 0
-      })
-    } else if (
-      entry.isFile() &&
-      entry.name.endsWith('.md') &&
-      !entry.name.startsWith('_')
-    ) {
+      items.push({ text: formatFromSlug(entry.name), items: nestedItems, order: 0 })
+    } else if (entry.isFile() && entry.name.endsWith('.md') && !entry.name.startsWith('_')) {
       const relativeFilePath = join(relativeDir, entry.name).replace(/\\/g, '/')
       const meta = createFileSidebarItem(relativeFilePath)
       if (meta) {
@@ -124,9 +113,7 @@ function collectInternalItems(relativeDir: string): SidebarItemInternal[] {
   return items
 }
 
-function createFileSidebarItem(
-  relativeFilePath: string
-): SidebarItemInternal | null {
+function createFileSidebarItem(relativeFilePath: string): SidebarItemInternal | null {
   const absolutePath = join(DOCS_ROOT, relativeFilePath)
   const content = readFileSync(absolutePath, 'utf-8')
   const { data, body } = parseFrontMatter(content)
@@ -140,16 +127,10 @@ function createFileSidebarItem(
   const order = resolveOrder({ filename, data })
   const link = buildLink(relativeFilePath)
 
-  return {
-    text,
-    link,
-    order
-  }
+  return { text, link, order }
 }
 
-function finalizeItems(
-  items: SidebarItemInternal[]
-): DefaultTheme.SidebarItem[] {
+function finalizeItems(items: SidebarItemInternal[]): DefaultTheme.SidebarItem[] {
   return items
     .sort((a, b) => {
       if (a.order !== b.order) {
@@ -162,33 +143,21 @@ function finalizeItems(
         return rest
       }
 
-      return {
-        ...rest,
-        items: finalizeItems(nested)
-      }
+      return { ...rest, items: finalizeItems(nested) }
     })
 }
 
-function parseFrontMatter(content: string): {
-  data: FrontMatterData
-  body: string
-} {
+function parseFrontMatter(content: string): { data: FrontMatterData; body: string } {
   const match = /^---\s*[\r\n]+([\s\S]*?)\s*---\s*/.exec(content)
 
   if (!match) {
-    return {
-      data: {},
-      body: content
-    }
+    return { data: {}, body: content }
   }
 
   const raw = match[1] ?? ''
   const body = content.slice(match[0].length)
 
-  return {
-    data: parseFrontMatterBlock(raw),
-    body
-  }
+  return { data: parseFrontMatterBlock(raw), body }
 }
 
 function parseFrontMatterBlock(raw: string): FrontMatterData {
@@ -223,7 +192,6 @@ function parseFrontMatterBlock(raw: string): FrontMatterData {
 
     const parsedValue = parseScalar(rawValue ?? '')
     if (parsedValue !== null) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ;(data as any)[key] = parsedValue
     }
   }
@@ -289,13 +257,7 @@ function resolveDisplayText({
   )
 }
 
-function resolveOrder({
-  filename,
-  data
-}: {
-  filename: string
-  data: FrontMatterData
-}): number {
+function resolveOrder({ filename, data }: { filename: string; data: FrontMatterData }): number {
   if (typeof data.sidebarOrder === 'number') {
     return data.sidebarOrder
   }
@@ -316,7 +278,7 @@ function formatFromSlug(slug: string): string {
   return slug
     .split(/[-_]/)
     .filter(Boolean)
-    .map(token => token.charAt(0).toUpperCase() + token.slice(1))
+    .map((token) => token.charAt(0).toUpperCase() + token.slice(1))
     .join(' ')
 }
 

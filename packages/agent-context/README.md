@@ -39,25 +39,25 @@ agent-context install
 
 ## 支持的工具
 
-| 工具 | Skill 目录 |
-| --- | --- |
-| Claude | `.claude/skills/agent-context/` |
-| Codex | `.codex/skills/agent-context/` |
-| Cursor | `.cursor/skills/agent-context/` |
-| Antigravity | `.agent/skills/agent-context/` |
+| 工具           | Skill 目录                      |
+| -------------- | ------------------------------- |
+| Claude         | `.claude/skills/agent-context/` |
+| Codex          | `.codex/skills/agent-context/`  |
+| Cursor         | `.cursor/skills/agent-context/` |
+| Antigravity    | `.agent/skills/agent-context/`  |
 | GitHub Copilot | `.github/skills/agent-context/` |
 
 ## 生成产物
 
 `agent-context` 会按工具生成对应官方支持的 Skill 产物：
 
-| 工具 | 产物 |
-| --- | --- |
-| Claude | `SKILL.md`，包含 `name`、`description`、`argument-hint` frontmatter |
-| Codex | `SKILL.md` + `agents/openai.yaml` |
-| Cursor | `SKILL.md` |
-| Antigravity | `SKILL.md` |
-| GitHub Copilot | `SKILL.md`，包含 `name`、`description`、`license` frontmatter |
+| 工具           | 产物                                                                |
+| -------------- | ------------------------------------------------------------------- |
+| Claude         | `SKILL.md`，包含 `name`、`description`、`argument-hint` frontmatter |
+| Codex          | `SKILL.md` + `agents/openai.yaml`                                   |
+| Cursor         | `SKILL.md`                                                          |
+| Antigravity    | `SKILL.md`                                                          |
+| GitHub Copilot | `SKILL.md`，包含 `name`、`description`、`license` frontmatter       |
 
 ## 命令参考
 
@@ -93,11 +93,11 @@ agent-context sync --check
 
 ### 通用选项
 
-| 选项 | 说明 |
-| --- | --- |
-| `--tools <tools>` | 指定目标工具，逗号分隔 |
-| `--check` | 仅检查，不写入文件 |
-| `--yes` | 仅 `install` 支持；非交互模式下优先复用已安装工具，否则安装全部工具 |
+| 选项              | 说明                                                                |
+| ----------------- | ------------------------------------------------------------------- |
+| `--tools <tools>` | 指定目标工具，逗号分隔                                              |
+| `--check`         | 仅检查，不写入文件                                                  |
+| `--yes`           | 仅 `install` 支持；非交互模式下优先复用已安装工具，否则安装全部工具 |
 
 ## License
 

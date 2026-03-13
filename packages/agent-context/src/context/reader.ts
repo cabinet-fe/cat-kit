@@ -1,5 +1,5 @@
-import { readdir, readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
+import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import type { ContextSnapshot, PlanInfo, PlanStatus } from '../types.js'
@@ -29,12 +29,7 @@ export async function readRawContext(
   const preparing = await readPlanDirs(join(root, 'preparing'))
   const done = await readDonePlans(join(root, 'done'))
 
-  const snapshot: ContextSnapshot = {
-    root,
-    currentPlan: currentPlans[0] ?? null,
-    preparing,
-    done
-  }
+  const snapshot: ContextSnapshot = { root, currentPlan: currentPlans[0] ?? null, preparing, done }
 
   return { snapshot, currentPlanCount: currentPlans.length }
 }
@@ -47,7 +42,7 @@ export async function readPlanStatus(planDir: string): Promise<PlanStatus> {
   }
 
   const content = await readFile(planFile, 'utf-8')
-  
+
   const exactMatch = content.match(EXACT_STATUS_RE)
   if (exactMatch) {
     return exactMatch[1] as PlanStatus
@@ -85,15 +80,12 @@ async function readDonePlans(parentDir: string): Promise<Pick<PlanInfo, 'number'
   if (!existsSync(parentDir)) return []
   const entries = await readdir(parentDir, { withFileTypes: true })
   const plans: Pick<PlanInfo, 'number' | 'dir'>[] = []
-  
+
   for (const entry of entries) {
     if (!entry.isDirectory()) continue
     const match = entry.name.match(DONE_DIR_RE)
     if (!match?.[1]) continue
-    plans.push({
-      number: parseInt(match[1], 10),
-      dir: join(parentDir, entry.name)
-    })
+    plans.push({ number: parseInt(match[1], 10), dir: join(parentDir, entry.name) })
   }
 
   return plans.sort((a, b) => a.number - b.number)

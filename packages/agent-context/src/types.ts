@@ -12,10 +12,7 @@ export interface ToolTarget {
 }
 
 export interface SkillArtifacts {
-  files: Array<{
-    relativePath: string
-    body: string
-  }>
+  files: Array<{ relativePath: string; body: string }>
 }
 
 export interface FileMutation {

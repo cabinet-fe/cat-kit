@@ -1,7 +1,12 @@
 import { checkbox } from '@inquirer/prompts'
 
 import { runInstall } from '../runner.js'
-import { DEFAULT_TOOL_ORDER, detectConfiguredToolIds, getToolChoices, parseToolIds } from '../tools.js'
+import {
+  DEFAULT_TOOL_ORDER,
+  detectConfiguredToolIds,
+  getToolChoices,
+  parseToolIds
+} from '../tools.js'
 import type { ToolId } from '../types.js'
 import { printCheckResult, printRunSummary } from './printer.js'
 

@@ -1,11 +1,18 @@
-import { resolve, dirname } from 'node:path'
 import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { resolve, dirname } from 'node:path'
 
+import { renderSkillArtifacts } from './content/index.js'
 import type { SkillPaths } from './tools.js'
 import { resolveToolTargets, resolveSkillPaths } from './tools.js'
-import { renderSkillArtifacts } from './content/index.js'
-import type { ApplyMutationResult, FileMutation, RunOptions, RunResult, ToolId, ToolTarget } from './types.js'
+import type {
+  ApplyMutationResult,
+  FileMutation,
+  RunOptions,
+  RunResult,
+  ToolId,
+  ToolTarget
+} from './types.js'
 
 export async function runInstall(options: RunOptions = {}): Promise<RunResult> {
   return run('install', options)
@@ -22,7 +29,7 @@ async function run(mode: 'install' | 'sync', options: RunOptions): Promise<RunRe
   const tools = dedup(options.tools)
   const targets = resolveToolTargets(tools)
 
-  const mutations: FileMutation[] = targets.flatMap(target => buildMutations(target, cwd))
+  const mutations: FileMutation[] = targets.flatMap((target) => buildMutations(target, cwd))
 
   const check = options.check ?? false
   const result = await applyMutations(mutations, check)
@@ -36,7 +43,7 @@ function buildMutations(target: ToolTarget, cwd: string): FileMutation[] {
   const artifacts = renderSkillArtifacts(target)
   const paths = resolveSkillPaths(target, cwd)
 
-  return artifacts.files.map(file => ({
+  return artifacts.files.map((file) => ({
     path: resolveArtifactPath(paths, file.relativePath),
     body: file.body
   }))
@@ -56,12 +63,7 @@ async function applyMutations(
   mutations: FileMutation[],
   check: boolean
 ): Promise<ApplyMutationResult> {
-  const result: ApplyMutationResult = {
-    created: [],
-    updated: [],
-    unchanged: [],
-    changed: []
-  }
+  const result: ApplyMutationResult = { created: [], updated: [], unchanged: [], changed: [] }
 
   for (const mutation of mutations) {
     const fileExists = existsSync(mutation.path)

@@ -34,15 +34,9 @@ program
   .option('--check', '仅检查是否存在待更新内容，不写入文件')
   .action(syncCommand)
 
-program
-  .command('validate')
-  .description('校验 .agent-context 目录结构')
-  .action(validateCommand)
+program.command('validate').description('校验 .agent-context 目录结构').action(validateCommand)
 
-program
-  .command('status')
-  .description('查看当前 agent-context 状态')
-  .action(statusCommand)
+program.command('status').description('查看当前 agent-context 状态').action(statusCommand)
 
 program
   .command('done')

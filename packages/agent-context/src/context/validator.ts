@@ -24,13 +24,17 @@ export function validate(
     }
 
     if (snapshot.currentPlan.status === '未知') {
-      errors.push(`当前计划 plan-${snapshot.currentPlan.number} 的状态格式严重不符合要求，请严格按照 "> 状态: 已执行" 或 "> 状态: 未执行" 的格式书写，禁止添加 emoji 或其他额外字符。`)
+      errors.push(
+        `当前计划 plan-${snapshot.currentPlan.number} 的状态格式严重不符合要求，请严格按照 "> 状态: 已执行" 或 "> 状态: 未执行" 的格式书写，禁止添加 emoji 或其他额外字符。`
+      )
     }
   }
 
   for (const p of snapshot.preparing) {
     if (p.status === '未知') {
-      errors.push(`待执行计划 plan-${p.number} 的状态格式严重不符合要求，请严格按照 "> 状态: 已执行" 或 "> 状态: 未执行" 的格式书写。`)
+      errors.push(
+        `待执行计划 plan-${p.number} 的状态格式严重不符合要求，请严格按照 "> 状态: 已执行" 或 "> 状态: 未执行" 的格式书写。`
+      )
     }
   }
 
@@ -54,7 +58,9 @@ export function validate(
   allNumbers.sort((a, b) => a - b)
   for (let i = 0; i < allNumbers.length; i++) {
     if (allNumbers[i] !== i + 1) {
-      errors.push(`计划序列不连续或未从 1 开始。预期出现编号 ${i + 1}，实际遇到编号 ${allNumbers[i]} (要求必须是从 1 开始顺序查询)。`)
+      errors.push(
+        `计划序列不连续或未从 1 开始。预期出现编号 ${i + 1}，实际遇到编号 ${allNumbers[i]} (要求必须是从 1 开始顺序查询)。`
+      )
       break
     }
   }

@@ -29,9 +29,7 @@ export async function doneCommand(options: { yes?: boolean }): Promise<void> {
   }
 
   if (!options.yes) {
-    const confirmed = await confirm({
-      message: `确认归档 plan-${snapshot.currentPlan.number}？`
-    })
+    const confirmed = await confirm({ message: `确认归档 plan-${snapshot.currentPlan.number}？` })
     if (!confirmed) {
       console.log('已取消') // eslint-disable-line no-console
       return
