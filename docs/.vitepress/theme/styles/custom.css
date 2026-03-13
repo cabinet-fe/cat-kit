@@ -35,6 +35,11 @@
   --vp-c-bg-alt: var(--paper-soft);
   --vp-c-bg-soft: var(--paper-soft);
 
+  /* 导航和侧栏背景透明化以透出背景图 */
+  --vp-sidebar-bg-color: transparent;
+  --vp-nav-bg-color: transparent;
+  --vp-local-nav-bg-color: transparent;
+
   /* 文字颜色 */
   --vp-c-text-1: var(--ink-heavy);
   --vp-c-text-2: var(--ink-medium);
@@ -88,6 +93,10 @@
   --vp-c-bg-alt: var(--paper-soft);
   --vp-c-bg-soft: var(--paper-soft);
 
+  --vp-sidebar-bg-color: transparent;
+  --vp-nav-bg-color: transparent;
+  --vp-local-nav-bg-color: transparent;
+
   --vp-c-brand-1: var(--ink-heavy);
   --vp-c-brand-2: var(--ink-medium);
   --vp-c-brand-3: var(--ink-light);
@@ -104,10 +113,12 @@
 
 body {
   background: url(texture.jpg) repeat;
+  background-attachment: fixed;
 }
 
 html.dark body {
   background: var(--vp-c-bg);
+  background-attachment: fixed;
 }
 /* --- 组件样式优化 --- */
 
@@ -239,12 +250,26 @@ html.dark body {
   backdrop-filter: blur(8px);
 }
 
+.VPNavBarTitle {
+  background-color: transparent !important;
+}
+
 .VPNavBar.top {
   background-color: transparent !important;
   backdrop-filter: none;
 }
 
 .dark .VPNavBar {
+  background-color: rgba(13, 13, 13, 0.9) !important;
+  backdrop-filter: blur(12px);
+}
+
+.VPLocalNav {
+  background-color: rgba(234, 232, 226, 0.85) !important;
+  backdrop-filter: blur(8px);
+}
+
+.dark .VPLocalNav {
   background-color: rgba(13, 13, 13, 0.9) !important;
   backdrop-filter: blur(12px);
 }
