@@ -45,9 +45,9 @@
   --vp-c-border: var(--ink-trace);
 
   /* 字体配置 - 霞鹜文楷优先 */
-  --vp-font-family-base: 'LXGW WenKai', 'Punctuation SC', 'Inter', ui-sans-serif,
-    system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-    'Segoe UI Symbol', 'Noto Color Emoji';
+  --vp-font-family-base:
+    'LXGW WenKai', 'Punctuation SC', 'Inter', ui-sans-serif, system-ui, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
   --vp-font-family-mono: 'Fira Code', monospace;
 
@@ -423,11 +423,7 @@ html.dark body {
 
 /* 淡墨晕背景 */
 .VPSidebarItem.is-active > .item > .link > .text {
-  background: linear-gradient(
-    90deg,
-    rgba(26, 26, 26, 0.08) 0%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, rgba(26, 26, 26, 0.08) 0%, transparent 100%);
   padding: 2px 8px 2px 4px;
   margin-left: -4px;
   border-radius: 2px;
@@ -446,9 +442,5 @@ html.dark body {
 }
 
 .dark .VPSidebarItem.is-active > .item > .link > .text {
-  background: linear-gradient(
-    90deg,
-    rgba(232, 230, 227, 0.1) 0%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, rgba(232, 230, 227, 0.1) 0%, transparent 100%);
 }
