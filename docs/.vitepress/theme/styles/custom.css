@@ -21,6 +21,12 @@
   --paper-white: #eae8e2;
   /* 素笺 - 卡片/区块背景（半透明以透出纹理） */
   --paper-soft: rgba(226, 223, 216, 0.85);
+  /* 深一层纸色 - 首页卷轴容器 */
+  --paper-deep: rgba(221, 216, 205, 0.74);
+  /* 印章朱砂 */
+  --seal-red: #9e3323;
+  /* 阴影 */
+  --paper-shadow: 0 24px 60px rgba(71, 60, 43, 0.12);
 
   /* --- VitePress 变量覆盖 --- */
 
@@ -87,6 +93,9 @@
   /* 深邃背景 */
   --paper-white: #0d0d0d; /* 夜墨深底 */
   --paper-soft: #1a1a1a; /* 深灰区块 */
+  --paper-deep: rgba(31, 31, 31, 0.88);
+  --seal-red: #c48b7f;
+  --paper-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
 
   /* 变量重映射 */
   --vp-c-bg: var(--paper-white);
@@ -468,4 +477,622 @@ html.dark body {
 
 .dark .VPSidebarItem.is-active > .item > .link > .text {
   background: linear-gradient(90deg, rgba(232, 230, 227, 0.1) 0%, transparent 100%);
+}
+
+/* 9. 首页专用布局 */
+.VPHome {
+  position: relative;
+  overflow: clip;
+}
+
+.VPHome::before,
+.VPHome::after {
+  content: '';
+  position: absolute;
+  inset: auto;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.VPHome::before {
+  top: 140px;
+  left: -80px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(26, 26, 26, 0.12) 0%, transparent 72%);
+  filter: blur(18px);
+}
+
+.VPHome::after {
+  right: -100px;
+  top: 520px;
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(158, 51, 35, 0.08) 0%, transparent 72%);
+  filter: blur(24px);
+}
+
+.VPHero.VPHomeHero {
+  position: relative;
+  padding: clamp(44px, 7vw, 84px) 24px 24px;
+}
+
+.VPHero.VPHomeHero .container {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: clamp(28px, 4vw, 56px);
+  align-items: center;
+}
+
+.VPHero.VPHomeHero .main {
+  position: relative;
+  z-index: 1;
+  padding: clamp(32px, 4vw, 52px);
+  border: 1px solid rgba(120, 108, 89, 0.28);
+  border-radius: 10px 34px 10px 34px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 55%),
+    linear-gradient(180deg, rgba(221, 216, 205, 0.88), rgba(233, 230, 222, 0.62));
+  box-shadow: var(--paper-shadow);
+  overflow: hidden;
+}
+
+.VPHero.VPHomeHero .main::before {
+  content: '开卷';
+  position: absolute;
+  top: 28px;
+  right: 26px;
+  writing-mode: vertical-rl;
+  letter-spacing: 0.35em;
+  font-size: 13px;
+  color: var(--ink-faint);
+  opacity: 0.85;
+}
+
+.VPHero.VPHomeHero .main::after {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(140, 128, 108, 0.14);
+  border-radius: 6px 28px 6px 28px;
+  pointer-events: none;
+}
+
+.VPHero.VPHomeHero .heading {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.VPHero.VPHomeHero .name,
+.VPHero.VPHomeHero .text {
+  line-height: 1.05;
+}
+
+.VPHero.VPHomeHero .name {
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  letter-spacing: 0.08em;
+}
+
+.VPHero.VPHomeHero .text {
+  font-family: 'STKaiti', 'KaiTi', 'LXGW WenKai', serif;
+  font-size: clamp(1.45rem, 2.8vw, 2.5rem);
+  color: var(--ink-medium);
+  letter-spacing: 0.18em;
+}
+
+.VPHero.VPHomeHero .tagline {
+  max-width: 36rem;
+  margin: 24px 0 0;
+  font-size: 1.05rem;
+  line-height: 1.95;
+  color: var(--ink-medium);
+}
+
+.VPHero.VPHomeHero .actions {
+  padding-top: 28px;
+  gap: 14px;
+}
+
+.VPHero.VPHomeHero .action {
+  flex-shrink: 0;
+}
+
+.VPHero.VPHomeHero .image {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+}
+
+.VPHero.VPHomeHero .image-container {
+  position: relative;
+  width: min(440px, 100%);
+  aspect-ratio: 1 / 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 38% 62% 48% 52% / 44% 46% 54% 56%;
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.35), transparent 38%),
+    radial-gradient(circle at center, rgba(26, 26, 26, 0.13) 0%, rgba(26, 26, 26, 0.05) 40%, transparent 74%);
+  border: 1px solid rgba(120, 108, 89, 0.18);
+  box-shadow: var(--paper-shadow);
+}
+
+.VPHero.VPHomeHero .image-container::before,
+.VPHero.VPHomeHero .image-container::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.VPHero.VPHomeHero .image-container::before {
+  inset: 28px;
+  border: 1px solid rgba(140, 128, 108, 0.16);
+}
+
+.VPHero.VPHomeHero .image-container::after {
+  right: 18%;
+  bottom: 12%;
+  width: 92px;
+  height: 92px;
+  background: radial-gradient(circle, rgba(158, 51, 35, 0.18) 0%, transparent 68%);
+  filter: blur(8px);
+}
+
+.VPHero.VPHomeHero .image-src {
+  width: min(250px, 58%);
+  height: auto;
+  filter: contrast(1.02) saturate(0.92);
+}
+
+.VPFeatures {
+  position: relative;
+  padding: 18px 24px 12px;
+}
+
+.VPFeatures .container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.VPFeatures .container::before {
+  content: '六艺分陈';
+  display: block;
+  margin: 0 0 18px;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.4em;
+  color: var(--ink-faint);
+}
+
+.VPFeatures .items {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px !important;
+  margin: 0 !important;
+}
+
+.VPFeatures .item {
+  position: relative;
+  width: auto !important;
+  padding: 0 !important;
+}
+
+.VPFeatures .item:nth-child(1),
+.VPFeatures .item:nth-child(4) {
+  transform: translateY(10px);
+}
+
+.VPFeatures .item:nth-child(3),
+.VPFeatures .item:nth-child(6) {
+  transform: translateY(-10px);
+}
+
+.VPFeatures .VPFeature {
+  min-height: 100%;
+  padding: 24px 22px 22px 26px !important;
+  border: 1px solid rgba(120, 108, 89, 0.18) !important;
+  border-radius: 8px 24px 8px 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 38%),
+    linear-gradient(180deg, rgba(224, 219, 208, 0.88), rgba(233, 230, 222, 0.52)) !important;
+  box-shadow: 0 18px 40px rgba(71, 60, 43, 0.08);
+  overflow: hidden;
+}
+
+.VPFeatures .VPFeature::before {
+  left: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 3px !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--ink-trace) 20%,
+    var(--ink-light) 50%,
+    var(--ink-trace) 80%,
+    transparent 100%
+  ) !important;
+}
+
+.VPFeatures .VPFeature:hover::before {
+  height: 60% !important;
+  width: 3px !important;
+  opacity: 1 !important;
+}
+
+.VPFeatures .VPFeature::after {
+  content: '';
+  display: block !important;
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+  width: 44px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ink-trace));
+  opacity: 0.8;
+}
+
+.VPFeatures .VPFeature:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 28px 50px rgba(71, 60, 43, 0.14) !important;
+}
+
+.VPFeatures .VPFeature .title {
+  margin-bottom: 10px !important;
+  font-family: 'STKaiti', 'KaiTi', 'LXGW WenKai', serif;
+  font-size: 1.22rem !important;
+  letter-spacing: 0.08em !important;
+}
+
+.VPFeatures .VPFeature .details {
+  line-height: 1.9 !important;
+}
+
+.VPHome .vp-doc.container {
+  max-width: 1240px;
+  padding: 20px 24px 96px;
+}
+
+.home-scroll {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  gap: 24px;
+  margin: 24px 0 56px;
+  position: relative;
+}
+
+.home-scroll::before {
+  content: '';
+  position: absolute;
+  inset: auto 10% -18px 10%;
+  height: 34px;
+  background: radial-gradient(ellipse at center, rgba(71, 60, 43, 0.12), transparent 68%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.home-scroll__panel,
+.home-scroll__aside,
+.home-package-card,
+.home-ritual__item {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 30%),
+    linear-gradient(180deg, var(--paper-deep), rgba(234, 232, 226, 0.58));
+  border: 1px solid rgba(120, 108, 89, 0.18);
+  box-shadow: var(--paper-shadow);
+}
+
+.home-scroll__panel {
+  padding: clamp(28px, 4vw, 40px);
+  border-radius: 8px 30px 8px 30px;
+}
+
+.home-scroll__panel::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 64px;
+  height: 64px;
+  background: radial-gradient(circle, rgba(26, 26, 26, 0.08), transparent 70%);
+  filter: blur(6px);
+}
+
+.home-scroll__kicker,
+.home-scroll__aside-title,
+.home-ritual__label,
+.home-package-card__tag {
+  margin: 0;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.home-scroll__kicker {
+  color: var(--seal-red);
+  font-size: 13px;
+}
+
+.home-scroll__panel h2 {
+  margin: 14px 0 16px;
+  font-family: 'STKaiti', 'KaiTi', 'LXGW WenKai', serif;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1.25;
+}
+
+.home-scroll__panel p {
+  margin: 0;
+  line-height: 1.95;
+  color: var(--ink-medium);
+}
+
+.home-scroll__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.home-scroll__metric {
+  padding: 16px 14px;
+  border-top: 1px solid rgba(120, 108, 89, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent);
+}
+
+.home-scroll__metric strong {
+  display: block;
+  font-size: 1rem;
+  color: var(--ink-heavy);
+}
+
+.home-scroll__metric span {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--ink-light);
+}
+
+.home-scroll__aside {
+  padding: 24px;
+  border-radius: 24px 8px 24px 8px;
+}
+
+.home-scroll__aside::before {
+  content: '札记';
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  writing-mode: vertical-rl;
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  color: var(--ink-faint);
+}
+
+.home-scroll__aside-title {
+  color: var(--seal-red);
+  font-size: 13px;
+}
+
+.home-scroll__list {
+  margin: 18px 0 28px;
+  padding: 0;
+  list-style: none;
+}
+
+.home-scroll__list li {
+  position: relative;
+  padding: 0 0 0 18px;
+  margin-bottom: 14px;
+  color: var(--ink-medium);
+  line-height: 1.8;
+}
+
+.home-scroll__list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--ink-trace);
+}
+
+.home-scroll__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-heavy);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(120, 108, 89, 0.24);
+  padding-bottom: 4px;
+}
+
+.home-scroll__link::after {
+  content: '→';
+  transition: transform 0.25s ease;
+}
+
+.home-scroll__link:hover::after {
+  transform: translateX(3px);
+}
+
+.home-package-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin: 28px 0 10px;
+}
+
+.home-package-card {
+  display: block;
+  padding: 22px 20px;
+  border-radius: 8px 22px 8px 22px;
+  text-decoration: none;
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.home-package-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(120, 108, 89, 0.28);
+  box-shadow: 0 26px 48px rgba(71, 60, 43, 0.12);
+}
+
+.home-package-card__tag {
+  display: inline-block;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--seal-red);
+}
+
+.home-package-card strong {
+  display: block;
+  margin-bottom: 10px;
+  font-family: 'STKaiti', 'KaiTi', 'LXGW WenKai', serif;
+  font-size: 1.28rem;
+  font-weight: normal;
+  color: var(--ink-heavy);
+}
+
+.home-package-card p {
+  margin: 0;
+  color: var(--ink-medium);
+  line-height: 1.85;
+}
+
+.home-ritual {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.home-ritual__item {
+  padding: 22px 20px;
+  border-radius: 20px 8px 20px 8px;
+}
+
+.home-ritual__label {
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--seal-red);
+}
+
+.home-ritual__item p:last-child {
+  margin: 0;
+  line-height: 1.85;
+  color: var(--ink-medium);
+}
+
+.VPHome .vp-doc h2 {
+  margin-top: 56px;
+}
+
+.VPHome .vp-doc div[class*='language-'] {
+  margin-top: 20px;
+}
+
+.dark .VPHero.VPHomeHero .main,
+.dark .VPFeatures .VPFeature,
+.dark .home-scroll__panel,
+.dark .home-scroll__aside,
+.dark .home-package-card,
+.dark .home-ritual__item {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 28%),
+    linear-gradient(180deg, rgba(31, 31, 31, 0.92), rgba(19, 19, 19, 0.88)) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .VPHero.VPHomeHero .image-container {
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.08), transparent 38%),
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 74%);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .home-scroll__link {
+  color: var(--ink-heavy);
+}
+
+@media (max-width: 960px) {
+  .VPHero.VPHomeHero .container,
+  .home-scroll {
+    grid-template-columns: 1fr;
+  }
+
+  .VPFeatures .items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .VPHero.VPHomeHero .image {
+    order: -1;
+  }
+
+  .VPFeatures .item:nth-child(1),
+  .VPFeatures .item:nth-child(3),
+  .VPFeatures .item:nth-child(4),
+  .VPFeatures .item:nth-child(6) {
+    transform: none;
+  }
+
+  .home-package-grid,
+  .home-ritual,
+  .home-scroll__metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .VPHero.VPHomeHero {
+    padding-inline: 16px;
+  }
+
+  .VPFeatures,
+  .VPHome .vp-doc.container {
+    padding-inline: 16px;
+  }
+
+  .VPFeatures .items {
+    grid-template-columns: 1fr;
+  }
+
+  .VPHero.VPHomeHero .main {
+    padding: 24px 20px;
+    border-radius: 8px 22px 8px 22px;
+  }
+
+  .VPHero.VPHomeHero .main::before,
+  .home-scroll__aside::before {
+    display: none;
+  }
+
+  .VPHero.VPHomeHero .tagline {
+    font-size: 0.98rem;
+  }
+
+  .home-package-card,
+  .home-ritual__item,
+  .home-scroll__panel,
+  .home-scroll__aside {
+    padding: 20px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .VPFeatures .VPFeature:hover,
+  .home-package-card:hover,
+  .home-scroll__link::after {
+    transform: none;
+  }
 }

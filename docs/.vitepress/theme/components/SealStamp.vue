@@ -38,7 +38,7 @@
   top: 35vh;
   right: 15%;
   z-index: 0;
-  color: var(--guochao-vermilion);
+  color: var(--seal-red);
   opacity: 0;
   animation: sealIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.2s forwards;
   mix-blend-mode: multiply;
