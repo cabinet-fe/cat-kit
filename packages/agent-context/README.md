@@ -2,12 +2,7 @@
 
 `@cat-kit/agent-context` 为主流 AI 编程助手安装统一的 `agent-context` Skill，让同一套计划生命周期协议在不同工具里保持一致。
 
-## 它解决什么问题
-
-旧版 AI 工具通常依赖命令文件或 workflow 目录来驱动任务流程，但现在主流产品都在转向 Skills。  
-如果你同时使用 Claude、Codex、Cursor、Antigravity、GitHub Copilot，就需要为不同工具分别维护同一套计划规则，内容容易漂移。
-
-`agent-context` v2 只维护一个核心 Skill，负责统一以下生命周期：
+`agent-context` 只维护一个核心 Skill，负责统一以下生命周期：
 
 ```text
 init -> plan -> replan -> implement -> patch -> done

@@ -1,7 +1,10 @@
-import DefaultTheme from 'vitepress/theme'
 import CopyOrDownloadAsMarkdownButtons from 'vitepress-plugin-llms/vitepress-components/CopyOrDownloadAsMarkdownButtons.vue'
-import DemoContainer from './components/DemoContainer.vue'
+import DefaultTheme from 'vitepress/theme'
+
 import CatKitLayout from './CatKitLayout.vue'
+import DemoContainer from './components/DemoContainer.vue'
+import Mermaid from './components/Mermaid.vue'
+
 import './styles/custom.css'
 
 export default {
@@ -9,9 +12,7 @@ export default {
   Layout: CatKitLayout,
   enhanceApp({ app }) {
     app.component('DemoContainer', DemoContainer)
-    app.component(
-      'CopyOrDownloadAsMarkdownButtons',
-      CopyOrDownloadAsMarkdownButtons
-    )
+    app.component('Mermaid', Mermaid)
+    app.component('CopyOrDownloadAsMarkdownButtons', CopyOrDownloadAsMarkdownButtons)
   }
 }
