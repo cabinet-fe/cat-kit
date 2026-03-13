@@ -1,6 +1,6 @@
 // Monorepo 模块
 
-export { Monorepo } from './monorepo'
+export { Monorepo, WorkspaceGroup } from './monorepo'
 export type {
   MonorepoWorkspace,
   WorkspaceBuildConfig,

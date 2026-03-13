@@ -12,7 +12,7 @@ import { select } from '@inquirer/prompts'
 import chalk from 'chalk'
 import { $ } from 'execa'
 
-import { main, maintenance, tsconfig, agentContext, repo } from './groups'
+import { repo, groups } from './groups'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -52,23 +52,13 @@ function validate(): void {
  * 选择发布组
  */
 async function chooseGroup() {
-  const value = await select({
-    message: '选择要发布的组',
-    choices: [
-      {
-        value: 'main' as const,
-        name: 'main',
-        description: '@cat-kit/core, @cat-kit/fe, @cat-kit/be, @cat-kit/http, @cat-kit/excel'
-      },
-      { value: 'maintenance' as const, name: 'maintenance', description: '@cat-kit/maintenance' },
-      { value: 'tsconfig' as const, name: 'tsconfig', description: '@cat-kit/tsconfig' },
-      {
-        value: 'agentContext' as const,
-        name: 'agent-context',
-        description: '@cat-kit/agent-context'
-      }
-    ]
+  const choices = Object.keys(groups).map((key) => {
+    const item = groups[key]!
+    const pkgNames = item.group.workspaces.map((ws) => ws.name).join(', ')
+    return { value: key, name: key, description: pkgNames }
   })
+
+  const value = await select({ message: '选择要发布的组', choices })
 
   return value
 }
@@ -157,24 +147,24 @@ async function gitReset(commitHash: string): Promise<void> {
 // 发布流程
 // ============================================================================
 
-const GROUP_MAP = { main, maintenance, tsconfig, agentContext }
-
 /**
  * 发布指定组
  */
-async function releaseGroup(
-  groupName: 'main' | 'maintenance' | 'tsconfig' | 'agentContext'
-): Promise<void> {
-  const builder = GROUPS_BUILD[groupName]
+async function releaseGroup(groupName: string): Promise<void> {
+  const item = groups[groupName]
+  if (!item) {
+    throw new Error(`未找到发布的组: ${groupName}`)
+  }
+
+  const { group } = item
 
   // 1. 构建
-  if (builder) {
+  if (item.build) {
     console.log(chalk.bold('\n🔨 开始构建...'))
-    await builder()
+    await item.build()
   }
 
   // 2. 获取当前版本
-  const group = GROUP_MAP[groupName]
   const currentVersion: string = group.workspaces[0]?.pkg.version || '0.0.0'
 
   // 3. 选择版本

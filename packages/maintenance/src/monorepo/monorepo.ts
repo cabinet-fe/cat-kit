@@ -28,7 +28,7 @@ import type {
  *
  * 用于对一组工作区进行批量操作
  */
-class WorkspaceGroup<Workspaces extends string> {
+export class WorkspaceGroup<Workspaces extends string> {
   #workspaces: MonorepoWorkspace[]
   #repo: Monorepo
 
