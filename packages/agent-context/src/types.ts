@@ -50,6 +50,7 @@ export interface PlanInfo {
 
 export interface ContextSnapshot {
   root: string
+  scope: string
   currentPlan: PlanInfo | null
   preparing: PlanInfo[]
   done: Pick<PlanInfo, 'number' | 'dir'>[]

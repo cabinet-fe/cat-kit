@@ -50,7 +50,7 @@ function renderInit(): string {
 function renderPlan(): string {
   return `# plan
 
-创建新的执行计划，写入 \`.agent-context/plan-{number}/plan.md\`。按复杂度可拆分为多个计划，维护「单当前计划 + preparing 队列」结构。
+创建新的执行计划，写入 \`.agent-context/{scope}/plan-{number}/plan.md\`。按复杂度可拆分为多个计划，维护「单当前计划 + preparing 队列」结构。
 
 必须附带计划描述。
 
@@ -70,7 +70,7 @@ function renderPlan(): string {
    - 存在显著不同的技术路径需用户决策。
    - 验收标准不明确：无法判断何时算"完成"。
 2. 按复杂度决定单计划或多计划拆分。
-3. 多计划拆分时：最小编号进入 \`.agent-context/\` 作为当前计划，其余进入 \`.agent-context/preparing/\`。单计划直接创建。
+3. 多计划拆分时：最小编号进入 \`.agent-context/{scope}/\` 作为当前计划，其余进入 \`.agent-context/{scope}/preparing/\`。单计划直接创建。
 4. 每个计划创建 \`plan.md\`，遵循下方模板。
 5. **自检**（不通过则修改后重新检查）：
    - 每个步骤可独立执行且有明确完成标准。
@@ -121,9 +121,9 @@ function renderReplan(): string {
 
 ## 作用域
 
-- 默认作用域：\`.agent-context/preparing/\` 中全部未实施计划。
+- 默认作用域：\`.agent-context/{scope}/preparing/\` 中全部未实施计划。
 - 可通过描述指定仅重规划部分计划（如"重规划 plan-3 和 plan-5"）。
-- 当前计划为 \`已执行\` → 禁止重写，仅允许重规划 \`preparing/\` 队列。
+- 当前计划为 \`已执行\` → 禁止重写，仅允许重规划 \`{scope}/preparing/\` 队列。
 - 当前计划为 \`未执行\` 且用户明确要求 → 可纳入重规划范围。
 
 ## 执行步骤
@@ -139,7 +139,7 @@ function renderReplan(): string {
 function renderImplement(): string {
   return `# implement
 
-实施当前计划 \`.agent-context/plan-{number}/plan.md\` 中的全部步骤，通过验证循环后将状态更新为「已执行」。
+实施当前计划 \`.agent-context/{scope}/plan-{number}/plan.md\` 中的全部步骤，通过验证循环后将状态更新为「已执行」。
 
 不接受额外描述。
 

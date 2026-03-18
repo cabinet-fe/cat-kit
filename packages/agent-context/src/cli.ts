@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs'
 import { Command } from 'commander'
 
 import { doneCommand } from './commands/done.js'
+import { initCommand } from './commands/init.js'
 import { installCommand } from './commands/install.js'
 import { statusCommand } from './commands/status.js'
 import { syncCommand } from './commands/sync.js'
@@ -33,6 +34,13 @@ program
   .option('--tools <tools>', '指定目标工具，逗号分隔：claude,codex,cursor,antigravity,copilot')
   .option('--check', '仅检查是否存在待更新内容，不写入文件')
   .action(syncCommand)
+
+program
+  .command('init')
+  .description('初始化 SCOPE（从 git user.name 自动获取或手动指定）')
+  .option('--scope <name>', '手动指定 SCOPE 名称')
+  .option('--yes', '非交互模式：自动覆盖已存在的 SCOPE')
+  .action(initCommand)
 
 program.command('validate').description('校验 .agent-context 目录结构').action(validateCommand)
 

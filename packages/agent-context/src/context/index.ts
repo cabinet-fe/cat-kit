@@ -1,3 +1,4 @@
 export { readContext, readRawContext, readPlanStatus } from './reader.js'
 export { validate } from './validator.js'
 export { archive } from './archiver.js'
+export { resolveScope, initScope, normalizeScope } from './scope.js'

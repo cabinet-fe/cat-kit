@@ -12,6 +12,7 @@ export async function validateCommand(): Promise<void> {
   if (result.valid) {
     console.log('✅ 校验通过')
     const ctx = result.context
+    console.log(`  当前作用域: ${ctx.scope}`)
     const current = ctx.currentPlan
       ? `plan-${ctx.currentPlan.number} (${ctx.currentPlan.status})`
       : '无'

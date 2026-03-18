@@ -55,7 +55,7 @@ function renderNavigator(target: ToolTarget): string {
 ## 全局约束
 
 - 状态机两态：\`未执行\`、\`已执行\`。
-- 任意时刻最多一个当前计划：\`.agent-context/plan-{number}\`。
+- 任意时刻最多一个当前计划：\`.agent-context/{scope}/plan-{number}\`。
 - 多个当前计划 → 拒绝执行，提示恢复单活跃状态。
 - 计划编号全局递增，不复用。补丁编号在单计划目录内递增，不复用。
 - 影响范围（\`## 影响范围\`）不得包含 \`.agent-context/\` 目录下的文件。
@@ -64,16 +64,19 @@ function renderNavigator(target: ToolTarget): string {
 
 \`\`\`text
 .agent-context/
-├── plan-{N}/          # 当前计划（最多一个）
-│   ├── plan.md
-│   └── patch-{N}.md
-├── preparing/         # 待执行计划队列
-│   └── plan-{N}/
-└── done/              # 已归档计划
-    └── plan-{N}-{YYYYMMDD}/
+├── .env               # SCOPE 配置（SCOPE=<name>）
+├── .gitignore
+└── {scope}/           # 作用域目录（按协作者隔离）
+    ├── plan-{N}/      # 当前计划（最多一个）
+    │   ├── plan.md
+    │   └── patch-{N}.md
+    ├── preparing/     # 待执行计划队列
+    │   └── plan-{N}/
+    └── done/          # 已归档计划
+        └── plan-{N}-{YYYYMMDD}/
 \`\`\`
 
-编号规则：扫描全部 \`plan-N\` 目录取 \`max(N)+1\`。
+编号规则：在当前 scope 内扫描全部 \`plan-N\` 目录取 \`max(N)+1\`。
 `
 }
 

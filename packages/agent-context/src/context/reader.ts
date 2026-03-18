@@ -3,6 +3,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import type { ContextSnapshot, PlanInfo, PlanStatus } from '../types.js'
+import { resolveScope } from './scope.js'
 
 const PLAN_DIR_RE = /^plan-(\d+)$/
 const DONE_DIR_RE = /^plan-(\d+)(?:-\d{8})?$/
@@ -19,17 +20,26 @@ export async function readContext(cwd: string): Promise<ContextSnapshot | null> 
 export async function readRawContext(
   cwd: string
 ): Promise<{ snapshot: ContextSnapshot | null; currentPlanCount: number }> {
-  const root = join(cwd, '.agent-context')
+  const acRoot = join(cwd, '.agent-context')
 
-  if (!existsSync(root)) {
+  if (!existsSync(acRoot)) {
     return { snapshot: null, currentPlanCount: 0 }
   }
+
+  const scope = await resolveScope(acRoot)
+  const root = join(acRoot, scope)
 
   const currentPlans = await readPlanDirs(root)
   const preparing = await readPlanDirs(join(root, 'preparing'))
   const done = await readDonePlans(join(root, 'done'))
 
-  const snapshot: ContextSnapshot = { root, currentPlan: currentPlans[0] ?? null, preparing, done }
+  const snapshot: ContextSnapshot = {
+    root,
+    scope,
+    currentPlan: currentPlans[0] ?? null,
+    preparing,
+    done
+  }
 
   return { snapshot, currentPlanCount: currentPlans.length }
 }

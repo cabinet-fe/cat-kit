@@ -1,6 +1,6 @@
 # implement
 
-实施当前计划 `.agent-context/plan-{number}/plan.md` 中的全部步骤，通过验证循环后将状态更新为「已执行」。
+实施当前计划 `.agent-context/{scope}/plan-{number}/plan.md` 中的全部步骤，通过验证循环后将状态更新为「已执行」。
 
 不接受额外描述。
 

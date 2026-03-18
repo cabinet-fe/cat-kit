@@ -1,6 +1,6 @@
 # plan
 
-创建新的执行计划，写入 `.agent-context/plan-{number}/plan.md`。按复杂度可拆分为多个计划，维护「单当前计划 + preparing 队列」结构。
+创建新的执行计划，写入 `.agent-context/{scope}/plan-{number}/plan.md`。按复杂度可拆分为多个计划，维护「单当前计划 + preparing 队列」结构。
 
 必须附带计划描述。
 
@@ -20,7 +20,7 @@
    - 存在显著不同的技术路径需用户决策。
    - 验收标准不明确：无法判断何时算"完成"。
 2. 按复杂度决定单计划或多计划拆分。
-3. 多计划拆分时：最小编号进入 `.agent-context/` 作为当前计划，其余进入 `.agent-context/preparing/`。单计划直接创建。
+3. 多计划拆分时：最小编号进入 `.agent-context/{scope}/` 作为当前计划，其余进入 `.agent-context/{scope}/preparing/`。单计划直接创建。
 4. 每个计划创建 `plan.md`，遵循下方模板。
 5. **自检**（不通过则修改后重新检查）：
    - 每个步骤可独立执行且有明确完成标准。

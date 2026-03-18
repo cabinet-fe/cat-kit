@@ -27,6 +27,7 @@ export async function statusCommand(): Promise<void> {
   console.log('')
   console.log('Agent Context Status')
   console.log('────────────────────')
+  console.log(`当前作用域: ${ctx.scope}`)
   console.log(`当前计划:  ${current}`)
   console.log(`待执行队列: ${preparing}`)
   console.log(`已归档:    ${ctx.done.length} 个`)
