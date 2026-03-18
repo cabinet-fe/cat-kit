@@ -85,9 +85,16 @@
 - `description`：一句话描述页面内容
 - `sidebarOrder`：需要排序时使用（数值越小越靠前）
 
+### 指南索引同步（强制）
+
+- 涉及 `@cat-kit/agent-context` 的文档新增、改名、结构调整时，必须同步更新 `docs/content/guide/getting-started.md` 的索引信息。
+- 若变更内容涉及 `/ac-workflow` action（如 `init/plan/replan/implement/patch/rush/done`）或 CLI 能力，必须同步更新“AI 导航索引”里 `@cat-kit/agent-context` 对应行的“继续阅读”和“检索关键词”。
+- 修改索引时，确保链接可达、关键词覆盖新增能力，并保持表格风格一致。
+
 ### 输出验收清单（提交前自检）
 
 - **结构**：`index.md` 仅“介绍 + 导航”；非 index 页包含 `介绍/快速使用/API参考` 且顺序正确
 - **准确**：API 与类型来源于 `dist/index.d.ts` 或 `src`（不臆造）
 - **演示**：可浏览器运行的功能提供 `::: demo ... :::`，且 demo 文件存在于 `docs/examples`
+- **索引**：涉及 `@cat-kit/agent-context` 或 `/ac-workflow` 的文档改动，已同步更新 `docs/content/guide/getting-started.md` 中对应索引
 - **简练**：无冗余背景故事、无重复表达、无 Emoji 轰炸
