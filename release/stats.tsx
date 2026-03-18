@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 
 import { renderToString } from 'react-dom/server'
 
-import { main, maintenance } from './groups'
+import { groups } from './groups'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.resolve(__dirname, '..')
@@ -16,7 +16,7 @@ interface Package {
 
 // 动态扫描 packages 目录
 async function getPackages(): Promise<Package[]> {
-  const workspaces = [...main.workspaces, ...maintenance.workspaces]
+  const workspaces = [...groups.main!.group.workspaces, ...groups.maintenance!.group.workspaces]
   const packages = await Promise.all(
     workspaces.map(async ({ dir, name, pkg }) => {
       const dirName = path.basename(dir)

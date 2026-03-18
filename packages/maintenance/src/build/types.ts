@@ -17,11 +17,14 @@ export interface BuildConfig {
    * @default true
    */
   dts?: boolean
-  /**
-   * 指定外部依赖
-   * @description 这些依赖不会被打包进产物，哪怕他们是 peerDependencies 或 devDependencies
-   */
-  external?: string[]
+  /** 依赖管理 */
+  deps?: {
+    /**
+     * 指定不打包的依赖
+     * @description 这些依赖不会被打包进产物，哪怕他们是 peerDependencies 或 devDependencies
+     */
+    neverBundle?: string[]
+  }
   /**
    * 构建平台
    * @default 'neutral'

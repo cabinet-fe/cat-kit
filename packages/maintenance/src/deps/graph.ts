@@ -44,30 +44,18 @@ export function buildDependencyGraph(
   const nodes: DependencyNode[] = []
   const edges: DependencyEdge[] = []
   const externalDeps = new Set<string>()
-  const internalPackageNames = new Set(packages.map(p => p.name))
+  const internalPackageNames = new Set(packages.map((p) => p.name))
 
   // 构建内部包节点
   for (const p of packages) {
-    nodes.push({
-      id: p.name,
-      version: p.version,
-      external: false
-    })
+    nodes.push({ id: p.name, version: p.version, external: false })
 
     // 收集所有依赖
-    const allDeps = {
-      ...(p.pkg.dependencies || {}),
-      ...(p.pkg.devDependencies || {}),
-      ...(p.pkg.peerDependencies || {})
-    }
+    const allDeps = { ...p.pkg.dependencies, ...p.pkg.devDependencies, ...p.pkg.peerDependencies }
 
     for (const depName of Object.keys(allDeps)) {
       if (internalPackageNames.has(depName)) {
-        edges.push({
-          from: p.name,
-          to: depName,
-          type: getDependencyType(p.pkg, depName)
-        })
+        edges.push({ from: p.name, to: depName, type: getDependencyType(p.pkg, depName) })
       } else {
         externalDeps.add(depName)
       }
@@ -76,25 +64,13 @@ export function buildDependencyGraph(
 
   // 添加外部依赖节点
   for (const depName of externalDeps) {
-    nodes.push({
-      id: depName,
-      version: '*',
-      external: true
-    })
+    nodes.push({ id: depName, version: '*', external: true })
 
     for (const p of packages) {
-      const allDeps = {
-        ...(p.pkg.dependencies || {}),
-        ...(p.pkg.devDependencies || {}),
-        ...(p.pkg.peerDependencies || {})
-      }
+      const allDeps = { ...p.pkg.dependencies, ...p.pkg.devDependencies, ...p.pkg.peerDependencies }
 
       if (allDeps[depName]) {
-        edges.push({
-          from: p.name,
-          to: depName,
-          type: getDependencyType(p.pkg, depName)
-        })
+        edges.push({ from: p.name, to: depName, type: getDependencyType(p.pkg, depName) })
       }
     }
   }
@@ -133,10 +109,10 @@ export function visualizeDependencyGraph(
 
   const edges = includeExternal
     ? graph.edges
-    : graph.edges.filter(edge => {
-      const targetNode = graph.nodes.find(n => n.id === edge.to)
-      return targetNode && !targetNode.external
-    })
+    : graph.edges.filter((edge) => {
+        const targetNode = graph.nodes.find((n) => n.id === edge.to)
+        return targetNode && !targetNode.external
+      })
 
   for (const edge of edges) {
     let arrow = '-->'

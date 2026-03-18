@@ -1,13 +1,15 @@
-import { build } from 'tsdown'
-import type { BuildConfig } from './types'
-import path from 'node:path'
 import { existsSync } from 'node:fs'
+import path from 'node:path'
+
 import { visualizer } from 'rollup-plugin-visualizer'
+import { build } from 'tsdown'
+
+import type { BuildConfig } from './types'
 
 export async function buildLib(config: BuildConfig) {
   const start = Date.now()
 
-  const { dir, dts, external, output, platform = 'neutral' } = config
+  const { dir, dts, deps, output, platform = 'neutral' } = config
 
   if (!path.isAbsolute(dir)) {
     throw new Error('dir 必须是绝对路径')
@@ -34,19 +36,14 @@ export async function buildLib(config: BuildConfig) {
       cwd: dir,
       dts: dts !== false,
       sourcemap: output?.sourcemap !== false,
-      external,
-      outExtensions: () => ({
-        js: '.js',
-        dts: '.d.ts'
-      }),
+      deps,
+      outExtensions: () => ({ js: '.js', dts: '.d.ts' }),
       format: 'es',
       platform,
       minify: true,
       logLevel: 'warn',
 
-      outputOptions: {
-        preserveModules: true
-      },
+      outputOptions: { preserveModules: true },
 
       plugins: [
         visualizer({
@@ -56,10 +53,7 @@ export async function buildLib(config: BuildConfig) {
       ]
     })
 
-    return {
-      success: true,
-      duration: Date.now() - start
-    }
+    return { success: true, duration: Date.now() - start }
   } catch (err) {
     return {
       success: false,

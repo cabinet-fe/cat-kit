@@ -127,7 +127,7 @@ function rollbackVersion(context: RollbackContext): void {
       pkg.version = context.originalVersion
       writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
     } catch (err) {
-      console.error(chalk.red(`  回滚失败: ${pkgPath}`))
+      console.error(chalk.red(`  回滚失败: ${pkgPath} ${err instanceof Error ? err.message : ''}`))
     }
   }
 
