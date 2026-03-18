@@ -2,7 +2,7 @@ import { basename } from 'node:path'
 
 import { confirm } from '@inquirer/prompts'
 
-import { archive, readRawContext, validate } from '../context/index.js'
+import { archive, generateIndex, readContext, readRawContext, validate } from '../context/index.js'
 
 export async function doneCommand(options: { yes?: boolean }): Promise<void> {
   const { snapshot, currentPlanCount } = await readRawContext(process.cwd())
@@ -49,5 +49,11 @@ export async function doneCommand(options: { yes?: boolean }): Promise<void> {
     console.log(`📋 待执行队列剩余 ${archiveResult.remainingPreparing} 个计划`) // eslint-disable-line no-console
   } else if (archiveResult.promoted === null) {
     console.log('ℹ 无更多待执行计划') // eslint-disable-line no-console
+  }
+
+  const freshSnapshot = await readContext(process.cwd())
+  if (freshSnapshot) {
+    await generateIndex(freshSnapshot)
+    console.log('📇 已更新索引') // eslint-disable-line no-console
   }
 }

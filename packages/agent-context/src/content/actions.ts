@@ -19,12 +19,14 @@ function renderInit(): string {
 
 ## 执行步骤
 
-1. **判断项目类型**：检测根目录是否存在有效代码文件和目录结构。
+1. **检查 SCOPE**：检查 \`.agent-context/.env\` 是否存在。若不存在，运行 \`agent-context init\` 初始化作用域。
+
+2. **判断项目类型**：检测根目录是否存在有效代码文件和目录结构。
    - 新项目：无实质代码，或用户明确说明是新项目。
    - 旧项目：已有代码、配置文件和目录结构。
    - 无法判断 → 向用户提问澄清，不可假设。
 
-2. **处理 AGENTS.md**：
+3. **处理 AGENTS.md**：
    - 新项目：
      1. 通过提问澄清以下要点（已从描述中获取的可跳过）：项目目标与核心功能、技术栈与版本、代码规范与工具链（lint/formatter/测试）、目录结构偏好。
      2. 生成高质量 \`AGENTS.md\`（须满足下方质量标准，不满足则重新优化直至满足）。
@@ -34,7 +36,7 @@ function renderInit(): string {
      2. 若已存在 \`AGENTS.md\`：按质量标准评估，不足时增补优化。
      3. 默认不创建计划（除非用户明确要求）。
 
-3. **输出反馈**：向用户报告项目类型判定结果、AGENTS.md 处理结果、是否需要后续计划。
+4. **输出反馈**：向用户报告项目类型判定结果、AGENTS.md 处理结果、是否需要后续计划。
 
 ## 高质量 AGENTS.md 标准
 
@@ -57,6 +59,7 @@ function renderPlan(): string {
 ## 前置检查
 
 - 运行 \`agent-context validate\`，不通过则中止并报告错误。
+- SCOPE 未初始化（\`.agent-context/.env\` 不存在）→ 提示运行 \`agent-context init\`。
 - 描述为空 → 拒绝执行。
 - 存在未归档的已执行当前计划 → 判断新需求与当前计划的关联性：
   - 相关联或用户本意是修补 → 拒绝执行，提示改用 patch。
@@ -70,7 +73,7 @@ function renderPlan(): string {
    - 存在显著不同的技术路径需用户决策。
    - 验收标准不明确：无法判断何时算"完成"。
 2. 按复杂度决定单计划或多计划拆分。
-3. 多计划拆分时：最小编号进入 \`.agent-context/{scope}/\` 作为当前计划，其余进入 \`.agent-context/{scope}/preparing/\`。单计划直接创建。
+3. 多计划拆分时：最小编号进入 \`.agent-context/{scope}/\` 作为当前计划，其余进入 \`.agent-context/{scope}/preparing/\`。单计划直接创建。编号规则：在当前 scope 内扫描全部 \`plan-N\` 目录取 \`max(N)+1\`。
 4. 每个计划创建 \`plan.md\`，遵循下方模板。
 5. **自检**（不通过则修改后重新检查）：
    - 每个步骤可独立执行且有明确完成标准。
@@ -113,6 +116,7 @@ function renderReplan(): string {
 ## 前置检查
 
 - 运行 \`agent-context validate\`，不通过则中止并报告错误。
+- SCOPE 未初始化（\`.agent-context/.env\` 不存在）→ 提示运行 \`agent-context init\`。
 - 描述为空 → 拒绝执行。
 - 无未实施计划 → 拒绝执行，提示使用 plan 创建。
 - 存在多个当前计划 → 拒绝执行，提示恢复单活跃状态。
@@ -131,7 +135,7 @@ function renderReplan(): string {
 1. 解析描述，确定重规划目标范围。
 2. 读取目标计划 \`plan.md\`，理解现有意图。
 3. 生成新的拆分方案，保持「单当前计划 + 若干 preparing 计划」结构。
-4. 新增计划编号：全局 max(N)+1 递增分配；未改动计划保持原编号。
+4. 新增计划编号：scope 内 max(N)+1 递增分配；未改动计划保持原编号。
 5. 更新目录结构，确保每个新计划的 \`plan.md\` 遵循标准模板。
 `
 }
@@ -146,6 +150,7 @@ function renderImplement(): string {
 ## 前置检查
 
 - 运行 \`agent-context validate\`，不通过则中止并报告错误。
+- SCOPE 未初始化（\`.agent-context/.env\` 不存在）→ 提示运行 \`agent-context init\`。
 - 带描述 → 拒绝执行。
 - 当前计划不存在 → 拒绝执行，提示先创建计划。
 - 当前计划状态为 \`已执行\` → 拒绝执行，提示使用 patch 修补或运行 \`agent-context done\` 归档。
@@ -174,13 +179,14 @@ function renderImplement(): string {
 function renderPatch(): string {
   return `# patch
 
-基于当前已执行计划创建增量补丁，修复问题或追加变更。
+基于当前已执行计划 \`.agent-context/{scope}/plan-{number}/\` 创建增量补丁，修复问题或追加变更。
 
 必须附带补丁描述。
 
 ## 前置检查
 
 - 运行 \`agent-context validate\`，不通过则中止并报告错误。
+- SCOPE 未初始化（\`.agent-context/.env\` 不存在）→ 提示运行 \`agent-context init\`。
 - 描述为空 → 拒绝执行。
 - 当前计划不存在 → 拒绝执行，提示先创建计划。
 - 当前计划状态为 \`未执行\` → 拒绝执行，提示先实施。
@@ -225,6 +231,7 @@ function renderRush(): string {
 ## 前置检查
 
 - 运行 \`agent-context validate\`，不通过则中止并报告错误。
+- SCOPE 未初始化（\`.agent-context/.env\` 不存在）→ 提示运行 \`agent-context init\`。
 - 描述为空 → 拒绝执行。
 - 存在未归档的已执行当前计划 → 判断新需求与当前计划的关联性：
   - 相关联或用户本意是修补 → 拒绝执行，提示改用 patch。

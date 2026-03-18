@@ -54,6 +54,8 @@ function renderNavigator(target: ToolTarget): string {
 
 ## 全局约束
 
+- 首次使用前需运行 \`agent-context init\` 初始化作用域。
+- SCOPE 由 git \`user.name\` 决定，计划编号在各 SCOPE 内独立递增。
 - 状态机两态：\`未执行\`、\`已执行\`。
 - 任意时刻最多一个当前计划：\`.agent-context/{scope}/plan-{number}\`。
 - 多个当前计划 → 拒绝执行，提示恢复单活跃状态。

@@ -15,13 +15,17 @@
 
 ```text
 .agent-context/
-├── plan-{N}/          # 当前计划（最多一个）
-│   ├── plan.md
-│   └── patch-{N}.md
-├── preparing/         # 待执行计划队列
-│   └── plan-{N}/
-└── done/              # 已归档计划
-    └── plan-{N}-{YYYYMMDD}/
+├── .env               # SCOPE 配置（SCOPE=<name>）
+├── .gitignore
+└── {scope}/           # 作用域目录（按协作者隔离）
+    ├── index.md       # 计划索引（自动生成）
+    ├── plan-{N}/      # 当前计划（最多一个）
+    │   ├── plan.md
+    │   └── patch-{N}.md
+    ├── preparing/     # 待执行计划队列
+    │   └── plan-{N}/
+    └── done/          # 已归档计划
+        └── plan-{N}-{YYYYMMDD}/
 ```
 
 生命周期如下：
@@ -235,9 +239,41 @@ rush 一下，把 README 里的命令表更新为最新版本
 
 `rush` 很适合这种“知道要改什么，也知道验收标准”的任务，但不适合目标模糊的大需求。
 
+## 多人协作
+
+`agent-context` 通过 SCOPE 机制支持多人在同一项目中独立管理计划：
+
+- 每位协作者拥有独立的作用域目录（`{scope}/`），互不干扰
+- SCOPE 名称自动取自 git 配置的 `user.name`
+- 计划编号在各 SCOPE 内独立递增
+- 首次使用时运行 `agent-context init` 初始化作用域
+
+```text
+.agent-context/
+├── alice/             # Alice 的计划
+│   ├── index.md
+│   ├── plan-1/
+│   └── done/
+├── bob/               # Bob 的计划
+│   ├── index.md
+│   ├── plan-3/
+│   └── done/
+└── .env               # 当前用户的 SCOPE
+```
+
 ## CLI 命令参考
 
 CLI 只负责文件安装、同步和状态管理，不负责替代 action。
+
+### `agent-context init`
+
+初始化作用域。首次在项目中使用时运行，会自动检测 git `user.name` 作为 SCOPE 名称，并创建必要的目录结构。
+
+```bash
+agent-context init
+agent-context init --scope alice
+agent-context init --yes
+```
 
 ### `agent-context install`
 
@@ -289,13 +325,24 @@ agent-context done
 agent-context done --yes
 ```
 
+### `agent-context index`
+
+生成或更新当前 SCOPE 的计划索引文件 `.agent-context/{scope}/index.md`。索引按 done、当前计划、preparing 分类，每项为 `- [x/ ] [标题](相对路径)` 格式。
+
+归档计划时（`done`）会自动调用，也可手动运行：
+
+```bash
+agent-context index
+```
+
 ## 通用选项
 
 | 选项 | 适用命令 | 说明 |
 | ---- | -------- | ---- |
 | `--tools <tools>` | `install` / `sync` | 指定目标工具，逗号分隔 |
 | `--check` | `install` / `sync` | 只检查是否有变更，不写文件 |
-| `--yes` | `install` / `done` | 跳过交互确认；`install` 会优先复用已安装工具 |
+| `--yes` | `install` / `init` / `done` | 跳过交互确认；`install` 会优先复用已安装工具 |
+| `--scope <name>` | `init` | 手动指定 SCOPE 名称，不使用 git user.name |
 
 ## 支持的工具
 

@@ -12,6 +12,7 @@ CLI 工具，用于管理 `.agent-context/` 目录下的计划生命周期（创
 packages/agent-context/src/
 ├── commands/          # CLI 子命令
 │   ├── done.ts        # 归档计划
+│   ├── index-cmd.ts   # 生成计划索引
 │   ├── init.ts        # 初始化 SCOPE
 │   ├── install.ts     # 安装 Skill
 │   ├── printer.ts     # 输出格式化
@@ -23,6 +24,7 @@ packages/agent-context/src/
 │   └── index.ts
 ├── context/           # 上下文管理
 │   ├── archiver.ts    # 计划归档
+│   ├── indexer.ts     # 计划索引生成
 │   ├── reader.ts      # 计划读取
 │   ├── scope.ts       # SCOPE 解析与初始化
 │   ├── validator.ts   # 计划验证

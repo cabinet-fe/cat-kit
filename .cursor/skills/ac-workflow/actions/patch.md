@@ -1,12 +1,13 @@
 # patch
 
-基于当前已执行计划创建增量补丁，修复问题或追加变更。
+基于当前已执行计划 `.agent-context/{scope}/plan-{number}/` 创建增量补丁，修复问题或追加变更。
 
 必须附带补丁描述。
 
 ## 前置检查
 
 - 运行 `agent-context validate`，不通过则中止并报告错误。
+- SCOPE 未初始化（`.agent-context/.env` 不存在）→ 提示运行 `agent-context init`。
 - 描述为空 → 拒绝执行。
 - 当前计划不存在 → 拒绝执行，提示先创建计划。
 - 当前计划状态为 `未执行` → 拒绝执行，提示先实施。

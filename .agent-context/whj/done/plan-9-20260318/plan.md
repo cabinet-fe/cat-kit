@@ -1,6 +1,6 @@
 # 更新 Skill 协议与文档适配 SCOPE 机制
 
-> 状态: 未执行
+> 状态: 已执行
 
 ## 目标
 
@@ -49,8 +49,8 @@
 
 ## 影响范围
 
-- `packages/agent-context/src/content/index.ts`
-- `packages/agent-context/src/content/actions.ts`
-- `packages/agent-context/README.md`
+- 修改文件: `packages/agent-context/src/content/index.ts`
+- 修改文件: `packages/agent-context/src/content/actions.ts`
+- 修改文件: `packages/agent-context/README.md`
 
 ## 历史补丁

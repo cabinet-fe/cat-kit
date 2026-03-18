@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs'
 import { Command } from 'commander'
 
 import { doneCommand } from './commands/done.js'
+import { indexCommand } from './commands/index-cmd.js'
 import { initCommand } from './commands/init.js'
 import { installCommand } from './commands/install.js'
 import { statusCommand } from './commands/status.js'
@@ -51,6 +52,8 @@ program
   .description('归档当前已执行计划')
   .option('--yes', '跳过确认，直接归档')
   .action(doneCommand)
+
+program.command('index').description('生成或更新计划索引文件').action(indexCommand)
 
 program.parseAsync().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error)
