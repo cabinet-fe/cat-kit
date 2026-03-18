@@ -103,6 +103,7 @@ export class WorkspaceGroup<Workspaces extends string> {
       const batchResults = await Promise.all(
         batch.map(async (ws) => {
           const wsStart = Date.now()
+
           const config = getBuildConfig(ws)
 
           try {

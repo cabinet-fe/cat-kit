@@ -46,6 +46,7 @@ export default defineConfig({
           { text: 'Excel处理', link: '/packages/excel/' },
           { text: '后端', link: '/packages/be/' },
           { text: '维护工具', link: '/packages/maintenance/' },
+          { text: 'CLI工具', link: '/packages/cli/' },
           { text: '代理上下文', link: '/packages/agent-context/' }
         ]
       }

@@ -18,6 +18,7 @@ import { buildLib } from '@cat-kit/maintenance'
 await buildLib({
   dir: '/abs/path/to/package',
   entry: 'src/index.ts',
+  deps: { neverBundle: ['@cat-kit/core'] },
   output: { dir: 'dist' }
 })
 ```
@@ -39,9 +40,9 @@ function buildLib(config: BuildConfig): Promise<BuildResult>
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `dir` | `string` | - | 包目录（必须是绝对路径） |
-| `entry` | `string` | `'src/index.ts'` | 入口文件路径 |
+| `entry` | `string \| string[]` | 依次尝试 `'src/index.ts'`、`'index.ts'` | 入口文件路径，支持单入口或多入口 |
 | `dts` | `boolean` | `true` | 是否生成 d.ts 文件 |
-| `external` | `string[]` | - | 外部依赖，不打包进产物 |
+| `deps.neverBundle` | `string[]` | - | 额外指定不打包的依赖 |
 | `platform` | `'neutral' \| 'node' \| 'browser'` | `'neutral'` | 构建平台 |
 | `output.dir` | `string` | `'dist'` | 输出目录 |
 | `output.sourcemap` | `boolean` | `true` | 是否生成 sourcemap |
@@ -64,9 +65,11 @@ import { resolve } from 'node:path'
 
 const result = await buildLib({
   dir: resolve(process.cwd(), 'packages/core'),
-  entry: 'src/index.ts',
+  entry: ['src/index.ts', 'src/runtime.ts'],
   dts: true,
-  external: ['vue', 'react'],
+  deps: {
+    neverBundle: ['vue', 'react']
+  },
   platform: 'neutral',
   output: {
     dir: 'dist',
@@ -118,10 +121,10 @@ const repo = new Monorepo()
 
 await repo.group(['@cat-kit/core', '@cat-kit/fe', '@cat-kit/http']).build({
   '@cat-kit/fe': {
-    external: ['@cat-kit/core']
+    deps: { neverBundle: ['@cat-kit/core'] }
   },
   '@cat-kit/http': {
-    external: ['@cat-kit/core'],
+    deps: { neverBundle: ['@cat-kit/core'] },
     platform: 'neutral'
   }
 })
@@ -132,16 +135,18 @@ await repo.group(['@cat-kit/core', '@cat-kit/fe', '@cat-kit/http']).build({
 - **依赖感知** - 自动分析包之间的依赖关系
 - **分批构建** - 按正确顺序构建，避免依赖缺失
 - **并行执行** - 同一批次内并行构建
-- **自动 external** - 自动将 `peerDependencies` 和 `devDependencies` 设为 external
+- **可控排除** - 支持通过 `deps.neverBundle` 显式指定额外外置依赖
 
 ## 类型定义
 
 ```typescript
 interface BuildConfig {
   dir: string
-  entry?: string
+  entry?: string | string[]
   dts?: boolean
-  external?: string[]
+  deps?: {
+    neverBundle?: string[]
+  }
   platform?: 'neutral' | 'node' | 'browser'
   output?: {
     dir?: string

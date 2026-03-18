@@ -172,9 +172,9 @@ async build(configs?: Partial<Record<WorkspaceName, WorkspaceBuildConfig>>): Pro
 
 ```typescript
 interface WorkspaceBuildConfig {
-  entry?: string                          // 入口文件
+  entry?: string | string[]               // 入口文件
   dts?: boolean                           // 生成 d.ts，默认 true
-  external?: string[]                     // 外部依赖
+  deps?: { neverBundle?: string[] }       // 额外外置依赖
   platform?: 'neutral' | 'node' | 'browser'
   output?: { dir?: string; sourcemap?: boolean }
 }
@@ -184,8 +184,11 @@ interface WorkspaceBuildConfig {
 
 ```typescript
 await repo.group(['@cat-kit/core', '@cat-kit/fe', '@cat-kit/http']).build({
-  '@cat-kit/fe': { external: ['@cat-kit/core'] },
-  '@cat-kit/http': { external: ['@cat-kit/core'], platform: 'neutral' }
+  '@cat-kit/fe': { deps: { neverBundle: ['@cat-kit/core'] } },
+  '@cat-kit/http': {
+    deps: { neverBundle: ['@cat-kit/core'] },
+    platform: 'neutral'
+  }
 })
 ```
 
@@ -295,8 +298,8 @@ async function release(type: 'major' | 'minor' | 'patch' = 'patch') {
 
   // 3. 构建
   await group.build({
-    '@cat-kit/fe': { external: ['@cat-kit/core'] },
-    '@cat-kit/http': { external: ['@cat-kit/core'] }
+    '@cat-kit/fe': { deps: { neverBundle: ['@cat-kit/core'] } },
+    '@cat-kit/http': { deps: { neverBundle: ['@cat-kit/core'] } }
   })
 
   // 4. 更新版本
@@ -355,9 +358,9 @@ interface MonorepoRoot {
 }
 
 interface WorkspaceBuildConfig {
-  entry?: string
+  entry?: string | string[]
   dts?: boolean
-  external?: string[]
+  deps?: { neverBundle?: string[] }
   platform?: 'neutral' | 'node' | 'browser'
   output?: { dir?: string; sourcemap?: boolean }
 }

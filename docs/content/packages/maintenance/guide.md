@@ -128,16 +128,18 @@ export function formatDate(date) {
 | **peerDependencies** | 不打包 | 保留 import 语句 |
 | **devDependencies** | 按需打包 | 实际被 import 时打包 |
 
-### external 配置
+### deps.neverBundle 配置
 
-`external` 告诉构建工具哪些导入应该保留，不打包进产物。
+`deps.neverBundle` 用于补充「额外不打包」名单，适合手动指定需要外置的依赖。
 
-**使用 `external` 排除额外的包**:
+**使用 `deps.neverBundle` 排除额外的包**:
 
 ```typescript
 await group.build({
   '@cat-kit/fe': {
-    external: ['@cat-kit/core']  // 排除内部依赖
+    deps: {
+      neverBundle: ['@cat-kit/core']  // 排除内部依赖
+    }
   }
 })
 ```
@@ -147,7 +149,7 @@ await group.build({
 | 场景 | 建议 |
 |-----|------|
 | React/Vue 等框架 | peerDependencies |
-| Monorepo 内部包 | peerDependencies + external |
+| Monorepo 内部包 | peerDependencies + deps.neverBundle |
 | 小型工具库 (< 10KB) | 打包进产物 |
 | 大型工具库 (lodash) | dependencies |
 
@@ -179,7 +181,9 @@ const repo = new Monorepo()
 
 await repo.group(['@cat-kit/core', '@cat-kit/fe']).build({
   '@cat-kit/fe': {
-    external: ['@cat-kit/core']  // 显式排除内部依赖
+    deps: {
+      neverBundle: ['@cat-kit/core']  // 显式排除内部依赖
+    }
   }
 })
 ```
@@ -198,6 +202,6 @@ await repo.group(['@cat-kit/core', '@cat-kit/fe']).build({
 
 - ✅ 内部依赖在 `peerDependencies` 中声明
 - ✅ 内部依赖在 `devDependencies` 中引用 (`workspace:*`)
-- ✅ 构建配置的 `external` 包含内部依赖
+- ✅ 构建配置的 `deps.neverBundle` 覆盖额外需外置的内部依赖
 - ✅ 框架依赖放在 `peerDependencies` 中
 - ✅ 构建工具放在 `devDependencies` 中
