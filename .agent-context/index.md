@@ -1,0 +1,1 @@
+- [新建 @cat-kit/cli 包并实现可测试的 verify-commit 子命令](./done/plan-1-20260312/plan.md)

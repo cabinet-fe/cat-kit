@@ -6,12 +6,14 @@ const DEFAULT_COMMIT_MSG_FILE = '.git/COMMIT_EDITMSG'
  * 核心校验逻辑 (无副作用，易于测试)
  */
 export function verifyCommitMessage(message: string): { valid: boolean; reason?: string } {
-  const commitRE = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?: .+/
+  const commitRE =
+    /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|release)(\(.+\))?!?: .+/
 
   if (!commitRE.test(message)) {
     return {
       valid: false,
-      reason: '提交信息格式错误。请使用 feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert 等前缀。',
+      reason:
+        '提交信息格式错误。请使用 feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert 等前缀。'
     }
   }
 
