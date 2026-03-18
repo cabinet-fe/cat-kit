@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises'
 
+const DEFAULT_COMMIT_MSG_FILE = '.git/COMMIT_EDITMSG'
+
 /**
  * 核心校验逻辑 (无副作用，易于测试)
  */
@@ -16,8 +18,14 @@ export function verifyCommitMessage(message: string): { valid: boolean; reason?:
   return { valid: true }
 }
 
+export function stripComments(raw: string): string {
+  return raw.replace(/^#.*$/gm, '').trim()
+}
+
 /**
  * CLI 命令适配器
+ *
+ * 消息来源优先级: --message > file 参数 > .git/COMMIT_EDITMSG
  */
 export async function verifyCommitAction(
   file: string | undefined,
@@ -27,23 +35,21 @@ export async function verifyCommitAction(
   let message = ''
 
   if (options.message) {
-    message = options.message
-  } else if (file) {
+    message = options.message.trim()
+  } else {
+    const targetFile = file ?? DEFAULT_COMMIT_MSG_FILE
     try {
-      message = await readFile(file, 'utf8')
+      message = stripComments(await readFile(targetFile, 'utf8'))
     } catch (err) {
-      console.error(`无法读取文件: ${file}`)
+      console.error(`无法读取文件: ${targetFile}`)
       if (err instanceof Error) {
         console.error(err.message)
       }
       process.exit(1)
     }
-  } else {
-    // 从 stdin 读取
-    message = await readFromStdin()
   }
 
-  const { valid, reason } = verifyCommitMessage(message.trim())
+  const { valid, reason } = verifyCommitMessage(message)
 
   if (!valid) {
     console.error(`❌ 提交验证失败: ${reason}`)
@@ -51,13 +57,4 @@ export async function verifyCommitAction(
   }
 
   console.log('✅ 提交验证通过')
-}
-
-async function readFromStdin(): Promise<string> {
-  let result = ''
-  process.stdin.setEncoding('utf8')
-  for await (const chunk of process.stdin) {
-    result += chunk
-  }
-  return result
 }

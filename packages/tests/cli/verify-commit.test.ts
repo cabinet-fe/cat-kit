@@ -1,5 +1,26 @@
 import { describe, it, expect } from 'vitest'
-import { verifyCommitMessage } from '@cat-kit/cli/src/commands/verify-commit'
+import { verifyCommitMessage, stripComments } from '@cat-kit/cli/src/commands/verify-commit'
+
+describe('stripComments', () => {
+  it('应该去除 # 开头的注释行', () => {
+    const raw = [
+      'feat: add feature',
+      '',
+      '# Please enter the commit message for your changes.',
+      '# Lines starting with \'#\' will be ignored.'
+    ].join('\n')
+
+    expect(stripComments(raw)).toBe('feat: add feature')
+  })
+
+  it('应该处理纯注释内容', () => {
+    expect(stripComments('# comment only')).toBe('')
+  })
+
+  it('应该保留无注释的消息', () => {
+    expect(stripComments('fix: a bug')).toBe('fix: a bug')
+  })
+})
 
 describe('verify-commit', () => {
   it('应该通过合法的提交信息', () => {
