@@ -46,6 +46,7 @@ scheduler.start()
 解析 Cron 表达式，创建可计算下一次执行时间的 `CronExpression` 实例。这是一个便捷函数，等同于 `new CronExpression(expression)`。
 
 **适用场景：**
+
 - 解析和验证 Cron 表达式
 - 计算任务的下次执行时间
 - 动态创建 Cron 任务
@@ -159,6 +160,7 @@ class CronExpression {
 任务调度器类，支持 Cron 任务、延迟任务和定时任务。所有任务都需要先添加到调度器，然后调用 `start()` 启动调度器。
 
 **适用场景：**
+
 - 定时任务执行
 - 数据清理
 - 健康检查
@@ -268,10 +270,10 @@ class Scheduler {
 
 ```typescript
 interface TaskInfo {
-  id: string                    // 任务 ID
+  id: string // 任务 ID
   type: 'cron' | 'timeout' | 'interval' // 任务类型
-  nextRun?: Date                // 下次执行时间
-  running: boolean              // 是否正在运行
+  nextRun?: Date // 下次执行时间
+  running: boolean // 是否正在运行
 }
 ```
 
@@ -450,7 +452,7 @@ async function executeWithRetry(task: () => Promise<void>, maxRetries = 3) {
         throw error
       }
       console.log(`任务失败，${1000 * (i + 1)}ms 后重试...`)
-      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)))
     }
   }
 }

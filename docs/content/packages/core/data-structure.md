@@ -21,4 +21,3 @@ console.log(root.isLeaf, manager.flatten().length, forest.size)
 ## API参考
 
 本节按模块列出 API 签名、参数、返回值与使用示例。
-

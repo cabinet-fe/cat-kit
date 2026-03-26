@@ -71,7 +71,7 @@ async function loadDashboardData() {
 import { debounce } from '@cat-kit/core'
 
 // 创建防抖函数
-const debouncedSave = debounce(data => {
+const debouncedSave = debounce((data) => {
   console.log('保存数据:', data)
   saveToServer(data)
 }, 500) // 500ms 内多次调用只执行最后一次
@@ -98,7 +98,7 @@ const debouncedSearch = debounce(async (query: string) => {
   displayResults(await results.json())
 }, 300)
 
-searchInput?.addEventListener('input', e => {
+searchInput?.addEventListener('input', (e) => {
   const query = (e.target as HTMLInputElement).value
   debouncedSearch(query)
 })
@@ -124,17 +124,14 @@ import { debounce } from '@cat-kit/core'
 
 const formData = { title: '', content: '' }
 
-const autoSave = debounce(async data => {
+const autoSave = debounce(async (data) => {
   console.log('自动保存...')
-  await fetch('/api/drafts', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  })
+  await fetch('/api/drafts', { method: 'POST', body: JSON.stringify(data) })
   console.log('保存成功')
 }, 2000) // 2秒无操作后自动保存
 
-document.querySelectorAll('input, textarea').forEach(input => {
-  input.addEventListener('input', e => {
+document.querySelectorAll('input, textarea').forEach((input) => {
+  input.addEventListener('input', (e) => {
     const target = e.target as HTMLInputElement
     formData[target.name] = target.value
     autoSave(formData)
@@ -152,7 +149,7 @@ document.querySelectorAll('input, textarea').forEach(input => {
 import { throttle } from '@cat-kit/core'
 
 // 创建节流函数
-const throttledLog = throttle(message => {
+const throttledLog = throttle((message) => {
   console.log('执行:', message)
 }, 1000) // 每秒最多执行1次
 
@@ -299,10 +296,7 @@ async function animateSequence() {
 ```typescript
 import { sleep } from '@cat-kit/core'
 
-async function simulateLoading<T>(
-  task: () => Promise<T>,
-  minDelay = 500
-): Promise<T> {
+async function simulateLoading<T>(task: () => Promise<T>, minDelay = 500): Promise<T> {
   const start = Date.now()
   const result = await task()
   const elapsed = Date.now() - start
@@ -345,10 +339,10 @@ if (parsed !== undefined) {
 ```typescript
 import { safeRun } from '@cat-kit/core'
 
-const config = safeRun(
-  () => JSON.parse(localStorage.getItem('app-config') ?? '{}'),
-  { theme: 'light', lang: 'zh-CN' }
-)
+const config = safeRun(() => JSON.parse(localStorage.getItem('app-config') ?? '{}'), {
+  theme: 'light',
+  lang: 'zh-CN'
+})
 
 console.log(config.theme)
 ```
@@ -478,10 +472,7 @@ class DataSyncManager {
       }
 
       try {
-        await fetch('/api/sync', {
-          method: 'POST',
-          body: payload
-        })
+        await fetch('/api/sync', { method: 'POST', body: payload })
 
         console.log('同步成功')
         break

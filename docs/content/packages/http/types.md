@@ -34,14 +34,7 @@ function unwrap<T>(res: HTTPResponse<T>): T {
 HTTP 请求方法类型。
 
 ```typescript
-type RequestMethod =
-  | 'GET'
-  | 'POST'
-  | 'PUT'
-  | 'DELETE'
-  | 'PATCH'
-  | 'HEAD'
-  | 'OPTIONS'
+type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'
 ```
 
 **说明：**
@@ -103,10 +96,7 @@ interface ClientConfig {
 const config: ClientConfig = {
   origin: 'https://api.example.com',
   timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-    'X-API-Version': '1.0'
-  },
+  headers: { 'Content-Type': 'application/json', 'X-API-Version': '1.0' },
   credentials: true,
   plugins: [TokenPlugin({ getter: () => 'token' })]
 }
@@ -199,10 +189,7 @@ type AliasRequestConfig = Omit<RequestConfig, 'method'>
 **使用示例：**
 
 ```typescript
-const config: AliasRequestConfig = {
-  query: { page: 1 },
-  headers: { 'X-Custom': 'value' }
-}
+const config: AliasRequestConfig = { query: { page: 1 }, headers: { 'X-Custom': 'value' } }
 
 await http.get('/users', config)
 ```
@@ -297,10 +284,7 @@ interface ClientPlugin {
   /**
    * 错误钩子
    */
-  onError?(
-    error: unknown,
-    context: RequestContext
-  ): Promise<void> | void
+  onError?(error: unknown, context: RequestContext): Promise<void> | void
 }
 ```
 
@@ -345,15 +329,7 @@ class HTTPError<T = any> extends Error {
 const myPlugin: ClientPlugin = {
   beforeRequest(url, config) {
     console.log('请求前:', url)
-    return {
-      config: {
-        ...config,
-        headers: {
-          ...config.headers,
-          'X-Custom': 'value'
-        }
-      }
-    }
+    return { config: { ...config, headers: { ...config.headers, 'X-Custom': 'value' } } }
   },
 
   afterRespond(response) {
@@ -392,13 +368,7 @@ function modifyUrlPlugin(): ClientPlugin {
       // 修改 URL
       const result: PluginHookResult = {
         url: url + '?modified=true',
-        config: {
-          ...config,
-          headers: {
-            ...config.headers,
-            'X-Modified': 'true'
-          }
-        }
+        config: { ...config, headers: { ...config.headers, 'X-Modified': 'true' } }
       }
       return result
     }
@@ -445,18 +415,16 @@ interface HttpEngine {
 type ResponseData<T extends RequestConfig['responseType']> = T extends 'json'
   ? any
   : T extends 'text'
-  ? string
-  : T extends 'blob'
-  ? Blob
-  : T extends 'arraybuffer'
-  ? ArrayBuffer
-  : any
+    ? string
+    : T extends 'blob'
+      ? Blob
+      : T extends 'arraybuffer'
+        ? ArrayBuffer
+        : any
 
 // 使用示例
 async function fetchFile() {
-  const response = await http.get<Blob>('/file', {
-    responseType: 'blob'
-  })
+  const response = await http.get<Blob>('/file', { responseType: 'blob' })
   // response.data 的类型为 Blob
 }
 ```
@@ -474,10 +442,7 @@ interface CreateUserDTO {
   email: string
 }
 
-const body: RequestBody<'json'> = {
-  name: '张三',
-  email: 'zhangsan@example.com'
-}
+const body: RequestBody<'json'> = { name: '张三', email: 'zhangsan@example.com' }
 ```
 
 ## 类型守卫
@@ -585,12 +550,9 @@ async function example() {
   console.log(user.name) // TypeScript 知道 user 有 name 属性
 
   const users = await api.getUsers()
-  users.forEach(u => console.log(u.email)) // 类型安全
+  users.forEach((u) => console.log(u.email)) // 类型安全
 
-  const newUser = await api.createUser({
-    name: '张三',
-    email: 'zhangsan@example.com'
-  })
+  const newUser = await api.createUser({ name: '张三', email: 'zhangsan@example.com' })
   console.log(newUser.id) // 类型安全
 }
 ```
@@ -627,10 +589,7 @@ function createLoggerPlugin(options: LoggerPluginOptions): ClientPlugin {
 }
 
 // 使用
-const plugin = createLoggerPlugin({
-  level: 'debug',
-  prefix: '[API]'
-})
+const plugin = createLoggerPlugin({ level: 'debug', prefix: '[API]' })
 ```
 
 ## 常见问题
@@ -659,9 +618,7 @@ const response: HTTPResponse<User> = await http.get('/user/1')
 使用联合类型：
 
 ```typescript
-type ApiResponse<T> =
-  | { success: true; data: T }
-  | { success: false; error: string }
+type ApiResponse<T> = { success: true; data: T } | { success: false; error: string }
 
 const response = await http.get<ApiResponse<User>>('/user/1')
 

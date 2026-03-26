@@ -1,11 +1,4 @@
-import {
-  mkdtemp,
-  readFile,
-  rm,
-  stat,
-  writeFile,
-  readdir
-} from 'node:fs/promises'
+import { mkdtemp, readFile, rm, stat, writeFile, readdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
@@ -49,10 +42,7 @@ describe('@cat-kit/be 文件系统工具', () => {
     await writeFile(filePath, 'hello', 'utf8')
     await removePath(filePath)
 
-    await expect(readFile(filePath, 'utf8')).rejects.toHaveProperty(
-      'code',
-      'ENOENT'
-    )
+    await expect(readFile(filePath, 'utf8')).rejects.toHaveProperty('code', 'ENOENT')
   })
 
   it('应该递归读取目录并返回详细信息', async () => {
@@ -61,13 +51,11 @@ describe('@cat-kit/be 文件系统工具', () => {
     await writeFile(join(nestedDir, 'file.txt'), 'text')
     await writeFile(join(nestedDir, 'inner', 'another.txt'), 'text')
 
-    const entries = await readDir(nestedDir, {
-      recursive: true
-    })
+    const entries = await readDir(nestedDir, { recursive: true })
 
     expect(entries.length).toBeGreaterThanOrEqual(3) // 至少包含 dir, inner, file.txt, another.txt
-    expect(entries.some(entry => entry.isFile)).toBe(true)
-    expect(entries.some(entry => entry.isDirectory)).toBe(true)
+    expect(entries.some((entry) => entry.isFile)).toBe(true)
+    expect(entries.some((entry) => entry.isDirectory)).toBe(true)
   })
 
   it('应该只返回文件路径', async () => {
@@ -76,15 +64,12 @@ describe('@cat-kit/be 文件系统工具', () => {
     await writeFile(join(nestedDir, 'file.txt'), 'text')
     await writeFile(join(nestedDir, 'inner', 'another.txt'), 'text')
 
-    const files = await readDir(nestedDir, {
-      recursive: true,
-      onlyFiles: true
-    })
+    const files = await readDir(nestedDir, { recursive: true, onlyFiles: true })
 
     expect(files).toHaveLength(2)
-    expect(files.every(file => typeof file === 'string')).toBe(true)
-    expect(files.some(file => file.includes('file.txt'))).toBe(true)
-    expect(files.some(file => file.includes('another.txt'))).toBe(true)
+    expect(files.every((file) => typeof file === 'string')).toBe(true)
+    expect(files.some((file) => file.includes('file.txt'))).toBe(true)
+    expect(files.some((file) => file.includes('another.txt'))).toBe(true)
   })
 
   it('应该支持过滤函数', async () => {
@@ -97,11 +82,11 @@ describe('@cat-kit/be 文件系统工具', () => {
     const txtFiles = await readDir(nestedDir, {
       recursive: true,
       onlyFiles: true,
-      filter: entry => entry.name.endsWith('.txt')
+      filter: (entry) => entry.name.endsWith('.txt')
     })
 
     expect(txtFiles).toHaveLength(2)
-    expect(txtFiles.every(file => file.includes('.txt'))).toBe(true)
+    expect(txtFiles.every((file) => file.includes('.txt'))).toBe(true)
   })
 
   describe('emptyDir', () => {
@@ -179,10 +164,7 @@ describe('@cat-kit/be 文件系统工具', () => {
       const content = await readFile(join(destDir, 'file.txt'), 'utf8')
       expect(content).toBe('content')
 
-      const nestedContent = await readFile(
-        join(destDir, 'subdir', 'nested.txt'),
-        'utf8'
-      )
+      const nestedContent = await readFile(join(destDir, 'subdir', 'nested.txt'), 'utf8')
       expect(nestedContent).toBe('nested')
 
       // 源目录应该不存在
@@ -223,9 +205,7 @@ describe('@cat-kit/be 文件系统工具', () => {
       await writeFile(srcFile, 'content')
       await ensureDir(destDir)
 
-      await expect(
-        movePath(srcFile, destDir, { overwrite: true })
-      ).rejects.toThrow('类型不一致')
+      await expect(movePath(srcFile, destDir, { overwrite: true })).rejects.toThrow('类型不一致')
     })
 
     it('应该自动创建目标父目录', async () => {

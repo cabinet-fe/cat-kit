@@ -24,10 +24,7 @@ const parsed = parseSemver('1.2.3-alpha.1')
 const gt = compareSemver('1.2.3', '1.2.2') > 0
 const next = incrementVersion('1.2.3', 'minor')
 
-await syncPeerDependencies(
-  [{ dir: '/abs/path/to/packages/fe', name: '@cat-kit/fe' }],
-  '1.3.0'
-)
+await syncPeerDependencies([{ dir: '/abs/path/to/packages/fe', name: '@cat-kit/fe' }], '1.3.0')
 
 console.log(parsed, gt, next)
 ```
@@ -85,11 +82,11 @@ function isValidSemver(version: string): boolean
 ```typescript
 import { isValidSemver } from '@cat-kit/maintenance'
 
-isValidSemver('1.2.3')         // true
+isValidSemver('1.2.3') // true
 isValidSemver('1.2.3-alpha.1') // true
-isValidSemver('v2.0.0')        // true
-isValidSemver('invalid')       // false
-isValidSemver('1.2')           // false
+isValidSemver('v2.0.0') // true
+isValidSemver('invalid') // false
+isValidSemver('1.2') // false
 ```
 
 ## compareSemver
@@ -102,11 +99,11 @@ function compareSemver(v1: string | SemverVersion, v2: string | SemverVersion): 
 
 **返回值：**
 
-| 值 | 说明 |
-| --- | --- |
-| `1` | v1 > v2 |
+| 值   | 说明    |
+| ---- | ------- |
+| `1`  | v1 > v2 |
 | `-1` | v1 < v2 |
-| `0` | v1 = v2 |
+| `0`  | v1 = v2 |
 
 **比较规则：**
 
@@ -118,9 +115,9 @@ function compareSemver(v1: string | SemverVersion, v2: string | SemverVersion): 
 ```typescript
 import { compareSemver } from '@cat-kit/maintenance'
 
-compareSemver('2.0.0', '1.0.0')         // 1
-compareSemver('1.0.0', '2.0.0')         // -1
-compareSemver('1.0.0-alpha', '1.0.0')   // -1
+compareSemver('2.0.0', '1.0.0') // 1
+compareSemver('1.0.0', '2.0.0') // -1
+compareSemver('1.0.0-alpha', '1.0.0') // -1
 
 // 排序
 const versions = ['1.0.0', '2.0.0', '1.5.0', '1.0.0-alpha']
@@ -138,14 +135,14 @@ function incrementVersion(version: string, type: BumpType, preid?: string): stri
 
 **递增类型：**
 
-| 类型 | 说明 | 示例 |
-| --- | --- | --- |
-| `major` | 主版本号递增 | `1.2.3` → `2.0.0` |
-| `minor` | 次版本号递增 | `1.2.3` → `1.3.0` |
-| `patch` | 修订号递增 | `1.2.3` → `1.2.4` |
-| `premajor` | 主版本预发布 | `1.2.3` → `2.0.0-alpha.0` |
-| `preminor` | 次版本预发布 | `1.2.3` → `1.3.0-alpha.0` |
-| `prepatch` | 修订号预发布 | `1.2.3` → `1.2.4-alpha.0` |
+| 类型         | 说明         | 示例                              |
+| ------------ | ------------ | --------------------------------- |
+| `major`      | 主版本号递增 | `1.2.3` → `2.0.0`                 |
+| `minor`      | 次版本号递增 | `1.2.3` → `1.3.0`                 |
+| `patch`      | 修订号递增   | `1.2.3` → `1.2.4`                 |
+| `premajor`   | 主版本预发布 | `1.2.3` → `2.0.0-alpha.0`         |
+| `preminor`   | 次版本预发布 | `1.2.3` → `1.3.0-alpha.0`         |
+| `prepatch`   | 修订号预发布 | `1.2.3` → `1.2.4-alpha.0`         |
 | `prerelease` | 递增预发布号 | `1.0.0-alpha.0` → `1.0.0-alpha.1` |
 
 **示例：**
@@ -153,11 +150,11 @@ function incrementVersion(version: string, type: BumpType, preid?: string): stri
 ```typescript
 import { incrementVersion } from '@cat-kit/maintenance'
 
-incrementVersion('1.2.3', 'major')                // '2.0.0'
-incrementVersion('1.2.3', 'minor')                // '1.3.0'
-incrementVersion('1.2.3', 'patch')                // '1.2.4'
-incrementVersion('1.2.3', 'premajor', 'alpha')    // '2.0.0-alpha.0'
-incrementVersion('1.0.0-alpha.0', 'prerelease')   // '1.0.0-alpha.1'
+incrementVersion('1.2.3', 'major') // '2.0.0'
+incrementVersion('1.2.3', 'minor') // '1.3.0'
+incrementVersion('1.2.3', 'patch') // '1.2.4'
+incrementVersion('1.2.3', 'premajor', 'alpha') // '2.0.0-alpha.0'
+incrementVersion('1.0.0-alpha.0', 'prerelease') // '1.0.0-alpha.1'
 ```
 
 ## bumpVersion
@@ -170,23 +167,19 @@ function bumpVersion(pkgPath: string, options: BumpOptions): Promise<BumpResult>
 
 **参数：**
 
-| 参数 | 类型 | 说明 |
-| --- | --- | --- |
-| `pkgPath` | `string` | package.json 路径或所在目录 |
-| `options.type` | `BumpType` | 更新类型 |
-| `options.version` | `string` | 直接指定版本号（忽略 type） |
-| `options.preid` | `string` | 预发布标识，默认 `'alpha'` |
+| 参数              | 类型       | 说明                        |
+| ----------------- | ---------- | --------------------------- |
+| `pkgPath`         | `string`   | package.json 路径或所在目录 |
+| `options.type`    | `BumpType` | 更新类型                    |
+| `options.version` | `string`   | 直接指定版本号（忽略 type） |
+| `options.preid`   | `string`   | 预发布标识，默认 `'alpha'`  |
 
 **返回值：**
 
 ```typescript
 interface BumpResult {
   version: string
-  updated: Array<{
-    name: string
-    oldVersion: string
-    newVersion: string
-  }>
+  updated: Array<{ name: string; oldVersion: string; newVersion: string }>
 }
 ```
 
@@ -223,10 +216,7 @@ function syncPeerDependencies(
 ```typescript
 import { syncPeerDependencies } from '@cat-kit/maintenance'
 
-const packages = [
-  { dir: '/path/to/packages/core' },
-  { dir: '/path/to/packages/fe' }
-]
+const packages = [{ dir: '/path/to/packages/core' }, { dir: '/path/to/packages/fe' }]
 
 await syncPeerDependencies(packages, '1.2.3')
 ```
@@ -283,8 +273,8 @@ const group = repo.group(['@cat-kit/core', '@cat-kit/fe', '@cat-kit/http'])
 
 const result = await group.bumpVersion({
   type: 'minor',
-  syncPeer: true,  // 自动同步 peerDependencies
-  syncDeps: true   // 自动同步 workspace:*
+  syncPeer: true, // 自动同步 peerDependencies
+  syncDeps: true // 自动同步 workspace:*
 })
 
 console.log(`新版本: ${result.version}`)
@@ -293,14 +283,7 @@ console.log(`新版本: ${result.version}`)
 ## 类型定义
 
 ```typescript
-type BumpType =
-  | 'major'
-  | 'minor'
-  | 'patch'
-  | 'premajor'
-  | 'preminor'
-  | 'prepatch'
-  | 'prerelease'
+type BumpType = 'major' | 'minor' | 'patch' | 'premajor' | 'preminor' | 'prepatch' | 'prerelease'
 
 interface BumpOptions {
   type: BumpType
@@ -310,11 +293,7 @@ interface BumpOptions {
 
 interface BumpResult {
   version: string
-  updated: Array<{
-    name: string
-    oldVersion: string
-    newVersion: string
-  }>
+  updated: Array<{ name: string; oldVersion: string; newVersion: string }>
 }
 ```
 

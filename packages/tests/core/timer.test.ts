@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
 import { debounce, throttle, sleep } from '@cat-kit/core/src'
+import { describe, it, expect, vi } from 'vitest'
 
 describe('定时器工具函数', () => {
   describe('debounce', () => {

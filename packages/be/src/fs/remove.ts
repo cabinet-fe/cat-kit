@@ -13,10 +13,7 @@ export interface RemoveOptions {
  * @param targetPath - 要删除的路径
  * @param options - 删除行为控制（是否忽略不存在）
  */
-export async function removePath(
-  targetPath: string,
-  options: RemoveOptions = {}
-): Promise<void> {
+export async function removePath(targetPath: string, options: RemoveOptions = {}): Promise<void> {
   const { force = false } = options
   await rm(targetPath, { recursive: true, force })
 }

@@ -39,7 +39,7 @@ npm 将依赖分为三种类型，这种设计解决了以下核心问题：
 ```json
 {
   "dependencies": {
-    "dayjs": "^1.11.0"  // 库在运行时需要
+    "dayjs": "^1.11.0" // 库在运行时需要
   }
 }
 ```
@@ -49,12 +49,7 @@ npm 将依赖分为三种类型，这种设计解决了以下核心问题：
 仅在开发、测试、构建阶段需要。发布后**不会被安装**。
 
 ```json
-{
-  "devDependencies": {
-    "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
-  }
-}
+{ "devDependencies": { "typescript": "^5.0.0", "vitest": "^1.0.0" } }
 ```
 
 ### peerDependencies
@@ -62,11 +57,7 @@ npm 将依赖分为三种类型，这种设计解决了以下核心问题：
 声明"我的库需要与某个包配合使用"，由使用方负责安装。避免依赖重复安装导致的问题。
 
 ```json
-{
-  "peerDependencies": {
-    "react": "^18.0.0"
-  }
-}
+{ "peerDependencies": { "react": "^18.0.0" } }
 ```
 
 **为什么需要 peerDependencies？**
@@ -107,7 +98,7 @@ npm 将依赖分为三种类型，这种设计解决了以下核心问题：
 
 ```typescript
 // dist/index.js - 库的产物
-import { format } from 'date-fns'  // ← 保留导入，不打包
+import { format } from 'date-fns' // ← 保留导入，不打包
 
 export function formatDate(date) {
   return format(date, 'yyyy-MM-dd')
@@ -122,11 +113,11 @@ export function formatDate(date) {
 
 `Monorepo` 类的构建功能基于 [tsdown](https://tsdown.dev/) 实现。tsdown 对三种依赖类型的默认处理：
 
-| 依赖类型 | 默认行为 | 说明 |
-|---------|---------|------|
-| **dependencies** | 不打包 | 保留 import 语句 |
-| **peerDependencies** | 不打包 | 保留 import 语句 |
-| **devDependencies** | 按需打包 | 实际被 import 时打包 |
+| 依赖类型             | 默认行为 | 说明                 |
+| -------------------- | -------- | -------------------- |
+| **dependencies**     | 不打包   | 保留 import 语句     |
+| **peerDependencies** | 不打包   | 保留 import 语句     |
+| **devDependencies**  | 按需打包 | 实际被 import 时打包 |
 
 ### deps.neverBundle 配置
 
@@ -138,7 +129,7 @@ export function formatDate(date) {
 await group.build({
   '@cat-kit/fe': {
     deps: {
-      neverBundle: ['@cat-kit/core']  // 排除内部依赖
+      neverBundle: ['@cat-kit/core'] // 排除内部依赖
     }
   }
 })
@@ -146,12 +137,12 @@ await group.build({
 
 **打包决策参考**:
 
-| 场景 | 建议 |
-|-----|------|
-| React/Vue 等框架 | peerDependencies |
-| Monorepo 内部包 | peerDependencies + deps.neverBundle |
-| 小型工具库 (< 10KB) | 打包进产物 |
-| 大型工具库 (lodash) | dependencies |
+| 场景                | 建议                                |
+| ------------------- | ----------------------------------- |
+| React/Vue 等框架    | peerDependencies                    |
+| Monorepo 内部包     | peerDependencies + deps.neverBundle |
+| 小型工具库 (< 10KB) | 打包进产物                          |
+| 大型工具库 (lodash) | dependencies                        |
 
 ## Monorepo 最佳实践
 
@@ -160,19 +151,16 @@ await group.build({
 ```json
 {
   "name": "@cat-kit/fe",
-  "devDependencies": {
-    "@cat-kit/core": "workspace:*"
-  },
-  "peerDependencies": {
-    "@cat-kit/core": "1.0.0-alpha.1"
-  }
+  "devDependencies": { "@cat-kit/core": "workspace:*" },
+  "peerDependencies": { "@cat-kit/core": "1.0.0-alpha.1" }
 }
 ```
 
 ::: tip 为什么内部依赖同时在两处声明？
+
 - `devDependencies` + `workspace:*`: 开发时解析到本地工作区
 - `peerDependencies`: 发布后声明版本要求
-:::
+  :::
 
 ### 构建配置
 
@@ -182,7 +170,7 @@ const repo = new Monorepo()
 await repo.group(['@cat-kit/core', '@cat-kit/fe']).build({
   '@cat-kit/fe': {
     deps: {
-      neverBundle: ['@cat-kit/core']  // 显式排除内部依赖
+      neverBundle: ['@cat-kit/core'] // 显式排除内部依赖
     }
   }
 })

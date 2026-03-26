@@ -12,9 +12,7 @@
         </var-input>
 
         <var-space>
-          <var-button type="primary" @click="sendAuthRequest">
-            发送带 Token 的请求
-          </var-button>
+          <var-button type="primary" @click="sendAuthRequest"> 发送带 Token 的请求 </var-button>
           <var-button @click="clearToken">清空 Token</var-button>
         </var-space>
       </var-space>
@@ -29,10 +27,7 @@
         </div>
         <div class="info-row">
           <span class="label">状态:</span>
-          <span
-            class="value"
-            :class="lastRequest.success ? 'success' : 'error'"
-          >
+          <span class="value" :class="lastRequest.success ? 'success' : 'error'">
             {{ lastRequest.success ? '✅ 成功' : '❌ 失败' }}
           </span>
         </div>
@@ -43,9 +38,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
 import { HTTPClient, TokenPlugin } from '@cat-kit/http/src'
 import { Snackbar } from '@varlet/ui'
+import { ref } from 'vue'
 
 const token = ref('demo-token-abc123')
 const lastRequest = ref<{
@@ -71,9 +66,7 @@ async function sendAuthRequest() {
   }
 
   try {
-    const response = await http.get(
-      'https://jsonplaceholder.typicode.com/posts/1'
-    )
+    const response = await http.get('https://jsonplaceholder.typicode.com/posts/1')
 
     lastRequest.value = {
       headers: `Authorization: Bearer ${token.value}`,

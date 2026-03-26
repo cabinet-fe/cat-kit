@@ -9,11 +9,7 @@
 ```typescript
 import { Virtualizer, VirtualContainer } from '@cat-kit/fe'
 
-const vertical = new Virtualizer({
-  length: 10_000,
-  buffer: 8,
-  estimateSize: () => 36
-})
+const vertical = new Virtualizer({ length: 10_000, buffer: 8, estimateSize: () => 36 })
 
 const container = new VirtualContainer({ vertical })
 container.connect(document.querySelector('#list') as HTMLElement)
@@ -123,9 +119,7 @@ const virtualizer = new Virtualizer({
   }
 })
 
-const container = new VirtualContainer({
-  vertical: virtualizer
-})
+const container = new VirtualContainer({ vertical: virtualizer })
 
 // 连接到 DOM 元素
 container.connect('#list-container')
@@ -161,12 +155,7 @@ container.disconnect()
         :key="item.index"
         :data-index="item.index"
         class="virtual-list-item"
-        :style="{
-          position: 'absolute',
-          top: item.start + 'px',
-          left: 0,
-          right: 0
-        }"
+        :style="{ position: 'absolute', top: item.start + 'px', left: 0, right: 0 }"
         :ref="(el) => measureItem(el as HTMLElement, item.index)"
       >
         {{ data[item.index] }}
@@ -179,11 +168,7 @@ container.disconnect()
 import { ref, onMounted, onUnmounted } from 'vue'
 import { Virtualizer, VirtualContainer } from '@cat-kit/fe'
 
-type VisibleItem = {
-  index: number
-  start: number
-  size: number
-}
+type VisibleItem = { index: number; start: number; size: number }
 
 // 数据
 const data = ref(Array.from({ length: 10000 }, (_, i) => `Item ${i + 1}`))
@@ -206,9 +191,7 @@ const virtualizer = new Virtualizer({
   }
 })
 
-const container = new VirtualContainer({
-  vertical: virtualizer
-})
+const container = new VirtualContainer({ vertical: virtualizer })
 
 // 测量元素实际高度
 function measureItem(el: HTMLElement | null, index: number) {
@@ -356,9 +339,7 @@ class VirtualListRenderer {
       }
     })
 
-    this.container = new VirtualContainer({
-      vertical: this.virtualizer
-    })
+    this.container = new VirtualContainer({ vertical: this.virtualizer })
 
     this.container.connect(containerEl)
   }
@@ -375,7 +356,7 @@ class VirtualListRenderer {
     spacer.style.height = `${totalSize}px`
     spacer.innerHTML = ''
 
-    items.forEach(item => {
+    items.forEach((item) => {
       const el = document.createElement('div')
       el.className = 'item'
       el.dataset.index = String(item.index)
@@ -411,7 +392,7 @@ const list = new VirtualListRenderer(container, data)
 const virtualizer = new Virtualizer({
   length: data.length,
   // 根据内容估算不同高度
-  estimateSize: index => {
+  estimateSize: (index) => {
     const item = data[index]
     return item.length > 100 ? 100 : 50
   },
@@ -430,9 +411,7 @@ const horizontalVirtualizer = new Virtualizer({
   buffer: 3
 })
 
-const container = new VirtualContainer({
-  horizontal: horizontalVirtualizer
-})
+const container = new VirtualContainer({ horizontal: horizontalVirtualizer })
 ```
 
 ### 重置状态

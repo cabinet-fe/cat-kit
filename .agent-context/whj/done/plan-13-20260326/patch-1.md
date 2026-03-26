@@ -11,10 +11,10 @@
 ## 影响范围
 
 - **修改文件**:
-    - `packages/maintenance/src/build/types.ts`
-    - `packages/maintenance/src/build/build.ts`
-    - `release/groups.ts`
+  - `packages/maintenance/src/build/types.ts`
+  - `packages/maintenance/src/build/build.ts`
+  - `release/groups.ts`
 - **删除文件**:
-    - `packages/vitepress-theme/tsdown.config.ts`
+  - `packages/vitepress-theme/tsdown.config.ts`
 - **依赖变更**:
-    - 根目录 `devDependencies` 新增 `@vitejs/plugin-vue`, `vue`, `@tsdown/css`
+  - 根目录 `devDependencies` 新增 `@vitejs/plugin-vue`, `vue`, `@tsdown/css`

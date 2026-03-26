@@ -1,7 +1,5 @@
 <template>
-  <div>
-    查看控制台
-  </div>
+  <div>查看控制台</div>
   <div style="display: flex; gap: 4px">
     <var-button type="primary" @click="setInfo">设置信息</var-button>
     <var-button type="primary" @click="getInfo">获取信息</var-button>
@@ -25,12 +23,15 @@ onMounted(() => {
   storage = new WebStorage(localStorage)
 })
 
-
 function setInfo() {
-  storage.set(INFO_KEY, {
-    name: 'admin',
-    age: 18
-  }, 3600)
+  storage.set(
+    INFO_KEY,
+    {
+      name: 'admin',
+      age: 18
+    },
+    3600
+  )
 }
 
 function getInfo() {

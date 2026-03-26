@@ -55,7 +55,7 @@ await clipboard.copy(blob)
 
 // 复制 Canvas 内容
 const canvas = document.querySelector<HTMLCanvasElement>('#canvas')
-canvas?.toBlob(async blob => {
+canvas?.toBlob(async (blob) => {
   if (blob) {
     await clipboard.copy(blob)
     console.log('Canvas 内容已复制到剪贴板')
@@ -70,7 +70,7 @@ import { clipboard } from '@cat-kit/fe'
 
 // 同时复制文本和图片
 const text = '图片描述'
-const imageBlob = await fetch('image.png').then(r => r.blob())
+const imageBlob = await fetch('image.png').then((r) => r.blob())
 
 await clipboard.copy([text, imageBlob])
 ```
@@ -106,7 +106,7 @@ for (const blob of blobs) {
 import { clipboard } from '@cat-kit/fe'
 
 // 监听粘贴事件
-document.addEventListener('paste', async e => {
+document.addEventListener('paste', async (e) => {
   e.preventDefault()
 
   try {
@@ -144,7 +144,7 @@ class ImageEditor {
 
   async copyToClipboard() {
     return new Promise<void>((resolve, reject) => {
-      this.canvas.toBlob(async blob => {
+      this.canvas.toBlob(async (blob) => {
         if (!blob) {
           reject(new Error('无法生成图片'))
           return
@@ -162,7 +162,7 @@ class ImageEditor {
 
   async pasteFromClipboard(): Promise<HTMLImageElement> {
     const blobs = await clipboard.read()
-    const imageBlob = blobs.find(b => b.type.startsWith('image/'))
+    const imageBlob = blobs.find((b) => b.type.startsWith('image/'))
 
     if (!imageBlob) {
       throw new Error('剪贴板中没有图片')
@@ -170,7 +170,7 @@ class ImageEditor {
 
     const img = new Image()
     img.src = URL.createObjectURL(imageBlob)
-    await new Promise(resolve => (img.onload = resolve))
+    await new Promise((resolve) => (img.onload = resolve))
 
     return img
   }
@@ -277,9 +277,7 @@ async function setupUI() {
   const notificationButton = document.querySelector('#notifyButton')
   if (notificationButton) {
     notificationButton.disabled = !canUseNotifications
-    notificationButton.title = canUseNotifications
-      ? '发送通知'
-      : '通知权限未授予'
+    notificationButton.title = canUseNotifications ? '发送通知' : '通知权限未授予'
   }
 }
 ```

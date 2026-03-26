@@ -6,10 +6,7 @@ export abstract class HttpEngine {
    * @param url 请求 URL
    * @param options 请求选项
    */
-  abstract request<T = any>(
-    url: string,
-    options?: RequestConfig
-  ): Promise<HTTPResponse<T>>
+  abstract request<T = any>(url: string, options?: RequestConfig): Promise<HTTPResponse<T>>
 
   /**
    * 中止 HTTP 请求

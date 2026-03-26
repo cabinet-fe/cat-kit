@@ -86,15 +86,15 @@ agent-context install --tools claude,codex,cursor
 
 下面的 action 不是 CLI 子命令，而是你对 AI 说的话。AI 安装 Skill 后，会把这些话映射到固定协议。
 
-| Action | 何时使用 | 当前状态要求 | 结果 |
-| ------ | -------- | ------------ | ---- |
-| `init` | 项目还没建立好协作约定，或者 `AGENTS.md` 不完整 | 无 | 生成或补全 `AGENTS.md`，新项目可继续进入计划 |
-| `plan` | 新需求需要正式拆分步骤 | 当前没有冲突中的已执行计划 | 创建 `plan.md`，必要时拆成当前计划 + preparing 队列 |
-| `replan` | 计划还没实施，但拆分方式或技术路线要改 | 目标计划必须仍是 `未执行` | 重写计划结构，保留单当前计划模型 |
-| `implement` | 计划已经明确，开始真正落地 | 当前计划存在且状态为 `未执行` | 实施全部步骤，验证通过后把计划改为 `已执行` |
-| `patch` | 已执行计划上出现 Bug、遗漏项或增量需求 | 当前计划必须是 `已执行` | 执行修补，生成 `patch-{N}.md`，更新影响范围 |
-| `rush` | 任务范围很清晰，不想先单独经历 plan 再 implement | 当前不能存在未实施计划 | 直接创建单计划并立刻实施 |
-| `done` | 当前计划已经真正完成，需要收尾归档 | 当前计划必须是 `已执行` | 把当前计划移入 `done/`，必要时晋升下一个 preparing 计划 |
+| Action      | 何时使用                                         | 当前状态要求                  | 结果                                                    |
+| ----------- | ------------------------------------------------ | ----------------------------- | ------------------------------------------------------- |
+| `init`      | 项目还没建立好协作约定，或者 `AGENTS.md` 不完整  | 无                            | 生成或补全 `AGENTS.md`，新项目可继续进入计划            |
+| `plan`      | 新需求需要正式拆分步骤                           | 当前没有冲突中的已执行计划    | 创建 `plan.md`，必要时拆成当前计划 + preparing 队列     |
+| `replan`    | 计划还没实施，但拆分方式或技术路线要改           | 目标计划必须仍是 `未执行`     | 重写计划结构，保留单当前计划模型                        |
+| `implement` | 计划已经明确，开始真正落地                       | 当前计划存在且状态为 `未执行` | 实施全部步骤，验证通过后把计划改为 `已执行`             |
+| `patch`     | 已执行计划上出现 Bug、遗漏项或增量需求           | 当前计划必须是 `已执行`       | 执行修补，生成 `patch-{N}.md`，更新影响范围             |
+| `rush`      | 任务范围很清晰，不想先单独经历 plan 再 implement | 当前不能存在未实施计划        | 直接创建单计划并立刻实施                                |
+| `done`      | 当前计划已经真正完成，需要收尾归档               | 当前计划必须是 `已执行`       | 把当前计划移入 `done/`，必要时晋升下一个 preparing 计划 |
 
 ### `init`
 
@@ -337,21 +337,21 @@ agent-context index
 
 ## 通用选项
 
-| 选项 | 适用命令 | 说明 |
-| ---- | -------- | ---- |
-| `--tools <tools>` | `install` / `sync` | 指定目标工具，逗号分隔 |
-| `--check` | `install` / `sync` | 只检查是否有变更，不写文件 |
-| `--yes` | `install` / `init` / `done` | 跳过交互确认；`install` 会优先复用已安装工具 |
-| `--scope <name>` | `init` | 手动指定 SCOPE 名称，不使用 git user.name |
+| 选项              | 适用命令                    | 说明                                         |
+| ----------------- | --------------------------- | -------------------------------------------- |
+| `--tools <tools>` | `install` / `sync`          | 指定目标工具，逗号分隔                       |
+| `--check`         | `install` / `sync`          | 只检查是否有变更，不写文件                   |
+| `--yes`           | `install` / `init` / `done` | 跳过交互确认；`install` 会优先复用已安装工具 |
+| `--scope <name>`  | `init`                      | 手动指定 SCOPE 名称，不使用 git user.name    |
 
 ## 支持的工具
 
-| 工具 | Skill 目录 |
-| ---- | ---------- |
-| Claude | `.claude/skills/agent-context/` |
-| Codex | `.codex/skills/agent-context/` |
-| Cursor | `.cursor/skills/agent-context/` |
-| Antigravity | `.agent/skills/agent-context/` |
+| 工具           | Skill 目录                      |
+| -------------- | ------------------------------- |
+| Claude         | `.claude/skills/agent-context/` |
+| Codex          | `.codex/skills/agent-context/`  |
+| Cursor         | `.cursor/skills/agent-context/` |
+| Antigravity    | `.agent/skills/agent-context/`  |
 | GitHub Copilot | `.github/skills/agent-context/` |
 
 其中 Codex 会额外生成 `agents/openai.yaml` 元数据文件，其余工具只生成 Skill 内容本身。

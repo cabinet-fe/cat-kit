@@ -1,12 +1,12 @@
 {
   "name": "@cat-kit/maintenance",
-  "type": "module",
   "version": "1.0.1",
   "description": "包维护工具",
   "files": [
     "dist",
     "src"
   ],
+  "type": "module",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -16,10 +16,10 @@
   },
   "dependencies": {
     "chalk": "^5.6.2",
+    "execa": "^9.6.1",
     "fast-glob": "^3.3.3",
     "rollup-plugin-visualizer": "^7.0.1",
-    "tsdown": "^0.21.5",
-    "execa": "^9.6.1"
+    "tsdown": "^0.21.5"
   },
   "devDependencies": {
     "@cat-kit/tsconfig": "workspace:*"

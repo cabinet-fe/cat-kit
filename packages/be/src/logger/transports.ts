@@ -1,10 +1,11 @@
 import { appendFile, rename, stat } from 'node:fs/promises'
 import { basename, dirname, extname, join } from 'node:path'
+
+import { Dater } from '@cat-kit/core'
 import chalk from 'chalk'
 
-import type { LogEntry, LogFormat, LogLevel } from './logger'
 import { ensureDir } from '../fs/ensure-dir'
-import { Dater } from '@cat-kit/core'
+import type { LogEntry, LogFormat, LogLevel } from './logger'
 
 /**
  * 日志传输器接口
@@ -21,11 +22,7 @@ export interface Transport {
    * @param formatted - 格式化后的日志字符串
    * @param format - 日志格式
    */
-  write(
-    entry: LogEntry,
-    formatted: string,
-    format: LogFormat
-  ): void | Promise<void>
+  write(entry: LogEntry, formatted: string, format: LogFormat): void | Promise<void>
 }
 
 /**

@@ -53,9 +53,7 @@ function deepMerge(target: Mergeable, source: Mergeable): Mergeable {
  * @returns 合并后的新对象
  * @template T 配置对象类型
  */
-export function mergeConfig<T extends Mergeable>(
-  ...configs: Array<Partial<T>>
-): T {
+export function mergeConfig<T extends Mergeable>(...configs: Array<Partial<T>>): T {
   return configs.reduce<Mergeable>(
     (acc, config) => (config ? deepMerge(acc, config) : acc),
     {}

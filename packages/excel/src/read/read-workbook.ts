@@ -1,12 +1,7 @@
 import { Workbook } from '../model/workbook'
 import type { DateSystem, ReadOptions, WorkbookInput } from '../types'
 import { getZipTextEntry, readZipEntries } from '../zip/zip-reader'
-import {
-  parseSharedStrings,
-  parseStyles,
-  parseWorkbookSheets,
-  parseWorksheet
-} from './xml-reader'
+import { parseSharedStrings, parseStyles, parseWorkbookSheets, parseWorksheet } from './xml-reader'
 
 const DEFAULT_DATE_SYSTEM: DateSystem = 1900
 

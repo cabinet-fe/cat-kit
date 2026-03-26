@@ -9,10 +9,7 @@
 ```typescript
 import { readFile, saveFromBlob, saveFromURL } from '@cat-kit/fe'
 
-await readFile(file, {
-  chunkSize: 1024 * 1024,
-  onChunk: (chunk) => console.log(chunk.byteLength)
-})
+await readFile(file, { chunkSize: 1024 * 1024, onChunk: (chunk) => console.log(chunk.byteLength) })
 
 saveFromBlob(new Blob(['hello']), 'output.txt')
 await saveFromURL('/report.csv', 'report.csv')
@@ -46,7 +43,7 @@ import { readFile } from '@cat-kit/fe'
 
 // 从 input 元素获取文件
 const input = document.querySelector<HTMLInputElement>('#fileInput')
-input?.addEventListener('change', async e => {
+input?.addEventListener('change', async (e) => {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
 
@@ -78,7 +75,7 @@ async function calculateMD5(file: File): Promise<string> {
 
   await readFile(file, {
     chunkSize: 2 * 1024 * 1024, // 2MB 每块
-    onChunk: chunk => {
+    onChunk: (chunk) => {
       spark.append(chunk.buffer)
     }
   })
@@ -115,10 +112,7 @@ async function uploadLargeFile(file: File, uploadUrl: string) {
       formData.append('filename', file.name)
 
       // 上传当前块
-      await fetch(uploadUrl, {
-        method: 'POST',
-        body: formData
-      })
+      await fetch(uploadUrl, { method: 'POST', body: formData })
 
       uploadedChunks++
       const progress = (uploadedChunks / totalChunks) * 100
@@ -207,7 +201,7 @@ saveJSON(data, 'user.json')
 import { saveFromBlob } from '@cat-kit/fe'
 
 function saveCanvasAsImage(canvas: HTMLCanvasElement, filename: string) {
-  canvas.toBlob(blob => {
+  canvas.toBlob((blob) => {
     if (blob) {
       saveFromBlob(blob, filename)
     }
@@ -244,7 +238,7 @@ function saveCSV(data: any[], filename: string) {
   const headers = Object.keys(data[0])
   const csvContent = [
     headers.join(','),
-    ...data.map(row => headers.map(h => row[h]).join(','))
+    ...data.map((row) => headers.map((h) => row[h]).join(','))
   ].join('\n')
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
@@ -268,7 +262,7 @@ import { readFile, saveFromBlob } from '@cat-kit/fe'
 
 // 1. 读取文件
 const input = document.querySelector<HTMLInputElement>('#fileInput')
-input?.addEventListener('change', async e => {
+input?.addEventListener('change', async (e) => {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
 
@@ -280,10 +274,7 @@ input?.addEventListener('change', async e => {
       // 收集所有块
       chunks.push(chunk)
       console.log(
-        `处理进度：${(
-          ((index + 1) * 100) /
-          Math.ceil(file.size / (1024 * 1024))
-        ).toFixed(2)}%`
+        `处理进度：${(((index + 1) * 100) / Math.ceil(file.size / (1024 * 1024))).toFixed(2)}%`
       )
     }
   })

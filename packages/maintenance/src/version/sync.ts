@@ -1,6 +1,7 @@
-import { writeJson, readJson } from '../utils'
 import { join } from 'node:path'
+
 import type { PackageJson } from '../types'
+import { writeJson, readJson } from '../utils'
 import type { PackageVersionConfig } from './types'
 
 /**
@@ -73,10 +74,7 @@ export async function syncPeerDependencies(
 
     // 如果有修改，写回文件
     if (modified) {
-      await writeJson(packageJsonPath, packageJson, {
-        space: 2,
-        eol: '\n'
-      })
+      await writeJson(packageJsonPath, packageJson, { space: 2, eol: '\n' })
     }
   }
 }
@@ -131,9 +129,7 @@ export async function syncDependencies(
 
     // 更新 dependencies
     if (packageJson.dependencies) {
-      for (const [dep, currentVersion] of Object.entries(
-        packageJson.dependencies
-      )) {
+      for (const [dep, currentVersion] of Object.entries(packageJson.dependencies)) {
         if (
           typeof currentVersion === 'string' &&
           packageNames.has(dep) &&
@@ -149,10 +145,7 @@ export async function syncDependencies(
     }
 
     if (modified) {
-      await writeJson(packageJsonPath, packageJson, {
-        space: 2,
-        eol: '\n'
-      })
+      await writeJson(packageJsonPath, packageJson, { space: 2, eol: '\n' })
     }
   }
 }

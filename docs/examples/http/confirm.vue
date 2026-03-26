@@ -10,9 +10,7 @@
             <div class="item-title">{{ item.title }}</div>
             <div class="item-desc">ID: {{ item.id }}</div>
           </div>
-          <var-button type="danger" size="small" @click="deleteItem(item.id)">
-            删除
-          </var-button>
+          <var-button type="danger" size="small" @click="deleteItem(item.id)"> 删除 </var-button>
         </div>
       </div>
     </div>
@@ -30,10 +28,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
 import { HTTPClient } from '@cat-kit/http/src'
-import { Dialog, Snackbar } from '@varlet/ui'
 import type { ClientPlugin } from '@cat-kit/http/src'
+import { Dialog, Snackbar } from '@varlet/ui'
+import { ref } from 'vue'
 
 const items = ref([
   { id: 1, title: '项目 A' },
@@ -89,7 +87,7 @@ async function deleteItem(id: number) {
     await http.delete(`https://jsonplaceholder.typicode.com/posts/${id}`)
 
     // 从列表中移除
-    items.value = items.value.filter(item => item.id !== id)
+    items.value = items.value.filter((item) => item.id !== id)
     Snackbar.success('删除成功')
   } catch (error: any) {
     if (error.message === '用户取消操作') {

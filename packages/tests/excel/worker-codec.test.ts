@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { Workbook, readWorkbook, writeWorkbook, ExcelParseError } from '@cat-kit/excel/src'
+import { describe, expect, it } from 'vitest'
 
 function toChunkedStream(data: Uint8Array, chunkSize = 5): ReadableStream<Uint8Array> {
   let offset = 0
@@ -16,10 +16,7 @@ function toChunkedStream(data: Uint8Array, chunkSize = 5): ReadableStream<Uint8A
   })
 }
 
-async function* toChunkedAsyncIterable(
-  data: Uint8Array,
-  chunkSize = 7
-): AsyncIterable<Uint8Array> {
+async function* toChunkedAsyncIterable(data: Uint8Array, chunkSize = 7): AsyncIterable<Uint8Array> {
   for (let offset = 0; offset < data.length; offset += chunkSize) {
     yield data.slice(offset, offset + chunkSize)
   }

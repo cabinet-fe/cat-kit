@@ -30,13 +30,7 @@ async function getDiskInfoUnix(path: string): Promise<DiskInfo> {
   const free = blockSize * Number(stats.bavail)
   const used = Math.max(total - free, 0)
 
-  return {
-    path,
-    total,
-    free,
-    used,
-    usedPercent: total === 0 ? 0 : (used / total) * 100
-  }
+  return { path, total, free, used, usedPercent: total === 0 ? 0 : (used / total) * 100 }
 }
 
 function resolveDriveLetter(path: string): string {
@@ -52,11 +46,7 @@ async function getDiskInfoWindows(path: string): Promise<DiskInfo> {
   const drive = resolveDriveLetter(path)
   const script = `Get-PSDrive -Name '${drive}' | Select-Object Used,Free | ConvertTo-Json -Compress`
 
-  const { stdout } = await execFileAsync('powershell', [
-    '-NoProfile',
-    '-Command',
-    script
-  ])
+  const { stdout } = await execFileAsync('powershell', ['-NoProfile', '-Command', script])
 
   const data = JSON.parse(stdout.trim())
   const used = Number(data.Used ?? 0)

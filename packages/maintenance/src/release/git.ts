@@ -1,7 +1,7 @@
 import { $ } from 'execa'
+
 import { GitError } from '../errors'
 import type { GitCommitAndPushOptions, GitCommitResult, GitTagOptions, GitTagResult } from './types'
-
 
 /**
  * 执行 git 命令
@@ -22,14 +22,9 @@ export async function execGit(cwd: string, args: string[]): Promise<string> {
     const stderr = execaError.stderr?.trim()
     const errorMessage = stderr || execaError.message || '未知错误'
 
-    throw new GitError(
-      `执行 git 命令失败: ${command}\n${errorMessage}`,
-      command,
-      error as Error
-    )
+    throw new GitError(`执行 git 命令失败: ${command}\n${errorMessage}`, command, error as Error)
   }
 }
-
 
 /**
  * 创建 git tag（可选推送）
@@ -93,9 +88,7 @@ export async function createGitTag(options: GitTagOptions): Promise<GitTagResult
  * })
  * ```
  */
-export async function commitAndPush(
-  options: GitCommitAndPushOptions
-): Promise<GitCommitResult> {
+export async function commitAndPush(options: GitCommitAndPushOptions): Promise<GitCommitResult> {
   const {
     cwd,
     message,
@@ -127,8 +120,7 @@ export async function commitAndPush(
   }
 
   const branch =
-    specifiedBranch ||
-    (await execGit(cwd, ['rev-parse', '--abbrev-ref', 'HEAD'])).trim()
+    specifiedBranch || (await execGit(cwd, ['rev-parse', '--abbrev-ref', 'HEAD'])).trim()
 
   // 只有在有变更时才推送
   if (hasChanges || allowEmpty) {
@@ -141,8 +133,5 @@ export async function commitAndPush(
 
   const commitHash = await execGit(cwd, ['rev-parse', 'HEAD'])
 
-  return {
-    commitHash,
-    branch
-  }
+  return { commitHash, branch }
 }

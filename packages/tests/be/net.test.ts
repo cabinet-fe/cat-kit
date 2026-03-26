@@ -5,7 +5,7 @@ import { getLocalIP, isPortAvailable } from '@cat-kit/be/src'
 describe('@cat-kit/be 网络工具', () => {
   it('应该检测端口可用性', async () => {
     const server = createServer()
-    const port = await new Promise<number>(resolve => {
+    const port = await new Promise<number>((resolve) => {
       server.listen(0, '127.0.0.1', () => {
         const address = server.address()
         resolve(typeof address === 'object' && address ? address.port : 0)
@@ -13,7 +13,7 @@ describe('@cat-kit/be 网络工具', () => {
     })
 
     expect(await isPortAvailable(port)).toBe(false)
-    await new Promise(resolve => server.close(resolve))
+    await new Promise((resolve) => server.close(resolve))
     expect(await isPortAvailable(port)).toBe(true)
   })
 
@@ -22,4 +22,3 @@ describe('@cat-kit/be 网络工具', () => {
     expect(ip).toMatch(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/)
   })
 })
-

@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser'
+
 import { ExcelParseError } from '../errors'
 
 const parser = new XMLParser({

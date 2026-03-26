@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest'
 import {
   getDataType,
   isObj,
@@ -24,6 +23,7 @@ import {
   isUndef,
   isEmpty
 } from '@cat-kit/core/src'
+import { describe, it, expect } from 'vitest'
 
 describe('类型判断函数', () => {
   describe('getDataType', () => {
@@ -63,7 +63,7 @@ describe('类型判断函数', () => {
 
     it('应该识别函数', () => {
       expect(getDataType(() => {})).toBe('function')
-      expect(getDataType(function() {})).toBe('function')
+      expect(getDataType(function () {})).toBe('function')
     })
 
     it('应该识别 Symbol', () => {
@@ -146,7 +146,7 @@ describe('类型判断函数', () => {
   describe('isFunction', () => {
     it('应该识别函数', () => {
       expect(isFunction(() => {})).toBe(true)
-      expect(isFunction(function() {})).toBe(true)
+      expect(isFunction(function () {})).toBe(true)
       // async函数被识别为asyncfunction
     })
 
@@ -277,4 +277,3 @@ describe('类型判断函数', () => {
     })
   })
 })
-

@@ -51,9 +51,7 @@ await removePath('./tmp/reports/a.txt')
 import { readDir } from '@cat-kit/be'
 
 // 返回包含文件和目录的详细信息数组（默认）
-const entries = await readDir('./src', {
-  recursive: true
-})
+const entries = await readDir('./src', { recursive: true })
 // [
 //   {
 //     path: '/path/to/src/index.ts',
@@ -77,17 +75,14 @@ const entries = await readDir('./src', {
 // ]
 
 // 只返回文件路径数组
-const files = await readDir('./src', {
-  recursive: true,
-  onlyFiles: true
-})
+const files = await readDir('./src', { recursive: true, onlyFiles: true })
 // ['/path/to/src/index.ts', '/path/to/src/utils.ts', ...]
 
 // 使用过滤函数
 const tsFiles = await readDir('./src', {
   recursive: true,
   onlyFiles: true,
-  filter: entry => entry.name.endsWith('.ts')
+  filter: (entry) => entry.name.endsWith('.ts')
 })
 ```
 
@@ -95,16 +90,10 @@ const tsFiles = await readDir('./src', {
 
 ```typescript
 // 返回详细信息数组（默认）
-function readDir(
-  dir: string,
-  options?: ReadDirOptions & { onlyFiles?: false }
-): Promise<DirEntry[]>
+function readDir(dir: string, options?: ReadDirOptions & { onlyFiles?: false }): Promise<DirEntry[]>
 
 // 返回文件路径数组
-function readDir(
-  dir: string,
-  options: ReadDirOptions & { onlyFiles: true }
-): Promise<string[]>
+function readDir(dir: string, options: ReadDirOptions & { onlyFiles: true }): Promise<string[]>
 ```
 
 **参数说明：**
@@ -259,9 +248,7 @@ await writeFile('./logs/app.log', 'New line\n', { flag: 'a' })
 await writeFile('./data/utf16.txt', 'Unicode 文本', { encoding: 'utf16le' })
 
 // 指定文件权限
-await writeFile('./scripts/run.sh', '#!/bin/bash\necho "Hello"', {
-  mode: 0o755
-})
+await writeFile('./scripts/run.sh', '#!/bin/bash\necho "Hello"', { mode: 0o755 })
 ```
 
 #### 流式下载示例
@@ -281,20 +268,13 @@ async function downloadFile(url: string, savePath: string) {
   await writeFile(savePath, response.body!)
 }
 
-await downloadFile(
-  'https://example.com/large-file.zip',
-  './downloads/large-file.zip'
-)
+await downloadFile('https://example.com/large-file.zip', './downloads/large-file.zip')
 ```
 
 #### API参考
 
 ```typescript
-function writeFile(
-  filePath: string,
-  data: WriteFileData,
-  options?: WriteFileOptions
-): Promise<void>
+function writeFile(filePath: string, data: WriteFileData, options?: WriteFileOptions): Promise<void>
 ```
 
 **参数说明：**
@@ -361,10 +341,7 @@ const data = await readJson('./data.json', {
 #### API参考
 
 ```typescript
-function readJson<T = unknown>(
-  filePath: string,
-  options?: ReadJsonOptions
-): Promise<T>
+function readJson<T = unknown>(filePath: string, options?: ReadJsonOptions): Promise<T>
 ```
 
 **参数说明：**
@@ -393,10 +370,7 @@ function readJson<T = unknown>(
 import { writeJson } from '@cat-kit/be'
 
 // 写入 JSON 文件
-await writeJson('./data.json', {
-  name: 'CatKit',
-  version: '1.0.0'
-})
+await writeJson('./data.json', { name: 'CatKit', version: '1.0.0' })
 
 // 自定义格式
 await writeJson('./config.json', config, {
@@ -418,11 +392,7 @@ await writeJson('./data.json', data, {
 #### API参考
 
 ```typescript
-function writeJson(
-  filePath: string,
-  data: unknown,
-  options?: WriteJsonOptions
-): Promise<void>
+function writeJson(filePath: string, data: unknown, options?: WriteJsonOptions): Promise<void>
 ```
 
 **参数说明：**
@@ -477,11 +447,7 @@ await movePath('C:/temp/file.txt', 'D:/backup/file.txt')
 #### API参考
 
 ```typescript
-function movePath(
-  src: string,
-  dest: string,
-  options?: MoveOptions
-): Promise<void>
+function movePath(src: string, dest: string, options?: MoveOptions): Promise<void>
 ```
 
 **参数说明：**
@@ -556,15 +522,12 @@ import { readDir, readJson, writeJson } from '@cat-kit/be'
 const configFiles = await readDir('./config', {
   recursive: true,
   onlyFiles: true,
-  filter: entry => entry.name.endsWith('.json')
+  filter: (entry) => entry.name.endsWith('.json')
 })
 
-const configs = await Promise.all(configFiles.map(file => readJson(file)))
+const configs = await Promise.all(configFiles.map((file) => readJson(file)))
 
-const mergedConfig = configs.reduce(
-  (acc, config) => ({ ...acc, ...config }),
-  {}
-)
+const mergedConfig = configs.reduce((acc, config) => ({ ...acc, ...config }), {})
 
 await writeJson('./config/merged.json', mergedConfig)
 ```
@@ -578,10 +541,10 @@ import { readDir, removePath } from '@cat-kit/be'
 const tempFiles = await readDir('./temp', {
   recursive: true,
   onlyFiles: true,
-  filter: entry => entry.name.startsWith('.tmp')
+  filter: (entry) => entry.name.startsWith('.tmp')
 })
 
-await Promise.all(tempFiles.map(file => removePath(file)))
+await Promise.all(tempFiles.map((file) => removePath(file)))
 ```
 
 ### 备份数据
@@ -592,10 +555,7 @@ import { format } from 'date-fns'
 
 // 备份 JSON 数据
 const data = await readJson('./data.json')
-const backupPath = `./backups/data-${format(
-  new Date(),
-  'yyyy-MM-dd-HH-mm-ss'
-)}.json`
+const backupPath = `./backups/data-${format(new Date(), 'yyyy-MM-dd-HH-mm-ss')}.json`
 await writeJson(backupPath, data)
 ```
 
@@ -651,15 +611,14 @@ import { readDir } from '@cat-kit/be'
 const tsFiles = await readDir('./src', {
   recursive: true,
   onlyFiles: true,
-  filter: entry => entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')
+  filter: (entry) => entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')
 })
 
 // 查找所有测试文件
 const testFiles = await readDir('./src', {
   recursive: true,
   onlyFiles: true,
-  filter: entry =>
-    entry.name.includes('.test.') || entry.name.includes('.spec.')
+  filter: (entry) => entry.name.includes('.test.') || entry.name.includes('.spec.')
 })
 ```
 
@@ -669,9 +628,7 @@ const testFiles = await readDir('./src', {
 import { readDir } from '@cat-kit/be'
 
 // 分析目录结构（返回详细信息）
-const entries = await readDir('./src', {
-  recursive: true
-})
+const entries = await readDir('./src', { recursive: true })
 
 const stats = {
   totalFiles: 0,
@@ -751,13 +708,11 @@ import { basename } from 'node:path'
 async function moveTextFiles(srcDir: string, destDir: string) {
   const files = await readDir(srcDir, {
     onlyFiles: true,
-    filter: entry => entry.name.endsWith('.txt')
+    filter: (entry) => entry.name.endsWith('.txt')
   })
 
   await Promise.all(
-    files.map(file =>
-      movePath(file, `${destDir}/${basename(file)}`, { overwrite: true })
-    )
+    files.map((file) => movePath(file, `${destDir}/${basename(file)}`, { overwrite: true }))
   )
 }
 ```

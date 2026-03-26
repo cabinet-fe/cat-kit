@@ -69,9 +69,7 @@ describe('@cat-kit/be 缓存工具', () => {
   describe('memoize', () => {
     it('应该使用自定义解析器缓存函数结果', async () => {
       const spy = vi.fn(async (value: number) => value * 2)
-      const memoized = memoize(spy, {
-        resolver: (value: number) => `key:${value}`
-      })
+      const memoized = memoize(spy, { resolver: (value: number) => `key:${value}` })
 
       await memoized(2)
       await memoized(2)
@@ -80,4 +78,3 @@ describe('@cat-kit/be 缓存工具', () => {
     })
   })
 })
-

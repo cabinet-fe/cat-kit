@@ -114,9 +114,7 @@ export function saveFromBlob(blob: Blob, filename: string): void {
  * }
  * ```
  */
-export function createWritableStream(
-  options: StreamSaveOptions
-): WritableStream<Uint8Array> {
+export function createWritableStream(options: StreamSaveOptions): WritableStream<Uint8Array> {
   const {
     filename,
     size,
@@ -210,11 +208,7 @@ export function createWritableStream(
 export async function saveFromStream(
   stream: ReadableStream<Uint8Array>,
   filename: string,
-  options?: {
-    size?: number
-    type?: string
-    onProgress?: (bytesWritten: number) => void
-  }
+  options?: { size?: number; type?: string; onProgress?: (bytesWritten: number) => void }
 ): Promise<void> {
   const writable = createWritableStream({
     filename,
@@ -253,9 +247,7 @@ export async function saveFromURL(
   const response = await fetch(url, options?.fetchOptions)
 
   if (!response.ok) {
-    throw new Error(
-      `Failed to fetch: ${response.status} ${response.statusText}`
-    )
+    throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`)
   }
 
   if (!response.body) {

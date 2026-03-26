@@ -1,5 +1,5 @@
-import type { SemverVersion, BumpType } from './types'
 import { SemverError } from '../errors'
+import type { SemverVersion, BumpType } from './types'
 
 /**
  * 解析 semver 版本号
@@ -113,10 +113,7 @@ function comparePrereleaseIdentifiers(a: string[], b: string[]): number {
  * compareSemver('1.0.0-alpha', '1.0.0')   // -1 (预发布版本小于正式版本)
  * ```
  */
-export function compareSemver(
-  v1: string | SemverVersion,
-  v2: string | SemverVersion
-): number {
+export function compareSemver(v1: string | SemverVersion, v2: string | SemverVersion): number {
   const ver1 = typeof v1 === 'string' ? parseSemver(v1) : v1
   const ver2 = typeof v2 === 'string' ? parseSemver(v2) : v2
 
@@ -164,11 +161,7 @@ export function compareSemver(
  * incrementVersion('1.2.3', 'prerelease', 'beta') // '1.2.3-beta.0'
  * ```
  */
-export function incrementVersion(
-  version: string,
-  type: BumpType,
-  preid: string = 'alpha'
-): string {
+export function incrementVersion(version: string, type: BumpType, preid: string = 'alpha'): string {
   const ver = parseSemver(version)
 
   switch (type) {

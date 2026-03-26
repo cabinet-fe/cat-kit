@@ -169,7 +169,7 @@ TokenPlugin({
 TokenPlugin({
   getter: () => 'my-secret-token',
   authType: 'Custom',
-  formatter: token => `Token ${token}`
+  formatter: (token) => `Token ${token}`
   // 添加请求头：Authorization: Token my-secret-token
 })
 
@@ -178,7 +178,7 @@ TokenPlugin({
   getter: () => localStorage.getItem('api_key'),
   headerName: 'X-API-Key',
   authType: 'Custom',
-  formatter: token => token
+  formatter: (token) => token
   // 添加请求头：X-API-Key: <token>
 })
 ```
@@ -198,12 +198,7 @@ TokenPlugin({
 import { HTTPClient, MethodOverridePlugin } from '@cat-kit/http'
 
 const http = new HTTPClient('', {
-  plugins: [
-    MethodOverridePlugin({
-      methods: ['DELETE', 'PUT', 'PATCH'],
-      overrideMethod: 'POST'
-    })
-  ]
+  plugins: [MethodOverridePlugin({ methods: ['DELETE', 'PUT', 'PATCH'], overrideMethod: 'POST' })]
 })
 ```
 
@@ -251,9 +246,7 @@ MethodOverridePlugin({
 })
 
 // 使用示例
-const http = new HTTPClient('', {
-  plugins: [MethodOverridePlugin()]
-})
+const http = new HTTPClient('', { plugins: [MethodOverridePlugin()] })
 
 // 发送 DELETE 请求
 await http.delete('/users/123')
@@ -293,9 +286,7 @@ function LoggerPlugin(): ClientPlugin {
 }
 
 // 使用插件
-const http = new HTTPClient('', {
-  plugins: [LoggerPlugin()]
-})
+const http = new HTTPClient('', { plugins: [LoggerPlugin()] })
 ```
 
 ### 修改请求
@@ -307,15 +298,7 @@ function TimestampPlugin(): ClientPlugin {
   return {
     beforeRequest(url, config) {
       // 在查询参数中添加时间戳
-      return {
-        config: {
-          ...config,
-          query: {
-            ...config.query,
-            _t: Date.now()
-          }
-        }
-      }
+      return { config: { ...config, query: { ...config.query, _t: Date.now() } } }
     }
   }
 }
@@ -366,10 +349,7 @@ function ConfirmDeletePlugin(): ClientPlugin {
     async beforeRequest(url, config) {
       if (config.method === 'DELETE') {
         try {
-          await Dialog({
-            title: '确认删除',
-            message: '确定要删除该项吗？此操作不可恢复。'
-          })
+          await Dialog({ title: '确认删除', message: '确定要删除该项吗？此操作不可恢复。' })
         } catch {
           throw new Error('用户取消操作')
         }
@@ -402,11 +382,7 @@ function DataTransformPlugin(): ClientPlugin {
       const apiResponse = response.data as ApiResponse<any>
 
       // 转换为标准格式
-      return {
-        ...response,
-        code: apiResponse.code,
-        data: apiResponse.data
-      }
+      return { ...response, code: apiResponse.code, data: apiResponse.data }
     }
   }
 }
@@ -444,10 +420,7 @@ function ErrorHandlerPlugin(): ClientPlugin {
 创建一个自动重试的插件：
 
 ```typescript
-function RetryPlugin(
-  maxRetries: number = 3,
-  delay: number = 1000
-): ClientPlugin {
+function RetryPlugin(maxRetries: number = 3, delay: number = 1000): ClientPlugin {
   const retryCount = new WeakMap<any, number>()
 
   return {
@@ -470,7 +443,7 @@ function RetryPlugin(
       retryCount.set(config, count + 1)
 
       // 等待一段时间后重试
-      await new Promise(resolve => setTimeout(resolve, delay * (count + 1)))
+      await new Promise((resolve) => setTimeout(resolve, delay * (count + 1)))
 
       console.log(`第 ${count + 1} 次重试: ${url}`)
 
@@ -511,10 +484,7 @@ function CachePlugin(ttl: number = 60000): ClientPlugin {
       // 只缓存成功的 GET 请求
       if (config.method === 'GET' && response.code === 200) {
         const cacheKey = url + JSON.stringify(config.query)
-        cache.set(cacheKey, {
-          data: response.data,
-          timestamp: Date.now()
-        })
+        cache.set(cacheKey, { data: response.data, timestamp: Date.now() })
       }
       return response
     }
@@ -563,9 +533,7 @@ import { HTTPClient, TokenPlugin, MethodOverridePlugin } from '@cat-kit/http'
 const http = new HTTPClient('/api', {
   plugins: [
     // 1. 添加令牌
-    TokenPlugin({
-      getter: () => localStorage.getItem('token')
-    }),
+    TokenPlugin({ getter: () => localStorage.getItem('token') }),
 
     // 2. 方法重写
     MethodOverridePlugin(),
@@ -619,15 +587,7 @@ function MixedPlugin() {
 function GoodPlugin(): ClientPlugin {
   return {
     beforeRequest(url, config) {
-      return {
-        config: {
-          ...config,
-          headers: {
-            ...config.headers,
-            'X-Custom': 'value'
-          }
-        }
-      }
+      return { config: { ...config, headers: { ...config.headers, 'X-Custom': 'value' } } }
     }
   }
 }
@@ -654,15 +614,7 @@ function AsyncPlugin(): ClientPlugin {
       // 异步获取某些数据
       const data = await fetchSomeData()
 
-      return {
-        config: {
-          ...config,
-          headers: {
-            ...config.headers,
-            'X-Data': data
-          }
-        }
-      }
+      return { config: { ...config, headers: { ...config.headers, 'X-Data': data } } }
     }
   }
 }
@@ -680,13 +632,7 @@ function SafePlugin(): ClientPlugin {
         // 可能失败的操作
         const token = getToken()
         return {
-          config: {
-            ...config,
-            headers: {
-              ...config.headers,
-              Authorization: `Bearer ${token}`
-            }
-          }
+          config: { ...config, headers: { ...config.headers, Authorization: `Bearer ${token}` } }
         }
       } catch (error) {
         console.error('获取令牌失败:', error)
@@ -705,9 +651,7 @@ function SafePlugin(): ClientPlugin {
 插件按照数组顺序依次执行：
 
 ```typescript
-const http = new HTTPClient('', {
-  plugins: [pluginA, pluginB, pluginC]
-})
+const http = new HTTPClient('', { plugins: [pluginA, pluginB, pluginC] })
 
 // beforeRequest 执行顺序: A → B → C
 // afterRespond 执行顺序: A → B → C
@@ -737,12 +681,7 @@ function ValidationPlugin(): ClientPlugin {
 function PluginA(): ClientPlugin {
   return {
     beforeRequest(url, config) {
-      return {
-        config: {
-          ...config,
-          _pluginAData: 'some data'
-        }
-      }
+      return { config: { ...config, _pluginAData: 'some data' } }
     }
   }
 }

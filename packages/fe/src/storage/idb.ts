@@ -5,12 +5,12 @@
 
 interface FieldDefinition {
   type:
-  | StringConstructor
-  | NumberConstructor
-  | ObjectConstructor
-  | ArrayConstructor
-  | BooleanConstructor
-  | DateConstructor
+    | StringConstructor
+    | NumberConstructor
+    | ObjectConstructor
+    | ArrayConstructor
+    | BooleanConstructor
+    | DateConstructor
   required?: boolean
   primary?: boolean
   autoIncrement?: boolean
@@ -30,11 +30,12 @@ interface Query {
   [key: string]: any
 }
 
-
-
-class Store<T extends StoreDefinition, Data = {
-  [key in keyof T]: InstanceType<T[key]['type']>
-}> {
+class Store<
+  T extends StoreDefinition,
+  Data = {
+    [key in keyof T]: InstanceType<T[key]['type']>
+  }
+> {
   private name: string
   private schema: StoreDefinition
   private db: IDBDatabase | null = null
@@ -106,10 +107,7 @@ class Store<T extends StoreDefinition, Data = {
       // 检查必须字段
       if (field.required && data[key] === undefined) {
         if (field.default !== undefined) {
-          result[key] =
-            typeof field.default === 'function'
-              ? field.default()
-              : field.default
+          result[key] = typeof field.default === 'function' ? field.default() : field.default
         } else {
           throw new Error(`${key} is required`)
         }
@@ -122,8 +120,7 @@ class Store<T extends StoreDefinition, Data = {
         } else if (field.type === Boolean) {
           result[key] = Boolean(data[key])
         } else if (field.type === Date) {
-          result[key] =
-            data[key] instanceof Date ? data[key] : new Date(data[key])
+          result[key] = data[key] instanceof Date ? data[key] : new Date(data[key])
         } else if (field.type === Object || field.type === Array) {
           result[key] = data[key]
         } else {
@@ -139,9 +136,7 @@ class Store<T extends StoreDefinition, Data = {
    * @param mode 事务模式
    * @returns 事务对象
    */
-  private async getTransaction(
-    mode: IDBTransactionMode = 'readonly'
-  ): Promise<IDBObjectStore> {
+  private async getTransaction(mode: IDBTransactionMode = 'readonly'): Promise<IDBObjectStore> {
     if (!this.db && this.dbReady) {
       this.db = await this.dbReady
     }
@@ -204,13 +199,12 @@ class Store<T extends StoreDefinition, Data = {
   async find(query: Query): Promise<any> {
     return new Promise((resolve, reject) => {
       this.getTransaction()
-        .then(store => {
+        .then((store) => {
           const request = store.openCursor()
           const filter = this.buildQuery(query)
 
-          request.onsuccess = event => {
-            const cursor = (event.target as IDBRequest)
-              .result as IDBCursorWithValue
+          request.onsuccess = (event) => {
+            const cursor = (event.target as IDBRequest).result as IDBCursorWithValue
             if (cursor) {
               if (filter(cursor.value)) {
                 resolve(cursor.value)
@@ -221,8 +215,7 @@ class Store<T extends StoreDefinition, Data = {
               resolve(null)
             }
           }
-          request.onerror = () =>
-            reject(request.error ?? new Error('find failed'))
+          request.onerror = () => reject(request.error ?? new Error('find failed'))
         })
         .catch(reject)
     })
@@ -236,14 +229,13 @@ class Store<T extends StoreDefinition, Data = {
   async findMany(query: Query): Promise<any[]> {
     return new Promise((resolve, reject) => {
       this.getTransaction()
-        .then(store => {
+        .then((store) => {
           const request = store.openCursor()
           const filter = this.buildQuery(query)
           const results: any[] = []
 
-          request.onsuccess = event => {
-            const cursor = (event.target as IDBRequest)
-              .result as IDBCursorWithValue
+          request.onsuccess = (event) => {
+            const cursor = (event.target as IDBRequest).result as IDBCursorWithValue
             if (cursor) {
               if (filter(cursor.value)) {
                 results.push(cursor.value)
@@ -253,8 +245,7 @@ class Store<T extends StoreDefinition, Data = {
               resolve(results)
             }
           }
-          request.onerror = () =>
-            reject(request.error ?? new Error('findMany failed'))
+          request.onerror = () => reject(request.error ?? new Error('findMany failed'))
         })
         .catch(reject)
     })
@@ -269,7 +260,7 @@ class Store<T extends StoreDefinition, Data = {
   async update(key: IDBValidKey, data: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
       this.getTransaction('readwrite')
-        .then(store => {
+        .then((store) => {
           const request = store.get(key)
 
           request.onsuccess = () => {
@@ -282,12 +273,10 @@ class Store<T extends StoreDefinition, Data = {
             const putRequest = store.put(updatedData)
 
             putRequest.onsuccess = () => resolve(true)
-            putRequest.onerror = () =>
-              reject(putRequest.error ?? new Error('update failed'))
+            putRequest.onerror = () => reject(putRequest.error ?? new Error('update failed'))
           }
 
-          request.onerror = () =>
-            reject(request.error ?? new Error('update failed'))
+          request.onerror = () => reject(request.error ?? new Error('update failed'))
         })
         .catch(reject)
     })
@@ -325,14 +314,14 @@ class Store<T extends StoreDefinition, Data = {
     return new Promise((resolve, reject) => {
       try {
         this.find(query)
-          .then(data => {
+          .then((data) => {
             if (!data) {
               resolve(false)
               return
             }
 
             this.getTransaction('readwrite')
-              .then(store => {
+              .then((store) => {
                 const key = this.primaryKey ? data[this.primaryKey] : null
 
                 if (!key) {
@@ -343,8 +332,7 @@ class Store<T extends StoreDefinition, Data = {
                 const request = store.delete(key)
 
                 request.onsuccess = () => resolve(true)
-                request.onerror = () =>
-                  reject(request.error ?? new Error('delete failed'))
+                request.onerror = () => reject(request.error ?? new Error('delete failed'))
               })
               .catch(reject)
           })
@@ -364,15 +352,15 @@ class Store<T extends StoreDefinition, Data = {
     return new Promise((resolve, reject) => {
       try {
         this.findMany(query)
-          .then(dataList => {
+          .then((dataList) => {
             if (dataList.length === 0) {
               resolve(0)
               return
             }
 
             this.getTransaction('readwrite')
-              .then(store => {
-                const deletes = dataList.map(data => {
+              .then((store) => {
+                const deletes = dataList.map((data) => {
                   const key = this.primaryKey ? data[this.primaryKey] : null
                   if (!key) {
                     throw new Error('无法确定删除键值')
@@ -380,8 +368,7 @@ class Store<T extends StoreDefinition, Data = {
                   const req = store.delete(key)
                   return new Promise<void>((res, rej) => {
                     req.onsuccess = () => res()
-                    req.onerror = () =>
-                      rej(req.error ?? new Error('deleteMany failed'))
+                    req.onerror = () => rej(req.error ?? new Error('deleteMany failed'))
                   })
                 })
 
@@ -440,7 +427,7 @@ export class IDB {
     this.config = config
     this.ready = this.connect()
     // 让 Store 方法在连接尚未完成时也能排队等待
-    this.config.stores.forEach(store => store.setDBReady(this.ready))
+    this.config.stores.forEach((store) => store.setDBReady(this.ready))
   }
 
   /**
@@ -463,12 +450,12 @@ export class IDB {
 
       const request = indexedDB.open(this.name, this.config.version)
 
-      request.onupgradeneeded = event => {
+      request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result
         const tx = (event.target as IDBOpenDBRequest).transaction
 
         // 创建或更新存储对象
-        this.config.stores.forEach(store => {
+        this.config.stores.forEach((store) => {
           const storeName = store.getName()
           const primaryKey = store.getPrimaryKey()
 
@@ -494,7 +481,10 @@ export class IDB {
               )
             }
 
-            if (existingKeyPath !== desiredKeyPath || existingAutoIncrement !== desiredAutoIncrement) {
+            if (
+              existingKeyPath !== desiredKeyPath ||
+              existingAutoIncrement !== desiredAutoIncrement
+            ) {
               throw new Error(
                 `IndexedDB 升级不支持变更 "${storeName}" 的 keyPath/autoIncrement（为保护数据已中止升级）`
               )
@@ -520,20 +510,20 @@ export class IDB {
         })
       }
 
-      request.onsuccess = event => {
+      request.onsuccess = (event) => {
         this.db = (event.target as IDBOpenDBRequest).result
         this.isConnected = true
         this.connecting = null
 
         // 为每个存储对象设置数据库实例
-        this.config.stores.forEach(store => {
+        this.config.stores.forEach((store) => {
           store.setDB(this.db as IDBDatabase)
         })
 
         resolve(this.db)
       }
 
-      request.onerror = event => {
+      request.onerror = (event) => {
         this.connecting = null
         reject(request.error ?? event)
       }
@@ -565,15 +555,9 @@ export class IDB {
         resolve()
       }
 
-      request.onerror = event => {
+      request.onerror = (event) => {
         reject(event)
       }
     })
   }
 }
-
-
-
-
-
-

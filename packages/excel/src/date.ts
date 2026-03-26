@@ -17,10 +17,7 @@ function assertSerial(value: number): void {
   }
 }
 
-export function excelSerialToDate(
-  serial: number,
-  dateSystem: DateSystem = 1900
-): Date {
+export function excelSerialToDate(serial: number, dateSystem: DateSystem = 1900): Date {
   assertSerial(serial)
   const whole = Math.trunc(serial)
   const fraction = serial - whole
@@ -35,10 +32,7 @@ export function excelSerialToDate(
   return new Date(EXCEL_1904_EPOCH + whole * MS_PER_DAY + fraction * MS_PER_DAY)
 }
 
-export function dateToExcelSerial(
-  date: Date,
-  dateSystem: DateSystem = 1900
-): number {
+export function dateToExcelSerial(date: Date, dateSystem: DateSystem = 1900): number {
   assertDate(date)
   const time = date.getTime()
 

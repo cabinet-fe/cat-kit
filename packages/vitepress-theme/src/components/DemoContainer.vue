@@ -1,20 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, type DefineComponent } from 'vue'
 import { clipboard } from '@cat-kit/fe'
-import {
-  X,
-  Check,
-  Copy,
-  Code,
-  Eye,
-  Maximize2,
-  AlertCircle,
-  Terminal,
-  Ban
-} from 'lucide-vue-next'
-import Console from './Console.vue'
-import CodeViewer from './CodeViewer.vue'
+import { X, Check, Copy, Code, Eye, Maximize2, AlertCircle, Terminal, Ban } from 'lucide-vue-next'
+import { ref, computed, type DefineComponent } from 'vue'
+
 import { useFullscreen, useDraggable } from '../composables'
+import CodeViewer from './CodeViewer.vue'
+import Console from './Console.vue'
 
 const props = defineProps<{
   is?: DefineComponent
@@ -31,11 +22,7 @@ const showConsole = ref(false)
 const consoleRef = ref<InstanceType<typeof Console>>()
 
 // 全屏模式
-const {
-  isFullscreen,
-  enter: enterFullscreen,
-  exit: exitFullscreen
-} = useFullscreen()
+const { isFullscreen, enter: enterFullscreen, exit: exitFullscreen } = useFullscreen()
 
 // 控制台高度拖拽
 const { value: consoleHeight, onDragStart } = useDraggable({
@@ -45,9 +32,7 @@ const { value: consoleHeight, onDragStart } = useDraggable({
 })
 
 // 解码后的代码
-const decodedCode = computed(() =>
-  props.code ? decodeURIComponent(props.code) : ''
-)
+const decodedCode = computed(() => (props.code ? decodeURIComponent(props.code) : ''))
 const decodedHighlightCode = computed(() =>
   props.highlightCode ? decodeURIComponent(props.highlightCode) : ''
 )
@@ -128,11 +113,7 @@ function handleExitFullscreen() {
           <Code v-if="viewMode === 'preview'" :size="16" />
           <Eye v-else :size="16" />
         </button>
-        <button
-          class="demo-btn fullscreen-btn"
-          title="全屏查看"
-          @click="enterFullscreen"
-        >
+        <button class="demo-btn fullscreen-btn" title="全屏查看" @click="enterFullscreen">
           <Maximize2 :size="16" />
         </button>
       </div>
@@ -140,10 +121,7 @@ function handleExitFullscreen() {
 
     <div class="demo-content">
       <!-- 预览区域 -->
-      <div
-        v-show="isFullscreen || viewMode === 'preview'"
-        class="demo-preview-panel"
-      >
+      <div v-show="isFullscreen || viewMode === 'preview'" class="demo-preview-panel">
         <div class="demo-preview-wrapper">
           <div v-if="!is" class="demo-error">
             <AlertCircle :size="18" />
@@ -156,11 +134,7 @@ function handleExitFullscreen() {
 
         <!-- 全屏模式控制台 -->
         <div v-if="isFullscreen" class="console-area">
-          <div
-            v-if="showConsole"
-            class="console-drag-bar"
-            @mousedown="onDragStart"
-          />
+          <div v-if="showConsole" class="console-drag-bar" @mousedown="onDragStart" />
           <div class="console-toolbar">
             <button
               class="console-toggle-btn"
@@ -194,14 +168,8 @@ function handleExitFullscreen() {
       </div>
 
       <!-- 代码区域 -->
-      <div
-        v-show="isFullscreen || viewMode === 'code'"
-        class="demo-source-panel"
-      >
-        <CodeViewer
-          :highlighted-code="decodedHighlightCode"
-          :line-count="lineCount || 1"
-        />
+      <div v-show="isFullscreen || viewMode === 'code'" class="demo-source-panel">
+        <CodeViewer :highlighted-code="decodedHighlightCode" :line-count="lineCount || 1" />
       </div>
     </div>
   </div>
@@ -217,7 +185,9 @@ function handleExitFullscreen() {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
 }
 
 .demo-container:hover {
@@ -255,7 +225,10 @@ function handleExitFullscreen() {
   border: 1px solid var(--ink-trace);
   color: var(--vp-c-text-2);
   cursor: pointer;
-  transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+  transition:
+    color 0.2s,
+    background-color 0.2s,
+    border-color 0.2s;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -406,7 +379,9 @@ function handleExitFullscreen() {
   color: var(--ink-light);
   border-radius: 3px;
   cursor: pointer;
-  transition: color 0.2s, background-color 0.2s;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
 }
 
 .console-clear-btn:hover:not(:disabled) {
@@ -475,7 +450,10 @@ function handleExitFullscreen() {
   border: 1px solid transparent;
   border-radius: 4px;
   cursor: pointer;
-  transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+  transition:
+    color 0.2s,
+    background-color 0.2s,
+    border-color 0.2s;
 }
 
 .demo-btn:hover {

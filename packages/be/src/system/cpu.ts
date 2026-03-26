@@ -53,7 +53,7 @@ function aggregateCpuTimes(): CpuUsage {
   let system = 0
   let idle = 0
 
-  cpuList.forEach(cpu => {
+  cpuList.forEach((cpu) => {
     user += cpu.times.user
     system += cpu.times.sys
     idle += cpu.times.idle
@@ -61,17 +61,10 @@ function aggregateCpuTimes(): CpuUsage {
 
   const total = user + system + idle
 
-  return {
-    user,
-    system,
-    idle,
-    total,
-    percent: total === 0 ? 0 : ((total - idle) / total) * 100
-  }
+  return { user, system, idle, total, percent: total === 0 ? 0 : ((total - idle) / total) * 100 }
 }
 
-const sleep = (ms: number): Promise<void> =>
-  new Promise(resolve => setTimeout(resolve, ms))
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
  * 采样 CPU 使用情况
@@ -91,11 +84,5 @@ export async function getCpuUsage(interval = 500): Promise<CpuUsage> {
   const idle = end.idle - start.idle
   const total = user + system + idle
 
-  return {
-    user,
-    system,
-    idle,
-    total,
-    percent: total === 0 ? 0 : ((total - idle) / total) * 100
-  }
+  return { user, system, idle, total, percent: total === 0 ? 0 : ((total - idle) / total) * 100 }
 }

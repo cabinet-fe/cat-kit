@@ -1,4 +1,5 @@
 import { Dater } from '@cat-kit/core'
+
 import type { Transport } from './transports'
 import { ConsoleTransport } from './transports'
 
@@ -43,10 +44,7 @@ export interface LogEntry {
   /** 附加元数据 */
   meta?: Record<string, unknown>
   /** 错误信息（如果有） */
-  error?: {
-    message: string
-    stack?: string
-  }
+  error?: { message: string; stack?: string }
 }
 
 /**
@@ -128,10 +126,7 @@ function formatEntry(
     level: entry.level.toUpperCase().padEnd(5),
     name: entry.name ? `[${entry.name}] ` : '',
     message: entry.message,
-    meta:
-      entry.meta && Object.keys(entry.meta).length
-        ? ` ${JSON.stringify(entry.meta)}`
-        : '',
+    meta: entry.meta && Object.keys(entry.meta).length ? ` ${JSON.stringify(entry.meta)}` : '',
     error: entry.error ? ` ${entry.error.stack ?? entry.error.message}` : ''
   }
 
@@ -219,13 +214,7 @@ export class Logger {
     meta?: Record<string, unknown>,
     error?: Error
   ): LogEntry {
-    const mergedMeta =
-      meta || this.context
-        ? {
-            ...this.context,
-            ...meta
-          }
-        : undefined
+    const mergedMeta = meta || this.context ? { ...this.context, ...meta } : undefined
 
     return {
       level,
@@ -233,12 +222,7 @@ export class Logger {
       timestamp: this.getTimestamp(),
       name: this.name,
       meta: mergedMeta,
-      error: error
-        ? {
-            message: error.message,
-            stack: error.stack
-          }
-        : undefined
+      error: error ? { message: error.message, stack: error.stack } : undefined
     }
   }
 
@@ -247,10 +231,8 @@ export class Logger {
 
     await Promise.all(
       this.transports
-        .filter(transport =>
-          shouldLog(transport.level ?? this.level, entry.level)
-        )
-        .map(transport => transport.write(entry, formatted, this.format))
+        .filter((transport) => shouldLog(transport.level ?? this.level, entry.level))
+        .map((transport) => transport.write(entry, formatted, this.format))
     )
   }
 

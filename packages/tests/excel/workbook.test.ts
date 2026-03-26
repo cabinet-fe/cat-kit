@@ -1,14 +1,10 @@
-import { describe, expect, it } from 'vitest'
 import { Workbook, ExcelSchemaError } from '@cat-kit/excel/src'
+import { describe, expect, it } from 'vitest'
 
 describe('Workbook', () => {
   it('应保存 metadata 并允许新增工作表', () => {
     const createdAt = new Date('2024-01-01T00:00:00.000Z')
-    const workbook = new Workbook({
-      creator: 'tester',
-      createdAt,
-      lastModifiedBy: 'tester'
-    })
+    const workbook = new Workbook({ creator: 'tester', createdAt, lastModifiedBy: 'tester' })
 
     const sheet = workbook.addWorksheet('Sheet1')
 
@@ -47,6 +43,6 @@ describe('Workbook', () => {
 
     const recreated = workbook.addWorksheet('A')
     expect(workbook.getWorksheet('A')).toBe(recreated)
-    expect(workbook.worksheets.map(sheet => sheet.name)).toEqual(['B', 'A'])
+    expect(workbook.worksheets.map((sheet) => sheet.name)).toEqual(['B', 'A'])
   })
 })

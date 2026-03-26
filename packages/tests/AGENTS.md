@@ -28,11 +28,7 @@ Node.js
 引入测试目标时，统一使用源码路径，每个包的`package.json`文件的`exports`字段定义了源码路径如下:
 
 ```json
-{
-  "exports": {
-    "./src": "./src/index.ts"
-  }
-}
+{ "exports": { "./src": "./src/index.ts" } }
 ```
 
 引入示例：
@@ -48,6 +44,7 @@ import { o } from '@cat-kit/core/src'
 ```
 packages/core/src/data/array.ts → packages/tests/core/data/array.test.ts
 ```
+
 ### 命名约定
 
 - 测试文件以 `.test.ts` 结尾
@@ -59,7 +56,6 @@ packages/core/src/data/array.ts → packages/tests/core/data/array.test.ts
 - 使用 `async/await` 处理异步逻辑，确保不使用不稳定的定时器（除非使用 vi.useFakeTimers()）
 - 避免在测试中编写复杂的逻辑。如果测试代码本身需要复杂的 if/else，请简化它
 - 充分利用 Vitest 的类型支持，例如在 Mock 之后使用 vi.mocked(dependency) 来获得完整的 IDE 类型提示
-
 
 ## 持续集成
 

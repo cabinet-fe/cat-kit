@@ -6,11 +6,7 @@
     </div>
 
     <div class="demo-controls">
-      <var-input
-        v-model="postTitle"
-        placeholder="POST 时使用的标题"
-        clearable
-      />
+      <var-input v-model="postTitle" placeholder="POST 时使用的标题" clearable />
 
       <var-space>
         <var-button type="primary" :loading="loading" @click="sendGetRequest">
@@ -48,8 +44,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
 import { HTTPClient } from '@cat-kit/http'
+import { computed, ref } from 'vue'
 
 interface PostItem {
   id: number
@@ -88,12 +84,9 @@ async function sendGetRequest() {
   lastUrl.value = 'https://jsonplaceholder.typicode.com/posts/1?_t=debug'
 
   try {
-    const response = await http.get<PostItem>(
-      'https://jsonplaceholder.typicode.com/posts/1',
-      {
-        query: { _t: 'debug' }
-      }
-    )
+    const response = await http.get<PostItem>('https://jsonplaceholder.typicode.com/posts/1', {
+      query: { _t: 'debug' }
+    })
 
     statusCode.value = response.code
     responseData.value = response.data
@@ -111,14 +104,11 @@ async function sendPostRequest() {
   lastUrl.value = 'https://jsonplaceholder.typicode.com/posts'
 
   try {
-    const response = await http.post<PostItem>(
-      'https://jsonplaceholder.typicode.com/posts',
-      {
-        title: postTitle.value || 'cat-kit browser demo',
-        body: 'request from docs demo',
-        userId: 1
-      }
-    )
+    const response = await http.post<PostItem>('https://jsonplaceholder.typicode.com/posts', {
+      title: postTitle.value || 'cat-kit browser demo',
+      body: 'request from docs demo',
+      userId: 1
+    })
 
     statusCode.value = response.code
     responseData.value = response.data

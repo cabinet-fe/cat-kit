@@ -32,11 +32,7 @@ export default defineConfig({
       md.use(mermaidPlugin)
     }
   },
-  vite: {
-    plugins: [
-      importExamples({ examplesDir: '/path/to/examples' })
-    ]
-  }
+  vite: { plugins: [importExamples({ examplesDir: '/path/to/examples' })] }
 })
 ```
 

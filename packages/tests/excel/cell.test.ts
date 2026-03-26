@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
 import { Cell, ExcelValueError } from '@cat-kit/excel/src'
 import type { CellStyle } from '@cat-kit/excel/src'
+import { describe, expect, it } from 'vitest'
 
 describe('Cell', () => {
   it('应支持设置基础值类型与公式值', () => {
@@ -48,7 +48,9 @@ describe('Cell', () => {
 
   it('应拒绝非法值类型和非法日期', () => {
     expect(() => new Cell(new Date('invalid'))).toThrowError(ExcelValueError)
-    expect(() => new Cell({ foo: 'bar' } as unknown as string)).toThrow('Unsupported cell value type')
+    expect(() => new Cell({ foo: 'bar' } as unknown as string)).toThrow(
+      'Unsupported cell value type'
+    )
     expect(() => new Cell({ formula: '', result: 1 })).toThrow('Unsupported cell value type')
   })
 })

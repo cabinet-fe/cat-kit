@@ -117,8 +117,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
 import { date } from '@cat-kit/core/src'
+import { ref, computed } from 'vue'
 
 const today = new Date()
 const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
@@ -421,7 +421,7 @@ const pointPosition = computed(() => {
   background: var(--vp-c-danger-1);
   border-radius: 50%;
   border: 2px solid var(--vp-c-bg);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .range-point.inside {

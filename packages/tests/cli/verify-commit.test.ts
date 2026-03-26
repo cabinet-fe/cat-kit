@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { verifyCommitMessage, stripComments } from '@cat-kit/cli/src/commands/verify-commit'
+import { describe, it, expect } from 'vitest'
 
 describe('stripComments', () => {
   it('应该去除 # 开头的注释行', () => {
@@ -7,7 +7,7 @@ describe('stripComments', () => {
       'feat: add feature',
       '',
       '# Please enter the commit message for your changes.',
-      '# Lines starting with \'#\' will be ignored.'
+      "# Lines starting with '#' will be ignored."
     ].join('\n')
 
     expect(stripComments(raw)).toBe('feat: add feature')

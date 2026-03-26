@@ -40,8 +40,7 @@ type DateParts = {
   seconds: number
 }
 
-const PARSE_TOKEN_REG =
-  /(yyyy|YYYY|MM|M|dd|d|DD|D|HH|H|hh|h|mm|m|ss|s)/g
+const PARSE_TOKEN_REG = /(yyyy|YYYY|MM|M|dd|d|DD|D|HH|H|hh|h|mm|m|ss|s)/g
 
 const PARSE_TOKEN_MAP: Record<
   string,
@@ -55,31 +54,13 @@ const PARSE_TOKEN_MAP: Record<
   d: { pattern: '\\d{1,2}', apply: (parts, value) => (parts.day = +value) },
   DD: { pattern: '\\d{2}', apply: (parts, value) => (parts.day = +value) },
   D: { pattern: '\\d{1,2}', apply: (parts, value) => (parts.day = +value) },
-  HH: {
-    pattern: '\\d{2}',
-    apply: (parts, value) => (parts.hours = +value)
-  },
-  H: {
-    pattern: '\\d{1,2}',
-    apply: (parts, value) => (parts.hours = +value)
-  },
-  hh: {
-    pattern: '\\d{2}',
-    apply: (parts, value) => (parts.hours = +value)
-  },
+  HH: { pattern: '\\d{2}', apply: (parts, value) => (parts.hours = +value) },
+  H: { pattern: '\\d{1,2}', apply: (parts, value) => (parts.hours = +value) },
+  hh: { pattern: '\\d{2}', apply: (parts, value) => (parts.hours = +value) },
   h: { pattern: '\\d{1,2}', apply: (parts, value) => (parts.hours = +value) },
-  mm: {
-    pattern: '\\d{2}',
-    apply: (parts, value) => (parts.minutes = +value)
-  },
-  m: {
-    pattern: '\\d{1,2}',
-    apply: (parts, value) => (parts.minutes = +value)
-  },
-  ss: {
-    pattern: '\\d{2}',
-    apply: (parts, value) => (parts.seconds = +value)
-  },
+  mm: { pattern: '\\d{2}', apply: (parts, value) => (parts.minutes = +value) },
+  m: { pattern: '\\d{1,2}', apply: (parts, value) => (parts.minutes = +value) },
+  ss: { pattern: '\\d{2}', apply: (parts, value) => (parts.seconds = +value) },
   s: { pattern: '\\d{1,2}', apply: (parts, value) => (parts.seconds = +value) }
 }
 
@@ -89,8 +70,7 @@ export class Dater {
   private date!: Date
 
   constructor(date: DateInput) {
-    const rawDate =
-      date instanceof Dater ? date.raw : isDate(date) ? date : new Date(date)
+    const rawDate = date instanceof Dater ? date.raw : isDate(date) ? date : new Date(date)
 
     this.date = new Date(rawDate)
   }
@@ -100,10 +80,7 @@ export class Dater {
     return this.date
   }
 
-  private static matchers: Record<
-    string,
-    (parts: DateParts, len: number) => string
-  > = {
+  private static matchers: Record<string, (parts: DateParts, len: number) => string> = {
     yyyy: (parts: DateParts): string => `${parts.year}`,
     YYYY: (parts: DateParts): string => `${parts.year}`,
     'M+': (parts: DateParts, len: number): string => {
@@ -272,12 +249,9 @@ export class Dater {
   format(formatter = 'yyyy-MM-dd', options?: FormatOptions): string {
     const parts = this.getParts(options?.utc)
     Object.keys(Dater.matchers).forEach((reg: string) => {
-      formatter = formatter.replace(
-        new RegExp(`(${reg})`, 'g'),
-        (str: string) => {
-          return Dater.matchers[reg]!(parts, str.length)
-        }
-      )
+      formatter = formatter.replace(new RegExp(`(${reg})`, 'g'), (str: string) => {
+        return Dater.matchers[reg]!(parts, str.length)
+      })
     })
     return formatter
   }
@@ -287,10 +261,7 @@ export class Dater {
    * @param timeStep 计算的日期, 负数表示之前的日期, 正数表示之后的日期
    * @param type 时间步长类别, 默认以天为单位
    */
-  calc(
-    timeStep: number,
-    type: 'days' | 'weeks' | 'months' | 'years' = 'days'
-  ): Dater {
+  calc(timeStep: number, type: 'days' | 'weeks' | 'months' | 'years' = 'days'): Dater {
     let { date } = this
 
     if (type === 'days') {
@@ -427,11 +398,7 @@ export class Dater {
    * @param unit 单位
    * @param options absolute 为 true 时返回绝对值, float 为 true 时返回小数（仅限毫秒-周）
    */
-  diff(
-    date: DateInput,
-    unit: DiffUnit = 'milliseconds',
-    options: DiffOptions = {}
-  ): number {
+  diff(date: DateInput, unit: DiffUnit = 'milliseconds', options: DiffOptions = {}): number {
     const target = new Dater(date)
     const timeDiff = this.timestamp - target.timestamp
     const { absolute = false, float = false } = options
@@ -502,11 +469,7 @@ export class Dater {
 
   isSameDay(date: DateInput): boolean {
     const target = new Dater(date)
-    return (
-      this.year === target.year &&
-      this.month === target.month &&
-      this.day === target.day
-    )
+    return this.year === target.year && this.month === target.month && this.day === target.day
   }
 
   isSameMonth(date: DateInput): boolean {
@@ -550,9 +513,7 @@ export class Dater {
   }
 
   private static diffInCalendarMonths(dateLeft: Date, dateRight: Date): number {
-    const sign = Math.sign(
-      dateLeft.getTime() - dateRight.getTime()
-    ) as -1 | 0 | 1
+    const sign = Math.sign(dateLeft.getTime() - dateRight.getTime()) as -1 | 0 | 1
     const yearsDiff = dateLeft.getFullYear() - dateRight.getFullYear()
     const monthsDiff = dateLeft.getMonth() - dateRight.getMonth()
     const result = yearsDiff * 12 + monthsDiff
@@ -591,11 +552,7 @@ export class Dater {
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   }
 
-  private static parseByFormat(
-    value: string,
-    format: string,
-    useUTC: boolean
-  ): Date {
+  private static parseByFormat(value: string, format: string, useUTC: boolean): Date {
     PARSE_TOKEN_REG.lastIndex = 0
     let lastIndex = 0
     const tokens: string[] = []
@@ -661,9 +618,7 @@ export class Dater {
         ? result.getUTCFullYear() !== year ||
           result.getUTCMonth() !== month ||
           result.getUTCDate() !== day
-        : result.getFullYear() !== year ||
-          result.getMonth() !== month ||
-          result.getDate() !== day
+        : result.getFullYear() !== year || result.getMonth() !== month || result.getDate() !== day
     ) {
       return new Date(NaN)
     }

@@ -210,12 +210,7 @@ function checkBrowserSupport(): boolean {
   const major = parseInt(version.split('.')[0])
 
   // 检查最低版本要求
-  const minVersions = {
-    Chrome: 90,
-    Firefox: 88,
-    Safari: 14,
-    Edge: 90
-  }
+  const minVersions = { Chrome: 90, Firefox: 88, Safari: 14, Edge: 90 }
 
   const minVersion = minVersions[browser]
   if (!minVersion) {
@@ -378,7 +373,7 @@ function reportError(error: Error) {
 }
 
 // 全局错误处理
-window.addEventListener('error', event => {
+window.addEventListener('error', (event) => {
   reportError(event.error)
 })
 ```
@@ -396,13 +391,7 @@ function isInNode(): boolean
 ### 操作系统
 
 ```typescript
-function getOSType():
-  | 'Windows'
-  | 'MacOS'
-  | 'Linux'
-  | 'iOS'
-  | 'Android'
-  | 'Unknown'
+function getOSType(): 'Windows' | 'MacOS' | 'Linux' | 'iOS' | 'Android' | 'Unknown'
 ```
 
 ### 设备类型
@@ -414,14 +403,7 @@ function getDeviceType(): 'Mobile' | 'Desktop' | 'Unknown'
 ### 浏览器
 
 ```typescript
-function getBrowserType():
-  | 'Chrome'
-  | 'Firefox'
-  | 'Safari'
-  | 'Edge'
-  | 'IE'
-  | 'Opera'
-  | 'Unknown'
+function getBrowserType(): 'Chrome' | 'Firefox' | 'Safari' | 'Edge' | 'IE' | 'Opera' | 'Unknown'
 
 function getBrowserVersion(): string
 ```

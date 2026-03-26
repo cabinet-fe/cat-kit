@@ -1,5 +1,6 @@
-import { str } from '@cat-kit/core'
 import path from 'node:path'
+
+import { str } from '@cat-kit/core'
 import type { Plugin } from 'vitepress'
 
 export interface ImportExamplesOptions {
@@ -18,13 +19,15 @@ export function importExamples(options: ImportExamplesOptions): Plugin {
       if (!id.endsWith('.md')) return
       const demos = [...code.matchAll(/^:::\s+demo\s*(.*)$/gm)]
 
-      const demoPaths = demos.map(demo => demo[1]!)
+      const demoPaths = demos.map((demo) => demo[1]!)
 
       if (demoPaths.length) {
-        const importExpressions = demoPaths.map(demoPath => {
+        const importExpressions = demoPaths.map((demoPath) => {
           const ComponentName = str(path.basename(demoPath, '.vue')).camelCase('upper')
 
-          const relativePath = path.relative(path.dirname(id), path.join(examplesDir, demoPath)).replaceAll(path.sep, '/')
+          const relativePath = path
+            .relative(path.dirname(id), path.join(examplesDir, demoPath))
+            .replaceAll(path.sep, '/')
           return `import ${ComponentName} from '${relativePath}'`
         })
 
@@ -33,7 +36,6 @@ export function importExamples(options: ImportExamplesOptions): Plugin {
             </script>`
 
         code = `${script}\n${code}`
-
       }
       return code
     }

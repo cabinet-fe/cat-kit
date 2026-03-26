@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { str, $str } from '@cat-kit/core/src'
+import { describe, it, expect } from 'vitest'
 
 describe('CatString', () => {
   describe('camelCase', () => {
@@ -56,50 +56,37 @@ describe('CatString', () => {
 describe('$str', () => {
   describe('joinUrlPath', () => {
     it('应该拼接简单路径', () => {
-      expect($str.joinUrlPath('path', 'to', 'resource')).toBe(
-        'path/to/resource'
-      )
-      expect($str.joinUrlPath('path/', 'to/', 'resource')).toBe(
-        'path/to/resource'
-      )
+      expect($str.joinUrlPath('path', 'to', 'resource')).toBe('path/to/resource')
+      expect($str.joinUrlPath('path/', 'to/', 'resource')).toBe('path/to/resource')
     })
 
     it('应该拼接带协议的URL', () => {
-      expect(
-        $str.joinUrlPath('https://example.com', 'path', 'to', 'resource')
-      ).toBe('https://example.com/path/to/resource')
-      expect(
-        $str.joinUrlPath('http://example.com/', 'path/', 'to/', 'resource')
-      ).toBe('http://example.com/path/to/resource')
+      expect($str.joinUrlPath('https://example.com', 'path', 'to', 'resource')).toBe(
+        'https://example.com/path/to/resource'
+      )
+      expect($str.joinUrlPath('http://example.com/', 'path/', 'to/', 'resource')).toBe(
+        'http://example.com/path/to/resource'
+      )
     })
 
     it('应该处理多个连续斜杠', () => {
-      expect(
-        $str.joinUrlPath(
-          'https://example.com///',
-          '//path///',
-          '//to///',
-          'resource'
-        )
-      ).toBe('https://example.com/path/to/resource')
-      expect($str.joinUrlPath('path///', '//to///', 'resource')).toBe(
-        'path/to/resource'
+      expect($str.joinUrlPath('https://example.com///', '//path///', '//to///', 'resource')).toBe(
+        'https://example.com/path/to/resource'
       )
+      expect($str.joinUrlPath('path///', '//to///', 'resource')).toBe('path/to/resource')
     })
 
     it('应该保留尾部斜杠', () => {
-      expect(
-        $str.joinUrlPath('https://example.com', 'path', 'to', 'resource/')
-      ).toBe('https://example.com/path/to/resource/')
-      expect($str.joinUrlPath('path', 'to', 'resource/')).toBe(
-        'path/to/resource/'
+      expect($str.joinUrlPath('https://example.com', 'path', 'to', 'resource/')).toBe(
+        'https://example.com/path/to/resource/'
       )
+      expect($str.joinUrlPath('path', 'to', 'resource/')).toBe('path/to/resource/')
     })
 
     it('应该处理FTP协议', () => {
-      expect(
-        $str.joinUrlPath('ftp://example.com', 'path', 'to', 'resource')
-      ).toBe('ftp://example.com/path/to/resource')
+      expect($str.joinUrlPath('ftp://example.com', 'path', 'to', 'resource')).toBe(
+        'ftp://example.com/path/to/resource'
+      )
     })
 
     it('应该处理file协议', () => {
@@ -109,16 +96,12 @@ describe('$str', () => {
     })
 
     it('应该处理单个路径', () => {
-      expect($str.joinUrlPath('https://example.com')).toBe(
-        'https://example.com'
-      )
+      expect($str.joinUrlPath('https://example.com')).toBe('https://example.com')
       expect($str.joinUrlPath('path')).toBe('path')
     })
 
     it('应该处理空路径', () => {
-      expect($str.joinUrlPath('https://example.com', '', 'path')).toBe(
-        'https://example.com/path'
-      )
+      expect($str.joinUrlPath('https://example.com', '', 'path')).toBe('https://example.com/path')
     })
   })
 })

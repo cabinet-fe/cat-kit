@@ -1,8 +1,8 @@
 import { formatCellAddress } from '../address'
 import { dateToExcelSerial } from '../date'
 import { ExcelWriteError } from '../errors'
-import { StylePool, type StyleSnapshot } from '../model/style'
 import { SharedStringPool } from '../model/shared-string'
+import { StylePool, type StyleSnapshot } from '../model/style'
 import { Workbook } from '../model/workbook'
 import { Worksheet } from '../model/worksheet'
 import type { CellStyle, DateSystem } from '../types'
@@ -130,13 +130,10 @@ export function buildRootRelsXml(): string {
 
 export function buildWorkbookXml(sheets: WorkbookSheetRef[]): string {
   const sheetNodes = sheets
-    .map(ref =>
+    .map((ref) =>
       xmlLeaf(
         'sheet',
-        `${xmlAttr('name', ref.name)}${xmlAttr('sheetId', ref.id)}${xmlAttr(
-          'r:id',
-          ref.rid
-        )}`
+        `${xmlAttr('name', ref.name)}${xmlAttr('sheetId', ref.id)}${xmlAttr('r:id', ref.rid)}`
       )
     )
     .join('')
@@ -150,9 +147,12 @@ export function buildWorkbookXml(sheets: WorkbookSheetRef[]): string {
   )
 }
 
-export function buildWorkbookRelsXml(sheets: WorkbookSheetRef[], hasSharedStrings: boolean): string {
+export function buildWorkbookRelsXml(
+  sheets: WorkbookSheetRef[],
+  hasSharedStrings: boolean
+): string {
   const sheetRels = sheets
-    .map(ref =>
+    .map((ref) =>
       xmlLeaf(
         'Relationship',
         `${xmlAttr('Id', ref.rid)}${xmlAttr(
@@ -219,13 +219,18 @@ export function buildCorePropsXml(workbook: Workbook): string {
 }
 
 export function buildAppPropsXml(workbook: Workbook): string {
-  const titles = workbook.worksheets.map(sheet => xmlNode('vt:lpstr', escapeXml(sheet.name))).join('')
+  const titles = workbook.worksheets
+    .map((sheet) => xmlNode('vt:lpstr', escapeXml(sheet.name)))
+    .join('')
   return (
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" ' +
     'xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">' +
     xmlNode('Application', 'cat-kit excel') +
-    xmlNode('HeadingPairs', `<vt:vector size="2" baseType="variant"><vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant><vt:variant><vt:i4>${workbook.worksheets.length}</vt:i4></vt:variant></vt:vector>`) +
+    xmlNode(
+      'HeadingPairs',
+      `<vt:vector size="2" baseType="variant"><vt:variant><vt:lpstr>Worksheets</vt:lpstr></vt:variant><vt:variant><vt:i4>${workbook.worksheets.length}</vt:i4></vt:variant></vt:vector>`
+    ) +
     xmlNode(
       'TitlesOfParts',
       `<vt:vector size="${workbook.worksheets.length}" baseType="lpstr">${titles}</vt:vector>`
@@ -236,9 +241,7 @@ export function buildAppPropsXml(workbook: Workbook): string {
 
 export function buildSharedStringsXml(pool: SharedStringPool): string {
   const all = pool.all()
-  const nodes = all
-    .map(item => xmlNode('si', xmlNode('t', escapeXml(item))))
-    .join('')
+  const nodes = all.map((item) => xmlNode('si', xmlNode('t', escapeXml(item)))).join('')
   return (
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
     `<sst xmlns="${SHEET_XMLNS}"${xmlAttr('count', all.length)}${xmlAttr(
@@ -250,91 +253,97 @@ export function buildSharedStringsXml(pool: SharedStringPool): string {
 
 export function buildStylesXml(snapshot: StyleSnapshot): string {
   const numFmtNodes = snapshot.numFmts
-    .map(item =>
-      xmlLeaf(
-        'numFmt',
-        `${xmlAttr('numFmtId', item.id)}${xmlAttr('formatCode', item.code)}`
-      )
+    .map((item) =>
+      xmlLeaf('numFmt', `${xmlAttr('numFmtId', item.id)}${xmlAttr('formatCode', item.code)}`)
     )
     .join('')
 
-  const fontNodes = snapshot.fonts.map(font => {
-    let body = ''
-    if (font.bold) body += xmlLeaf('b')
-    if (font.italic) body += xmlLeaf('i')
-    if (font.underline) body += xmlLeaf('u')
-    if (font.strike) body += xmlLeaf('strike')
-    if (font.size != null) body += xmlLeaf('sz', xmlAttr('val', font.size))
-    if (font.color) body += xmlLeaf('color', xmlAttr('rgb', font.color))
-    if (font.name) body += xmlLeaf('name', xmlAttr('val', font.name))
-    return xmlNode('font', body)
-  }).join('')
+  const fontNodes = snapshot.fonts
+    .map((font) => {
+      let body = ''
+      if (font.bold) body += xmlLeaf('b')
+      if (font.italic) body += xmlLeaf('i')
+      if (font.underline) body += xmlLeaf('u')
+      if (font.strike) body += xmlLeaf('strike')
+      if (font.size != null) body += xmlLeaf('sz', xmlAttr('val', font.size))
+      if (font.color) body += xmlLeaf('color', xmlAttr('rgb', font.color))
+      if (font.name) body += xmlLeaf('name', xmlAttr('val', font.name))
+      return xmlNode('font', body)
+    })
+    .join('')
 
-  const fillNodes = snapshot.fills.map((fill, index) => {
-    if (index === 1) {
-      return xmlNode('fill', xmlNode('patternFill', '', xmlAttr('patternType', 'gray125')))
-    }
-    if (fill.type === 'solid' && fill.color) {
-      const pattern =
-        xmlLeaf('fgColor', xmlAttr('rgb', fill.color)) +
-        xmlLeaf('bgColor', xmlAttr('indexed', 64))
-      return xmlNode('fill', xmlNode('patternFill', pattern, xmlAttr('patternType', 'solid')))
-    }
-    return xmlNode('fill', xmlNode('patternFill', '', xmlAttr('patternType', 'none')))
-  }).join('')
+  const fillNodes = snapshot.fills
+    .map((fill, index) => {
+      if (index === 1) {
+        return xmlNode('fill', xmlNode('patternFill', '', xmlAttr('patternType', 'gray125')))
+      }
+      if (fill.type === 'solid' && fill.color) {
+        const pattern =
+          xmlLeaf('fgColor', xmlAttr('rgb', fill.color)) +
+          xmlLeaf('bgColor', xmlAttr('indexed', 64))
+        return xmlNode('fill', xmlNode('patternFill', pattern, xmlAttr('patternType', 'solid')))
+      }
+      return xmlNode('fill', xmlNode('patternFill', '', xmlAttr('patternType', 'none')))
+    })
+    .join('')
 
-  const borderNodes = snapshot.borders.map(border => {
-    const edge = (name: string, data: { style?: string; color?: string }): string => {
-      const attrs = data.style ? xmlAttr('style', data.style) : ''
-      const body = data.color ? xmlLeaf('color', xmlAttr('rgb', data.color)) : ''
-      return xmlNode(name, body, attrs)
-    }
-    return xmlNode(
-      'border',
-      edge('left', border.left) +
-      edge('right', border.right) +
-      edge('top', border.top) +
-      edge('bottom', border.bottom) +
-      edge('diagonal', border.diagonal)
-    )
-  }).join('')
+  const borderNodes = snapshot.borders
+    .map((border) => {
+      const edge = (name: string, data: { style?: string; color?: string }): string => {
+        const attrs = data.style ? xmlAttr('style', data.style) : ''
+        const body = data.color ? xmlLeaf('color', xmlAttr('rgb', data.color)) : ''
+        return xmlNode(name, body, attrs)
+      }
+      return xmlNode(
+        'border',
+        edge('left', border.left) +
+          edge('right', border.right) +
+          edge('top', border.top) +
+          edge('bottom', border.bottom) +
+          edge('diagonal', border.diagonal)
+      )
+    })
+    .join('')
 
-  const xfNodes = snapshot.xfs.map(xf => {
-    const hasAlignment = xf.alignment && Object.values(xf.alignment).some(v => v !== undefined)
-    const hasProtection = xf.protection && Object.values(xf.protection).some(v => v !== undefined)
-    const attrs =
-      xmlAttr('numFmtId', xf.numFmtId) +
-      xmlAttr('fontId', xf.fontId) +
-      xmlAttr('fillId', xf.fillId) +
-      xmlAttr('borderId', xf.borderId) +
-      xmlAttr('xfId', 0) +
-      xmlAttr('applyNumberFormat', xf.numFmtId !== 0 ? 1 : undefined) +
-      xmlAttr('applyFont', xf.fontId !== 0 ? 1 : undefined) +
-      xmlAttr('applyFill', xf.fillId !== 0 ? 1 : undefined) +
-      xmlAttr('applyBorder', xf.borderId !== 0 ? 1 : undefined) +
-      xmlAttr('applyAlignment', hasAlignment ? 1 : undefined) +
-      xmlAttr('applyProtection', hasProtection ? 1 : undefined)
+  const xfNodes = snapshot.xfs
+    .map((xf) => {
+      const hasAlignment = xf.alignment && Object.values(xf.alignment).some((v) => v !== undefined)
+      const hasProtection =
+        xf.protection && Object.values(xf.protection).some((v) => v !== undefined)
+      const attrs =
+        xmlAttr('numFmtId', xf.numFmtId) +
+        xmlAttr('fontId', xf.fontId) +
+        xmlAttr('fillId', xf.fillId) +
+        xmlAttr('borderId', xf.borderId) +
+        xmlAttr('xfId', 0) +
+        xmlAttr('applyNumberFormat', xf.numFmtId !== 0 ? 1 : undefined) +
+        xmlAttr('applyFont', xf.fontId !== 0 ? 1 : undefined) +
+        xmlAttr('applyFill', xf.fillId !== 0 ? 1 : undefined) +
+        xmlAttr('applyBorder', xf.borderId !== 0 ? 1 : undefined) +
+        xmlAttr('applyAlignment', hasAlignment ? 1 : undefined) +
+        xmlAttr('applyProtection', hasProtection ? 1 : undefined)
 
-    const alignmentNode = hasAlignment
-      ? xmlLeaf(
-          'alignment',
-          xmlAttr('horizontal', xf.alignment?.horizontal) +
-            xmlAttr('vertical', xf.alignment?.vertical) +
-            xmlAttr('wrapText', xf.alignment?.wrapText ? 1 : undefined) +
-            xmlAttr('textRotation', xf.alignment?.textRotation) +
-            xmlAttr('indent', xf.alignment?.indent)
-        )
-      : ''
-    const protectionNode = hasProtection
-      ? xmlLeaf(
-          'protection',
-          xmlAttr('locked', xf.protection?.locked === false ? 0 : undefined) +
-            xmlAttr('hidden', xf.protection?.hidden ? 1 : undefined)
-        )
-      : ''
+      const alignmentNode = hasAlignment
+        ? xmlLeaf(
+            'alignment',
+            xmlAttr('horizontal', xf.alignment?.horizontal) +
+              xmlAttr('vertical', xf.alignment?.vertical) +
+              xmlAttr('wrapText', xf.alignment?.wrapText ? 1 : undefined) +
+              xmlAttr('textRotation', xf.alignment?.textRotation) +
+              xmlAttr('indent', xf.alignment?.indent)
+          )
+        : ''
+      const protectionNode = hasProtection
+        ? xmlLeaf(
+            'protection',
+            xmlAttr('locked', xf.protection?.locked === false ? 0 : undefined) +
+              xmlAttr('hidden', xf.protection?.hidden ? 1 : undefined)
+          )
+        : ''
 
-    return xmlNode('xf', alignmentNode + protectionNode, attrs)
-  }).join('')
+      return xmlNode('xf', alignmentNode + protectionNode, attrs)
+    })
+    .join('')
 
   return (
     '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -357,7 +366,10 @@ export function buildStylesXml(snapshot: StyleSnapshot): string {
     xmlNode('cellXfs', xfNodes, xmlAttr('count', snapshot.xfs.length)) +
     xmlNode(
       'cellStyles',
-      xmlLeaf('cellStyle', `${xmlAttr('name', 'Normal')}${xmlAttr('xfId', 0)}${xmlAttr('builtinId', 0)}`),
+      xmlLeaf(
+        'cellStyle',
+        `${xmlAttr('name', 'Normal')}${xmlAttr('xfId', 0)}${xmlAttr('builtinId', 0)}`
+      ),
       xmlAttr('count', 1)
     ) +
     '</styleSheet>'
@@ -406,15 +418,21 @@ export function buildWorksheetXml(sheet: Worksheet, ctx: WorksheetWriteContext):
   const dimensionRef = resolveDimensionRef(sheet)
   const dimensionNode = dimensionRef ? xmlLeaf('dimension', xmlAttr('ref', dimensionRef)) : ''
 
-  const rowNodes = rows.map(row => {
-    const rowCells = row.getCells().map(([colIndex, cell]) => {
-      const cellRef = formatCellAddress(row.index, colIndex)
-      const columnStyle = sheet.getColumn(colIndex)?.style
-      const styleId = resolveStyleId(cell.style ?? columnStyle, ctx)
-      return serializeCell(cellRef, cell.value, styleId, ctx)
-    }).filter(Boolean).join('')
-    return xmlNode('row', rowCells, xmlAttr('r', row.index))
-  }).join('')
+  const rowNodes = rows
+    .map((row) => {
+      const rowCells = row
+        .getCells()
+        .map(([colIndex, cell]) => {
+          const cellRef = formatCellAddress(row.index, colIndex)
+          const columnStyle = sheet.getColumn(colIndex)?.style
+          const styleId = resolveStyleId(cell.style ?? columnStyle, ctx)
+          return serializeCell(cellRef, cell.value, styleId, ctx)
+        })
+        .filter(Boolean)
+        .join('')
+      return xmlNode('row', rowCells, xmlAttr('r', row.index))
+    })
+    .join('')
 
   const sheetFormatPr = xmlLeaf(
     'sheetFormatPr',
@@ -477,17 +495,17 @@ function serializeCell(
 
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) {
-      throw new ExcelWriteError(`Invalid numeric value in cell ${cellRef}`, 'INVALID_NUMBER', cellRef)
+      throw new ExcelWriteError(
+        `Invalid numeric value in cell ${cellRef}`,
+        'INVALID_NUMBER',
+        cellRef
+      )
     }
     return xmlNode('c', xmlNode('v', String(value)), commonAttrs)
   }
 
   if (typeof value === 'boolean') {
-    return xmlNode(
-      'c',
-      xmlNode('v', value ? '1' : '0'),
-      `${commonAttrs}${xmlAttr('t', 'b')}`
-    )
+    return xmlNode('c', xmlNode('v', value ? '1' : '0'), `${commonAttrs}${xmlAttr('t', 'b')}`)
   }
 
   if (value instanceof Date) {

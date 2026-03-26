@@ -45,11 +45,7 @@
         <tr v-for="row in rows" :key="row.id">
           <td>{{ row.sheetName }}</td>
           <td>{{ row.rowIndex }}</td>
-          <td
-            v-for="column in displayColumns"
-            :key="`${row.id}-${column}`"
-            class="cell-mono"
-          >
+          <td v-for="column in displayColumns" :key="`${row.id}-${column}`" class="cell-mono">
             {{ row.values[column - 1] || '' }}
           </td>
         </tr>
@@ -60,8 +56,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, ref } from 'vue'
 import { readWorkbookStream, type CellValue, type ReadStreamOptions } from '@cat-kit/excel'
+import { computed, reactive, ref } from 'vue'
 
 interface RowPreview {
   id: string

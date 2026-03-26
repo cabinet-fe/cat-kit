@@ -8,8 +8,10 @@ type Obj = Record<string, unknown>
  * @template T - 原始数据类型
  * @template Self - 节点自身类型
  */
-export interface IForestNode<T extends Obj = Obj, Self = IForestNode<T, unknown>>
-  extends ITreeNode<T, Self> {
+export interface IForestNode<T extends Obj = Obj, Self = IForestNode<T, unknown>> extends ITreeNode<
+  T,
+  Self
+> {
   /** 所属森林实例 */
   forest: Forest<T, Self extends Obj ? Self : Obj>
 }
@@ -32,13 +34,7 @@ export class ForestNode<
   [key: string]: unknown
   readonly forest: Forest<T, Self>
 
-  constructor(
-    data: T,
-    index: number,
-    depth: number,
-    forest: Forest<T, Self>,
-    parent?: Self
-  ) {
+  constructor(data: T, index: number, depth: number, forest: Forest<T, Self>, parent?: Self) {
     super(data, index, depth, parent)
     this.forest = forest
   }
@@ -84,8 +80,10 @@ export interface ForestOptionsBase<T extends Obj> {
 /**
  * Forest 配置选项（带 createNode）
  */
-export interface ForestOptionsWithCreator<T extends Obj, Node extends Obj>
-  extends ForestOptionsBase<T> {
+export interface ForestOptionsWithCreator<
+  T extends Obj,
+  Node extends Obj
+> extends ForestOptionsBase<T> {
   createNode: ForestNodeCreator<T, Node>
 }
 
@@ -115,9 +113,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
 
   constructor(options: ForestOptionsBase<T>)
   constructor(options: ForestOptionsWithCreator<T, Node>)
-  constructor(
-    options: ForestOptionsBase<T> | ForestOptionsWithCreator<T, Node>
-  ) {
+  constructor(options: ForestOptionsBase<T> | ForestOptionsWithCreator<T, Node>) {
     const { data, childrenKey = 'children' } = options
     this.childrenKey = childrenKey
 
@@ -157,7 +153,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
       if (Array.isArray(dataChildren) && dataChildren.length) {
         const depth = (curNode as { depth?: number }).depth ?? 0
         const childrenNodes = new Array<Node>(dataChildren.length)
-          ; (curNode as Record<string, unknown>).children = childrenNodes
+        ;(curNode as Record<string, unknown>).children = childrenNodes
 
         // 倒序压栈，保证遍历顺序与数组顺序一致
         for (let i = dataChildren.length - 1; i >= 0; i--) {
@@ -179,9 +175,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
    * 深度优先遍历所有树
    * @param callback - 回调函数，返回 true 时提前终止当前树的遍历
    */
-  dfs(
-    callback: (node: Node, index: number, parent?: Node) => void | boolean
-  ): void {
+  dfs(callback: (node: Node, index: number, parent?: Node) => void | boolean): void {
     for (const root of this.roots) {
       dfs(root, callback, this.childrenKey)
     }
@@ -191,9 +185,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
    * 广度优先遍历所有树
    * @param callback - 回调函数，返回 true 时提前终止当前树的遍历
    */
-  bfs(
-    callback: (node: Node, index: number, parent?: Node) => void | boolean
-  ): void {
+  bfs(callback: (node: Node, index: number, parent?: Node) => void | boolean): void {
     for (const root of this.roots) {
       bfs(root, callback, this.childrenKey)
     }
@@ -205,7 +197,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
    */
   flatten(filter?: (node: Node) => boolean): Node[] {
     const result: Node[] = []
-    this.dfs(node => {
+    this.dfs((node) => {
       if (!filter || filter(node)) {
         result.push(node)
       }
@@ -223,7 +215,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
       let found: Node | null = null
       dfs(
         root,
-        node => {
+        (node) => {
           if (predicate(node)) {
             found = node
             return true
@@ -242,7 +234,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
    */
   findAll(predicate: (node: Node) => boolean): Node[] {
     const result: Node[] = []
-    this.dfs(node => {
+    this.dfs((node) => {
       if (predicate(node)) {
         result.push(node)
       }
@@ -254,7 +246,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
    * 获取所有叶子节点
    */
   getLeaves(): Node[] {
-    return this.findAll(node => {
+    return this.findAll((node) => {
       const children = (node as Record<string, unknown>)[this.childrenKey]
       return !Array.isArray(children) || children.length === 0
     })
@@ -276,7 +268,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
    */
   getMaxDepth(): number {
     let maxDepth = 0
-    this.dfs(node => {
+    this.dfs((node) => {
       const nodeDepth = (node as { depth?: number }).depth ?? 0
       if (nodeDepth > maxDepth) {
         maxDepth = nodeDepth
@@ -292,15 +284,10 @@ export class Forest<T extends Obj, Node extends Obj = T> {
    * @param isExpanded - 判断节点是否展开的函数
    * @returns 可见后代节点数组（深度优先顺序）
    */
-  getVisibleDescendants(
-    node: Node,
-    isExpanded: (node: Node) => boolean
-  ): Node[] {
+  getVisibleDescendants(node: Node, isExpanded: (node: Node) => boolean): Node[] {
     const { childrenKey } = this
     const result: Node[] = []
-    const children = (node as Record<string, unknown>)[childrenKey] as
-      | Node[]
-      | undefined
+    const children = (node as Record<string, unknown>)[childrenKey] as Node[] | undefined
 
     if (!Array.isArray(children) || !children.length) return result
 
@@ -313,9 +300,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
       const cur = stack.pop()!
       result.push(cur)
 
-      const curChildren = (cur as Record<string, unknown>)[childrenKey] as
-        | Node[]
-        | undefined
+      const curChildren = (cur as Record<string, unknown>)[childrenKey] as Node[] | undefined
       if (Array.isArray(curChildren) && curChildren.length && isExpanded(cur)) {
         for (let i = curChildren.length - 1; i >= 0; i--) {
           stack.push(curChildren[i]!)
@@ -333,15 +318,10 @@ export class Forest<T extends Obj, Node extends Obj = T> {
    * @param isExpanded - 判断节点是否展开的函数
    * @returns 可见后代节点数量
    */
-  getVisibleDescendantCount(
-    node: Node,
-    isExpanded: (node: Node) => boolean
-  ): number {
+  getVisibleDescendantCount(node: Node, isExpanded: (node: Node) => boolean): number {
     const { childrenKey } = this
     let count = 0
-    const children = (node as Record<string, unknown>)[childrenKey] as
-      | Node[]
-      | undefined
+    const children = (node as Record<string, unknown>)[childrenKey] as Node[] | undefined
 
     if (!Array.isArray(children) || !children.length) return count
 
@@ -354,9 +334,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
       const cur = stack.pop()!
       count++
 
-      const curChildren = (cur as Record<string, unknown>)[childrenKey] as
-        | Node[]
-        | undefined
+      const curChildren = (cur as Record<string, unknown>)[childrenKey] as Node[] | undefined
       if (Array.isArray(curChildren) && curChildren.length && isExpanded(cur)) {
         for (let i = curChildren.length - 1; i >= 0; i--) {
           stack.push(curChildren[i]!)
@@ -384,9 +362,7 @@ export class Forest<T extends Obj, Node extends Obj = T> {
         const node = stack.pop()!
         result.push(node)
 
-        const children = (node as Record<string, unknown>)[childrenKey] as
-          | Node[]
-          | undefined
+        const children = (node as Record<string, unknown>)[childrenKey] as Node[] | undefined
         if (Array.isArray(children) && children.length && isExpanded(node)) {
           for (let i = children.length - 1; i >= 0; i--) {
             stack.push(children[i]!)

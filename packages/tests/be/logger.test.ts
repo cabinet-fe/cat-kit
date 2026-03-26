@@ -55,7 +55,7 @@ describe('@cat-kit/be 日志工具', () => {
     const parsed = content
       .trim()
       .split('\n')
-      .map(line => JSON.parse(line))
+      .map((line) => JSON.parse(line))
 
     expect(parsed[0]).toMatchObject({
       level: LogLevel.ERROR,

@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest'
 import { date, Dater } from '@cat-kit/core/src'
+import { describe, it, expect, beforeEach } from 'vitest'
 
 describe('Dater', () => {
   let testDate: Dater
@@ -56,38 +56,22 @@ describe('Dater', () => {
 
     it('startOf 与 endOf day', () => {
       const d = date('2024-03-15 10:20:30')
-      expect(d.startOf('day').format('yyyy-MM-dd HH:mm:ss')).toBe(
-        '2024-03-15 00:00:00'
-      )
-      expect(d.endOf('day').format('yyyy-MM-dd HH:mm:ss')).toBe(
-        '2024-03-15 23:59:59'
-      )
+      expect(d.startOf('day').format('yyyy-MM-dd HH:mm:ss')).toBe('2024-03-15 00:00:00')
+      expect(d.endOf('day').format('yyyy-MM-dd HH:mm:ss')).toBe('2024-03-15 23:59:59')
     })
 
     it('startOf 与 endOf week (周一为一周开始)', () => {
       const sunday = date('2024-01-14 12:00:00') // 周日
-      expect(sunday.startOf('week').format('yyyy-MM-dd HH:mm:ss')).toBe(
-        '2024-01-08 00:00:00'
-      )
-      expect(sunday.endOf('week').format('yyyy-MM-dd HH:mm:ss')).toBe(
-        '2024-01-14 23:59:59'
-      )
+      expect(sunday.startOf('week').format('yyyy-MM-dd HH:mm:ss')).toBe('2024-01-08 00:00:00')
+      expect(sunday.endOf('week').format('yyyy-MM-dd HH:mm:ss')).toBe('2024-01-14 23:59:59')
     })
 
     it('startOf 与 endOf month/year', () => {
       const d = date('2024-02-15 10:00:00')
-      expect(d.startOf('month').format('yyyy-MM-dd HH:mm:ss')).toBe(
-        '2024-02-01 00:00:00'
-      )
-      expect(d.endOf('month').format('yyyy-MM-dd HH:mm:ss')).toBe(
-        '2024-02-29 23:59:59'
-      )
-      expect(d.startOf('year').format('yyyy-MM-dd HH:mm:ss')).toBe(
-        '2024-01-01 00:00:00'
-      )
-      expect(d.endOf('year').format('yyyy-MM-dd HH:mm:ss')).toBe(
-        '2024-12-31 23:59:59'
-      )
+      expect(d.startOf('month').format('yyyy-MM-dd HH:mm:ss')).toBe('2024-02-01 00:00:00')
+      expect(d.endOf('month').format('yyyy-MM-dd HH:mm:ss')).toBe('2024-02-29 23:59:59')
+      expect(d.startOf('year').format('yyyy-MM-dd HH:mm:ss')).toBe('2024-01-01 00:00:00')
+      expect(d.endOf('year').format('yyyy-MM-dd HH:mm:ss')).toBe('2024-12-31 23:59:59')
     })
   })
 
@@ -220,9 +204,7 @@ describe('Dater', () => {
 
     it('应该支持多次占位符和 UTC 选项', () => {
       const utcDate = new Dater(new Date(Date.UTC(2024, 0, 1, 23, 5, 9)))
-      expect(utcDate.format('yyyy-MM-dd HH:mm:ss HH', { utc: true })).toBe(
-        '2024-01-01 23:05:09 23'
-      )
+      expect(utcDate.format('yyyy-MM-dd HH:mm:ss HH', { utc: true })).toBe('2024-01-01 23:05:09 23')
     })
   })
 
@@ -289,7 +271,7 @@ describe('Dater', () => {
 
     it('应该支持自定义减少器', () => {
       const laterDate = new Date('2024-01-20 10:30:45') // 使用相同的时间避免部分小时差异
-      const hoursDiff = testDate.compare(laterDate, timeDiff =>
+      const hoursDiff = testDate.compare(laterDate, (timeDiff) =>
         Math.floor(timeDiff / (1000 * 60 * 60))
       )
       expect(hoursDiff).toBe(-120) // 120小时后
@@ -314,10 +296,7 @@ describe('Dater', () => {
       const monthDiff = date('2024-03-31').diff(date('2024-02-29'), 'months')
       expect(monthDiff).toBe(1)
 
-      const negativeMonthDiff = date('2024-02-15').diff(
-        date('2024-03-15'),
-        'months'
-      )
+      const negativeMonthDiff = date('2024-02-15').diff(date('2024-03-15'), 'months')
       expect(negativeMonthDiff).toBe(-1)
     })
 
@@ -355,12 +334,8 @@ describe('Dater', () => {
     })
 
     it('应该支持 UTC 解析', () => {
-      const parsed = Dater.parse('2024-01-01 00:00:00', 'yyyy-MM-dd HH:mm:ss', {
-        utc: true
-      })
-      expect(parsed.format('yyyy-MM-dd HH:mm:ss', { utc: true })).toBe(
-        '2024-01-01 00:00:00'
-      )
+      const parsed = Dater.parse('2024-01-01 00:00:00', 'yyyy-MM-dd HH:mm:ss', { utc: true })
+      expect(parsed.format('yyyy-MM-dd HH:mm:ss', { utc: true })).toBe('2024-01-01 00:00:00')
     })
 
     it('无效日期应返回 Invalid Date（不抛错）', () => {

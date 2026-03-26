@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
 import { o } from '@cat-kit/core/src'
+import { describe, it, expect, vi } from 'vitest'
 
 describe('对象工具函数', () => {
   describe('o() - CatObject', () => {
@@ -107,9 +107,7 @@ describe('对象工具函数', () => {
       })
 
       it('应该警告类型不一致', () => {
-        const consoleWarnSpy = vi
-          .spyOn(console, 'warn')
-          .mockImplementation(() => {})
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
         const obj = { a: 1 }
         const source = { a: '10' }
@@ -134,49 +132,24 @@ describe('对象工具函数', () => {
 
     describe('deepExtend', () => {
       it('应该深度继承嵌套对象', () => {
-        const obj = {
-          a: 1,
-          b: {
-            c: 2,
-            d: 3
-          }
-        }
-        const source = {
-          a: 10,
-          b: {
-            c: 20
-          }
-        }
+        const obj = { a: 1, b: { c: 2, d: 3 } }
+        const source = { a: 10, b: { c: 20 } }
 
         o(obj).deepExtend(source)
 
-        expect(obj).toEqual({
-          a: 10,
-          b: {
-            c: 20,
-            d: 3
-          }
-        })
+        expect(obj).toEqual({ a: 10, b: { c: 20, d: 3 } })
       })
 
       it('应该支持数组形式的多个源对象', () => {
-        const obj = {
-          a: 1,
-          b: { c: 2 }
-        }
+        const obj = { a: 1, b: { c: 2 } }
 
         o(obj).deepExtend([{ a: 10 }, { b: { c: 20 } }])
 
-        expect(obj).toEqual({
-          a: 10,
-          b: { c: 20 }
-        })
+        expect(obj).toEqual({ a: 10, b: { c: 20 } })
       })
 
       it('应该警告类型不一致', () => {
-        const consoleWarnSpy = vi
-          .spyOn(console, 'warn')
-          .mockImplementation(() => {})
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
         const obj = { a: { b: 1 } }
         const source = { a: '10' }
@@ -191,13 +164,7 @@ describe('对象工具函数', () => {
 
     describe('copy', () => {
       it('应该创建对象的深拷贝', () => {
-        const obj = {
-          a: 1,
-          b: {
-            c: 2,
-            d: [3, 4, 5]
-          }
-        }
+        const obj = { a: 1, b: { c: 2, d: [3, 4, 5] } }
 
         const copied = o(obj).copy()
 
@@ -218,10 +185,7 @@ describe('对象工具函数', () => {
       })
 
       it('应该忽略函数', () => {
-        const obj = {
-          a: 1,
-          fn: () => 'test'
-        }
+        const obj = { a: 1, fn: () => 'test' }
 
         const copied = o(obj).copy()
 
@@ -241,32 +205,12 @@ describe('对象工具函数', () => {
       })
 
       it('应该深度合并嵌套对象', () => {
-        const obj = {
-          a: 1,
-          b: {
-            c: 2,
-            d: 3
-          }
-        }
-        const source = {
-          b: {
-            d: 30,
-            e: 40
-          },
-          f: 50
-        }
+        const obj = { a: 1, b: { c: 2, d: 3 } }
+        const source = { b: { d: 30, e: 40 }, f: 50 }
 
         o(obj).merge(source)
 
-        expect(obj).toEqual({
-          a: 1,
-          b: {
-            c: 2,
-            d: 30,
-            e: 40
-          },
-          f: 50
-        })
+        expect(obj).toEqual({ a: 1, b: { c: 2, d: 30, e: 40 }, f: 50 })
       })
 
       it('应该支持数组形式的多个源对象', () => {
@@ -305,13 +249,7 @@ describe('对象工具函数', () => {
       })
 
       it('应该支持链式属性访问', () => {
-        const obj = {
-          a: {
-            b: {
-              c: 'value'
-            }
-          }
-        }
+        const obj = { a: { b: { c: 'value' } } }
 
         expect(o(obj).get('a.b.c')).toBe('value')
       })
@@ -349,13 +287,7 @@ describe('对象工具函数', () => {
 
         o(obj).set('x.y.z', 123)
 
-        expect(obj).toEqual({
-          x: {
-            y: {
-              z: 123
-            }
-          }
-        })
+        expect(obj).toEqual({ x: { y: { z: 123 } } })
       })
 
       it('应该返回设置值的父对象', () => {

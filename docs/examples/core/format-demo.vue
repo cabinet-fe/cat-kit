@@ -35,7 +35,11 @@
       </div>
       <div class="result-row code-preview">
         <span class="result-label">代码：</span>
-        <code class="result-code">date('{{ dateInput }}').format('{{ formatTemplate }}'{{ useUTC ? ", { utc: true }" : "" }})</code>
+        <code class="result-code"
+          >date('{{ dateInput }}').format('{{ formatTemplate }}'{{
+            useUTC ? ', { utc: true }' : ''
+          }})</code
+        >
       </div>
     </div>
 
@@ -56,8 +60,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
 import { date } from '@cat-kit/core/src'
+import { ref, computed } from 'vue'
 
 const dateInput = ref(new Date().toISOString().slice(0, 16))
 const formatTemplate = ref('yyyy-MM-dd HH:mm:ss')
@@ -70,7 +74,7 @@ const formats = [
   { label: '时间 (24小时)', value: 'HH:mm:ss' },
   { label: '时间 (12小时)', value: 'hh:mm:ss' },
   { label: '年月', value: 'yyyy-MM' },
-  { label: '月日', value: 'MM-dd' },
+  { label: '月日', value: 'MM-dd' }
 ]
 
 const formattedResult = computed(() => {

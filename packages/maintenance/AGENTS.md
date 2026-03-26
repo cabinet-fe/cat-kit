@@ -39,13 +39,13 @@ await group.publish()
 const repo = new Monorepo(rootDir?: string)
 ```
 
-| 属性/方法 | 说明 |
-|----------|------|
-| `root` | 根目录信息（`MonorepoRoot`） |
-| `workspaces` | 工作区列表（`MonorepoWorkspace[]`） |
-| `group(names)` | 创建工作区分组，返回 `WorkspaceGroup` |
-| `validate()` | 验证循环依赖和版本一致性 |
-| `buildDependencyGraph(options?)` | 构建依赖关系图，支持 Mermaid 输出 |
+| 属性/方法                        | 说明                                  |
+| -------------------------------- | ------------------------------------- |
+| `root`                           | 根目录信息（`MonorepoRoot`）          |
+| `workspaces`                     | 工作区列表（`MonorepoWorkspace[]`）   |
+| `group(names)`                   | 创建工作区分组，返回 `WorkspaceGroup` |
+| `validate()`                     | 验证循环依赖和版本一致性              |
+| `buildDependencyGraph(options?)` | 构建依赖关系图，支持 Mermaid 输出     |
 
 #### WorkspaceGroup
 
@@ -53,11 +53,11 @@ const repo = new Monorepo(rootDir?: string)
 const group = repo.group(['@cat-kit/core', '@cat-kit/fe'])
 ```
 
-| 方法 | 说明 |
-|------|------|
-| `build(configs?)` | 按拓扑顺序分批并行构建 |
-| `bumpVersion(options)` | 批量更新版本，自动同步 peer/deps |
-| `publish(options?)` | 批量发布到 npm，自动检测预发布 tag |
+| 方法                   | 说明                               |
+| ---------------------- | ---------------------------------- |
+| `build(configs?)`      | 按拓扑顺序分批并行构建             |
+| `bumpVersion(options)` | 批量更新版本，自动同步 peer/deps   |
+| `publish(options?)`    | 批量发布到 npm，自动检测预发布 tag |
 
 ---
 
@@ -100,7 +100,7 @@ import { buildDependencyGraph, visualizeDependencyGraph } from '@cat-kit/mainten
 const graph = buildDependencyGraph(packages)
 const mermaid = visualizeDependencyGraph(graph, {
   includeExternal: false,
-  distinguishTypes: true  // --> dependencies, ---> devDeps, -..-> peerDeps
+  distinguishTypes: true // --> dependencies, ---> devDeps, -..-> peerDeps
 })
 ```
 
@@ -116,10 +116,10 @@ import { parseSemver, compareSemver, isValidSemver } from '@cat-kit/maintenance'
 parseSemver('1.2.3-alpha.1')
 // { major: 1, minor: 2, patch: 3, prerelease: ['alpha', '1'], raw: '1.2.3-alpha.1' }
 
-compareSemver('2.0.0', '1.0.0')  // 1
-compareSemver('1.0.0-alpha', '1.0.0')  // -1 (预发布 < 正式)
+compareSemver('2.0.0', '1.0.0') // 1
+compareSemver('1.0.0-alpha', '1.0.0') // -1 (预发布 < 正式)
 
-isValidSemver('1.2.3')  // true
+isValidSemver('1.2.3') // true
 ```
 
 #### incrementVersion
@@ -127,10 +127,10 @@ isValidSemver('1.2.3')  // true
 ```typescript
 import { incrementVersion } from '@cat-kit/maintenance'
 
-incrementVersion('1.2.3', 'major')      // '2.0.0'
-incrementVersion('1.2.3', 'minor')      // '1.3.0'
-incrementVersion('1.2.3', 'patch')      // '1.2.4'
-incrementVersion('1.2.3', 'premajor')   // '2.0.0-alpha.0'
+incrementVersion('1.2.3', 'major') // '2.0.0'
+incrementVersion('1.2.3', 'minor') // '1.3.0'
+incrementVersion('1.2.3', 'patch') // '1.2.4'
+incrementVersion('1.2.3', 'premajor') // '2.0.0-alpha.0'
 incrementVersion('1.2.3', 'prerelease') // '1.2.3-alpha.0'
 incrementVersion('1.2.3-alpha.0', 'prerelease') // '1.2.3-alpha.1'
 ```
@@ -174,15 +174,12 @@ await syncDependencies(packages, '1.2.3')
 import { buildLib } from '@cat-kit/maintenance'
 
 const result = await buildLib({
-  dir: '/absolute/path/to/pkg',  // 必须是绝对路径
-  entry: 'src/index.ts',         // 可选，默认 src/index.ts 或 index.ts
-  dts: true,                     // 生成 .d.ts
-  external: ['vue', 'react'],    // 外部依赖
-  platform: 'neutral',           // 'neutral' | 'node' | 'browser'
-  output: {
-    dir: 'dist',
-    sourcemap: true
-  }
+  dir: '/absolute/path/to/pkg', // 必须是绝对路径
+  entry: 'src/index.ts', // 可选，默认 src/index.ts 或 index.ts
+  dts: true, // 生成 .d.ts
+  external: ['vue', 'react'], // 外部依赖
+  platform: 'neutral', // 'neutral' | 'node' | 'browser'
+  output: { dir: 'dist', sourcemap: true }
 })
 // { success: boolean, duration: number, error?: Error }
 ```
@@ -199,10 +196,10 @@ import { createGitTag } from '@cat-kit/maintenance'
 await createGitTag({
   cwd: '/path/to/repo',
   tag: 'v1.2.3',
-  message: '发布 1.2.3',  // 可选，有则创建 annotated tag
+  message: '发布 1.2.3', // 可选，有则创建 annotated tag
   push: true,
-  remote: 'origin',       // 默认 origin
-  force: false            // 是否强制覆盖
+  remote: 'origin', // 默认 origin
+  force: false // 是否强制覆盖
 })
 ```
 
@@ -214,11 +211,11 @@ import { commitAndPush } from '@cat-kit/maintenance'
 await commitAndPush({
   cwd: '/path/to/repo',
   message: 'chore: release',
-  addAll: true,      // 默认 true，自动 git add -A
+  addAll: true, // 默认 true，自动 git add -A
   allowEmpty: false, // 是否允许空提交
-  pushTags: true,    // 是否推送所有 tag
+  pushTags: true, // 是否推送所有 tag
   remote: 'origin',
-  branch: 'main'     // 可选，默认当前分支
+  branch: 'main' // 可选，默认当前分支
 })
 // { commitHash: string, branch: string }
 ```
@@ -249,7 +246,7 @@ await publishPackage({
 await publishPackage({
   cwd: '/path/to/monorepo',
   workspaces: true,
-  dryRun: true  // 模拟发布
+  dryRun: true // 模拟发布
 })
 ```
 
@@ -259,13 +256,13 @@ await publishPackage({
 
 所有错误继承自 `MaintenanceError`：
 
-| 错误类 | 场景 |
-|-------|------|
-| `ConfigError` | 配置无效（缺少 name 字段等） |
-| `SemverError` | 版本号格式无效 |
-| `ValidationError` | 验证失败 |
-| `GitError` | Git 命令执行失败 |
-| `PublishError` | npm 发布失败 |
+| 错误类            | 场景                         |
+| ----------------- | ---------------------------- |
+| `ConfigError`     | 配置无效（缺少 name 字段等） |
+| `SemverError`     | 版本号格式无效               |
+| `ValidationError` | 验证失败                     |
+| `GitError`        | Git 命令执行失败             |
+| `PublishError`    | npm 发布失败                 |
 
 ```typescript
 import { SemverError } from '@cat-kit/maintenance'
@@ -274,8 +271,8 @@ try {
   parseSemver('invalid')
 } catch (e) {
   if (e instanceof SemverError) {
-    console.log(e.version)  // 'invalid'
-    console.log(e.code)     // 'SEMVER_ERROR'
+    console.log(e.version) // 'invalid'
+    console.log(e.code) // 'SEMVER_ERROR'
   }
 }
 ```
@@ -299,7 +296,7 @@ interface PackageJson {
 
 interface MonorepoWorkspace {
   name: string
-  dir: string      // 绝对路径
+  dir: string // 绝对路径
   version: string
   pkg: PackageJson
   private: boolean
@@ -318,8 +315,8 @@ type BumpType = 'major' | 'minor' | 'patch' | 'premajor' | 'preminor' | 'prepatc
 
 interface BumpOptions {
   type?: BumpType
-  version?: string  // 直接指定版本号
-  preid?: string    // 预发布标识，默认 'alpha'
+  version?: string // 直接指定版本号
+  preid?: string // 预发布标识，默认 'alpha'
 }
 ```
 

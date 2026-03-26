@@ -75,15 +75,9 @@ export type InferObjectSchema<S extends Record<string, Parser<any>>> = {
   [K in keyof S]: InferParser<S[K]>
 }
 
-function prefixIssues(
-  issues: ValidationIssue[],
-  prefix: string
-): ValidationIssue[] {
+function prefixIssues(issues: ValidationIssue[], prefix: string): ValidationIssue[] {
   if (!prefix) return issues
-  return issues.map(i => ({
-    ...i,
-    path: i.path ? `${prefix}.${i.path}` : prefix
-  }))
+  return issues.map((i) => ({ ...i, path: i.path ? `${prefix}.${i.path}` : prefix }))
 }
 
 /**
@@ -108,10 +102,7 @@ export function object<S extends Record<string, Parser<any>>>(
 ): Validator<InferObjectSchema<S>> {
   const parser: Parser<InferObjectSchema<S>> = (input: unknown) => {
     if (input === null || typeof input !== 'object' || Array.isArray(input)) {
-      return {
-        success: false,
-        issues: [{ path: '', message: '期望是对象' }]
-      }
+      return { success: false, issues: [{ path: '', message: '期望是对象' }] }
     }
 
     const data = input as Record<string, unknown>
@@ -202,10 +193,7 @@ export function vDate(): Parser<Date> {
     if (input instanceof Date && !Number.isNaN(input.getTime())) {
       return { success: true, data: input }
     }
-    return {
-      success: false,
-      issues: [{ path: '', message: '期望是有效 Date' }]
-    }
+    return { success: false, issues: [{ path: '', message: '期望是有效 Date' }] }
   }
 }
 

@@ -7,16 +7,12 @@ function createClipboardData(
 ): ClipboardItem | ClipboardItem[] {
   if (typeof data === 'string') {
     const type = 'text/plain'
-    return new ClipboardItem({
-      [type]: new Blob([data], { type })
-    })
+    return new ClipboardItem({ [type]: new Blob([data], { type }) })
   } else if (data instanceof Blob) {
-    return new ClipboardItem({
-      [data.type]: data
-    })
+    return new ClipboardItem({ [data.type]: data })
   } else if (Array.isArray(data)) {
     let items: ClipboardItems = []
-    data.forEach(item => {
+    data.forEach((item) => {
       items.push(createClipboardData(item))
     })
     return items

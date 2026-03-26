@@ -77,10 +77,7 @@ const api = new HTTPClient('/api')
 // 完整配置
 const client = new HTTPClient('/api/v1', {
   timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-    'X-App-Version': '1.0.0'
-  },
+  headers: { 'Content-Type': 'application/json', 'X-App-Version': '1.0.0' },
   credentials: true
 })
 ```
@@ -140,28 +137,17 @@ interface HTTPResponse<T = any> {
 
 ```typescript
 // 基础请求
-const response = await http.request('/users', {
-  method: 'GET'
-})
+const response = await http.request('/users', { method: 'GET' })
 
 // 带查询参数
-const response = await http.request('/users', {
-  method: 'GET',
-  query: { page: 1, size: 10 }
-})
+const response = await http.request('/users', { method: 'GET', query: { page: 1, size: 10 } })
 // 实际请求：/users?page=1&size=10
 
 // POST 请求
-const response = await http.request('/users', {
-  method: 'POST',
-  body: { name: '张三', age: 18 }
-})
+const response = await http.request('/users', { method: 'POST', body: { name: '张三', age: 18 } })
 
 // 自定义响应类型
-const blob = await http.request<Blob>('/download/file', {
-  method: 'GET',
-  responseType: 'blob'
-})
+const blob = await http.request<Blob>('/download/file', { method: 'GET', responseType: 'blob' })
 ```
 
 ### get()
@@ -186,9 +172,7 @@ get<T>(url: string, config?: AliasRequestConfig): Promise<HTTPResponse<T>>
 const response = await http.get('/users')
 
 // 带查询参数
-const response = await http.get('/users', {
-  query: { page: 1, size: 10, status: 'active' }
-})
+const response = await http.get('/users', { query: { page: 1, size: 10, status: 'active' } })
 
 // 带类型定义
 interface User {
@@ -225,11 +209,7 @@ post<T = any>(
 
 ```typescript
 // JSON 数据
-const response = await http.post('/users', {
-  name: '张三',
-  age: 18,
-  email: 'zhangsan@example.com'
-})
+const response = await http.post('/users', { name: '张三', age: 18, email: 'zhangsan@example.com' })
 
 // FormData
 const formData = new FormData()
@@ -244,9 +224,7 @@ interface CreateUserResponse {
   success: boolean
 }
 
-const response = await http.post<CreateUserResponse>('/users', {
-  name: '张三'
-})
+const response = await http.post<CreateUserResponse>('/users', { name: '张三' })
 ```
 
 ### put()
@@ -265,10 +243,7 @@ put<T = any>(
 
 ```typescript
 // 更新用户信息
-const response = await http.put('/users/123', {
-  name: '李四',
-  age: 20
-})
+const response = await http.put('/users/123', { name: '李四', age: 20 })
 ```
 
 ### delete()
@@ -289,9 +264,7 @@ delete<T = any>(
 const response = await http.delete('/users/123')
 
 // 带确认参数
-const response = await http.delete('/users/123', {
-  query: { confirm: true }
-})
+const response = await http.delete('/users/123', { query: { confirm: true } })
 ```
 
 ### patch()
@@ -310,9 +283,7 @@ patch<T = any>(
 
 ```typescript
 // 只更新用户的邮箱
-const response = await http.patch('/users/123', {
-  email: 'newemail@example.com'
-})
+const response = await http.patch('/users/123', { email: 'newemail@example.com' })
 ```
 
 ### head()
@@ -459,9 +430,7 @@ import { HTTPClient } from '@cat-kit/http'
 
 export const http = new HTTPClient('/api', {
   timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  headers: { 'Content-Type': 'application/json' }
 })
 
 // api/user.ts
@@ -560,10 +529,7 @@ await userPosts.get('/') // /api/v1/users/posts/
 
 ```typescript
 const http = new HTTPClient('', {
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Custom-Header': 'value'
-  }
+  headers: { 'Content-Type': 'application/json', 'X-Custom-Header': 'value' }
 })
 ```
 
@@ -584,9 +550,7 @@ await http.post('/upload', formData)
 设置 `responseType` 为 `'blob'`：
 
 ```typescript
-const response = await http.get<Blob>('/download/file', {
-  responseType: 'blob'
-})
+const response = await http.get<Blob>('/download/file', { responseType: 'blob' })
 
 // 创建下载链接
 const url = URL.createObjectURL(response.data)
@@ -614,11 +578,7 @@ requestClient.abort()
 对象会被自动转换为 JSON 字符串：
 
 ```typescript
-await http.get('/search', {
-  query: {
-    filter: { status: 'active', role: 'admin' }
-  }
-})
+await http.get('/search', { query: { filter: { status: 'active', role: 'admin' } } })
 // 实际请求：/search?filter={"status":"active","role":"admin"}
 ```
 

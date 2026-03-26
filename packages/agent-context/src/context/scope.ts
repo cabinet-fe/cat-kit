@@ -1,7 +1,7 @@
+import { execSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { execSync } from 'node:child_process'
 
 export async function resolveScope(acRoot: string): Promise<string> {
   const envPath = join(acRoot, '.env')

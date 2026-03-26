@@ -1,13 +1,10 @@
-import { describe, it, expect, vi, afterAll } from 'vitest'
-import {
-  createWritableStream,
-  saveFromStream,
-  saveFromURL
-} from '@cat-kit/fe/src'
 import {
   ReadableStream as NodeReadableStream,
   WritableStream as NodeWritableStream
 } from 'node:stream/web'
+
+import { createWritableStream, saveFromStream, saveFromURL } from '@cat-kit/fe/src'
+import { describe, it, expect, vi, afterAll } from 'vitest'
 
 if (!globalThis.ReadableStream) {
   vi.stubGlobal('ReadableStream', NodeReadableStream)
@@ -21,27 +18,15 @@ const originalDocument = globalThis.document
 const originalURL = globalThis.URL
 
 function setupDownloadEnv() {
-  const link: any = {
-    style: {},
-    click: vi.fn()
-  }
-  const body = {
-    appendChild: vi.fn(),
-    removeChild: vi.fn()
-  }
-  const doc = {
-    createElement: vi.fn(() => link),
-    body
-  }
+  const link: any = { style: {}, click: vi.fn() }
+  const body = { appendChild: vi.fn(), removeChild: vi.fn() }
+  const doc = { createElement: vi.fn(() => link), body }
   Object.defineProperty(globalThis, 'document', {
     value: doc as unknown as Document,
     writable: true
   })
 
-  const urlMock = {
-    createObjectURL: vi.fn(() => 'blob://mock'),
-    revokeObjectURL: vi.fn()
-  }
+  const urlMock = { createObjectURL: vi.fn(() => 'blob://mock'), revokeObjectURL: vi.fn() }
   vi.stubGlobal('URL', urlMock as any)
 
   return { link, body, urlMock }
@@ -51,10 +36,7 @@ afterAll(() => {
   if (originalFetch) {
     vi.stubGlobal('fetch', originalFetch)
   }
-  Object.defineProperty(globalThis, 'document', {
-    value: originalDocument,
-    writable: true
-  })
+  Object.defineProperty(globalThis, 'document', { value: originalDocument, writable: true })
   if (originalURL) {
     vi.stubGlobal('URL', originalURL as any)
   }
@@ -66,10 +48,7 @@ describe('createWritableStream', () => {
     const onProgress = vi.fn()
 
     vi.useFakeTimers()
-    const writable = createWritableStream({
-      filename: 'demo.bin',
-      onProgress
-    })
+    const writable = createWritableStream({ filename: 'demo.bin', onProgress })
 
     const writer = writable.getWriter()
     await writer.write(new Uint8Array([1, 2, 3]))
@@ -111,13 +90,14 @@ describe('saveFromURL', () => {
     const { link } = setupDownloadEnv()
     const onProgress = vi.fn()
 
-    const response = new Response('cat', {
-      headers: { 'content-length': '3' }
-    })
-    vi.stubGlobal('fetch', vi.fn(async (_url, init) => {
-      expect(init?.headers).toEqual({ token: 'meow' })
-      return response
-    }))
+    const response = new Response('cat', { headers: { 'content-length': '3' } })
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url, init) => {
+        expect(init?.headers).toEqual({ token: 'meow' })
+        return response
+      })
+    )
 
     await saveFromURL('/file.bin', 'file.bin', {
       onProgress,

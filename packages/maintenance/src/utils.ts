@@ -1,8 +1,6 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname } from 'node:path'
 
-
-
 /**
  * 读取 JSON 文件并解析为对象
  *
@@ -16,9 +14,7 @@ import { dirname } from 'node:path'
  * console.log(pkg.name)
  * ```
  */
-export async function readJson<T = Record<string, unknown>>(
-  filePath: string
-): Promise<T> {
+export async function readJson<T = Record<string, unknown>>(filePath: string): Promise<T> {
   const content = await readFile(filePath, 'utf8')
   return JSON.parse(content)
 }

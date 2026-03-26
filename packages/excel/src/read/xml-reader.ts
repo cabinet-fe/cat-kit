@@ -38,10 +38,7 @@ export interface ParsedWorksheet {
   cells: ParsedCell[]
 }
 
-export function parseWorkbookSheets(
-  workbookXml: string,
-  relsXml: string
-): WorkbookSheetEntry[] {
+export function parseWorkbookSheets(workbookXml: string, relsXml: string): WorkbookSheetEntry[] {
   const workbook = parseXml<any>(workbookXml).workbook
   const rels = parseXml<any>(relsXml).Relationships
   if (!workbook?.sheets?.sheet) {
@@ -66,11 +63,7 @@ export function parseWorkbookSheets(
       throw new ExcelSchemaError(`Missing workbook relation for ${rid}`, 'MISSING_SHEET_REL')
     }
     const normalizedTarget = normalizeSheetTarget(target)
-    return {
-      sheetName: name,
-      sheetPath: normalizedTarget,
-      sheetIndex: index
-    }
+    return { sheetName: name, sheetPath: normalizedTarget, sheetIndex: index }
   })
 }
 
@@ -158,7 +151,8 @@ export function parseStyles(stylesXml: string | undefined): StyleLookup {
 
     if (fonts[fontId] && Object.keys(fonts[fontId]).length > 0) style.font = fonts[fontId]
     if (fills[fillId] && Object.keys(fills[fillId]).length > 0) style.fill = fills[fillId]
-    if (borders[borderId] && Object.keys(borders[borderId]).length > 0) style.border = borders[borderId]
+    if (borders[borderId] && Object.keys(borders[borderId]).length > 0)
+      style.border = borders[borderId]
     if (numFmtMap.has(numFmtId)) style.numberFormat = numFmtMap.get(numFmtId)
     if (xf.alignment) {
       style.alignment = {
@@ -212,9 +206,7 @@ export function parseWorksheet(
 
   const rows = toArray(worksheet?.sheetData?.row)
   for (const rowNode of rows) {
-    const rowIndex = rowNode?.['@_r']
-      ? Number.parseInt(String(rowNode['@_r']), 10)
-      : undefined
+    const rowIndex = rowNode?.['@_r'] ? Number.parseInt(String(rowNode['@_r']), 10) : undefined
     for (const cellNode of toArray(rowNode?.c)) {
       const ref = String(cellNode?.['@_r'] ?? '')
       const address = ref ? parseCellAddress(ref) : undefined
@@ -236,10 +228,14 @@ export function parseWorksheet(
 function parseWorksheetOptions(worksheet: any): WorksheetOptions {
   const options: WorksheetOptions = {}
   if (worksheet?.sheetFormatPr?.['@_defaultRowHeight']) {
-    options.defaultRowHeight = Number.parseFloat(String(worksheet.sheetFormatPr['@_defaultRowHeight']))
+    options.defaultRowHeight = Number.parseFloat(
+      String(worksheet.sheetFormatPr['@_defaultRowHeight'])
+    )
   }
   if (worksheet?.sheetFormatPr?.['@_defaultColWidth']) {
-    options.defaultColWidth = Number.parseFloat(String(worksheet.sheetFormatPr['@_defaultColWidth']))
+    options.defaultColWidth = Number.parseFloat(
+      String(worksheet.sheetFormatPr['@_defaultColWidth'])
+    )
   }
   const pane = worksheet?.sheetViews?.sheetView?.pane ?? worksheet?.sheetViews?.sheetView?.[0]?.pane
   if (pane) {
@@ -262,9 +258,8 @@ function parseWorksheetColumns(worksheet: any): Array<[index: number, column: Wo
       result.push([
         index,
         {
-          width: colNode['@_width'] != null
-            ? Number.parseFloat(String(colNode['@_width']))
-            : undefined,
+          width:
+            colNode['@_width'] != null ? Number.parseFloat(String(colNode['@_width'])) : undefined,
           hidden: colNode['@_hidden'] === '1'
         }
       ])
@@ -275,7 +270,7 @@ function parseWorksheetColumns(worksheet: any): Array<[index: number, column: Wo
 
 function inferColumnIndex(cellNode: any, cells: ParsedCell[], rowIndex?: number): number {
   if (rowIndex == null) return 0
-  const rowCells = cells.filter(cell => cell.row === rowIndex)
+  const rowCells = cells.filter((cell) => cell.row === rowIndex)
   if (rowCells.length === 0) return 1
   const last = rowCells[rowCells.length - 1]
   if (!last) return 1
@@ -310,17 +305,15 @@ function parseCellValue(
     if (!Number.isFinite(numeric)) {
       throw new ExcelParseError(`Invalid numeric cell value: ${raw}`, 'INVALID_NUMERIC_VALUE')
     }
-    value = !formula && styleLookup.dateStyleIds.has(styleId)
-      ? excelSerialToDate(numeric, dateSystem)
-      : numeric
+    value =
+      !formula && styleLookup.dateStyleIds.has(styleId)
+        ? excelSerialToDate(numeric, dateSystem)
+        : numeric
   }
 
   if (formula) {
     const result = value as string | number | boolean | null
-    return {
-      formula: String(formula),
-      result
-    }
+    return { formula: String(formula), result }
   }
   return value
 }

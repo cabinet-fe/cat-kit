@@ -25,7 +25,11 @@ export async function buildLib(config: BuildConfig) {
     const entries = requestedEntries
       .map((entry) => {
         const resolvedEntry = path.isAbsolute(entry) ? entry : path.resolve(dir, entry)
-        return existsSync(resolvedEntry) ? (path.isAbsolute(entry) ? path.relative(dir, entry) : entry) : null
+        return existsSync(resolvedEntry)
+          ? path.isAbsolute(entry)
+            ? path.relative(dir, entry)
+            : entry
+          : null
       })
       .filter((entry): entry is string => entry !== null)
 

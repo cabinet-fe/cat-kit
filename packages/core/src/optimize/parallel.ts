@@ -50,12 +50,12 @@ export async function parallel<T>(
 
         Promise.resolve()
           .then(() => tasks[current]?.())
-          .then(value => {
+          .then((value) => {
             results[current] = value as T
             finished++
             run()
           })
-          .catch(err => {
+          .catch((err) => {
             rejected = true
             reject(err)
           })

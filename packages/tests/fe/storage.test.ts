@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { WebStorage, storageKey } from '@cat-kit/fe/src'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 class MemoryStorage implements Storage {
   private store = new Map<string, string>()

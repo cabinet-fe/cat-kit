@@ -1,15 +1,13 @@
-import { describe, it, expect, afterEach } from 'vitest'
-import 'fake-indexeddb/auto'
 import { IDB } from '@cat-kit/fe/src'
+import 'fake-indexeddb/auto'
+import { describe, it, expect, afterEach } from 'vitest'
 
 describe('IDB', () => {
   const dbNames: string[] = []
 
   afterEach(async () => {
     // 清理测试产生的数据库
-    await Promise.all(
-      dbNames.splice(0).map(name => IDB.deleteDatabase(name).catch(() => {}))
-    )
+    await Promise.all(dbNames.splice(0).map((name) => IDB.deleteDatabase(name).catch(() => {})))
   })
 
   it('版本升级不应默认清空 objectStore（应保留数据）', async () => {
@@ -82,5 +80,3 @@ describe('IDB', () => {
     await expect(idb2.ready).rejects.toBeTruthy()
   })
 })
-
-

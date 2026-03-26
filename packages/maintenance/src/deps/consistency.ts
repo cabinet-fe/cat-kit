@@ -39,16 +39,10 @@ export function checkVersionConsistency(
 ): ConsistencyResult {
   const { ignore = [] } = options
 
-  const dependencyVersions = new Map<
-    string,
-    Map<string, string[]>
-  >()
+  const dependencyVersions = new Map<string, Map<string, string[]>>()
 
   for (const p of packages) {
-    const allDeps = {
-      ...p.pkg.dependencies,
-      ...p.pkg.devDependencies
-    }
+    const allDeps = { ...p.pkg.dependencies, ...p.pkg.devDependencies }
 
     for (const [depName, version] of Object.entries(allDeps)) {
       if (ignore.includes(depName)) {
@@ -85,15 +79,9 @@ export function checkVersionConsistency(
         usedBy
       }))
 
-      inconsistent.push({
-        name: depName,
-        versions
-      })
+      inconsistent.push({ name: depName, versions })
     }
   }
 
-  return {
-    consistent: inconsistent.length === 0,
-    inconsistent
-  }
+  return { consistent: inconsistent.length === 0, inconsistent }
 }

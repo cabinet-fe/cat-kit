@@ -5,11 +5,7 @@
       <p>调试 TokenPlugin、MethodOverridePlugin 与自定义日志插件</p>
     </div>
 
-    <var-input
-      v-model="token"
-      clearable
-      placeholder="输入 token，观察请求头变化"
-    />
+    <var-input v-model="token" clearable placeholder="输入 token，观察请求头变化" />
 
     <var-space>
       <var-button type="primary" :loading="loading" @click="sendDelete">
@@ -43,8 +39,8 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
 import { HTTPClient, MethodOverridePlugin, TokenPlugin } from '@cat-kit/http'
+import { reactive, ref } from 'vue'
 
 const token = ref('debug-token-001')
 const loading = ref(false)

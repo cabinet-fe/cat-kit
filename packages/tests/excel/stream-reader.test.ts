@@ -1,10 +1,5 @@
+import { Workbook, readWorkbookStream, writeWorkbook, type StreamEvent } from '@cat-kit/excel/src'
 import { describe, expect, it } from 'vitest'
-import {
-  Workbook,
-  readWorkbookStream,
-  writeWorkbook,
-  type StreamEvent
-} from '@cat-kit/excel/src'
 
 async function collectEvents(iterable: AsyncIterable<StreamEvent>): Promise<StreamEvent[]> {
   const events: StreamEvent[] = []
@@ -28,10 +23,7 @@ describe('readWorkbookStream', () => {
     const bytes = writeWorkbook(workbook)
 
     const events = await collectEvents(
-      readWorkbookStream(bytes, {
-        sheets: ['Target'],
-        includeEmptyRows: true
-      })
+      readWorkbookStream(bytes, { sheets: ['Target'], includeEmptyRows: true })
     )
 
     expect(events).toEqual([
@@ -51,7 +43,7 @@ describe('readWorkbookStream', () => {
     const bytes = writeWorkbook(workbook)
     const events = await collectEvents(readWorkbookStream(bytes, { sheets: ['S'] }))
 
-    const rowEvents = events.filter(event => event.type === 'row')
+    const rowEvents = events.filter((event) => event.type === 'row')
     expect(rowEvents).toHaveLength(1)
     expect(rowEvents[0]).toEqual({
       type: 'row',

@@ -29,7 +29,9 @@
       >
         {{ downloading ? '生成中...' : '生成并下载 XLSX' }}
       </button>
-      <span class="meta">{{ message || `当前 ${rows.length} 行数据，合计 ${totalAmount.toLocaleString()} 元` }}</span>
+      <span class="meta">{{
+        message || `当前 ${rows.length} 行数据，合计 ${totalAmount.toLocaleString()} 元`
+      }}</span>
     </div>
 
     <table class="preview-table">
@@ -60,7 +62,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, ref } from 'vue'
 import {
   Workbook,
   writeWorkbook,
@@ -68,6 +69,7 @@ import {
   pixelsToExcelWidth,
   type CellStyle
 } from '@cat-kit/excel'
+import { computed, reactive, ref } from 'vue'
 
 interface SalesRow {
   product: string
@@ -92,9 +94,7 @@ const draft = reactive<SalesRow>({
 const downloading = ref(false)
 const message = ref('')
 
-const totalAmount = computed(() =>
-  rows.value.reduce((sum, item) => sum + item.amount, 0)
-)
+const totalAmount = computed(() => rows.value.reduce((sum, item) => sum + item.amount, 0))
 
 const headerStyle: CellStyle = {
   font: { bold: true, color: '#FFFFFF' },

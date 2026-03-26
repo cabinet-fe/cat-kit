@@ -36,7 +36,7 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
   pick<KK extends K>(keys: KK[]): Pick<O, KK> {
     const { raw } = this
     const result = {} as Pick<O, KK>
-    keys.forEach(key => {
+    keys.forEach((key) => {
       result[key] = raw[key]
     })
     return result
@@ -50,7 +50,7 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
   omit<KK extends K>(keys: KK[]): Omit<O, KK> {
     const { raw } = this
     const result = { ...raw }
-    keys.forEach(key => delete result[key])
+    keys.forEach((key) => delete result[key])
     return result
   }
 
@@ -64,11 +64,11 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
     const rawKeys = Object.keys(raw)
 
     if (Array.isArray(source)) {
-      source.forEach(s => this.extend(s))
+      source.forEach((s) => this.extend(s))
       return raw
     }
 
-    rawKeys.forEach(key => {
+    rawKeys.forEach((key) => {
       if (!(key in source)) return
       const sourceVal = source[key]
 
@@ -96,13 +96,13 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
   deepExtend(source: Record<string, any>[] | Record<string, any>): O {
     const { raw } = this
     if (Array.isArray(source)) {
-      source.forEach(s => this.deepExtend(s))
+      source.forEach((s) => this.deepExtend(s))
       return raw
     }
 
     const rawKeys = Object.keys(raw)
 
-    rawKeys.forEach(key => {
+    rawKeys.forEach((key) => {
       if (!(key in source)) return
 
       const sourceVal = source[key]
@@ -148,7 +148,7 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
     target: Record<string, any>,
     source: Record<string, any>
   ): Record<string, any> {
-    Object.keys(source).forEach(key => {
+    Object.keys(source).forEach((key) => {
       const sourceVal = source[key]
 
       // 如果源值为空，则跳过
@@ -192,7 +192,7 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
     const { raw } = this
 
     if (Array.isArray(source)) {
-      source.forEach(s => CatObject.merge(raw, s))
+      source.forEach((s) => CatObject.merge(raw, s))
     } else {
       CatObject.merge(raw, source)
     }
@@ -250,4 +250,3 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
 export function o<O extends Record<string, any>>(object: O): CatObject<O> {
   return new CatObject(object)
 }
-

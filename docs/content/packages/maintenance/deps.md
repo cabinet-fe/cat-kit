@@ -21,7 +21,11 @@ import {
 
 const packages = [
   { name: '@cat-kit/core', version: '1.0.0', pkg: { name: '@cat-kit/core', version: '1.0.0' } },
-  { name: '@cat-kit/fe', version: '1.0.0', pkg: { name: '@cat-kit/fe', version: '1.0.0', dependencies: { '@cat-kit/core': '^1.0.0' } } }
+  {
+    name: '@cat-kit/fe',
+    version: '1.0.0',
+    pkg: { name: '@cat-kit/fe', version: '1.0.0', dependencies: { '@cat-kit/core': '^1.0.0' } }
+  }
 ]
 
 const circular = checkCircularDependencies(packages)
@@ -44,8 +48,8 @@ function checkCircularDependencies(packages: PackageInfo[]): CircularDependencyR
 
 **参数：**
 
-| 参数 | 类型 | 说明 |
-| --- | --- | --- |
+| 参数       | 类型            | 说明       |
+| ---------- | --------------- | ---------- |
 | `packages` | `PackageInfo[]` | 包信息列表 |
 
 **返回值：**
@@ -57,8 +61,8 @@ interface CircularDependencyResult {
 }
 
 interface CircularChain {
-  chain: string[]      // 依赖链
-  startIndex: number   // 循环起点索引
+  chain: string[] // 依赖链
+  startIndex: number // 循环起点索引
 }
 ```
 
@@ -69,13 +73,16 @@ import { checkCircularDependencies } from '@cat-kit/maintenance'
 
 const packages = [
   { name: '@my/core', pkg: { name: '@my/core', version: '1.0.0' } },
-  { name: '@my/utils', pkg: { name: '@my/utils', version: '1.0.0', dependencies: { '@my/core': '^1.0.0' } } }
+  {
+    name: '@my/utils',
+    pkg: { name: '@my/utils', version: '1.0.0', dependencies: { '@my/core': '^1.0.0' } }
+  }
 ]
 
 const result = checkCircularDependencies(packages)
 
 if (result.hasCircular) {
-  result.cycles.forEach(cycle => {
+  result.cycles.forEach((cycle) => {
     console.log(cycle.chain.join(' → '))
   })
 }
@@ -99,10 +106,7 @@ interface ConsistencyResult {
 
 interface InconsistentDependency {
   name: string
-  versions: Array<{
-    version: string
-    usedBy: string[]
-  }>
+  versions: Array<{ version: string; usedBy: string[] }>
 }
 ```
 
@@ -114,9 +118,9 @@ import { checkVersionConsistency } from '@cat-kit/maintenance'
 const result = checkVersionConsistency(packages)
 
 if (!result.consistent) {
-  result.inconsistent.forEach(dep => {
+  result.inconsistent.forEach((dep) => {
     console.log(`${dep.name}:`)
-    dep.versions.forEach(v => {
+    dep.versions.forEach((v) => {
       console.log(`  ${v.version} @ ${v.usedBy.join(', ')}`)
     })
   })
@@ -124,19 +128,18 @@ if (!result.consistent) {
 ```
 
 ::: tip 注意
+
 - 检查 `dependencies` 和 `devDependencies`
 - `peerDependencies` 不参与检查
 - `workspace:*` 依赖会被跳过
-:::
+  :::
 
 ## buildDependencyGraph
 
 构建包含所有依赖的完整依赖关系图。
 
 ```typescript
-function buildDependencyGraph(
-  packages: (PackageInfo & { version: string })[]
-): DependencyGraph
+function buildDependencyGraph(packages: (PackageInfo & { version: string })[]): DependencyGraph
 ```
 
 **返回值：**
@@ -167,8 +170,8 @@ import { buildDependencyGraph } from '@cat-kit/maintenance'
 
 const graph = buildDependencyGraph(packages)
 
-const internal = graph.nodes.filter(n => !n.external)
-const external = graph.nodes.filter(n => n.external)
+const internal = graph.nodes.filter((n) => !n.external)
+const external = graph.nodes.filter((n) => n.external)
 
 console.log(`内部包: ${internal.length}`)
 console.log(`外部依赖: ${external.length}`)
@@ -182,18 +185,18 @@ console.log(`外部依赖: ${external.length}`)
 function visualizeDependencyGraph(
   graph: DependencyGraph,
   options?: {
-    includeExternal?: boolean   // 包含外部依赖，默认 false
-    distinguishTypes?: boolean  // 区分依赖类型，默认 true
+    includeExternal?: boolean // 包含外部依赖，默认 false
+    distinguishTypes?: boolean // 区分依赖类型，默认 true
   }
 ): string
 ```
 
 **箭头类型：**
 
-| 依赖类型 | 箭头 |
-| --- | --- |
-| dependencies | `-->` |
-| devDependencies | `--->` |
+| 依赖类型         | 箭头   |
+| ---------------- | ------ |
+| dependencies     | `-->`  |
+| devDependencies  | `--->` |
 | peerDependencies | `-.->` |
 
 **示例：**
@@ -202,10 +205,7 @@ function visualizeDependencyGraph(
 import { buildDependencyGraph, visualizeDependencyGraph } from '@cat-kit/maintenance'
 
 const graph = buildDependencyGraph(packages)
-const mermaid = visualizeDependencyGraph(graph, {
-  includeExternal: false,
-  distinguishTypes: true
-})
+const mermaid = visualizeDependencyGraph(graph, { includeExternal: false, distinguishTypes: true })
 
 console.log(mermaid)
 ```

@@ -82,11 +82,7 @@ export async function readDir(
   dir: string,
   options: ReadDirOptions = {}
 ): Promise<DirEntry[] | string[]> {
-  const {
-    recursive = false,
-    filter,
-    onlyFiles = false
-  } = options
+  const { recursive = false, filter, onlyFiles = false } = options
 
   const root = resolve(dir)
   const entries: DirEntry[] = []
@@ -123,9 +119,7 @@ export async function readDir(
   await walk(root, 0)
 
   if (onlyFiles) {
-    return entries
-      .filter(entry => entry.isFile)
-      .map(entry => entry.path)
+    return entries.filter((entry) => entry.isFile).map((entry) => entry.path)
   }
 
   return entries

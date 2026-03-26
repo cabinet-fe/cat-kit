@@ -1,9 +1,10 @@
-import { writeJson, readJson } from '../utils'
 import { join, basename } from 'node:path'
-import type { PackageJson } from '../types'
-import type { BumpOptions, BumpResult, BumpType } from './types'
-import { incrementVersion, isValidSemver, parseSemver } from './semver'
+
 import { SemverError, ConfigError } from '../errors'
+import type { PackageJson } from '../types'
+import { writeJson, readJson } from '../utils'
+import { incrementVersion, isValidSemver, parseSemver } from './semver'
+import type { BumpOptions, BumpResult, BumpType } from './types'
 
 /**
  * 解析包路径
@@ -82,10 +83,7 @@ function inferBumpType(version: string): BumpType {
  * })
  * ```
  */
-export async function bumpVersion(
-  pkgPath: string,
-  options: BumpOptions = {}
-): Promise<BumpResult> {
+export async function bumpVersion(pkgPath: string, options: BumpOptions = {}): Promise<BumpResult> {
   const { type, version: targetVersion, preid } = options
 
   if (!pkgPath || !pkgPath.trim()) {
@@ -96,10 +94,7 @@ export async function bumpVersion(
   const packageJson = await readJson<PackageJson>(packageJsonPath)
 
   if (!packageJson.name) {
-    throw new ConfigError(
-      `package.json 缺少 name 字段`,
-      packageJsonPath
-    )
+    throw new ConfigError(`package.json 缺少 name 字段`, packageJsonPath)
   }
 
   const oldVersion = packageJson.version || '0.0.0'
@@ -126,15 +121,5 @@ export async function bumpVersion(
   // 写回文件
   await writeJson(packageJsonPath, packageJson, { space: 2, eol: '\n' })
 
-  return {
-    version: newVersion,
-    updated: [
-      {
-        name: packageJson.name,
-        oldVersion,
-        newVersion
-      }
-    ]
-  }
+  return { version: newVersion, updated: [{ name: packageJson.name, oldVersion, newVersion }] }
 }
-

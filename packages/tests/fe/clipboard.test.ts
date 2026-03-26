@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest'
 import { clipboard } from '@cat-kit/fe/src'
+import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest'
 
 class MockClipboardItem {
   constructor(public data: any) {}
@@ -8,17 +8,10 @@ class MockClipboardItem {
 const originalNavigator = globalThis.navigator
 const originalDocument = globalThis.document
 
-function setupNavigator(options: {
-  permission?: 'granted' | 'denied'
-  withClipboard?: boolean
-}) {
+function setupNavigator(options: { permission?: 'granted' | 'denied'; withClipboard?: boolean }) {
   const { permission = 'granted', withClipboard = true } = options
 
-  const nav: any = {
-    permissions: {
-      query: vi.fn(async () => ({ state: permission }))
-    }
-  }
+  const nav: any = { permissions: { query: vi.fn(async () => ({ state: permission })) } }
 
   if (withClipboard) {
     nav.clipboard = {
@@ -36,18 +29,11 @@ function setupNavigator(options: {
 
 function setupLegacyDocument() {
   const execCommand = vi.fn()
-  const textarea: any = {
-    style: {},
-    select: vi.fn(),
-    remove: vi.fn()
-  }
+  const textarea: any = { style: {}, select: vi.fn(), remove: vi.fn() }
 
   const mockDoc = {
     createElement: vi.fn(() => textarea),
-    body: {
-      appendChild: vi.fn(),
-      removeChild: vi.fn()
-    },
+    body: { appendChild: vi.fn(), removeChild: vi.fn() },
     execCommand
   }
 
@@ -68,10 +54,7 @@ afterAll(() => {
     vi.stubGlobal('navigator', originalNavigator)
   }
   if (originalDocument) {
-    Object.defineProperty(globalThis, 'document', {
-      value: originalDocument,
-      writable: true
-    })
+    Object.defineProperty(globalThis, 'document', { value: originalDocument, writable: true })
   }
 })
 
@@ -108,10 +91,7 @@ describe('clipboard.read', () => {
     const nav = setupNavigator({ permission: 'granted', withClipboard: true })
 
     nav.clipboard.read.mockResolvedValue([
-      {
-        types: ['text/plain'],
-        getType: vi.fn(async () => blob)
-      }
+      { types: ['text/plain'], getType: vi.fn(async () => blob) }
     ])
 
     const result = await clipboard.read()

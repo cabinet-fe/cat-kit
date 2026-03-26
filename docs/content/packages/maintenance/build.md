@@ -37,22 +37,22 @@ function buildLib(config: BuildConfig): Promise<BuildResult>
 
 **参数：**
 
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `dir` | `string` | - | 包目录（必须是绝对路径） |
-| `entry` | `string \| string[]` | 依次尝试 `'src/index.ts'`、`'index.ts'` | 入口文件路径，支持单入口或多入口 |
-| `dts` | `boolean` | `true` | 是否生成 d.ts 文件 |
-| `deps.neverBundle` | `string[]` | - | 额外指定不打包的依赖 |
-| `platform` | `'neutral' \| 'node' \| 'browser'` | `'neutral'` | 构建平台 |
-| `output.dir` | `string` | `'dist'` | 输出目录 |
-| `output.sourcemap` | `boolean` | `true` | 是否生成 sourcemap |
+| 参数               | 类型                               | 默认值                                  | 说明                             |
+| ------------------ | ---------------------------------- | --------------------------------------- | -------------------------------- |
+| `dir`              | `string`                           | -                                       | 包目录（必须是绝对路径）         |
+| `entry`            | `string \| string[]`               | 依次尝试 `'src/index.ts'`、`'index.ts'` | 入口文件路径，支持单入口或多入口 |
+| `dts`              | `boolean`                          | `true`                                  | 是否生成 d.ts 文件               |
+| `deps.neverBundle` | `string[]`                         | -                                       | 额外指定不打包的依赖             |
+| `platform`         | `'neutral' \| 'node' \| 'browser'` | `'neutral'`                             | 构建平台                         |
+| `output.dir`       | `string`                           | `'dist'`                                | 输出目录                         |
+| `output.sourcemap` | `boolean`                          | `true`                                  | 是否生成 sourcemap               |
 
 **返回值：**
 
 ```typescript
 interface BuildResult {
   success: boolean
-  duration: number   // 毫秒
+  duration: number // 毫秒
   error?: Error
 }
 ```
@@ -67,14 +67,9 @@ const result = await buildLib({
   dir: resolve(process.cwd(), 'packages/core'),
   entry: ['src/index.ts', 'src/runtime.ts'],
   dts: true,
-  deps: {
-    neverBundle: ['vue', 'react']
-  },
+  deps: { neverBundle: ['vue', 'react'] },
   platform: 'neutral',
-  output: {
-    dir: 'dist',
-    sourcemap: true
-  }
+  output: { dir: 'dist', sourcemap: true }
 })
 
 if (result.success) {
@@ -93,22 +88,22 @@ if (result.success) {
 
 ## 平台选项
 
-| 值 | 说明 |
-| --- | --- |
+| 值          | 说明                          |
+| ----------- | ----------------------------- |
 | `'neutral'` | 浏览器和 Node.js 通用（默认） |
-| `'node'` | 仅 Node.js |
-| `'browser'` | 仅浏览器 |
+| `'node'`    | 仅 Node.js                    |
+| `'browser'` | 仅浏览器                      |
 
 ## 构建产物
 
 构建后在输出目录生成：
 
-| 文件 | 说明 |
-| --- | --- |
-| `index.js` | ES 模块（压缩） |
-| `index.d.ts` | TypeScript 类型声明 |
-| `index.js.map` | Sourcemap（可选） |
-| `stats.html` | Bundle 分析报告 |
+| 文件           | 说明                |
+| -------------- | ------------------- |
+| `index.js`     | ES 模块（压缩）     |
+| `index.d.ts`   | TypeScript 类型声明 |
+| `index.js.map` | Sourcemap（可选）   |
+| `stats.html`   | Bundle 分析报告     |
 
 ## 使用 Monorepo 类
 
@@ -119,15 +114,12 @@ import { Monorepo } from '@cat-kit/maintenance'
 
 const repo = new Monorepo()
 
-await repo.group(['@cat-kit/core', '@cat-kit/fe', '@cat-kit/http']).build({
-  '@cat-kit/fe': {
-    deps: { neverBundle: ['@cat-kit/core'] }
-  },
-  '@cat-kit/http': {
-    deps: { neverBundle: ['@cat-kit/core'] },
-    platform: 'neutral'
-  }
-})
+await repo
+  .group(['@cat-kit/core', '@cat-kit/fe', '@cat-kit/http'])
+  .build({
+    '@cat-kit/fe': { deps: { neverBundle: ['@cat-kit/core'] } },
+    '@cat-kit/http': { deps: { neverBundle: ['@cat-kit/core'] }, platform: 'neutral' }
+  })
 ```
 
 `Monorepo.group().build()` 相比直接使用 `buildLib` 的优势：
@@ -144,14 +136,9 @@ interface BuildConfig {
   dir: string
   entry?: string | string[]
   dts?: boolean
-  deps?: {
-    neverBundle?: string[]
-  }
+  deps?: { neverBundle?: string[] }
   platform?: 'neutral' | 'node' | 'browser'
-  output?: {
-    dir?: string
-    sourcemap?: boolean
-  }
+  output?: { dir?: string; sourcemap?: boolean }
 }
 
 interface BuildResult {

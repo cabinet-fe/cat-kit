@@ -36,6 +36,7 @@ await fastFn('u1')
 `LRUCache` 是一个基于内存的缓存实现，使用最近最少使用（LRU）策略自动淘汰最久未使用的项。当缓存达到最大容量时，会自动删除最久未访问的项。同时支持 TTL 过期机制，可以设置默认过期时间，也可以为每个缓存项单独设置过期时间。
 
 **适用场景：**
+
 - API 响应缓存
 - 数据库查询结果缓存
 - 频繁访问的热点数据
@@ -48,8 +49,8 @@ import { LRUCache } from '@cat-kit/be'
 
 // 创建缓存实例
 const cache = new LRUCache<string, User>({
-  maxSize: 100,        // 最大容量
-  ttl: 3600000        // 默认过期时间：1小时（可选）
+  maxSize: 100, // 最大容量
+  ttl: 3600000 // 默认过期时间：1小时（可选）
 })
 
 // 设置缓存值
@@ -136,6 +137,7 @@ class LRUCache<K, V> {
 `FileCache` 是一个基于文件系统的缓存实现，将缓存数据持久化到磁盘。即使应用重启，缓存数据仍然保留。支持 TTL 过期机制，过期的缓存文件会在访问时自动删除。
 
 **适用场景：**
+
 - 需要跨进程共享的缓存
 - 需要持久化的缓存数据
 - 大型数据缓存（不受内存限制）
@@ -148,9 +150,9 @@ import { FileCache } from '@cat-kit/be'
 
 // 创建文件缓存实例
 const cache = new FileCache<CacheData>({
-  dir: './cache',              // 缓存目录路径
-  ttl: 86400000,               // 默认过期时间：24小时（可选）
-  extension: '.json'           // 文件扩展名，默认 '.json'（可选）
+  dir: './cache', // 缓存目录路径
+  ttl: 86400000, // 默认过期时间：24小时（可选）
+  extension: '.json' // 文件扩展名，默认 '.json'（可选）
 })
 
 // 设置缓存值（异步）
@@ -215,6 +217,7 @@ class FileCache<V> {
 `memoize` 是一个函数记忆化装饰器，自动缓存函数的调用结果。当使用相同参数调用函数时，会直接返回缓存的结果，而不是重新执行函数。支持同步和异步函数，也支持自定义缓存和键解析策略。
 
 **适用场景：**
+
 - 昂贵的计算函数
 - API 请求函数
 - 数据库查询函数
@@ -253,21 +256,21 @@ import { memoize, LRUCache } from '@cat-kit/be'
 // 自定义缓存实现
 const cache = new LRUCache<string, User>({ maxSize: 50 })
 
-const fetchUser = memoize(async (id: number) => {
-  return await getUserFromDB(id)
-}, {
-  cache,                              // 使用自定义缓存
-  resolver: (id) => `user:${id}`,     // 自定义键生成函数
-  ttl: 300000                        // 5分钟过期
-})
-
-// 自定义键解析器（处理多个参数）
-const expensiveFunction = memoize(
-  (a: number, b: number) => a + b,
+const fetchUser = memoize(
+  async (id: number) => {
+    return await getUserFromDB(id)
+  },
   {
-    resolver: (a, b) => `${a}-${b}` // 自定义键格式
+    cache, // 使用自定义缓存
+    resolver: (id) => `user:${id}`, // 自定义键生成函数
+    ttl: 300000 // 5分钟过期
   }
 )
+
+// 自定义键解析器（处理多个参数）
+const expensiveFunction = memoize((a: number, b: number) => a + b, {
+  resolver: (a, b) => `${a}-${b}` // 自定义键格式
+})
 ```
 
 ### API参考
@@ -276,10 +279,7 @@ const expensiveFunction = memoize(
 function memoize<F extends (...args: any[]) => any>(
   fn: F,
   options?: MemoizeOptions<F, unknown>
-): F & {
-  cache: CacheAdapter<unknown, Awaited<ReturnType<F>>>
-  clear(): void
-}
+): F & { cache: CacheAdapter<unknown, Awaited<ReturnType<F>>>; clear(): void }
 ```
 
 **选项说明：**
@@ -344,12 +344,15 @@ const queryCache = new LRUCache<string, QueryResult>({
   ttl: 60000 // 1分钟过期
 })
 
-const cachedQuery = memoize(async (sql: string) => {
-  return await db.query(sql)
-}, {
-  cache: queryCache,
-  resolver: (sql) => `query:${hash(sql)}` // 使用 SQL 的哈希值作为键
-})
+const cachedQuery = memoize(
+  async (sql: string) => {
+    return await db.query(sql)
+  },
+  {
+    cache: queryCache,
+    resolver: (sql) => `query:${hash(sql)}` // 使用 SQL 的哈希值作为键
+  }
+)
 ```
 
 ### 文件处理结果缓存
@@ -404,28 +407,28 @@ const expensiveFunction = memoize(
     // 昂贵的计算
     return await compute(input)
   },
-  {
-    cache: hotCache,
-    ttl: 300000
-  }
+  { cache: hotCache, ttl: 300000 }
 )
 ```
 
 ## 选择指南
 
 **何时使用 LRUCache：**
+
 - 需要快速访问的内存缓存
 - 数据量不大，可以放在内存中
 - 需要自动淘汰最久未使用的项
 - 应用重启后可以丢失的缓存
 
 **何时使用 FileCache：**
+
 - 需要持久化的缓存数据
 - 数据量较大，不适合放在内存
 - 需要跨进程或跨重启共享缓存
 - 可以接受文件 I/O 的性能开销
 
 **何时使用 memoize：**
+
 - 需要缓存函数调用结果
 - 函数参数可以唯一标识结果
 - 函数执行成本较高（网络请求、数据库查询、复杂计算等）

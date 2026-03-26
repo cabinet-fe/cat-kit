@@ -1,12 +1,7 @@
-import { describe, it, expect } from 'vitest'
 import { Forest, ForestNode, type IForestNode } from '@cat-kit/core/src'
+import { describe, it, expect } from 'vitest'
 
-type DataItem = {
-  id: number
-  name?: string
-  type?: string
-  children?: DataItem[]
-}
+type DataItem = { id: number; name?: string; type?: string; children?: DataItem[] }
 
 describe('森林结构', () => {
   describe('ForestNode', () => {
@@ -28,12 +23,7 @@ describe('森林结构', () => {
 
     it('应该从父节点中移除节点', () => {
       const forest = new Forest<DataItem, ForestNode<DataItem>>({
-        data: [
-          {
-            id: 1,
-            children: [{ id: 2 }, { id: 3 }]
-          }
-        ],
+        data: [{ id: 1, children: [{ id: 2 }, { id: 3 }] }],
         createNode: (data, index, depth, forest, parent) =>
           new ForestNode(data, index, depth, forest, parent)
       })
@@ -71,10 +61,7 @@ describe('森林结构', () => {
 
   describe('Forest', () => {
     it('应该直接使用原始数据创建森林（不传 createNode）', () => {
-      const data: DataItem[] = [
-        { id: 1, children: [{ id: 2 }] },
-        { id: 3 }
-      ]
+      const data: DataItem[] = [{ id: 1, children: [{ id: 2 }] }, { id: 3 }]
 
       const forest = new Forest({ data })
 
@@ -83,10 +70,7 @@ describe('森林结构', () => {
     })
 
     it('应该使用 createNode 构建森林', () => {
-      const data: DataItem[] = [
-        { id: 1, children: [{ id: 2 }] },
-        { id: 3 }
-      ]
+      const data: DataItem[] = [{ id: 1, children: [{ id: 2 }] }, { id: 3 }]
 
       const forest = new Forest({
         data,
@@ -101,9 +85,7 @@ describe('森林结构', () => {
     })
 
     it('应该使用 IForestNode 接口创建节点', () => {
-      const data: DataItem[] = [
-        { id: 1, children: [{ id: 2 }] }
-      ]
+      const data: DataItem[] = [{ id: 1, children: [{ id: 2 }] }]
 
       const forest = new Forest({
         data,
@@ -125,10 +107,7 @@ describe('森林结构', () => {
     })
 
     it('构建的节点应该有正确的 depth 和 index', () => {
-      const data: DataItem[] = [
-        { id: 1, children: [{ id: 3 }, { id: 4 }] },
-        { id: 2 }
-      ]
+      const data: DataItem[] = [{ id: 1, children: [{ id: 3 }, { id: 4 }] }, { id: 2 }]
 
       const forest = new Forest({
         data,
@@ -149,9 +128,7 @@ describe('森林结构', () => {
     })
 
     it('应该支持自定义 childrenKey', () => {
-      const data = [
-        { id: 1, items: [{ id: 2 }] }
-      ]
+      const data = [{ id: 1, items: [{ id: 2 }] }]
 
       const forest = new Forest({
         data,
@@ -177,7 +154,7 @@ describe('森林结构', () => {
         })
 
         const visited: number[] = []
-        forest.dfs(node => {
+        forest.dfs((node) => {
           visited.push(node.data.id)
         })
 
@@ -199,7 +176,7 @@ describe('森林结构', () => {
         })
 
         const visited: number[] = []
-        forest.bfs(node => {
+        forest.bfs((node) => {
           visited.push(node.data.id)
         })
 
@@ -210,10 +187,7 @@ describe('森林结构', () => {
 
     describe('flatten 方法', () => {
       it('应该扁平化所有节点', () => {
-        const data: DataItem[] = [
-          { id: 1, children: [{ id: 2 }] },
-          { id: 3 }
-        ]
+        const data: DataItem[] = [{ id: 1, children: [{ id: 2 }] }, { id: 3 }]
 
         const forest = new Forest({
           data,
@@ -224,7 +198,7 @@ describe('森林结构', () => {
         const flattened = forest.flatten()
 
         expect(flattened).toHaveLength(3)
-        expect(flattened.map(n => n.data.id)).toEqual([1, 2, 3])
+        expect(flattened.map((n) => n.data.id)).toEqual([1, 2, 3])
       })
 
       it('应该支持过滤', () => {
@@ -239,10 +213,10 @@ describe('森林结构', () => {
             new ForestNode(d, index, depth, forest, parent)
         })
 
-        const files = forest.flatten(node => node.data.type === 'file')
+        const files = forest.flatten((node) => node.data.type === 'file')
 
         expect(files).toHaveLength(2)
-        expect(files.map(n => n.data.id)).toEqual([2, 3])
+        expect(files.map((n) => n.data.id)).toEqual([2, 3])
       })
     })
 
@@ -259,7 +233,7 @@ describe('森林结构', () => {
             new ForestNode(d, index, depth, forest, parent)
         })
 
-        const found = forest.find(node => node.data.id === 4)
+        const found = forest.find((node) => node.data.id === 4)
 
         expect(found).not.toBeNull()
         expect(found?.data.id).toBe(4)
@@ -274,7 +248,7 @@ describe('森林结构', () => {
             new ForestNode(d, index, depth, forest, parent)
         })
 
-        const found = forest.find(node => node.data.id === 999)
+        const found = forest.find((node) => node.data.id === 999)
 
         expect(found).toBeNull()
       })
@@ -293,7 +267,7 @@ describe('森林结构', () => {
             new ForestNode(d, index, depth, forest, parent)
         })
 
-        const files = forest.findAll(node => node.data.type === 'file')
+        const files = forest.findAll((node) => node.data.type === 'file')
 
         expect(files).toHaveLength(2)
       })
@@ -301,10 +275,7 @@ describe('森林结构', () => {
 
     describe('getLeaves 方法', () => {
       it('应该获取所有叶子节点', () => {
-        const data: DataItem[] = [
-          { id: 1, children: [{ id: 2 }, { id: 3 }] },
-          { id: 4 }
-        ]
+        const data: DataItem[] = [{ id: 1, children: [{ id: 2 }, { id: 3 }] }, { id: 4 }]
 
         const forest = new Forest({
           data,
@@ -315,16 +286,13 @@ describe('森林结构', () => {
         const leaves = forest.getLeaves()
 
         expect(leaves).toHaveLength(3)
-        expect(leaves.map(n => n.data.id)).toEqual([2, 3, 4])
+        expect(leaves.map((n) => n.data.id)).toEqual([2, 3, 4])
       })
     })
 
     describe('size 属性', () => {
       it('应该返回节点总数', () => {
-        const data: DataItem[] = [
-          { id: 1, children: [{ id: 2 }] },
-          { id: 3 }
-        ]
+        const data: DataItem[] = [{ id: 1, children: [{ id: 2 }] }, { id: 3 }]
 
         const forest = new Forest({
           data,
@@ -405,57 +373,53 @@ describe('森林结构', () => {
           const forest = createExpandableForest(data)
 
           // 初始状态：只有根节点可见
-          let visible = forest.flattenVisible(n => n.expanded)
-          expect(visible.map(n => n.data.id)).toEqual([1, 2])
+          let visible = forest.flattenVisible((n) => n.expanded)
+          expect(visible.map((n) => n.data.id)).toEqual([1, 2])
 
           // 展开第一棵树的根
           forest.roots[0]!.expanded = true
-          visible = forest.flattenVisible(n => n.expanded)
-          expect(visible.map(n => n.data.id)).toEqual([1, 3, 2])
+          visible = forest.flattenVisible((n) => n.expanded)
+          expect(visible.map((n) => n.data.id)).toEqual([1, 3, 2])
 
           // 展开第二棵树的根
           forest.roots[1]!.expanded = true
-          visible = forest.flattenVisible(n => n.expanded)
-          expect(visible.map(n => n.data.id)).toEqual([1, 3, 2, 4])
+          visible = forest.flattenVisible((n) => n.expanded)
+          expect(visible.map((n) => n.data.id)).toEqual([1, 3, 2, 4])
         })
       })
 
       describe('getVisibleDescendants 方法', () => {
         it('应该获取展开节点的可见后代', () => {
-          const data: DataItem[] = [
-            { id: 1, children: [{ id: 2, children: [{ id: 3 }] }] }
-          ]
+          const data: DataItem[] = [{ id: 1, children: [{ id: 2, children: [{ id: 3 }] }] }]
 
           const forest = createExpandableForest(data)
           const root = forest.roots[0]!
           root.expanded = true
 
           // 子节点未展开
-          let descendants = forest.getVisibleDescendants(root, n => n.expanded)
-          expect(descendants.map(n => n.data.id)).toEqual([2])
+          let descendants = forest.getVisibleDescendants(root, (n) => n.expanded)
+          expect(descendants.map((n) => n.data.id)).toEqual([2])
 
           // 展开子节点
           root.children![0]!.expanded = true
-          descendants = forest.getVisibleDescendants(root, n => n.expanded)
-          expect(descendants.map(n => n.data.id)).toEqual([2, 3])
+          descendants = forest.getVisibleDescendants(root, (n) => n.expanded)
+          expect(descendants.map((n) => n.data.id)).toEqual([2, 3])
         })
       })
 
       describe('getVisibleDescendantCount 方法', () => {
         it('应该返回正确的可见后代数量', () => {
-          const data: DataItem[] = [
-            { id: 1, children: [{ id: 2, children: [{ id: 3 }] }] }
-          ]
+          const data: DataItem[] = [{ id: 1, children: [{ id: 2, children: [{ id: 3 }] }] }]
 
           const forest = createExpandableForest(data)
           const root = forest.roots[0]!
           root.expanded = true
 
-          let count = forest.getVisibleDescendantCount(root, n => n.expanded)
+          let count = forest.getVisibleDescendantCount(root, (n) => n.expanded)
           expect(count).toBe(1)
 
           root.children![0]!.expanded = true
-          count = forest.getVisibleDescendantCount(root, n => n.expanded)
+          count = forest.getVisibleDescendantCount(root, (n) => n.expanded)
           expect(count).toBe(2)
         })
       })

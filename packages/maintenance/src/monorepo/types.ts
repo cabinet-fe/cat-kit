@@ -1,7 +1,7 @@
-import type { BuildConfig } from "../build"
-import type { PackageJson } from "../types"
-import type { BumpOptions } from "../version/types"
-import type { PublishOptions } from "../release/types"
+import type { BuildConfig } from '../build'
+import type { PublishOptions } from '../release/types'
+import type { PackageJson } from '../types'
+import type { BumpOptions } from '../version/types'
 
 /**
  * Monorepo 工作区信息
@@ -57,7 +57,10 @@ export interface GroupBumpOptions extends BumpOptions {
 /**
  * 工作区分组发布选项
  */
-export interface GroupPublishOptions extends Omit<PublishOptions, 'cwd' | 'workspace' | 'workspaces' | 'includeWorkspaceRoot'> {
+export interface GroupPublishOptions extends Omit<
+  PublishOptions,
+  'cwd' | 'workspace' | 'workspaces' | 'includeWorkspaceRoot'
+> {
   /** 是否跳过私有包，默认 true */
   skipPrivate?: boolean
 }
@@ -73,12 +76,7 @@ export interface BuildSummary {
   /** 失败数量 */
   failedCount: number
   /** 各包构建结果 */
-  results: Array<{
-    name: string
-    success: boolean
-    duration: number
-    error?: Error
-  }>
+  results: Array<{ name: string; success: boolean; duration: number; error?: Error }>
 }
 
 /**
@@ -92,10 +90,7 @@ export interface MonorepoValidationResult {
   /** 循环依赖链 */
   circularChains: string[][]
   /** 版本不一致的依赖 */
-  inconsistentDeps: Array<{
-    name: string
-    versions: Array<{ version: string; usedBy: string[] }>
-  }>
+  inconsistentDeps: Array<{ name: string; versions: Array<{ version: string; usedBy: string[] }> }>
 }
 
 /**
@@ -103,11 +98,7 @@ export interface MonorepoValidationResult {
  */
 export interface DependencyGraphResult {
   /** 节点列表 */
-  nodes: Array<{
-    id: string
-    version: string
-    external: boolean
-  }>
+  nodes: Array<{ id: string; version: string; external: boolean }>
   /** 边列表 */
   edges: Array<{
     from: string

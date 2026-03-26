@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { extname, resolve } from 'node:path'
+
 import { mergeConfig } from './merge'
 
 /**
@@ -53,9 +54,7 @@ function detectFormat(filePath: string): ConfigFormat {
 
 class PeerDependencyError extends Error {
   constructor(dependency: string, cause?: unknown) {
-    super(
-      `可选依赖 "${dependency}" 未安装，请运行 "bun add ${dependency}" 后重试。`
-    )
+    super(`可选依赖 "${dependency}" 未安装，请运行 "bun add ${dependency}" 后重试。`)
     this.name = 'PeerDependencyError'
     if (cause) {
       ;(this as { cause?: unknown }).cause = cause
@@ -71,21 +70,14 @@ async function importOptionalModule<T>(specifier: string): Promise<T> {
   }
 }
 
-async function parseByFormat<T>(
-  source: string,
-  format: ConfigFormat
-): Promise<T> {
+async function parseByFormat<T>(source: string, format: ConfigFormat): Promise<T> {
   switch (format) {
     case 'yaml': {
-      const { load } = await importOptionalModule<typeof import('js-yaml')>(
-        'js-yaml'
-      )
+      const { load } = await importOptionalModule<typeof import('js-yaml')>('js-yaml')
       return load(source) as T
     }
     case 'toml': {
-      const { parse } = await importOptionalModule<typeof import('smol-toml')>(
-        'smol-toml'
-      )
+      const { parse } = await importOptionalModule<typeof import('smol-toml')>('smol-toml')
       return parse(source) as T
     }
     case 'json':
@@ -123,9 +115,10 @@ async function parseByFormat<T>(
  * @throws {Error} 当文件读取失败或解析失败时
  * @template T 配置对象类型
  */
-export async function loadConfig<
-  T extends Record<string, unknown> = Record<string, unknown>
->(filePath: string, options: LoadConfigOptions<T> = {}): Promise<T> {
+export async function loadConfig<T extends Record<string, unknown> = Record<string, unknown>>(
+  filePath: string,
+  options: LoadConfigOptions<T> = {}
+): Promise<T> {
   const { cwd = process.cwd(), format, defaults, parser, validate } = options
   const file = resolve(cwd, filePath)
   const source = await readFile(file, 'utf8')
@@ -139,8 +132,8 @@ export async function loadConfig<
     defaults && options.mergeDefaults !== false
       ? mergeConfig(defaults, parsed)
       : defaults
-      ? Object.assign({}, defaults, parsed)
-      : parsed
+        ? Object.assign({}, defaults, parsed)
+        : parsed
 
   validate?.(config)
   return config

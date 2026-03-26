@@ -1,7 +1,8 @@
 import { writeFile as fsWriteFile, open } from 'node:fs/promises'
+import { dirname } from 'node:path'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
-import { dirname } from 'node:path'
+
 import { ensureDir } from './ensure-dir'
 
 /**
@@ -40,14 +41,8 @@ export type WriteFileData =
 /**
  * 判断是否为简单数据类型（可直接用 fsWriteFile 写入）
  */
-function isSimpleData(
-  data: WriteFileData
-): data is string | Buffer | NodeJS.ArrayBufferView {
-  return (
-    typeof data === 'string' ||
-    Buffer.isBuffer(data) ||
-    ArrayBuffer.isView(data)
-  )
+function isSimpleData(data: WriteFileData): data is string | Buffer | NodeJS.ArrayBufferView {
+  return typeof data === 'string' || Buffer.isBuffer(data) || ArrayBuffer.isView(data)
 }
 
 /**

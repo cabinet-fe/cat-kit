@@ -1,8 +1,11 @@
 {
   "name": "@cat-kit/http",
-  "type": "module",
   "version": "1.0.0",
   "description": "HTTP 请求工具",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,9 +16,6 @@
       "types": "./src/index.ts"
     }
   },
-  "files": [
-    "dist"
-  ],
   "dependencies": {
     "@cat-kit/core": "workspace:*"
   },

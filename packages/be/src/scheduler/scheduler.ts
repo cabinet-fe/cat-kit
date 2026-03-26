@@ -85,13 +85,7 @@ export class Scheduler {
 
   schedule(id: string, cron: string | CronExpression, task: TaskFunction): void {
     const expression = typeof cron === 'string' ? new CronExpression(cron) : cron
-    this.addTask({
-      id,
-      type: 'cron',
-      task,
-      expression,
-      running: false
-    })
+    this.addTask({ id, type: 'cron', task, expression, running: false })
   }
 
   /**
@@ -107,14 +101,7 @@ export class Scheduler {
       throw new Error('Delay must be greater than or equal to 0')
     }
 
-    this.addTask({
-      id,
-      type: 'timeout',
-      task,
-      delay,
-      executed: false,
-      running: false
-    })
+    this.addTask({ id, type: 'timeout', task, delay, executed: false, running: false })
   }
 
   /**
@@ -130,13 +117,7 @@ export class Scheduler {
       throw new Error('Interval must be greater than 0')
     }
 
-    this.addTask({
-      id,
-      type: 'interval',
-      task,
-      interval,
-      running: false
-    })
+    this.addTask({ id, type: 'interval', task, interval, running: false })
   }
 
   /**
@@ -198,12 +179,7 @@ export class Scheduler {
     const task = this.tasks.get(id)
     if (!task) return undefined
 
-    return {
-      id: task.id,
-      type: task.type,
-      nextRun: task.nextRun,
-      running: task.running
-    }
+    return { id: task.id, type: task.type, nextRun: task.nextRun, running: task.running }
   }
 
   /**
@@ -212,7 +188,7 @@ export class Scheduler {
    * @returns 所有任务的信息数组
    */
   getTasks(): TaskInfo[] {
-    return Array.from(this.tasks.values()).map(task => ({
+    return Array.from(this.tasks.values()).map((task) => ({
       id: task.id,
       type: task.type,
       nextRun: task.nextRun,
@@ -297,4 +273,3 @@ export class Scheduler {
     }
   }
 }
-

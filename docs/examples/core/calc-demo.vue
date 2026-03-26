@@ -35,8 +35,15 @@
         </div>
         <div class="result-arrow">
           <span>{{ offset >= 0 ? '+' : '' }}{{ offset }} {{ unitLabels[unit] }}</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </div>
         <div class="result-item">
@@ -51,10 +58,20 @@
       </div>
 
       <div class="immutable-note">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 16v-4M12 8h.01" />
         </svg>
-        <span><code>{{ methodName }}()</code> 返回新实例，原日期 <strong>不会</strong> 被修改</span>
+        <span
+          ><code>{{ methodName }}()</code> 返回新实例，原日期 <strong>不会</strong> 被修改</span
+        >
       </div>
     </div>
 
@@ -73,8 +90,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
 import { date } from '@cat-kit/core/src'
+import { ref, computed } from 'vue'
 
 const baseDate = ref(new Date().toISOString().slice(0, 10))
 const offset = ref(7)

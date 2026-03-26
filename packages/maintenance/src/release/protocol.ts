@@ -1,5 +1,6 @@
-import { join } from 'node:path'
 import { readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+
 import type { PackageJson } from '../types'
 
 /**
@@ -73,10 +74,7 @@ export interface ProtocolResolveOptions {
  * resolveWorkspaceProtocol('workspace:^2.0.0', '1.2.3') // '^2.0.0'
  * ```
  */
-export function resolveWorkspaceProtocol(
-  protocol: string,
-  targetVersion: string
-): string {
+export function resolveWorkspaceProtocol(protocol: string, targetVersion: string): string {
   if (!protocol.startsWith('workspace:')) {
     return protocol
   }
@@ -177,10 +175,7 @@ export function isProtocolVersion(version: string): boolean {
  * // }
  * ```
  */
-export function resolveProtocols(
-  pkg: PackageJson,
-  options: ProtocolResolveOptions
-): PackageJson {
+export function resolveProtocols(pkg: PackageJson, options: ProtocolResolveOptions): PackageJson {
   const { workspaces = [], catalogs = {} } = options
 
   // 创建工作区名称到版本的映射
@@ -281,11 +276,7 @@ export async function withResolvedProtocols<T>(
 
   try {
     // 写入处理后的 package.json
-    await writeFile(
-      pkgPath,
-      JSON.stringify(resolved, null, indent) + eol,
-      'utf8'
-    )
+    await writeFile(pkgPath, JSON.stringify(resolved, null, indent) + eol, 'utf8')
 
     // 执行发布
     return await publishFn()
@@ -354,20 +345,14 @@ export async function withResolvedProtocolsBatch<T>(
       const eol = originalContent.includes('\r\n') ? '\r\n' : '\n'
 
       // 写入处理后的 package.json
-      await writeFile(
-        pkgPath,
-        JSON.stringify(resolved, null, indent) + eol,
-        'utf8'
-      )
+      await writeFile(pkgPath, JSON.stringify(resolved, null, indent) + eol, 'utf8')
     }
 
     // 执行发布
     return await publishFn()
   } finally {
     // 无论成功与否，都恢复所有备份的 package.json
-    await Promise.all(
-      backups.map(({ path, content }) => writeFile(path, content, 'utf8'))
-    )
+    await Promise.all(backups.map(({ path, content }) => writeFile(path, content, 'utf8')))
   }
 }
 

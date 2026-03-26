@@ -33,8 +33,7 @@ export class Observable<S extends object, K extends keyof S> {
   readonly state: S
 
   /** 属性处理器映射 */
-  private propsHandlers: Map<string | symbol | number, Set<PropHandler>> =
-    new Map()
+  private propsHandlers: Map<string | symbol | number, Set<PropHandler>> = new Map()
 
   /** 是否正在等待微任务执行 */
   private waitingMicrotask = false
@@ -92,9 +91,9 @@ export class Observable<S extends object, K extends keyof S> {
 
     const handlersSnapshot = Array.from(propHandlers)
 
-    handlersSnapshot.forEach(handler => {
+    handlersSnapshot.forEach((handler) => {
       // 立即捕获当前状态值
-      const currentValues = handler.params.map(p => Reflect.get(this.state, p))
+      const currentValues = handler.params.map((p) => Reflect.get(this.state, p))
 
       if (handler.sync) {
         handler.callback(currentValues)
@@ -141,7 +140,7 @@ export class Observable<S extends object, K extends keyof S> {
       once: options.once
     }
 
-    props.forEach(prop => {
+    props.forEach((prop) => {
       const propHandlers = propsHandlers.get(prop)
       if (propHandlers) {
         propHandlers.add(handler)
@@ -151,7 +150,7 @@ export class Observable<S extends object, K extends keyof S> {
     })
 
     if (options.immediate) {
-      handler.callback(handler.params.map(p => this.state[p]))
+      handler.callback(handler.params.map((p) => this.state[p]))
     }
 
     // 返回取消观察的函数
@@ -196,13 +195,13 @@ export class Observable<S extends object, K extends keyof S> {
   unobserve<const P extends K[]>(props: P, handler?: PropHandler): void {
     const { propsHandlers } = this
     if (!handler) {
-      props.forEach(prop => {
+      props.forEach((prop) => {
         propsHandlers.delete(prop)
       })
       return
     }
 
-    props.forEach(prop => {
+    props.forEach((prop) => {
       propsHandlers.get(prop)?.delete(handler)
     })
   }

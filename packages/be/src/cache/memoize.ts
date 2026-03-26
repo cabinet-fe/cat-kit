@@ -78,10 +78,7 @@ export function memoize<F extends (...args: any[]) => any>(
     new LRUCache<unknown, Awaited<ReturnType<F>>>()
   const resolver = options.resolver ?? defaultResolver
 
-  const memoized = function (
-    this: ThisParameterType<F>,
-    ...args: Parameters<F>
-  ): ReturnType<F> {
+  const memoized = function (this: ThisParameterType<F>, ...args: Parameters<F>): ReturnType<F> {
     const key = resolver(...args)
 
     if (cache.has(key)) {
@@ -91,12 +88,10 @@ export function memoize<F extends (...args: any[]) => any>(
     const result = fn.apply(this, args)
 
     if (result && typeof (result as Promise<unknown>).then === 'function') {
-      const promise = (result as Promise<Awaited<ReturnType<F>>>).then(
-        value => {
-          cache.set(key, value, options.ttl)
-          return value
-        }
-      )
+      const promise = (result as Promise<Awaited<ReturnType<F>>>).then((value) => {
+        cache.set(key, value, options.ttl)
+        return value
+      })
       // @ts-expect-error - aligning return type
       return promise
     }
@@ -104,10 +99,7 @@ export function memoize<F extends (...args: any[]) => any>(
     cache.set(key, result as Awaited<ReturnType<F>>, options.ttl)
     // @ts-expect-error - aligning return type
     return result
-  } as F & {
-    cache: CacheAdapter<unknown, Awaited<ReturnType<F>>>
-    clear(): void
-  }
+  } as F & { cache: CacheAdapter<unknown, Awaited<ReturnType<F>>>; clear(): void }
 
   memoized.cache = cache
   memoized.clear = () => cache.clear()

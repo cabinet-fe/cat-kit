@@ -21,10 +21,7 @@ type DataType =
  * @returns 类型字符串
  */
 export function getDataType(value: any): DataType {
-  return Object.prototype.toString
-    .call(value)
-    .slice(8, -1)
-    .toLowerCase() as DataType
+  return Object.prototype.toString.call(value).slice(8, -1).toLowerCase() as DataType
 }
 
 /**

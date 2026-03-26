@@ -55,7 +55,7 @@ export interface StyleSnapshot {
 
 function stableStringify(value: unknown): string {
   if (value == null || typeof value !== 'object') return JSON.stringify(value)
-  if (Array.isArray(value)) return `[${value.map(item => stableStringify(item)).join(',')}]`
+  if (Array.isArray(value)) return `[${value.map((item) => stableStringify(item)).join(',')}]`
   const entries = Object.entries(value as Record<string, unknown>)
     .filter(([, v]) => v !== undefined)
     .sort(([a], [b]) => a.localeCompare(b))
@@ -83,17 +83,11 @@ function normalizeFont(font: CellFontStyle | undefined): FontModel {
 }
 
 function normalizeFill(fill: CellFillStyle | undefined): FillModel {
-  return {
-    type: fill?.type ?? 'none',
-    color: normalizeColor(fill?.color)
-  }
+  return { type: fill?.type ?? 'none', color: normalizeColor(fill?.color) }
 }
 
 function normalizeBorderEdge(edge: CellBorderEdgeStyle | undefined): BorderEdgeModel {
-  return {
-    style: edge?.style,
-    color: normalizeColor(edge?.color)
-  }
+  return { style: edge?.style, color: normalizeColor(edge?.color) }
 }
 
 function normalizeBorder(border: CellBorderStyle | undefined): BorderModel {
@@ -119,36 +113,24 @@ function normalizeStyle(style: CellStyle | undefined): Required<CellStyle> {
       indent: style?.alignment?.indent
     },
     numberFormat: style?.numberFormat ?? '',
-    protection: {
-      locked: style?.protection?.locked,
-      hidden: style?.protection?.hidden
-    }
+    protection: { locked: style?.protection?.locked, hidden: style?.protection?.hidden }
   }
 }
 
-function toCellStyle(
-  xf: CellXfModel,
-  snapshot: StyleSnapshot
-): CellStyle {
+function toCellStyle(xf: CellXfModel, snapshot: StyleSnapshot): CellStyle {
   const font = snapshot.fonts[xf.fontId]
   const fill = snapshot.fills[xf.fillId]
   const border = snapshot.borders[xf.borderId]
-  const numFmt = snapshot.numFmts.find(item => item.id === xf.numFmtId)
+  const numFmt = snapshot.numFmts.find((item) => item.id === xf.numFmtId)
 
   const style: CellStyle = {}
   if (font && Object.values(font).some(Boolean)) {
-    style.font = {
-      ...font,
-      color: font.color ? `#${font.color.slice(-6)}` : undefined
-    }
+    style.font = { ...font, color: font.color ? `#${font.color.slice(-6)}` : undefined }
   }
   if (fill && (fill.type !== 'none' || fill.color)) {
-    style.fill = {
-      type: fill.type,
-      color: fill.color ? `#${fill.color.slice(-6)}` : undefined
-    }
+    style.fill = { type: fill.type, color: fill.color ? `#${fill.color.slice(-6)}` : undefined }
   }
-  if (border && Object.values(border).some(edge => Object.values(edge).some(Boolean))) {
+  if (border && Object.values(border).some((edge) => Object.values(edge).some(Boolean))) {
     style.border = {
       left: border.left,
       right: border.right,
@@ -160,10 +142,10 @@ function toCellStyle(
   if (numFmt?.code) {
     style.numberFormat = numFmt.code
   }
-  if (xf.alignment && Object.values(xf.alignment).some(v => v !== undefined)) {
+  if (xf.alignment && Object.values(xf.alignment).some((v) => v !== undefined)) {
     style.alignment = { ...xf.alignment }
   }
-  if (xf.protection && Object.values(xf.protection).some(v => v !== undefined)) {
+  if (xf.protection && Object.values(xf.protection).some((v) => v !== undefined)) {
     style.protection = { ...xf.protection }
   }
   return style
@@ -227,23 +209,17 @@ export class StylePool {
     this.intern(this.fills, this.fillKeyToId, { type: 'none' })
     // Excel 规范要求第二个 fill 为 gray125，保证兼容性。
     this.intern(this.fills, this.fillKeyToId, { type: 'solid', color: 'FFBFBFBF' })
-    this.intern(
-      this.borders,
-      this.borderKeyToId,
-      { left: {}, right: {}, top: {}, bottom: {}, diagonal: {} }
-    )
-    this.intern(
-      this.xfs,
-      this.xfKeyToId,
-      { fontId: 0, fillId: 0, borderId: 0, numFmtId: 0 }
-    )
+    this.intern(this.borders, this.borderKeyToId, {
+      left: {},
+      right: {},
+      top: {},
+      bottom: {},
+      diagonal: {}
+    })
+    this.intern(this.xfs, this.xfKeyToId, { fontId: 0, fillId: 0, borderId: 0, numFmtId: 0 })
   }
 
-  private intern<T>(
-    list: T[],
-    keyMap: Map<string, number>,
-    value: T
-  ): number {
+  private intern<T>(list: T[], keyMap: Map<string, number>, value: T): number {
     const key = stableStringify(value)
     const existing = keyMap.get(key)
     if (existing != null) return existing

@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 import { cookie } from '@cat-kit/fe/src'
+import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 
 const originalDocument = globalThis.document
 
@@ -15,15 +15,13 @@ function createMockDocument() {
     set cookie(value: string) {
       const [pair, ...attrs] = value
         .split(';')
-        .map(part => part.trim())
+        .map((part) => part.trim())
         .filter(Boolean)
       const [rawKey, rawValue] = (pair ?? '').split('=')
       const key = decodeURIComponent(rawKey ?? '')
       const val = decodeURIComponent(rawValue ?? '')
 
-      const expiresAttr = attrs.find(attr =>
-        attr.toLowerCase().startsWith('expires=')
-      )
+      const expiresAttr = attrs.find((attr) => attr.toLowerCase().startsWith('expires='))
       if (expiresAttr) {
         const expTime = new Date(expiresAttr.split('=')[1] ?? '').getTime()
         if (!Number.isNaN(expTime) && expTime <= Date.now()) {
@@ -43,17 +41,11 @@ function createMockDocument() {
 }
 
 beforeEach(() => {
-  Object.defineProperty(globalThis, 'document', {
-    value: createMockDocument(),
-    writable: true
-  })
+  Object.defineProperty(globalThis, 'document', { value: createMockDocument(), writable: true })
 })
 
 afterAll(() => {
-  Object.defineProperty(globalThis, 'document', {
-    value: originalDocument,
-    writable: true
-  })
+  Object.defineProperty(globalThis, 'document', { value: originalDocument, writable: true })
 })
 
 describe('cookie 工具', () => {

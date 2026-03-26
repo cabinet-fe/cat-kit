@@ -27,9 +27,7 @@ export interface GetLocalIPOptions {
  * @param options - 地址族与是否包含内网地址
  * @returns 匹配到的 IP 地址，若不存在则为 `undefined`
  */
-export function getLocalIP(
-  options: GetLocalIPOptions = {}
-): string | undefined {
+export function getLocalIP(options: GetLocalIPOptions = {}): string | undefined {
   const { family = 'IPv4', includeInternal = false } = options
   const interfaces = networkInterfaces()
 

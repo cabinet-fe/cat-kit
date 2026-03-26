@@ -44,8 +44,8 @@ class Monorepo {
 }
 ```
 
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
+| 参数      | 类型     | 默认值          | 说明                     |
+| --------- | -------- | --------------- | ------------------------ |
 | `rootDir` | `string` | `process.cwd()` | 根目录（必须是绝对路径） |
 
 ```typescript
@@ -61,9 +61,9 @@ const repoWithRoot = new Monorepo('/path/to/monorepo')
 
 ```typescript
 interface MonorepoRoot {
-  dir: string              // 绝对路径
-  pkg: PackageJson         // package.json 内容
-  workspacePatterns: string[]  // 工作区 glob 模式
+  dir: string // 绝对路径
+  pkg: PackageJson // package.json 内容
+  workspacePatterns: string[] // 工作区 glob 模式
 }
 ```
 
@@ -79,7 +79,7 @@ console.log(repo.root.workspacePatterns) // ['packages/*']
 ```typescript
 interface MonorepoWorkspace {
   name: string
-  dir: string      // 绝对路径
+  dir: string // 绝对路径
   version: string
   pkg: PackageJson
   private: boolean
@@ -87,12 +87,12 @@ interface MonorepoWorkspace {
 ```
 
 ```typescript
-repo.workspaces.forEach(ws => {
+repo.workspaces.forEach((ws) => {
   console.log(`${ws.name}@${ws.version}`)
 })
 
 // 过滤非私有包
-const publicPackages = repo.workspaces.filter(ws => !ws.private)
+const publicPackages = repo.workspaces.filter((ws) => !ws.private)
 ```
 
 ### group()
@@ -116,10 +116,7 @@ interface MonorepoValidationResult {
   valid: boolean
   hasCircular: boolean
   circularChains: string[][]
-  inconsistentDeps: Array<{
-    name: string
-    versions: Array<{ version: string; usedBy: string[] }>
-  }>
+  inconsistentDeps: Array<{ name: string; versions: Array<{ version: string; usedBy: string[] }> }>
 }
 ```
 
@@ -172,9 +169,9 @@ async build(configs?: Partial<Record<WorkspaceName, WorkspaceBuildConfig>>): Pro
 
 ```typescript
 interface WorkspaceBuildConfig {
-  entry?: string | string[]               // 入口文件
-  dts?: boolean                           // 生成 d.ts，默认 true
-  deps?: { neverBundle?: string[] }       // 额外外置依赖
+  entry?: string | string[] // 入口文件
+  dts?: boolean // 生成 d.ts，默认 true
+  deps?: { neverBundle?: string[] } // 额外外置依赖
   platform?: 'neutral' | 'node' | 'browser'
   output?: { dir?: string; sourcemap?: boolean }
 }
@@ -183,13 +180,12 @@ interface WorkspaceBuildConfig {
 **示例：**
 
 ```typescript
-await repo.group(['@cat-kit/core', '@cat-kit/fe', '@cat-kit/http']).build({
-  '@cat-kit/fe': { deps: { neverBundle: ['@cat-kit/core'] } },
-  '@cat-kit/http': {
-    deps: { neverBundle: ['@cat-kit/core'] },
-    platform: 'neutral'
-  }
-})
+await repo
+  .group(['@cat-kit/core', '@cat-kit/fe', '@cat-kit/http'])
+  .build({
+    '@cat-kit/fe': { deps: { neverBundle: ['@cat-kit/core'] } },
+    '@cat-kit/http': { deps: { neverBundle: ['@cat-kit/core'] }, platform: 'neutral' }
+  })
 ```
 
 **构建流程：**
@@ -226,19 +222,15 @@ interface GroupBumpOptions {
   type: BumpType
   version?: string
   preid?: string
-  syncPeer?: boolean  // 同步 peerDependencies，默认 true
-  syncDeps?: boolean  // 同步 workspace:*，默认 true
+  syncPeer?: boolean // 同步 peerDependencies，默认 true
+  syncDeps?: boolean // 同步 workspace:*，默认 true
 }
 ```
 
 **示例：**
 
 ```typescript
-const result = await group.bumpVersion({
-  type: 'minor',
-  syncPeer: true,
-  syncDeps: true
-})
+const result = await group.bumpVersion({ type: 'minor', syncPeer: true, syncDeps: true })
 
 console.log(`新版本: ${result.version}`)
 ```
@@ -253,13 +245,13 @@ async publish(options?: GroupPublishOptions): Promise<void>
 
 ```typescript
 interface GroupPublishOptions {
-  skipPrivate?: boolean                   // 跳过私有包，默认 true
+  skipPrivate?: boolean // 跳过私有包，默认 true
   registry?: string
-  tag?: string                            // 默认 'latest'
-  otp?: string                            // 2FA 验证码
+  tag?: string // 默认 'latest'
+  otp?: string // 2FA 验证码
   dryRun?: boolean
   access?: 'public' | 'restricted'
-  provenance?: boolean                    // npm 9+
+  provenance?: boolean // npm 9+
 }
 ```
 
@@ -267,10 +259,7 @@ interface GroupPublishOptions {
 
 ```typescript
 // 发布到 npm 镜像
-await group.publish({
-  registry: 'https://registry.npmmirror.com',
-  access: 'public'
-})
+await group.publish({ registry: 'https://registry.npmmirror.com', access: 'public' })
 
 // 预发布版本
 await group.publish({ tag: 'next' })
@@ -333,7 +322,7 @@ async function ciCheck() {
   }
 
   // 构建
-  const publicPackages = repo.workspaces.filter(ws => !ws.private).map(ws => ws.name)
+  const publicPackages = repo.workspaces.filter((ws) => !ws.private).map((ws) => ws.name)
   await repo.group(publicPackages).build()
 
   console.log('✅ CI 检查完成')
@@ -388,17 +377,17 @@ interface GroupPublishOptions {
 
 每个包构建后输出到 `dist` 目录：
 
-| 文件 | 说明 |
-| --- | --- |
-| `index.js` | ES 模块（压缩） |
-| `index.d.ts` | TypeScript 类型声明 |
-| `index.js.map` | Sourcemap（可选） |
-| `stats.html` | Bundle 分析报告 |
+| 文件           | 说明                |
+| -------------- | ------------------- |
+| `index.js`     | ES 模块（压缩）     |
+| `index.d.ts`   | TypeScript 类型声明 |
+| `index.js.map` | Sourcemap（可选）   |
+| `stats.html`   | Bundle 分析报告     |
 
 ## 常见错误
 
-| 错误 | 可能原因 |
-| --- | --- |
-| `rootDir 必须是绝对路径` | 传入了相对路径 |
-| `未找到 package.json` | 指定目录不存在 |
-| `检测到循环依赖，无法完成构建` | 存在循环依赖 |
+| 错误                           | 可能原因       |
+| ------------------------------ | -------------- |
+| `rootDir 必须是绝对路径`       | 传入了相对路径 |
+| `未找到 package.json`          | 指定目录不存在 |
+| `检测到循环依赖，无法完成构建` | 存在循环依赖   |

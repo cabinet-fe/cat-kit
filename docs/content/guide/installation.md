@@ -39,15 +39,15 @@ bun add @cat-kit/core @cat-kit/fe
 
 ## 按需安装
 
-| 需求 | 建议安装 |
-| --- | --- |
-| 只需要通用工具 | `@cat-kit/core` |
-| 浏览器请求客户端 | `@cat-kit/http` |
-| 浏览器存储、文件、Web API | `@cat-kit/fe` |
-| Node/Bun 后端工具 | `@cat-kit/be` |
-| Excel 导入导出 | `@cat-kit/excel` |
-| monorepo 构建、版本、发布 | `@cat-kit/maintenance` |
-| AI 协作工作流 | `@cat-kit/agent-context` |
+| 需求                      | 建议安装                 |
+| ------------------------- | ------------------------ |
+| 只需要通用工具            | `@cat-kit/core`          |
+| 浏览器请求客户端          | `@cat-kit/http`          |
+| 浏览器存储、文件、Web API | `@cat-kit/fe`            |
+| Node/Bun 后端工具         | `@cat-kit/be`            |
+| Excel 导入导出            | `@cat-kit/excel`         |
+| monorepo 构建、版本、发布 | `@cat-kit/maintenance`   |
+| AI 协作工作流             | `@cat-kit/agent-context` |
 
 如果一个项目会直接导入多个包，就把这些包一起安装。`@cat-kit/http`、`@cat-kit/fe`、`@cat-kit/be`、`@cat-kit/excel` 内部会依赖 `@cat-kit/core`，但如果你的代码也会直接导入 `@cat-kit/core`，仍然建议显式安装。
 
@@ -60,9 +60,7 @@ bun add @cat-kit/core @cat-kit/fe
 Node.js 项目通常需要在 `package.json` 中启用 ESM：
 
 ```json
-{
-  "type": "module"
-}
+{ "type": "module" }
 ```
 
 ## TypeScript 建议

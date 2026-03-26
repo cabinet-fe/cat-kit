@@ -21,10 +21,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
 import { HTTPClient } from '@cat-kit/http/src'
-import { Snackbar } from '@varlet/ui'
 import type { ClientPlugin } from '@cat-kit/http/src'
+import { Snackbar } from '@varlet/ui'
+import { ref } from 'vue'
 
 const logs = ref<string[]>([])
 

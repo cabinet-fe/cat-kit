@@ -1,10 +1,6 @@
 import { isObj } from './type'
 
-type Last<T> = T extends [...any, infer L]
-  ? L
-  : T extends (infer P)[]
-  ? P
-  : undefined
+type Last<T> = T extends [...any, infer L] ? L : T extends (infer P)[] ? P : undefined
 
 /**
  * 获取数组最后一位
@@ -29,13 +25,10 @@ export function union<T>(...arrList: T[][]): T[] {
  * @param key 按照这个字段进行去重
  * @param arrList 任意多个数组
  */
-export function unionBy<T extends Record<string, any>>(
-  key: string,
-  ...arrList: T[][]
-): T[] {
+export function unionBy<T extends Record<string, any>>(key: string, ...arrList: T[][]): T[] {
   let s = new Set<T>()
 
-  const ret = arrList.flat().filter(item => {
+  const ret = arrList.flat().filter((item) => {
     if (!isObj(item)) return true
 
     let v = item[key]
@@ -58,10 +51,7 @@ export function unionBy<T extends Record<string, any>>(
  * @param arr 数组
  * @param cb 回调
  */
-export function eachRight<T>(
-  arr: T[],
-  cb: (v: T, i: number, arr: T[]) => void
-): void {
+export function eachRight<T>(arr: T[], cb: (v: T, i: number, arr: T[]) => void): void {
   let len = arr.length
 
   while (--len > -1) {
@@ -120,8 +110,8 @@ class Arr<T> {
    * @returns
    */
   find(condition: Record<string, any>): T | undefined {
-    return this._source.find(item =>
-      Object.keys(condition).every(key => item[key] === condition[key])
+    return this._source.find((item) =>
+      Object.keys(condition).every((key) => item[key] === condition[key])
     )
   }
 
@@ -167,7 +157,7 @@ class Arr<T> {
    */
   groupBy<K extends string | number>(cb: (item: T) => K): Record<K, T[]> {
     const result: Record<K, T[]> = {} as Record<K, T[]>
-    this._source.forEach(item => {
+    this._source.forEach((item) => {
       const key = cb(item)
       if (!result[key]) {
         result[key] = []

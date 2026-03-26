@@ -43,7 +43,7 @@ export function u8a2str(data: Uint8Array): string {
  */
 export function u8a2hex(u8a: Uint8Array): string {
   return Array.from(u8a)
-    .map(b => b.toString(16).padStart(2, '0'))
+    .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
 }
 
@@ -53,9 +53,7 @@ export function u8a2hex(u8a: Uint8Array): string {
  * @returns Uint8Array 类型的数据
  */
 export function hex2u8a(hex: string): Uint8Array {
-  return new Uint8Array(
-    Array.from(hex.match(/.{1,2}/g)!).map(b => parseInt(b, 16))
-  )
+  return new Uint8Array(Array.from(hex.match(/.{1,2}/g)!).map((b) => parseInt(b, 16)))
 }
 
 /**
@@ -133,8 +131,8 @@ export function query2obj(query: string): Record<string, any> {
   return Object.fromEntries(
     query
       .split('&')
-      .filter(pair => pair.includes('='))
-      .map(pair => {
+      .filter((pair) => pair.includes('='))
+      .map((pair) => {
         const [key = '', value = ''] = pair.split('=')
         const decodedValue = decodeURIComponent(value)
 
@@ -162,7 +160,7 @@ export function transform<T extends TransformMethod>(
   transformChain: [...TransformMethod[], T]
 ): ReturnType<T> {
   let val = data
-  transformChain.forEach(method => {
+  transformChain.forEach((method) => {
     val = method(val)
   })
   return val as ReturnType<T>

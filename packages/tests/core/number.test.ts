@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { n, $n } from '@cat-kit/core/src'
+import { describe, it, expect } from 'vitest'
 
 describe('数字工具函数', () => {
   describe('Num类 - n()', () => {
@@ -23,9 +23,7 @@ describe('数字工具函数', () => {
 
       it('应该支持配置对象', () => {
         expect(n(123.456).currency('CNY', { precision: 2 })).toBe('123.46')
-        expect(
-          n(123.456).currency('CNY', { minPrecision: 2, maxPrecision: 4 })
-        ).toBe('123.456')
+        expect(n(123.456).currency('CNY', { minPrecision: 2, maxPrecision: 4 })).toBe('123.456')
       })
 
       it('应该将数字转换为中文大写', () => {
@@ -36,9 +34,7 @@ describe('数字工具函数', () => {
       })
 
       it('应该处理大数字的中文大写', () => {
-        expect(n(123456789).currency('CNY_HAN')).toContain(
-          '壹亿贰仟叁佰肆拾伍万陆仟柒佰捌拾玖元'
-        )
+        expect(n(123456789).currency('CNY_HAN')).toContain('壹亿贰仟叁佰肆拾伍万陆仟柒佰捌拾玖元')
         expect(n(1000000).currency('CNY_HAN')).toContain('壹佰万元')
       })
 
@@ -66,9 +62,7 @@ describe('数字工具函数', () => {
       })
 
       it('应该支持最小最大精度', () => {
-        expect(n(123.456).fixed({ minPrecision: 2, maxPrecision: 4 })).toBe(
-          '123.456'
-        )
+        expect(n(123.456).fixed({ minPrecision: 2, maxPrecision: 4 })).toBe('123.456')
         expect(n(123.4).fixed({ minPrecision: 2 })).toBe('123.40')
         expect(n(123.45678).fixed({ maxPrecision: 3 })).toBe('123.457')
       })
@@ -82,23 +76,23 @@ describe('数字工具函数', () => {
     describe('each', () => {
       it('应该遍历数字', () => {
         const result: number[] = []
-        n(5).each(i => result.push(i))
+        n(5).each((i) => result.push(i))
         expect(result).toEqual([1, 2, 3, 4, 5])
       })
 
       it('应该处理0和负数', () => {
         const result: number[] = []
-        n(0).each(i => result.push(i))
+        n(0).each((i) => result.push(i))
         expect(result).toEqual([])
 
-        n(-3).each(i => result.push(i))
+        n(-3).each((i) => result.push(i))
         expect(result).toEqual([])
       })
 
       it('应该返回自身以支持链式调用', () => {
         const result: number[] = []
         const num = n(3)
-        const returned = num.each(i => result.push(i))
+        const returned = num.each((i) => result.push(i))
         expect(returned).toBe(num)
       })
     })
@@ -157,11 +151,7 @@ describe('数字工具函数', () => {
       })
 
       it('应该支持货币格式', () => {
-        const formatter = $n.formatter({
-          style: 'currency',
-          currency: 'CNY',
-          precision: 2
-        })
+        const formatter = $n.formatter({ style: 'currency', currency: 'CNY', precision: 2 })
         expect(formatter.format(1234.5)).toBe('¥1,234.50')
       })
 

@@ -33,7 +33,7 @@ export class Workbook {
     if (typeof nameOrIndex === 'number') {
       return this.sheetList[nameOrIndex]
     }
-    return this.sheetList.find(sheet => sheet.name === nameOrIndex)
+    return this.sheetList.find((sheet) => sheet.name === nameOrIndex)
   }
 
   get worksheets(): Worksheet[] {
@@ -41,7 +41,7 @@ export class Workbook {
   }
 
   removeWorksheet(name: string): boolean {
-    const index = this.sheetList.findIndex(sheet => sheet.name === name)
+    const index = this.sheetList.findIndex((sheet) => sheet.name === name)
     if (index === -1) return false
     const [sheet] = this.sheetList.splice(index, 1)
     if (sheet) this.sheetNameSet.delete(sheet.name)

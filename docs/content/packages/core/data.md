@@ -109,12 +109,7 @@ isInt32Array(new Int32Array()) // true
 ```typescript
 import { o } from '@cat-kit/core'
 
-const user = {
-  id: 1,
-  name: 'Alice',
-  age: 25,
-  email: 'alice@example.com'
-}
+const user = { id: 1, name: 'Alice', age: 25, email: 'alice@example.com' }
 
 const obj = o(user)
 
@@ -140,16 +135,9 @@ const omitted = obj.omit(['age', 'email'])
 ```typescript
 import { o } from '@cat-kit/core'
 
-const defaults = {
-  theme: 'light',
-  fontSize: 14,
-  language: 'zh-CN'
-}
+const defaults = { theme: 'light', fontSize: 14, language: 'zh-CN' }
 
-const userSettings = {
-  theme: 'dark',
-  fontSize: 16
-}
+const userSettings = { theme: 'dark', fontSize: 16 }
 
 // 从 userSettings 继承属性（只继承已存在的属性）
 o(defaults).extend(userSettings)
@@ -161,21 +149,9 @@ o(defaults).extend(userSettings)
 ```typescript
 import { o } from '@cat-kit/core'
 
-const defaults = {
-  ui: {
-    theme: 'light',
-    fontSize: 14
-  },
-  data: {
-    cache: true
-  }
-}
+const defaults = { ui: { theme: 'light', fontSize: 14 }, data: { cache: true } }
 
-const userConfig = {
-  ui: {
-    theme: 'dark'
-  }
-}
+const userConfig = { ui: { theme: 'dark' } }
 
 // 深度继承
 o(defaults).deepExtend(userConfig)
@@ -262,7 +238,7 @@ users.find({ age: 25 }) // { id: 1, name: 'Alice', age: 25 }
 list.move(0, 2) // 将索引 0 的元素移动到索引 2
 
 // 分组
-users.groupBy(item => (item.age > 25 ? 'old' : 'young'))
+users.groupBy((item) => (item.age > 25 ? 'old' : 'young'))
 // { young: [...], old: [...] }
 ```
 
@@ -347,14 +323,7 @@ num.fixed(0) // '3'
 ### 二进制转换
 
 ```typescript
-import {
-  str2u8a,
-  u8a2str,
-  u8a2hex,
-  hex2u8a,
-  u8a2base64,
-  base642u8a
-} from '@cat-kit/core'
+import { str2u8a, u8a2str, u8a2hex, hex2u8a, u8a2base64, base642u8a } from '@cat-kit/core'
 
 // 字符串 ↔ Uint8Array
 const uint8 = str2u8a('Hello') // Uint8Array
@@ -449,10 +418,10 @@ function processUsers(users: User[]) {
   const userList = arr(users)
 
   // 按角色分组
-  const grouped = userList.groupBy(u => u.role)
+  const grouped = userList.groupBy((u) => u.role)
 
   // 只保留需要的字段
-  const simplified = users.map(u => o(u).pick(['id', 'name']))
+  const simplified = users.map((u) => o(u).pick(['id', 'name']))
 
   return { grouped, simplified }
 }
@@ -463,20 +432,13 @@ function processUsers(users: User[]) {
 ```typescript
 import { $str, obj2query } from '@cat-kit/core'
 
-function buildApiUrl(
-  baseUrl: string,
-  path: string,
-  params: Record<string, any>
-): string {
+function buildApiUrl(baseUrl: string, path: string, params: Record<string, any>): string {
   const url = $str.joinUrlPath(baseUrl, path)
   const query = obj2query(params)
   return query ? `${url}?${query}` : url
 }
 
-buildApiUrl('https://api.example.com', 'users/search', {
-  name: 'Alice',
-  age: 25
-})
+buildApiUrl('https://api.example.com', 'users/search', { name: 'Alice', age: 25 })
 // 'https://api.example.com/users/search?name=Alice&age=25'
 ```
 

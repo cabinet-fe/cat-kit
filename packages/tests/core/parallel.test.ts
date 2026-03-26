@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parallel } from '@cat-kit/core/src'
+import { describe, it, expect } from 'vitest'
 
 describe('并行处理函数', () => {
   describe('parallel', () => {
@@ -16,12 +16,7 @@ describe('并行处理函数', () => {
     })
 
     it('应该处理不同返回类型', async () => {
-      const tasks = [
-        () => 'string',
-        () => 123,
-        () => ({ key: 'value' }),
-        () => [1, 2, 3]
-      ]
+      const tasks = [() => 'string', () => 123, () => ({ key: 'value' }), () => [1, 2, 3]]
 
       const results = await parallel(tasks)
       expect(results).toEqual(['string', 123, { key: 'value' }, [1, 2, 3]])
@@ -30,15 +25,15 @@ describe('并行处理函数', () => {
     it('应该按顺序返回结果（与任务顺序一致）', async () => {
       const tasks = [
         async () => {
-          await new Promise(r => setTimeout(r, 30))
+          await new Promise((r) => setTimeout(r, 30))
           return 'a'
         },
         async () => {
-          await new Promise(r => setTimeout(r, 10))
+          await new Promise((r) => setTimeout(r, 10))
           return 'b'
         },
         async () => {
-          await new Promise(r => setTimeout(r, 20))
+          await new Promise((r) => setTimeout(r, 20))
           return 'c'
         }
       ]
@@ -54,7 +49,7 @@ describe('并行处理函数', () => {
       const tasks = Array.from({ length: 10 }, (_, i) => async () => {
         active++
         maxActive = Math.max(maxActive, active)
-        await new Promise(r => setTimeout(r, 20))
+        await new Promise((r) => setTimeout(r, 20))
         active--
         return i
       })

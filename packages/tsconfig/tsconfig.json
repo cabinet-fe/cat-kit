@@ -31,6 +31,14 @@
     "noImplicitOverride": true,
     // 索引访问会自动加上 undefined，提示先做存在性判断
     "noUncheckedIndexedAccess": true,
+    // 检查是否有未处理副作用的导入
+    "noUncheckedSideEffectImports": true,
+    // 严格可选属性类型
+    "exactOptionalPropertyTypes": true,
+    // 单文件模块编译隔离（保证所有文件都能安全转绎）
+    "isolatedModules": true,
+    // 强制将文件均视为模块
+    "moduleDetection": "force",
 
     // ---- 代码质量守护
     // 提示未使用的局部变量，防止遗忘的草稿代码

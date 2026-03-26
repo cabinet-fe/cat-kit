@@ -1,22 +1,19 @@
 #!/usr/bin/env node
-import { Command } from 'commander'
 import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+
+import { Command } from 'commander'
+
 import { verifyCommitAction } from './commands/verify-commit.js'
 
 const currentDir = dirname(fileURLToPath(import.meta.url))
 const packageJsonPath = resolve(currentDir, '../package.json')
-const { version } = JSON.parse(
-  readFileSync(packageJsonPath, 'utf8')
-) as { version: string }
+const { version } = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { version: string }
 
 const program = new Command()
 
-program
-  .name('cat-cli')
-  .description('CatKit CLI tools')
-  .version(version)
+program.name('cat-cli').description('CatKit CLI tools').version(version)
 
 program
   .command('verify-commit')

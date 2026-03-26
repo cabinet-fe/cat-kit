@@ -2,12 +2,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import {
-  loadConfig,
-  loadEnv,
-  mergeConfig,
-  parseEnv
-} from '@cat-kit/be/src'
+import { loadConfig, loadEnv, mergeConfig, parseEnv } from '@cat-kit/be/src'
 
 describe('@cat-kit/be 配置工具', () => {
   let tempDir: string
@@ -32,12 +27,7 @@ describe('@cat-kit/be 配置工具', () => {
       META: { type: 'json', default: { foo: 'bar' } }
     }
 
-    const source = {
-      ENABLED: 'true',
-      PORT: '8080',
-      TAGS: 'a;b;c',
-      META: '{"foo":"baz"}'
-    }
+    const source = { ENABLED: 'true', PORT: '8080', TAGS: 'a;b;c', META: '{"foo":"baz"}' }
 
     const parsed = parseEnv(schema, source)
     expect(parsed).toEqual({
@@ -52,9 +42,7 @@ describe('@cat-kit/be 配置工具', () => {
     const file = join(tempDir, 'config.yaml')
     await writeFile(file, 'foo: bar\nnested:\n  value: 1', 'utf8')
 
-    const config = await loadConfig<{ foo: string; nested: { value: number } }>(
-      file
-    )
+    const config = await loadConfig<{ foo: string; nested: { value: number } }>(file)
 
     expect(config).toEqual({ foo: 'bar', nested: { value: 1 } })
   })
@@ -65,10 +53,6 @@ describe('@cat-kit/be 配置工具', () => {
       { foo: { extra: true }, arr: [3] }
     )
 
-    expect(result).toEqual({
-      foo: { value: 1, extra: true },
-      arr: [3]
-    })
+    expect(result).toEqual({ foo: { value: 1, extra: true }, arr: [3] })
   })
 })
-

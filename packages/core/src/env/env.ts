@@ -33,13 +33,7 @@ export function isInNode(): boolean {
 /**
  * 操作系统类型
  */
-export type OSType =
-  | 'Windows'
-  | 'Linux'
-  | 'MacOS'
-  | 'Android'
-  | 'iOS'
-  | 'Unknown'
+export type OSType = 'Windows' | 'Linux' | 'MacOS' | 'Android' | 'iOS' | 'Unknown'
 
 /**
  * 获取操作系统类型
@@ -109,11 +103,7 @@ export function getDeviceType(): DeviceType {
     const userAgent = window.navigator.userAgent.toLowerCase()
 
     // 检测是否为移动设备
-    if (
-      /android|webos|iphone|ipod|blackberry|iemobile|opera mini/i.test(
-        userAgent
-      )
-    ) {
+    if (/android|webos|iphone|ipod|blackberry|iemobile|opera mini/i.test(userAgent)) {
       return 'Mobile'
     }
 
@@ -136,14 +126,7 @@ export function getDeviceType(): DeviceType {
 /**
  * 浏览器类型
  */
-export type BrowserType =
-  | 'Chrome'
-  | 'Firefox'
-  | 'Safari'
-  | 'Edge'
-  | 'IE'
-  | 'Opera'
-  | 'Unknown'
+export type BrowserType = 'Chrome' | 'Firefox' | 'Safari' | 'Edge' | 'IE' | 'Opera' | 'Unknown'
 
 /**
  * 获取浏览器类型
@@ -208,18 +191,13 @@ export function getBrowserVersion(): string | null {
       match = userAgent.match(/Version\/(\d+\.\d+)/)
       break
     case 'Edge':
-      match =
-        userAgent.match(/Edg\/(\d+\.\d+)/) ||
-        userAgent.match(/Edge\/(\d+\.\d+)/)
+      match = userAgent.match(/Edg\/(\d+\.\d+)/) || userAgent.match(/Edge\/(\d+\.\d+)/)
       break
     case 'IE':
-      match =
-        userAgent.match(/MSIE (\d+\.\d+)/) || userAgent.match(/rv:(\d+\.\d+)/)
+      match = userAgent.match(/MSIE (\d+\.\d+)/) || userAgent.match(/rv:(\d+\.\d+)/)
       break
     case 'Opera':
-      match =
-        userAgent.match(/OPR\/(\d+\.\d+)/) ||
-        userAgent.match(/Opera\/(\d+\.\d+)/)
+      match = userAgent.match(/OPR\/(\d+\.\d+)/) || userAgent.match(/Opera\/(\d+\.\d+)/)
       break
   }
 
@@ -286,11 +264,7 @@ export type EnvironmentSummary =
       browserVersion: string | null
       device: DeviceType
     }
-  | {
-      runtime: 'node'
-      os: OSType
-      nodeVersion: string | null
-    }
+  | { runtime: 'node'; os: OSType; nodeVersion: string | null }
 
 /**
  * 获取环境信息摘要
@@ -299,10 +273,7 @@ export type EnvironmentSummary =
 export function getEnvironmentSummary(): Record<string, any> {
   const runtime = getRuntime()
 
-  const summary: Record<string, any> = {
-    runtime,
-    os: getOSType()
-  }
+  const summary: Record<string, any> = { runtime, os: getOSType() }
 
   if (runtime === 'browser') {
     summary.browser = getBrowserType()
@@ -315,5 +286,3 @@ export function getEnvironmentSummary(): Record<string, any> {
 
   return summary
 }
-
-

@@ -40,7 +40,7 @@ export async function isPortAvailable(
 ): Promise<boolean> {
   const { host = '127.0.0.1', timeout = 1000 } = options
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const server = createServer()
 
     const onError = (): void => {

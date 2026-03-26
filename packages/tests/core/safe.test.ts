@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { safeRun } from '@cat-kit/core/src'
+import { describe, it, expect } from 'vitest'
 
 describe('安全执行函数', () => {
   describe('safeRun', () => {
@@ -41,4 +41,3 @@ describe('安全执行函数', () => {
     })
   })
 })
-

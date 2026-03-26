@@ -24,5 +24,6 @@
 - `.agent-context/plan-5/patch-2.md`
 
 ## 历史补丁
+
 - patch-1: 补充 ac-workflow 指南索引
 - patch-2: 将 CLI 纳入指南索引

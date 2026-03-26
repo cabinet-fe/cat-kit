@@ -1,7 +1,7 @@
 {
   "name": "@cat-kit/tests",
-  "private": true,
   "version": "1.0.0-alpha.1",
+  "private": true,
   "description": "喵喵工具箱测试",
   "main": "index.ts",
   "scripts": {
@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@cat-kit/tsconfig": "workspace:*",
-    "fake-indexeddb": "^6.2.5",
-    "@vitest/coverage-v8": "^4.1.1"
+    "@vitest/coverage-v8": "^4.1.1",
+    "fake-indexeddb": "^6.2.5"
   }
 }

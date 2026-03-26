@@ -618,7 +618,12 @@ html.dark body {
   border-radius: 38% 62% 48% 52% / 44% 46% 54% 56%;
   background:
     radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.35), transparent 38%),
-    radial-gradient(circle at center, rgba(26, 26, 26, 0.13) 0%, rgba(26, 26, 26, 0.05) 40%, transparent 74%);
+    radial-gradient(
+      circle at center,
+      rgba(26, 26, 26, 0.13) 0%,
+      rgba(26, 26, 26, 0.05) 40%,
+      transparent 74%
+    );
   border: 1px solid rgba(120, 108, 89, 0.18);
   box-shadow: var(--paper-shadow);
 }
@@ -939,7 +944,10 @@ html.dark body {
   padding: 22px 20px;
   border-radius: 8px 22px 8px 22px;
   text-decoration: none;
-  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
 }
 
 .home-package-card:hover {
@@ -1017,7 +1025,12 @@ html.dark body {
 .dark .VPHero.VPHomeHero .image-container {
   background:
     radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.08), transparent 38%),
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 74%);
+    radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.02) 40%,
+      transparent 74%
+    );
   border-color: rgba(255, 255, 255, 0.08);
 }
 

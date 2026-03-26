@@ -1,17 +1,6 @@
-import type {
-  CellValue,
-  DateSystem,
-  ReadStreamOptions,
-  StreamEvent,
-  WorkbookInput
-} from '../types'
+import type { CellValue, DateSystem, ReadStreamOptions, StreamEvent, WorkbookInput } from '../types'
 import { getZipTextEntry, readZipEntries } from '../zip/zip-reader'
-import {
-  parseSharedStrings,
-  parseStyles,
-  parseWorkbookSheets,
-  parseWorksheet
-} from './xml-reader'
+import { parseSharedStrings, parseStyles, parseWorkbookSheets, parseWorksheet } from './xml-reader'
 
 const DEFAULT_DATE_SYSTEM: DateSystem = 1900
 
@@ -38,11 +27,7 @@ export async function* readWorkbookStream(
     const sheetXml = getZipTextEntry(entries, sheetEntry.sheetPath)
     const parsed = parseWorksheet(sheetXml, sharedStrings, styleLookup, dateSystem)
     const rows = toRowValues(parsed.cells)
-    yield {
-      type: 'sheetStart',
-      sheetName: sheetEntry.sheetName,
-      sheetIndex: sheetEntry.sheetIndex
-    }
+    yield { type: 'sheetStart', sheetName: sheetEntry.sheetName, sheetIndex: sheetEntry.sheetIndex }
 
     let currentRow = 1
     for (const [rowIndex, values] of rows) {
@@ -69,11 +54,7 @@ export async function* readWorkbookStream(
       currentRow = rowIndex + 1
     }
 
-    yield {
-      type: 'sheetEnd',
-      sheetName: sheetEntry.sheetName,
-      sheetIndex: sheetEntry.sheetIndex
-    }
+    yield { type: 'sheetEnd', sheetName: sheetEntry.sheetName, sheetIndex: sheetEntry.sheetIndex }
   }
 }
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
@@ -12,8 +12,8 @@
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-          'Helvetica Neue', Arial, sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
         display: flex;
@@ -261,7 +261,7 @@
       </header>
 
       <div class="packages-grid">
-        <div class="package-card" onclick="window.location.href='packages/core/dist/stats.html'">
+        <div class="package-card" onclick="window.location.href = 'packages/core/dist/stats.html'">
           <div class="package-icon">🎯</div>
           <div class="package-name">@cat-kit/core</div>
           <div class="package-description">
@@ -281,12 +281,16 @@
               <div class="stat-value">168.6 KB</div>
             </div>
           </div>
-          <a href="packages/core/dist/stats.html" class="view-button" onclick="event.stopPropagation()">
+          <a
+            href="packages/core/dist/stats.html"
+            class="view-button"
+            onclick="event.stopPropagation()"
+          >
             查看分析
             <span>→</span>
           </a>
         </div>
-        <div class="package-card" onclick="window.location.href='packages/fe/dist/stats.html'">
+        <div class="package-card" onclick="window.location.href = 'packages/fe/dist/stats.html'">
           <div class="package-icon">🌐</div>
           <div class="package-name">@cat-kit/fe</div>
           <div class="package-description">
@@ -306,17 +310,19 @@
               <div class="stat-value">162.2 KB</div>
             </div>
           </div>
-          <a href="packages/fe/dist/stats.html" class="view-button" onclick="event.stopPropagation()">
+          <a
+            href="packages/fe/dist/stats.html"
+            class="view-button"
+            onclick="event.stopPropagation()"
+          >
             查看分析
             <span>→</span>
           </a>
         </div>
-        <div class="package-card" onclick="window.location.href='packages/http/dist/stats.html'">
+        <div class="package-card" onclick="window.location.href = 'packages/http/dist/stats.html'">
           <div class="package-icon">🌍</div>
           <div class="package-name">@cat-kit/http</div>
-          <div class="package-description">
-            HTTP 客户端库，支持插件系统、请求拦截、多种请求引擎
-          </div>
+          <div class="package-description">HTTP 客户端库，支持插件系统、请求拦截、多种请求引擎</div>
           <div class="package-stats">
             <div class="stat">
               <div class="stat-label">类型</div>
@@ -331,17 +337,19 @@
               <div class="stat-value">162.0 KB</div>
             </div>
           </div>
-          <a href="packages/http/dist/stats.html" class="view-button" onclick="event.stopPropagation()">
+          <a
+            href="packages/http/dist/stats.html"
+            class="view-button"
+            onclick="event.stopPropagation()"
+          >
             查看分析
             <span>→</span>
           </a>
         </div>
-        <div class="package-card" onclick="window.location.href='packages/be/dist/stats.html'">
+        <div class="package-card" onclick="window.location.href = 'packages/be/dist/stats.html'">
           <div class="package-icon">⚙️</div>
           <div class="package-name">@cat-kit/be</div>
-          <div class="package-description">
-            后端工具库，提供服务端开发所需的各类实用工具
-          </div>
+          <div class="package-description">后端工具库，提供服务端开发所需的各类实用工具</div>
           <div class="package-stats">
             <div class="stat">
               <div class="stat-label">类型</div>
@@ -356,12 +364,16 @@
               <div class="stat-value">158.0 KB</div>
             </div>
           </div>
-          <a href="packages/be/dist/stats.html" class="view-button" onclick="event.stopPropagation()">
+          <a
+            href="packages/be/dist/stats.html"
+            class="view-button"
+            onclick="event.stopPropagation()"
+          >
             查看分析
             <span>→</span>
           </a>
         </div>
-        <div class="package-card" onclick="window.location.href='packages/excel/dist/stats.html'">
+        <div class="package-card" onclick="window.location.href = 'packages/excel/dist/stats.html'">
           <div class="package-icon">📑</div>
           <div class="package-name">@cat-kit/excel</div>
           <div class="package-description">
@@ -381,7 +393,11 @@
               <div class="stat-value">169.6 KB</div>
             </div>
           </div>
-          <a href="packages/excel/dist/stats.html" class="view-button" onclick="event.stopPropagation()">
+          <a
+            href="packages/excel/dist/stats.html"
+            class="view-button"
+            onclick="event.stopPropagation()"
+          >
             查看分析
             <span>→</span>
           </a>

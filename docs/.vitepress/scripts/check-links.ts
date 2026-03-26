@@ -28,7 +28,7 @@ console.log(`\n找到 ${links.length} 个内部链接，开始检查...\n`)
 // 检查每个链接
 const errors: string[] = []
 
-links.forEach(link => {
+links.forEach((link) => {
   // 规范化链接到文件路径
   let filePath = link
 
@@ -55,7 +55,7 @@ links.forEach(link => {
 
 if (errors.length > 0) {
   console.log('\n\n发现以下问题：\n')
-  errors.forEach(err => console.log(err))
+  errors.forEach((err) => console.log(err))
   process.exit(1)
 } else {
   console.log('\n\n✅ 所有链接都有对应的文档文件！')

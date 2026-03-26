@@ -29,10 +29,5 @@ export function useFullscreen() {
     document.body.style.overflow = ''
   })
 
-  return {
-    isFullscreen,
-    enter,
-    exit
-  }
+  return { isFullscreen, enter, exit }
 }
-

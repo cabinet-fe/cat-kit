@@ -1,12 +1,12 @@
 {
   "name": "@cat-kit/be",
-  "type": "module",
   "version": "1.0.0",
   "description": "后端工具",
   "files": [
     "dist",
     "src"
   ],
+  "type": "module",
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -16,9 +16,9 @@
   },
   "dependencies": {
     "@cat-kit/core": "workspace:*",
-    "smol-toml": "^1.6.1",
+    "chalk": "^5.6.2",
     "js-yaml": "^4.1.1",
-    "chalk": "^5.6.2"
+    "smol-toml": "^1.6.1"
   },
   "devDependencies": {
     "@cat-kit/tsconfig": "workspace:*"

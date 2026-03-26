@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest'
 import {
   columnToIndex,
   indexToColumn,
@@ -8,6 +7,7 @@ import {
   excelWidthToPixels,
   ExcelValueError
 } from '@cat-kit/excel/src'
+import { describe, expect, it } from 'vitest'
 
 describe('address', () => {
   describe('columnToIndex / indexToColumn', () => {

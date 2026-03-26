@@ -1,32 +1,15 @@
+import { dfs, bfs, TreeNode, TreeManager, type ITreeNode } from '@cat-kit/core/src'
 import { describe, it, expect } from 'vitest'
-import {
-  dfs,
-  bfs,
-  TreeNode,
-  TreeManager,
-  type ITreeNode
-} from '@cat-kit/core/src'
 
-type DataItem = {
-  id: number
-  name?: string
-  type?: string
-  children?: DataItem[]
-}
+type DataItem = { id: number; name?: string; type?: string; children?: DataItem[] }
 
 describe('树结构', () => {
   describe('dfs - 深度优先遍历函数', () => {
     it('应该按深度优先顺序遍历', () => {
-      const data: DataItem = {
-        id: 1,
-        children: [
-          { id: 2, children: [{ id: 4 }] },
-          { id: 3 }
-        ]
-      }
+      const data: DataItem = { id: 1, children: [{ id: 2, children: [{ id: 4 }] }, { id: 3 }] }
 
       const visited: number[] = []
-      dfs(data, node => {
+      dfs(data, (node) => {
         visited.push(node.id)
       })
 
@@ -34,19 +17,11 @@ describe('树结构', () => {
     })
 
     it('应该提供正确的 index 和 parent', () => {
-      const data: DataItem = {
-        id: 1,
-        children: [{ id: 2 }, { id: 3 }]
-      }
+      const data: DataItem = { id: 1, children: [{ id: 2 }, { id: 3 }] }
 
-      const results: Array<{ id: number; index: number; parentId?: number }> =
-        []
+      const results: Array<{ id: number; index: number; parentId?: number }> = []
       dfs(data, (node, index, parent) => {
-        results.push({
-          id: node.id,
-          index,
-          parentId: parent?.id
-        })
+        results.push({ id: node.id, index, parentId: parent?.id })
       })
 
       expect(results).toEqual([
@@ -57,13 +32,10 @@ describe('树结构', () => {
     })
 
     it('返回 true 时应提前终止遍历', () => {
-      const data: DataItem = {
-        id: 1,
-        children: [{ id: 2 }, { id: 3 }]
-      }
+      const data: DataItem = { id: 1, children: [{ id: 2 }, { id: 3 }] }
 
       const visited: number[] = []
-      const result = dfs(data, node => {
+      const result = dfs(data, (node) => {
         visited.push(node.id)
         if (node.id === 2) return true
       })
@@ -73,15 +45,12 @@ describe('树结构', () => {
     })
 
     it('应该支持自定义 childrenKey', () => {
-      const data = {
-        id: 1,
-        items: [{ id: 2 }, { id: 3 }]
-      }
+      const data = { id: 1, items: [{ id: 2 }, { id: 3 }] }
 
       const visited: number[] = []
       dfs(
         data,
-        node => {
+        (node) => {
           visited.push(node.id as number)
         },
         'items'
@@ -93,16 +62,10 @@ describe('树结构', () => {
 
   describe('bfs - 广度优先遍历函数', () => {
     it('应该按广度优先顺序遍历', () => {
-      const data: DataItem = {
-        id: 1,
-        children: [
-          { id: 2, children: [{ id: 4 }] },
-          { id: 3 }
-        ]
-      }
+      const data: DataItem = { id: 1, children: [{ id: 2, children: [{ id: 4 }] }, { id: 3 }] }
 
       const visited: number[] = []
-      bfs(data, node => {
+      bfs(data, (node) => {
         visited.push(node.id)
       })
 
@@ -110,13 +73,10 @@ describe('树结构', () => {
     })
 
     it('返回 true 时应提前终止遍历', () => {
-      const data: DataItem = {
-        id: 1,
-        children: [{ id: 2 }, { id: 3 }]
-      }
+      const data: DataItem = { id: 1, children: [{ id: 2 }, { id: 3 }] }
 
       const visited: number[] = []
-      const result = bfs(data, node => {
+      const result = bfs(data, (node) => {
         visited.push(node.id)
         if (node.id === 2) return true
       })
@@ -364,10 +324,7 @@ describe('树结构', () => {
     })
 
     it('应该使用 ITreeNode 接口创建节点', () => {
-      const data: DataItem = {
-        id: 1,
-        children: [{ id: 2 }, { id: 3 }]
-      }
+      const data: DataItem = { id: 1, children: [{ id: 2 }, { id: 3 }] }
 
       const tree = new TreeManager(data, {
         createNode: (data, index, depth, parent): ITreeNode<DataItem> => ({
@@ -388,10 +345,7 @@ describe('树结构', () => {
     })
 
     it('构建的节点应该有正确的 depth 和 parent', () => {
-      const data: DataItem = {
-        id: 1,
-        children: [{ id: 2, children: [{ id: 3 }] }]
-      }
+      const data: DataItem = { id: 1, children: [{ id: 2, children: [{ id: 3 }] }] }
 
       const tree = new TreeManager(data, {
         createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
@@ -406,14 +360,10 @@ describe('树结构', () => {
     })
 
     it('应该支持自定义 childrenKey', () => {
-      const data = {
-        id: 1,
-        items: [{ id: 2 }, { id: 3 }]
-      }
+      const data = { id: 1, items: [{ id: 2 }, { id: 3 }] }
 
       const tree = new TreeManager(data, {
-        createNode: (d, index, depth, parent) =>
-          new TreeNode(d as DataItem, index, depth, parent),
+        createNode: (d, index, depth, parent) => new TreeNode(d as DataItem, index, depth, parent),
         childrenKey: 'items'
       })
 
@@ -422,20 +372,14 @@ describe('树结构', () => {
 
     describe('dfs 方法', () => {
       it('应该深度优先遍历', () => {
-        const data: DataItem = {
-          id: 1,
-          children: [
-            { id: 2, children: [{ id: 4 }] },
-            { id: 3 }
-          ]
-        }
+        const data: DataItem = { id: 1, children: [{ id: 2, children: [{ id: 4 }] }, { id: 3 }] }
 
         const tree = new TreeManager(data, {
           createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
         })
 
         const visited: number[] = []
-        tree.dfs(node => {
+        tree.dfs((node) => {
           visited.push(node.data.id)
         })
 
@@ -445,20 +389,14 @@ describe('树结构', () => {
 
     describe('bfs 方法', () => {
       it('应该广度优先遍历', () => {
-        const data: DataItem = {
-          id: 1,
-          children: [
-            { id: 2, children: [{ id: 4 }] },
-            { id: 3 }
-          ]
-        }
+        const data: DataItem = { id: 1, children: [{ id: 2, children: [{ id: 4 }] }, { id: 3 }] }
 
         const tree = new TreeManager(data, {
           createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
         })
 
         const visited: number[] = []
-        tree.bfs(node => {
+        tree.bfs((node) => {
           visited.push(node.data.id)
         })
 
@@ -468,15 +406,12 @@ describe('树结构', () => {
 
     describe('find 方法', () => {
       it('应该查找节点', () => {
-        const data: DataItem = {
-          id: 1,
-          children: [{ id: 2 }, { id: 3, children: [{ id: 4 }] }]
-        }
+        const data: DataItem = { id: 1, children: [{ id: 2 }, { id: 3, children: [{ id: 4 }] }] }
 
         const tree = new TreeManager(data, {
           createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
         })
-        const found = tree.find(node => node.data.id === 4)
+        const found = tree.find((node) => node.data.id === 4)
 
         expect(found).not.toBeNull()
         expect(found?.data.id).toBe(4)
@@ -487,7 +422,7 @@ describe('树结构', () => {
         const tree = new TreeManager(data, {
           createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
         })
-        const found = tree.find(node => node.data.id === 999)
+        const found = tree.find((node) => node.data.id === 999)
 
         expect(found).toBeNull()
       })
@@ -508,19 +443,16 @@ describe('树结构', () => {
         const tree = new TreeManager(data, {
           createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
         })
-        const files = tree.findAll(node => node.data.type === 'file')
+        const files = tree.findAll((node) => node.data.type === 'file')
 
         expect(files).toHaveLength(2)
-        expect(files.map(n => n.data.id)).toEqual([2, 3])
+        expect(files.map((n) => n.data.id)).toEqual([2, 3])
       })
     })
 
     describe('flatten 方法', () => {
       it('应该扁平化节点', () => {
-        const data: DataItem = {
-          id: 1,
-          children: [{ id: 2 }, { id: 3, children: [{ id: 4 }] }]
-        }
+        const data: DataItem = { id: 1, children: [{ id: 2 }, { id: 3, children: [{ id: 4 }] }] }
 
         const tree = new TreeManager(data, {
           createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
@@ -528,7 +460,7 @@ describe('树结构', () => {
         const flattened = tree.flatten()
 
         expect(flattened).toHaveLength(4)
-        expect(flattened.map(n => n.data.id)).toEqual([1, 2, 3, 4])
+        expect(flattened.map((n) => n.data.id)).toEqual([1, 2, 3, 4])
       })
 
       it('应该支持扁平化时过滤', () => {
@@ -544,10 +476,10 @@ describe('树结构', () => {
         const tree = new TreeManager(data, {
           createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
         })
-        const files = tree.flatten(node => node.data.type === 'file')
+        const files = tree.flatten((node) => node.data.type === 'file')
 
         expect(files).toHaveLength(2)
-        expect(files.map(n => n.data.id)).toEqual([2, 4])
+        expect(files.map((n) => n.data.id)).toEqual([2, 4])
       })
     })
 
@@ -555,10 +487,7 @@ describe('树结构', () => {
       it('应该获取所有叶子节点', () => {
         const data: DataItem = {
           id: 1,
-          children: [
-            { id: 2 },
-            { id: 3, children: [{ id: 4 }, { id: 5 }] }
-          ]
+          children: [{ id: 2 }, { id: 3, children: [{ id: 4 }, { id: 5 }] }]
         }
 
         const tree = new TreeManager(data, {
@@ -567,7 +496,7 @@ describe('树结构', () => {
         const leaves = tree.getLeaves()
 
         expect(leaves).toHaveLength(3)
-        expect(leaves.map(n => n.data.id)).toEqual([2, 4, 5])
+        expect(leaves.map((n) => n.data.id)).toEqual([2, 4, 5])
       })
     })
 
@@ -589,9 +518,9 @@ describe('树结构', () => {
         const depth1 = tree.getNodesAtDepth(1)
         const depth2 = tree.getNodesAtDepth(2)
 
-        expect(depth0.map(n => n.data.id)).toEqual([1])
-        expect(depth1.map(n => n.data.id)).toEqual([2, 3])
-        expect(depth2.map(n => n.data.id)).toEqual([4, 5])
+        expect(depth0.map((n) => n.data.id)).toEqual([1])
+        expect(depth1.map((n) => n.data.id)).toEqual([2, 3])
+        expect(depth2.map((n) => n.data.id)).toEqual([4, 5])
       })
     })
 
@@ -599,10 +528,7 @@ describe('树结构', () => {
       it('应该计算最大深度', () => {
         const data: DataItem = {
           id: 1,
-          children: [
-            { id: 2 },
-            { id: 3, children: [{ id: 4, children: [{ id: 5 }] }] }
-          ]
+          children: [{ id: 2 }, { id: 3, children: [{ id: 4, children: [{ id: 5 }] }] }]
         }
 
         const tree = new TreeManager(data, {
@@ -651,23 +577,23 @@ describe('树结构', () => {
           const tree = createExpandableTree(data)
 
           // 初始状态：只有根节点可见
-          let visible = tree.flattenVisible(n => n.expanded)
-          expect(visible.map(n => n.data.id)).toEqual([1])
+          let visible = tree.flattenVisible((n) => n.expanded)
+          expect(visible.map((n) => n.data.id)).toEqual([1])
 
           // 展开根节点
           tree.root.expanded = true
-          visible = tree.flattenVisible(n => n.expanded)
-          expect(visible.map(n => n.data.id)).toEqual([1, 2, 3])
+          visible = tree.flattenVisible((n) => n.expanded)
+          expect(visible.map((n) => n.data.id)).toEqual([1, 2, 3])
 
           // 展开第一个子节点
           tree.root.children![0]!.expanded = true
-          visible = tree.flattenVisible(n => n.expanded)
-          expect(visible.map(n => n.data.id)).toEqual([1, 2, 4, 3])
+          visible = tree.flattenVisible((n) => n.expanded)
+          expect(visible.map((n) => n.data.id)).toEqual([1, 2, 4, 3])
 
           // 展开第二个子节点
           tree.root.children![1]!.expanded = true
-          visible = tree.flattenVisible(n => n.expanded)
-          expect(visible.map(n => n.data.id)).toEqual([1, 2, 4, 3, 5])
+          visible = tree.flattenVisible((n) => n.expanded)
+          expect(visible.map((n) => n.data.id)).toEqual([1, 2, 4, 3, 5])
         })
       })
 
@@ -675,36 +601,30 @@ describe('树结构', () => {
         it('应该获取展开节点的可见后代', () => {
           const data: DataItem = {
             id: 1,
-            children: [
-              { id: 2, children: [{ id: 4 }, { id: 5 }] },
-              { id: 3 }
-            ]
+            children: [{ id: 2, children: [{ id: 4 }, { id: 5 }] }, { id: 3 }]
           }
 
           const tree = createExpandableTree(data)
           tree.root.expanded = true
 
           // 获取根节点的可见后代（子节点都未展开）
-          let descendants = tree.getVisibleDescendants(tree.root, n => n.expanded)
-          expect(descendants.map(n => n.data.id)).toEqual([2, 3])
+          let descendants = tree.getVisibleDescendants(tree.root, (n) => n.expanded)
+          expect(descendants.map((n) => n.data.id)).toEqual([2, 3])
 
           // 展开 id=2 的节点
           tree.root.children![0]!.expanded = true
-          descendants = tree.getVisibleDescendants(tree.root, n => n.expanded)
-          expect(descendants.map(n => n.data.id)).toEqual([2, 4, 5, 3])
+          descendants = tree.getVisibleDescendants(tree.root, (n) => n.expanded)
+          expect(descendants.map((n) => n.data.id)).toEqual([2, 4, 5, 3])
         })
 
         it('叶子节点应返回空数组', () => {
-          const data: DataItem = {
-            id: 1,
-            children: [{ id: 2 }]
-          }
+          const data: DataItem = { id: 1, children: [{ id: 2 }] }
 
           const tree = createExpandableTree(data)
           tree.root.expanded = true
 
           const leaf = tree.root.children![0]!
-          const descendants = tree.getVisibleDescendants(leaf, n => n.expanded)
+          const descendants = tree.getVisibleDescendants(leaf, (n) => n.expanded)
           expect(descendants).toEqual([])
         })
       })
@@ -713,63 +633,54 @@ describe('树结构', () => {
         it('应该返回正确的可见后代数量', () => {
           const data: DataItem = {
             id: 1,
-            children: [
-              { id: 2, children: [{ id: 4 }, { id: 5 }] },
-              { id: 3 }
-            ]
+            children: [{ id: 2, children: [{ id: 4 }, { id: 5 }] }, { id: 3 }]
           }
 
           const tree = createExpandableTree(data)
           tree.root.expanded = true
 
           // 子节点都未展开
-          let count = tree.getVisibleDescendantCount(tree.root, n => n.expanded)
+          let count = tree.getVisibleDescendantCount(tree.root, (n) => n.expanded)
           expect(count).toBe(2)
 
           // 展开 id=2 的节点
           tree.root.children![0]!.expanded = true
-          count = tree.getVisibleDescendantCount(tree.root, n => n.expanded)
+          count = tree.getVisibleDescendantCount(tree.root, (n) => n.expanded)
           expect(count).toBe(4) // 2, 4, 5, 3
         })
       })
 
       describe('增量更新使用示例', () => {
         it('应该正确模拟展开/折叠操作', () => {
-          const data: DataItem = {
-            id: 1,
-            children: [
-              { id: 2, children: [{ id: 4 }] },
-              { id: 3 }
-            ]
-          }
+          const data: DataItem = { id: 1, children: [{ id: 2, children: [{ id: 4 }] }, { id: 3 }] }
 
           const tree = createExpandableTree(data)
           tree.root.expanded = true
 
           // 初始化扁平列表
-          let flatList = tree.flattenVisible(n => n.expanded)
-          expect(flatList.map(n => n.data.id)).toEqual([1, 2, 3])
+          let flatList = tree.flattenVisible((n) => n.expanded)
+          expect(flatList.map((n) => n.data.id)).toEqual([1, 2, 3])
 
           // 模拟展开 id=2 的节点
           const nodeToExpand = tree.root.children![0]!
           nodeToExpand.expanded = true
 
           // 获取需要插入的节点
-          const toInsert = tree.getVisibleDescendants(nodeToExpand, n => n.expanded)
-          expect(toInsert.map(n => n.data.id)).toEqual([4])
+          const toInsert = tree.getVisibleDescendants(nodeToExpand, (n) => n.expanded)
+          expect(toInsert.map((n) => n.data.id)).toEqual([4])
 
           // 找到节点在列表中的位置并插入
           const nodeIndex = flatList.indexOf(nodeToExpand)
           flatList.splice(nodeIndex + 1, 0, ...toInsert)
-          expect(flatList.map(n => n.data.id)).toEqual([1, 2, 4, 3])
+          expect(flatList.map((n) => n.data.id)).toEqual([1, 2, 4, 3])
 
           // 模拟折叠 id=2 的节点
-          const removeCount = tree.getVisibleDescendantCount(nodeToExpand, n => n.expanded)
+          const removeCount = tree.getVisibleDescendantCount(nodeToExpand, (n) => n.expanded)
           expect(removeCount).toBe(1)
 
           nodeToExpand.expanded = false
           flatList.splice(nodeIndex + 1, removeCount)
-          expect(flatList.map(n => n.data.id)).toEqual([1, 2, 3])
+          expect(flatList.map((n) => n.data.id)).toEqual([1, 2, 3])
         })
       })
     })

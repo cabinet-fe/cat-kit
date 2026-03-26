@@ -25,10 +25,5 @@ export function getMemoryInfo(): MemoryInfo {
   const used = total - free
   const usedPercent = total === 0 ? 0 : (used / total) * 100
 
-  return {
-    total,
-    free,
-    used,
-    usedPercent
-  }
+  return { total, free, used, usedPercent }
 }

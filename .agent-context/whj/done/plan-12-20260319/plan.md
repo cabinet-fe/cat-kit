@@ -9,6 +9,7 @@
 ### 边界定义
 
 **包含（提取到主题包）：**
+
 - CSS 变量系统（墨色系统、纸张系统、VP 变量覆盖、暗色模式）
 - 全部组件样式覆盖（按钮、卡片、导航栏、侧边栏、代码块、提示框、首页布局等）
 - 响应式样式、滚动条美化、`prefers-reduced-motion` 支持
@@ -23,6 +24,7 @@
 - Vite 插件：`import-examples.ts`（importExamples）
 
 **不包含（保留在 docs 项目）：**
+
 - `config.ts`（含项目专属 nav、head、social links 等）
 - `sidebar.ts`
 - `shared.ts`（DOCS_DIR / EXAMPLES_DIR 常量，与 demo 系统紧耦合，需改为配置化）
@@ -68,6 +70,7 @@ packages/vitepress-theme/
 ```
 
 `package.json` 关键配置：
+
 - `name`: `@cat-kit/vitepress-theme`
 - `type`: `module`
 - `exports`: 双入口（`dist` + `src`），额外导出 `./config` 子路径供用户 config 中使用

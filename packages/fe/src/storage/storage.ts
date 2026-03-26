@@ -1,10 +1,6 @@
 import { getDataType } from '@cat-kit/core'
 
-type Callback<T = any> = (
-  key: StorageKey<T>,
-  value?: T,
-  temp?: { value: T; exp: number }
-) => void
+type Callback<T = any> = (key: StorageKey<T>, value?: T, temp?: { value: T; exp: number }) => void
 
 export interface StorageKey<T> extends String {}
 
@@ -15,13 +11,7 @@ export function storageKey<T>(str: string): StorageKey<T> {
 export type ExtractStorageKey<T> = T extends StorageKey<infer K> ? K : never
 
 export class WebStorage {
-  static enabledType: Set<string> = new Set([
-    'string',
-    'number',
-    'object',
-    'boolean',
-    'bigint'
-  ])
+  static enabledType: Set<string> = new Set(['string', 'number', 'object', 'boolean', 'bigint'])
 
   private storage: Storage
 
@@ -52,7 +42,7 @@ export class WebStorage {
 
     // 如果有绑定回调则此处出发回调
     const cb = this.callbacks[key as string]
-    cb?.forEach(fn => fn(key, value, temp))
+    cb?.forEach((fn) => fn(key, value, temp))
 
     this.storage.setItem(key as string, JSON.stringify(temp))
 
@@ -62,9 +52,7 @@ export class WebStorage {
   // 获取对应的字段
   get<T>(key: StorageKey<T>): T | null
   get<T>(key: StorageKey<T>, defaultValue: T): T
-  get<T extends [...any[]]>(
-    keys: [...T]
-  ): { [I in keyof T]: ExtractStorageKey<T[I]> }
+  get<T extends [...any[]]>(keys: [...T]): { [I in keyof T]: ExtractStorageKey<T[I]> }
   get(key: any, defaultValue: any = null) {
     let type = getDataType(key)
     if (type === 'string') {
@@ -87,9 +75,7 @@ export class WebStorage {
       return key.map((v: string) => this.get(v))
     }
 
-    throw Error(
-      `get第一个参数的类型应该是string或者array, 但传入的值是${type}类型`
-    )
+    throw Error(`get第一个参数的类型应该是string或者array, 但传入的值是${type}类型`)
   }
 
   /**
@@ -127,7 +113,7 @@ export class WebStorage {
     } else if (typeof item === 'string') {
       this.storage.removeItem(item)
     } else if (Array.isArray(item)) {
-      item.forEach(key => this.remove(key))
+      item.forEach((key) => this.remove(key))
     }
     return this
   }

@@ -1,7 +1,8 @@
 import { $ } from 'execa'
+
 import { PublishError } from '../errors'
-import type { PublishOptions, PublishResult } from './types'
 import { withResolvedProtocols, withResolvedProtocolsBatch } from './protocol'
+import type { PublishOptions, PublishResult } from './types'
 
 /**
  * 发布 npm 包
@@ -54,9 +55,7 @@ import { withResolvedProtocols, withResolvedProtocolsBatch } from './protocol'
  * })
  * ```
  */
-export async function publishPackage(
-  options: PublishOptions
-): Promise<PublishResult> {
+export async function publishPackage(options: PublishOptions): Promise<PublishResult> {
   const {
     cwd,
     workspace,
@@ -121,11 +120,7 @@ export async function publishPackage(
   if (resolveProtocol) {
     // 批量发布模式：使用 resolveProtocolDirs 指定的目录列表
     if ((workspace || workspaces) && resolveProtocolDirs?.length) {
-      return withResolvedProtocolsBatch(
-        resolveProtocolDirs,
-        resolveProtocol,
-        doPublish
-      )
+      return withResolvedProtocolsBatch(resolveProtocolDirs, resolveProtocol, doPublish)
     }
     // 单包发布模式：直接使用 cwd
     if (!workspace && !workspaces) {

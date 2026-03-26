@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import DefaultTheme from 'vitepress/theme'
 import { useData } from 'vitepress'
+import DefaultTheme from 'vitepress/theme'
 import { computed, defineAsyncComponent } from 'vue'
 
-const CloudPatterns = defineAsyncComponent(
-  () => import('./CloudPatterns.vue')
-)
-const SealStamp = defineAsyncComponent(
-  () => import('./SealStamp.vue')
-)
-const BrushStrokes = defineAsyncComponent(
-  () => import('./BrushStrokes.vue')
-)
+const CloudPatterns = defineAsyncComponent(() => import('./CloudPatterns.vue'))
+const SealStamp = defineAsyncComponent(() => import('./SealStamp.vue'))
+const BrushStrokes = defineAsyncComponent(() => import('./BrushStrokes.vue'))
 
 const { Layout: DefaultLayout } = DefaultTheme
 const { frontmatter } = useData()

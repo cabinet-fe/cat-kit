@@ -1,4 +1,5 @@
 import { getDataType } from '@cat-kit/core'
+
 import type { RequestConfig, RequestMethod } from '../types'
 
 export function shouldSendBody(method: RequestMethod): boolean {
@@ -6,7 +7,7 @@ export function shouldSendBody(method: RequestMethod): boolean {
 }
 
 export function hasContentType(headers: Record<string, string>): boolean {
-  return Object.keys(headers).some(key => key.toLowerCase() === 'content-type')
+  return Object.keys(headers).some((key) => key.toLowerCase() === 'content-type')
 }
 
 export function buildRequestBody(
@@ -28,4 +29,3 @@ export function buildRequestBody(
 
   return body as BodyInit
 }
-

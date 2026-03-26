@@ -16,9 +16,7 @@ class CatString {
    * ```
    */
   camelCase(type: 'lower' | 'upper' = 'lower'): string {
-    const camelStr = this.raw.replace(/(?:^|[-_])(\w)/g, (_, letter) =>
-      letter.toUpperCase()
-    )
+    const camelStr = this.raw.replace(/(?:^|[-_])(\w)/g, (_, letter) => letter.toUpperCase())
 
     if (type === 'lower') {
       // 小驼峰：第一个字符小写
@@ -76,9 +74,7 @@ export const $str = {
       // 分离协议和路径部分
       const [protocol, hostname] = firstPath.split('://') as [string, string]
       const normalizedFirstPath = hostname.replace(/\/+$/, '') // 移除尾部多余斜杠
-      const joinedPaths = [normalizedFirstPath, ...paths]
-        .join('/')
-        .replace(/\/+/g, '/') // 替换连续斜杠
+      const joinedPaths = [normalizedFirstPath, ...paths].join('/').replace(/\/+/g, '/') // 替换连续斜杠
 
       return `${protocol}://${joinedPaths}`
     } else {
@@ -94,4 +90,3 @@ export const $str = {
     }
   }
 }
-

@@ -5,7 +5,7 @@ import type { PackageInfo, CircularDependencyResult, CircularChain } from './typ
  */
 function buildDependencyMap(packages: PackageInfo[]): Map<string, string[]> {
   const graph = new Map<string, string[]>()
-  const internalPackageNames = new Set(packages.map(p => p.name))
+  const internalPackageNames = new Set(packages.map((p) => p.name))
 
   for (const p of packages) {
     const deps: string[] = []
@@ -54,9 +54,7 @@ function buildDependencyMap(packages: PackageInfo[]): Map<string, string[]> {
  * }
  * ```
  */
-export function checkCircularDependencies(
-  packages: PackageInfo[]
-): CircularDependencyResult {
+export function checkCircularDependencies(packages: PackageInfo[]): CircularDependencyResult {
   const graph = buildDependencyMap(packages)
 
   let index = 0
@@ -99,10 +97,7 @@ export function checkCircularDependencies(
       } while (w !== node)
 
       if (component.length > 1) {
-        cycles.push({
-          chain: component.reverse(),
-          startIndex: 0
-        })
+        cycles.push({ chain: component.reverse(), startIndex: 0 })
       }
     }
   }
@@ -113,8 +108,5 @@ export function checkCircularDependencies(
     }
   }
 
-  return {
-    hasCircular: cycles.length > 0,
-    cycles
-  }
+  return { hasCircular: cycles.length > 0, cycles }
 }

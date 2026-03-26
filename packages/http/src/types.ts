@@ -1,11 +1,4 @@
-export type RequestMethod =
-  | 'GET'
-  | 'POST'
-  | 'PUT'
-  | 'DELETE'
-  | 'PATCH'
-  | 'HEAD'
-  | 'OPTIONS'
+export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'
 
 /** 请求客户端配置 */
 export interface ClientConfig {
@@ -98,12 +91,7 @@ export interface HTTPResponse<T = any> {
   raw?: Response | any
 }
 
-export type HttpErrorCode =
-  | 'TIMEOUT'
-  | 'ABORTED'
-  | 'NETWORK'
-  | 'PARSE'
-  | 'UNKNOWN'
+export type HttpErrorCode = 'TIMEOUT' | 'ABORTED' | 'NETWORK' | 'PARSE' | 'UNKNOWN'
 
 export interface HTTPErrorOptions<T = any> {
   code: HttpErrorCode
@@ -177,8 +165,5 @@ export interface ClientPlugin {
    * - 请求链中出现错误时触发
    * - 不返回值，仅用于记录、上报或副作用处理
    */
-  onError?(
-    error: unknown,
-    context: RequestContext
-  ): Promise<void> | void
+  onError?(error: unknown, context: RequestContext): Promise<void> | void
 }

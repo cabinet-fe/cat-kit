@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, toRef } from 'vue'
 import { Circle, Info, AlertTriangle, XCircle, Bug } from 'lucide-vue-next'
+import { ref, toRef } from 'vue'
+
 import { useConsoleInterceptor, type LogEntry } from '../composables'
 
 const props = defineProps<{
@@ -21,8 +22,7 @@ function formatValue(value: unknown): string {
   if (value === null) return 'null'
   if (value === undefined) return 'undefined'
   if (typeof value === 'string') return value
-  if (typeof value === 'number' || typeof value === 'boolean')
-    return String(value)
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
   if (typeof value === 'function') return `ƒ ${value.name || 'anonymous'}()`
   if (value instanceof Error) return `${value.name}: ${value.message}`
 
@@ -57,20 +57,14 @@ defineExpose({ clearLogs, logs })
 <template>
   <div ref="consoleRef" class="console-logs">
     <div v-if="logs.length === 0" class="console-empty">暂无日志输出</div>
-    <div
-      v-for="log in logs"
-      :key="log.id"
-      class="console-entry"
-      :class="`log-${log.type}`"
-    >
+    <div v-for="log in logs" :key="log.id" class="console-entry" :class="`log-${log.type}`">
       <span class="log-icon">
         <component :is="getLogIcon(log.type)" :size="12" />
       </span>
       <span class="log-content">
         <template v-for="(arg, index) in log.args" :key="index">
           <span class="log-value">{{ formatValue(arg) }}</span>
-          <span v-if="index < log.args.length - 1" class="log-separator">
-          </span>
+          <span v-if="index < log.args.length - 1" class="log-separator"> </span>
         </template>
       </span>
     </div>

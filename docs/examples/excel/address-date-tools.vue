@@ -82,7 +82,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
 import {
   columnToIndex,
   indexToColumn,
@@ -92,10 +91,9 @@ import {
   excelSerialToDate,
   type DateSystem
 } from '@cat-kit/excel'
+import { computed, ref } from 'vue'
 
-type Result<T> =
-  | { ok: true; value: T }
-  | { ok: false; error: string }
+type Result<T> = { ok: true; value: T } | { ok: false; error: string }
 
 const columnLabel = ref('AA')
 const columnIndex = ref(27)
@@ -123,7 +121,9 @@ function capture<T>(fn: () => T): Result<T> {
 const columnLabelResult = computed(() => capture(() => columnToIndex(columnLabel.value)))
 const columnIndexResult = computed(() => capture(() => indexToColumn(columnIndex.value)))
 const addressResult = computed(() => capture(() => parseCellAddress(addressText.value)))
-const formatResult = computed(() => capture(() => formatCellAddress(rowIndex.value, colIndex.value)))
+const formatResult = computed(() =>
+  capture(() => formatCellAddress(rowIndex.value, colIndex.value))
+)
 
 const serialResult = computed(() =>
   capture(() => {

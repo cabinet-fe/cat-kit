@@ -1,5 +1,4 @@
 import type { RequestConfig, HTTPResponse } from '../types'
-
 import { HTTPError } from '../types'
 import { HttpEngine } from './engine'
 import { buildRequestBody } from './shared'

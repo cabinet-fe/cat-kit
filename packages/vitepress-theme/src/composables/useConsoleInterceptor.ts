@@ -19,7 +19,7 @@ function getOriginalConsole(): Record<ConsoleMethod, typeof console.log> {
   const win = window as unknown as Record<string, unknown>
   if (!win[ORIGINAL_CONSOLE_KEY]) {
     win[ORIGINAL_CONSOLE_KEY] = Object.fromEntries(
-      CONSOLE_METHODS.map(method => [method, console[method].bind(console)])
+      CONSOLE_METHODS.map((method) => [method, console[method].bind(console)])
     )
   }
   return win[ORIGINAL_CONSOLE_KEY] as Record<ConsoleMethod, typeof console.log>
@@ -47,12 +47,7 @@ export function useConsoleInterceptor(options: UseConsoleInterceptorOptions) {
     const originalConsole = getOriginalConsole()
     return (...args: unknown[]) => {
       if (isIntercepting) {
-        logs.value.push({
-          id: logId++,
-          type,
-          args,
-          timestamp: Date.now()
-        })
+        logs.value.push({ id: logId++, type, args, timestamp: Date.now() })
         // 自动滚动到底部
         nextTick(() => {
           if (containerRef?.value) {
@@ -67,7 +62,7 @@ export function useConsoleInterceptor(options: UseConsoleInterceptorOptions) {
   const setupInterceptors = () => {
     if (isIntercepting) return
     isIntercepting = true
-    CONSOLE_METHODS.forEach(method => {
+    CONSOLE_METHODS.forEach((method) => {
       console[method] = createInterceptor(method)
     })
   }
@@ -76,7 +71,7 @@ export function useConsoleInterceptor(options: UseConsoleInterceptorOptions) {
     if (!isIntercepting) return
     isIntercepting = false
     const originalConsole = getOriginalConsole()
-    CONSOLE_METHODS.forEach(method => {
+    CONSOLE_METHODS.forEach((method) => {
       console[method] = originalConsole[method]
     })
   }
@@ -88,7 +83,7 @@ export function useConsoleInterceptor(options: UseConsoleInterceptorOptions) {
   // 监听 active 状态切换拦截
   watch(
     active,
-    isActive => {
+    (isActive) => {
       if (isActive) {
         setupInterceptors()
       } else {
@@ -101,9 +96,5 @@ export function useConsoleInterceptor(options: UseConsoleInterceptorOptions) {
   // 组件卸载时恢复
   onUnmounted(restoreConsole)
 
-  return {
-    logs,
-    clearLogs
-  }
+  return { logs, clearLogs }
 }
-

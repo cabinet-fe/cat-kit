@@ -44,17 +44,9 @@ stop() // 取消观察
 ```typescript
 import { Observable } from '@cat-kit/core'
 
-type QueueState = {
-  pending: number
-  running: number
-  failed: number
-}
+type QueueState = { pending: number; running: number; failed: number }
 
-const queue = new Observable<QueueState, keyof QueueState>({
-  pending: 0,
-  running: 0,
-  failed: 0
-})
+const queue = new Observable<QueueState, keyof QueueState>({ pending: 0, running: 0, failed: 0 })
 
 // 记录状态变更，写入日志/指标
 const stop = queue.observe(['pending', 'running', 'failed'], ([p, r, f]) => {
@@ -75,4 +67,3 @@ queue.destroyAll()
 - 有生命周期的场景记得调用取消函数或 `destroyAll()`。
 - 批量修改优先用 `setState`，减少重复触发。
 - `sync` 会阻塞主线程，仅在需要严格时序时启用。
-

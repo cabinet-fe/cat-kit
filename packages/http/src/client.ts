@@ -1,6 +1,8 @@
 import { $str } from '@cat-kit/core'
 
 import type { HttpEngine } from './engine/engine'
+import { FetchEngine } from './engine/fetch'
+import { XHREngine } from './engine/xhr'
 import type {
   ClientConfig,
   RequestConfig,
@@ -8,9 +10,6 @@ import type {
   AliasRequestConfig,
   RequestContext
 } from './types'
-
-import { FetchEngine } from './engine/fetch'
-import { XHREngine } from './engine/xhr'
 
 /**
  * HTTP 请求客户端

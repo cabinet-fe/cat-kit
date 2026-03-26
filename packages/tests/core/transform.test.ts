@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest'
 import {
   str2u8a,
   u8a2str,
@@ -10,6 +9,7 @@ import {
   query2obj,
   transform
 } from '@cat-kit/core/src'
+import { describe, it, expect } from 'vitest'
 
 describe('数据转换函数', () => {
   describe('str2u8a 和 u8a2str', () => {
@@ -107,9 +107,7 @@ describe('数据转换函数', () => {
       const converted = base642u8a(base64)
 
       expect(converted.length).toBe(largeArray.length)
-      expect(Array.from(converted.slice(0, 10))).toEqual(
-        Array.from(largeArray.slice(0, 10))
-      )
+      expect(Array.from(converted.slice(0, 10))).toEqual(Array.from(largeArray.slice(0, 10)))
     })
   })
 
@@ -127,21 +125,14 @@ describe('数据转换函数', () => {
       const query = 'name=John&age=30&city=Beijing'
       const obj = query2obj(query)
 
-      expect(obj).toEqual({
-        name: 'John',
-        age: 30,
-        city: 'Beijing'
-      })
+      expect(obj).toEqual({ name: 'John', age: 30, city: 'Beijing' })
     })
 
     it('应该处理带 ? 的查询字符串', () => {
       const query = '?name=John&age=30'
       const obj = query2obj(query)
 
-      expect(obj).toEqual({
-        name: 'John',
-        age: 30
-      })
+      expect(obj).toEqual({ name: 'John', age: 30 })
     })
 
     it('应该处理空查询字符串', () => {
@@ -171,19 +162,11 @@ describe('数据转换函数', () => {
       const query = 'validkey=value&invalidparam&anotherkey=value2'
       const obj = query2obj(query)
 
-      expect(obj).toEqual({
-        validkey: 'value',
-        anotherkey: 'value2'
-      })
+      expect(obj).toEqual({ validkey: 'value', anotherkey: 'value2' })
     })
 
     it('应该无损还原原始类型', () => {
-      const original = {
-        num: 1,
-        bool: true,
-        arr: [1, 'a'],
-        nested: { x: 1 }
-      }
+      const original = { num: 1, bool: true, arr: [1, 'a'], nested: { x: 1 } }
 
       const query = obj2query(original)
       const parsed = query2obj(query)
@@ -196,8 +179,8 @@ describe('数据转换函数', () => {
     it('应该按顺序执行转换链', () => {
       const data = 5
       const result = transform(data, [
-        (x: number) => x * 2,  // 10
-        (x: number) => x + 3,  // 13
+        (x: number) => x * 2, // 10
+        (x: number) => x + 3, // 13
         (x: number) => x.toString() // "13"
       ])
 
@@ -214,9 +197,9 @@ describe('数据转换函数', () => {
     it('应该处理复杂的转换链', () => {
       const data = { value: 10 }
       const result = transform(data, [
-        (obj: any) => obj.value,           // 10
-        (x: number) => x * 2,              // 20
-        (x: number) => ({ result: x }),    // { result: 20 }
+        (obj: any) => obj.value, // 10
+        (x: number) => x * 2, // 20
+        (x: number) => ({ result: x }), // { result: 20 }
         (obj: any) => obj.result.toString() // "20"
       ])
 
@@ -226,13 +209,12 @@ describe('数据转换函数', () => {
     it('应该处理类型转换', () => {
       const data = [1, 2, 3]
       const result = transform(data, [
-        (arr: number[]) => arr.map(x => x * 2),    // [2, 4, 6]
+        (arr: number[]) => arr.map((x) => x * 2), // [2, 4, 6]
         (arr: number[]) => arr.reduce((a, b) => a + b, 0), // 12
-        (x: number) => x.toString()                // "12"
+        (x: number) => x.toString() // "12"
       ])
 
       expect(result).toBe('12')
     })
   })
 })
-

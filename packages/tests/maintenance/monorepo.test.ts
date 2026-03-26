@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest'
-import { Monorepo } from '@cat-kit/maintenance/src'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+import { Monorepo } from '@cat-kit/maintenance/src'
+import { describe, expect, it } from 'vitest'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const testRepoRoot = path.resolve(__dirname, '../../..')
@@ -12,7 +13,6 @@ describe('Monorepo 类', () => {
       const repo = new Monorepo(testRepoRoot)
       expect(repo).toBeInstanceOf(Monorepo)
     })
-
 
     it('rootDir 不是绝对路径时应抛出错误', () => {
       expect(() => new Monorepo('relative/path')).toThrow('rootDir 必须是绝对路径')
@@ -37,7 +37,7 @@ describe('Monorepo 类', () => {
 
     it('应包含已知的包', () => {
       const repo = new Monorepo(testRepoRoot)
-      const names = repo.workspaces.map(ws => ws.name)
+      const names = repo.workspaces.map((ws) => ws.name)
 
       expect(names).toContain('@cat-kit/core')
       expect(names).toContain('@cat-kit/be')

@@ -1,4 +1,5 @@
 import { unzipSync } from 'fflate'
+
 import { ExcelParseError } from '../errors'
 import type { WorkbookInput } from '../types'
 
@@ -19,9 +20,7 @@ export async function toUint8Array(input: WorkbookInput): Promise<Uint8Array> {
   throw new ExcelParseError('Unsupported workbook input type', 'UNSUPPORTED_INPUT')
 }
 
-export async function readZipEntries(
-  input: WorkbookInput
-): Promise<Map<string, Uint8Array>> {
+export async function readZipEntries(input: WorkbookInput): Promise<Map<string, Uint8Array>> {
   const bytes = await toUint8Array(input)
   try {
     const files = unzipSync(bytes)
@@ -38,10 +37,7 @@ export async function readZipEntries(
   }
 }
 
-export function getZipTextEntry(
-  entries: Map<string, Uint8Array>,
-  path: string
-): string
+export function getZipTextEntry(entries: Map<string, Uint8Array>, path: string): string
 export function getZipTextEntry(
   entries: Map<string, Uint8Array>,
   path: string,
@@ -63,18 +59,11 @@ export function getZipTextEntry(
 }
 
 function isReadableStream(input: unknown): input is ReadableStream<Uint8Array> {
-  return (
-    typeof ReadableStream !== 'undefined' &&
-    input instanceof ReadableStream
-  )
+  return typeof ReadableStream !== 'undefined' && input instanceof ReadableStream
 }
 
 function isAsyncIterable(input: unknown): input is AsyncIterable<Uint8Array> {
-  return (
-    typeof input === 'object' &&
-    input !== null &&
-    Symbol.asyncIterator in input
-  )
+  return typeof input === 'object' && input !== null && Symbol.asyncIterator in input
 }
 
 async function readReadableStream(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {

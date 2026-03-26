@@ -8,20 +8,15 @@
       <span>进度：{{ progress }}%</span>
       <span class="status">{{ status }}</span>
     </div>
-    <var-button
-      block
-      type="primary"
-      :loading="loading"
-      @click="handleSave"
-    >
+    <var-button block type="primary" :loading="loading" @click="handleSave">
       开始流式保存
     </var-button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
 import { createWritableStream } from '@cat-kit/fe'
+import { ref } from 'vue'
 
 const progress = ref(0)
 const status = ref('')
@@ -39,7 +34,7 @@ const handleSave = async () => {
   const stream = createWritableStream({
     filename: 'cat-kit-stream-demo.txt',
     size: totalSize,
-    onProgress: bytes => {
+    onProgress: (bytes) => {
       progress.value = Math.min(100, Math.round((bytes / totalSize) * 100))
     }
   })

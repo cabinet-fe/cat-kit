@@ -1,19 +1,19 @@
 {
   "name": "build",
-  "devDependencies": {
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "@cat-kit/maintenance": "workspace:*",
-    "@cat-kit/tsconfig": "workspace:*",
-    "@inquirer/prompts": "^8.3.2",
-    "chalk": "^5.6.2",
-    "execa": "^9.6.1"
-  },
   "scripts": {
     "release": "bun release.ts",
     "analyze": "bun stats.tsx",
     "bundle": "bun bundle.ts"
+  },
+  "devDependencies": {
+    "@cat-kit/maintenance": "workspace:*",
+    "@cat-kit/tsconfig": "workspace:*",
+    "@inquirer/prompts": "^8.3.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "chalk": "^5.6.2",
+    "execa": "^9.6.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   }
 }

@@ -63,8 +63,15 @@ interface RequestConfig {
 
 ```ts
 interface ClientPlugin {
-  beforeRequest?(url: string, config: RequestConfig): PluginHookResult | void | Promise<PluginHookResult | void>
-  afterRespond?(response: HTTPResponse, url: string, config: RequestConfig): HTTPResponse | void | Promise<HTTPResponse | void>
+  beforeRequest?(
+    url: string,
+    config: RequestConfig
+  ): PluginHookResult | void | Promise<PluginHookResult | void>
+  afterRespond?(
+    response: HTTPResponse,
+    url: string,
+    config: RequestConfig
+  ): HTTPResponse | void | Promise<HTTPResponse | void>
   onError?(error: unknown, context: RequestContext): void | Promise<void>
 }
 ```

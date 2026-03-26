@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { Worksheet, ExcelSchemaError, ExcelValueError } from '@cat-kit/excel/src'
+import { describe, expect, it } from 'vitest'
 
 describe('Worksheet', () => {
   it('应在构造时规范化名称并保留 options', () => {
@@ -75,7 +75,7 @@ describe('Worksheet', () => {
     sheet.row(1).setCell(4, 'D1')
     sheet.setColumn(6, { width: 12 })
 
-    expect(sheet.getRows().map(row => row.index)).toEqual([1, 5])
+    expect(sheet.getRows().map((row) => row.index)).toEqual([1, 5])
     expect(sheet.maxRowIndex()).toBe(5)
     expect(sheet.maxColIndex()).toBe(6)
   })

@@ -4,8 +4,26 @@
       <!-- 移除 seal-noise 和 rough-paper 滤镜，保留印章图形 -->
       <g transform="rotate(-5, 50, 50)">
         <!-- 印章边框 -->
-        <rect x="5" y="5" width="90" height="90" rx="4" fill="none" stroke="currentColor" stroke-width="4" />
-        <rect x="12" y="12" width="76" height="76" rx="2" fill="none" stroke="currentColor" stroke-width="2" />
+        <rect
+          x="5"
+          y="5"
+          width="90"
+          height="90"
+          rx="4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="4"
+        />
+        <rect
+          x="12"
+          y="12"
+          width="76"
+          height="76"
+          rx="2"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        />
 
         <!-- 印章文字：喵喵工具 -->
         <g fill="currentColor">
@@ -23,7 +41,16 @@
           <rect x="20" y="76" width="25" height="4" />
 
           <!-- 具 (右下) -->
-          <rect x="55" y="55" width="25" height="25" rx="2" fill="none" stroke="currentColor" stroke-width="3"/>
+          <rect
+            x="55"
+            y="55"
+            width="25"
+            height="25"
+            rx="2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+          />
           <rect x="55" y="65" width="25" height="3" />
           <rect x="66" y="55" width="3" height="25" />
         </g>

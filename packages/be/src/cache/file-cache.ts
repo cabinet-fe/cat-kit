@@ -110,13 +110,8 @@ export class FileCache<V> {
    */
   async set(key: string, value: V, ttl?: number): Promise<void> {
     const ttlValue = ttl ?? this.ttl
-    const expiresAt =
-      typeof ttlValue === 'number' ? Date.now() + ttlValue : undefined
-    const entry: FileCacheEntry<V> = {
-      value,
-      createdAt: Date.now(),
-      expiresAt
-    }
+    const expiresAt = typeof ttlValue === 'number' ? Date.now() + ttlValue : undefined
+    const entry: FileCacheEntry<V> = { value, createdAt: Date.now(), expiresAt }
 
     const filePath = this.getFilePath(key)
     await ensureDir(this.dir)

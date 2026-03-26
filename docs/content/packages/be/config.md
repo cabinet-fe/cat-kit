@@ -36,6 +36,7 @@ const finalConfig = mergeConfig(fileConfig, { port: env.PORT })
 加载 `.env` 文件集合，支持多环境配置。可以自动加载多个环境文件，后加载的文件会覆盖先加载的文件。
 
 **适用场景：**
+
 - 应用启动时加载环境变量
 - 多环境配置管理（开发、测试、生产）
 - 敏感信息管理（不提交到版本控制）
@@ -50,25 +51,17 @@ import { loadEnv } from '@cat-kit/be'
 const env = await loadEnv()
 
 // 指定运行模式（如 development、production）
-const env = await loadEnv({
-  mode: 'production'
-})
+const env = await loadEnv({ mode: 'production' })
 // 加载顺序：.env -> .env.local -> .env.production -> .env.production.local
 
 // 自定义文件列表
-const env = await loadEnv({
-  files: ['.env', '.env.custom']
-})
+const env = await loadEnv({ files: ['.env', '.env.custom'] })
 
 // 不写入 process.env（只返回对象）
-const env = await loadEnv({
-  injectToProcess: false
-})
+const env = await loadEnv({ injectToProcess: false })
 
 // 覆盖已存在的环境变量
-const env = await loadEnv({
-  override: true
-})
+const env = await loadEnv({ override: true })
 ```
 
 #### API参考
@@ -112,6 +105,7 @@ function loadEnv(options?: LoadEnvOptions): Promise<EnvRecord>
 根据 schema 校验并转换环境变量，提供类型安全的环境变量访问。支持多种数据类型转换，包括数字、布尔值、JSON 和数组。
 
 **适用场景：**
+
 - 环境变量类型转换和验证
 - 配置项默认值设置
 - 必需配置项检查
@@ -130,10 +124,10 @@ const config = parseEnv({
   API_KEYS: { type: 'array', delimiter: ',' }
 })
 
-console.log(config.PORT)      // number
-console.log(config.NODE_ENV)  // string
-console.log(config.DEBUG)      // boolean
-console.log(config.API_KEYS)   // string[]
+console.log(config.PORT) // number
+console.log(config.NODE_ENV) // string
+console.log(config.DEBUG) // boolean
+console.log(config.API_KEYS) // string[]
 ```
 
 #### 高级用法
@@ -141,10 +135,7 @@ console.log(config.API_KEYS)   // string[]
 ```typescript
 // JSON 类型
 const config = parseEnv({
-  DATABASE_CONFIG: {
-    type: 'json',
-    default: { host: 'localhost', port: 5432 }
-  }
+  DATABASE_CONFIG: { type: 'json', default: { host: 'localhost', port: 5432 } }
 })
 // config.DATABASE_CONFIG 是解析后的对象
 
@@ -166,19 +157,13 @@ const config = parseEnv({
 const config = parseEnv({
   API_URL: {
     type: 'string',
-    transform: (value) => value.endsWith('/') ? value.slice(0, -1) : value
+    transform: (value) => (value.endsWith('/') ? value.slice(0, -1) : value)
   }
 })
 
 // 从自定义数据源解析
 const customSource = { PORT: '8080', DEBUG: 'true' }
-const config = parseEnv(
-  {
-    PORT: { type: 'number' },
-    DEBUG: { type: 'boolean' }
-  },
-  customSource
-)
+const config = parseEnv({ PORT: { type: 'number' }, DEBUG: { type: 'boolean' } }, customSource)
 ```
 
 #### API参考
@@ -204,8 +189,13 @@ function parseEnv<T extends Record<string, any>>(
 ```typescript
 interface EnvDefinition<T> {
   // 类型：内置类型字符串、自定义转换函数
-  type?: 'string' | 'number' | 'boolean' | 'json' | 'array'
-        | ((value: string | undefined, key: string) => T)
+  type?:
+    | 'string'
+    | 'number'
+    | 'boolean'
+    | 'json'
+    | 'array'
+    | ((value: string | undefined, key: string) => T)
 
   // 默认值
   default?: T
@@ -270,6 +260,7 @@ const env = parseEnvFile(content)
 加载并解析配置文件，支持 JSON、YAML 和 TOML 格式。可以合并默认值，支持自定义解析器和验证函数。
 
 **适用场景：**
+
 - 应用配置文件加载
 - 多环境配置文件管理
 - 配置验证和默认值合并
@@ -289,17 +280,10 @@ const config = await loadConfig('./config.yaml')
 const config = await loadConfig('./config.toml')
 
 // 指定格式
-const config = await loadConfig('./config', {
-  format: 'yaml'
-})
+const config = await loadConfig('./config', { format: 'yaml' })
 
 // 合并默认值
-const config = await loadConfig('./config.json', {
-  defaults: {
-    port: 3000,
-    host: 'localhost'
-  }
-})
+const config = await loadConfig('./config.json', { defaults: { port: 3000, host: 'localhost' } })
 ```
 
 #### 高级用法
@@ -326,10 +310,7 @@ const config = await loadConfig('./config.json', {
 })
 
 // 不合并默认值（完全替换）
-const config = await loadConfig('./config.json', {
-  defaults: { port: 3000 },
-  mergeDefaults: false
-})
+const config = await loadConfig('./config.json', { defaults: { port: 3000 }, mergeDefaults: false })
 ```
 
 #### API参考
@@ -373,6 +354,7 @@ function loadConfig<T extends Record<string, unknown> = Record<string, unknown>>
 深度合并多个配置对象。对象属性会深度合并，数组会被替换（不合并）。
 
 **适用场景：**
+
 - 合并多个配置文件
 - 合并默认配置和用户配置
 - 多环境配置合并
@@ -391,19 +373,14 @@ const merged = mergeConfig(
 // { port: 4000, db: { host: 'localhost', port: 5432 } }
 
 // 数组会被替换（不合并）
-const merged = mergeConfig(
-  { items: [1, 2] },
-  { items: [3, 4] }
-)
+const merged = mergeConfig({ items: [1, 2] }, { items: [3, 4] })
 // { items: [3, 4] }
 ```
 
 #### API参考
 
 ```typescript
-function mergeConfig<T extends Record<string, any>>(
-  ...configs: Array<Partial<T>>
-): T
+function mergeConfig<T extends Record<string, any>>(...configs: Array<Partial<T>>): T
 ```
 
 **参数说明：**
@@ -440,16 +417,10 @@ const envConfig = parseEnv({
 })
 
 // 3. 加载配置文件
-const fileConfig = await loadConfig('./config.json', {
-  defaults: { port: 3000 }
-})
+const fileConfig = await loadConfig('./config.json', { defaults: { port: 3000 } })
 
 // 4. 合并配置（环境变量优先级最高）
-const finalConfig = mergeConfig(
-  fileConfig,
-  { port: envConfig.PORT },
-  { debug: envConfig.DEBUG }
-)
+const finalConfig = mergeConfig(fileConfig, { port: envConfig.PORT }, { debug: envConfig.DEBUG })
 ```
 
 ### 多环境配置管理
@@ -476,10 +447,7 @@ import { loadConfig } from '@cat-kit/be'
 interface AppConfig {
   port: number
   host: string
-  database: {
-    host: string
-    port: number
-  }
+  database: { host: string; port: number }
 }
 
 const config = await loadConfig<AppConfig>('./config.json', {
@@ -515,17 +483,10 @@ const config = parseEnv({
   ENABLED: { type: 'boolean', default: false },
 
   // JSON 类型
-  DATABASE: {
-    type: 'json',
-    default: { host: 'localhost', port: 5432 }
-  },
+  DATABASE: { type: 'json', default: { host: 'localhost', port: 5432 } },
 
   // 数组类型
-  ALLOWED_ORIGINS: {
-    type: 'array',
-    delimiter: ';',
-    default: ['http://localhost:3000']
-  },
+  ALLOWED_ORIGINS: { type: 'array', delimiter: ';', default: ['http://localhost:3000'] },
 
   // 自定义转换
   TIMEOUT: {

@@ -34,6 +34,7 @@ console.log({ available, ip })
 检查指定端口是否可用（未被占用）。通过尝试在该端口创建临时服务器来判断端口是否可用。
 
 **适用场景：**
+
 - 服务器启动前检查端口
 - 动态端口分配
 - 端口冲突检测
@@ -52,19 +53,13 @@ if (available) {
 }
 
 // 指定主机和超时时间
-const available = await isPortAvailable(3000, {
-  host: '0.0.0.0',
-  timeout: 2000
-})
+const available = await isPortAvailable(3000, { host: '0.0.0.0', timeout: 2000 })
 ```
 
 #### API参考
 
 ```typescript
-function isPortAvailable(
-  port: number,
-  options?: PortCheckOptions
-): Promise<boolean>
+function isPortAvailable(port: number, options?: PortCheckOptions): Promise<boolean>
 ```
 
 **参数说明：**
@@ -88,6 +83,7 @@ function isPortAvailable(
 获取本机网卡的首个匹配 IP 地址。可以根据地址族（IPv4/IPv6）和是否包含内网地址进行过滤。
 
 **适用场景：**
+
 - 获取服务器地址
 - 网络配置检测
 - 多网卡环境处理
@@ -111,9 +107,7 @@ const allIPs = getLocalIP({ includeInternal: true })
 #### API参考
 
 ```typescript
-function getLocalIP(
-  options?: GetLocalIPOptions
-): string | undefined
+function getLocalIP(options?: GetLocalIPOptions): string | undefined
 ```
 
 **参数说明：**
@@ -142,6 +136,7 @@ function getLocalIP(
 获取本机所有网络接口信息。可以过滤内网接口，返回详细的网络接口信息。
 
 **适用场景：**
+
 - 网络接口监控
 - 多网卡环境处理
 - 网络配置分析
@@ -154,7 +149,7 @@ import { getNetworkInterfaces } from '@cat-kit/be'
 // 获取所有网络接口（排除内网）
 const interfaces = getNetworkInterfaces({ includeInternal: false })
 
-interfaces.forEach(iface => {
+interfaces.forEach((iface) => {
   console.log(`${iface.name}: ${iface.address} (${iface.family})`)
   console.log(`  MAC: ${iface.mac}`)
   console.log(`  子网掩码: ${iface.netmask}`)
@@ -170,9 +165,7 @@ const allInterfaces = getNetworkInterfaces({ includeInternal: true })
 #### API参考
 
 ```typescript
-function getNetworkInterfaces(
-  options?: GetNetworkInterfacesOptions
-): NetworkInterfaceInfo[]
+function getNetworkInterfaces(options?: GetNetworkInterfacesOptions): NetworkInterfaceInfo[]
 ```
 
 **参数说明：**
@@ -187,13 +180,13 @@ function getNetworkInterfaces(
 
 ```typescript
 interface NetworkInterfaceInfo {
-  name: string              // 接口名称
-  address: string          // IP 地址
-  family: 'IPv4' | 'IPv6'  // 地址族
-  mac: string              // MAC 地址
-  internal: boolean        // 是否为内网地址
-  netmask: string          // 子网掩码
-  cidr?: string           // CIDR 表示法（如果可用）
+  name: string // 接口名称
+  address: string // IP 地址
+  family: 'IPv4' | 'IPv6' // 地址族
+  mac: string // MAC 地址
+  internal: boolean // 是否为内网地址
+  netmask: string // 子网掩码
+  cidr?: string // CIDR 表示法（如果可用）
 }
 ```
 
@@ -223,10 +216,7 @@ async function startServer(port: number) {
 ```typescript
 import { isPortAvailable } from '@cat-kit/be'
 
-async function findAvailablePort(
-  startPort: number,
-  maxAttempts = 100
-): Promise<number> {
+async function findAvailablePort(startPort: number, maxAttempts = 100): Promise<number> {
   for (let i = 0; i < maxAttempts; i++) {
     const port = startPort + i
     const available = await isPortAvailable(port)
@@ -236,9 +226,7 @@ async function findAvailablePort(
     }
   }
 
-  throw new Error(
-    `在 ${startPort}-${startPort + maxAttempts} 范围内未找到可用端口`
-  )
+  throw new Error(`在 ${startPort}-${startPort + maxAttempts} 范围内未找到可用端口`)
 }
 
 // 使用
@@ -275,7 +263,7 @@ function monitorNetworkInterfaces() {
   const interfaces = getNetworkInterfaces({ includeInternal: false })
 
   console.log('网络接口列表:')
-  interfaces.forEach(iface => {
+  interfaces.forEach((iface) => {
     console.log(`  ${iface.name}:`)
     console.log(`    地址: ${iface.address}`)
     console.log(`    类型: ${iface.family}`)
@@ -354,7 +342,7 @@ import { getNetworkInterfaces } from '@cat-kit/be'
 function getNetworkDetails() {
   const interfaces = getNetworkInterfaces({ includeInternal: true })
 
-  return interfaces.map(iface => ({
+  return interfaces.map((iface) => ({
     name: iface.name,
     address: iface.address,
     family: iface.family,

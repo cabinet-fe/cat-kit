@@ -1,5 +1,6 @@
-import CopyOrDownloadAsMarkdownButtons from 'vitepress-plugin-llms/vitepress-components/CopyOrDownloadAsMarkdownButtons.vue'
 import theme from '@cat-kit/vitepress-theme'
+import CopyOrDownloadAsMarkdownButtons from 'vitepress-plugin-llms/vitepress-components/CopyOrDownloadAsMarkdownButtons.vue'
+
 import '@cat-kit/vitepress-theme/style.css'
 
 export default {
@@ -9,4 +10,3 @@ export default {
     app.component('CopyOrDownloadAsMarkdownButtons', CopyOrDownloadAsMarkdownButtons)
   }
 }
-

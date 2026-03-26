@@ -27,10 +27,7 @@ bun add -d @cat-kit/tsconfig typescript
 ```json
 {
   "extends": "@cat-kit/tsconfig/tsconfig.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
+  "compilerOptions": { "outDir": "./dist", "rootDir": "./src" },
   "include": ["src/**/*"]
 }
 ```
@@ -42,10 +39,7 @@ bun add -d @cat-kit/tsconfig typescript
 ```json
 {
   "extends": "@cat-kit/tsconfig/tsconfig.bun.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
+  "compilerOptions": { "outDir": "./dist", "rootDir": "./src" },
   "include": ["src/**/*"]
 }
 ```
@@ -57,10 +51,7 @@ bun add -d @cat-kit/tsconfig typescript
 ```json
 {
   "extends": "@cat-kit/tsconfig/tsconfig.node.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
+  "compilerOptions": { "outDir": "./dist", "rootDir": "./src" },
   "include": ["src/**/*"]
 }
 ```
@@ -72,10 +63,7 @@ bun add -d @cat-kit/tsconfig typescript
 ```json
 {
   "extends": "@cat-kit/tsconfig/tsconfig.web.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
+  "compilerOptions": { "outDir": "./dist", "rootDir": "./src" },
   "include": ["src/**/*"]
 }
 ```
@@ -87,10 +75,7 @@ bun add -d @cat-kit/tsconfig typescript
 ```json
 {
   "extends": "@cat-kit/tsconfig/tsconfig.vue.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
+  "compilerOptions": { "outDir": "./dist", "rootDir": "./src" },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }
 ```

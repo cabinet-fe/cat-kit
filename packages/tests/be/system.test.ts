@@ -39,4 +39,3 @@ describe('@cat-kit/be 系统工具', () => {
     expect(interfaces.length).toBeGreaterThan(0)
   })
 })
-

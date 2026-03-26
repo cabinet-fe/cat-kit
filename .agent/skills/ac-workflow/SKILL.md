@@ -3,7 +3,6 @@ name: ac-workflow
 description: 管理 .agent-context 计划生命周期，按 init、plan、replan、implement、patch、rush、done 协议推进任务。
 ---
 
-
 # Agent Context
 
 管理项目中的 `.agent-context/` 计划生命周期。匹配用户意图后，**必须先读取对应协议文件的完整内容**，再严格按协议步骤逐项执行。
@@ -17,17 +16,18 @@ description: 管理 .agent-context 计划生命周期，按 init、plan、replan
 
 ## 意图匹配
 
-| 用户意图 | 动作 | 协议文件 |
-|----------|------|----------|
-| 初始化项目上下文、补全 AGENTS | init | `actions/init.md` |
-| 给需求出计划、拆分任务 | plan | `actions/plan.md` |
-| 重做计划、调整方案 | replan | `actions/replan.md` |
-| 按计划开始做、实现当前计划 | implement | `actions/implement.md` |
-| 实施后不满意、追加需求、修补问题 | patch | `actions/patch.md` |
-| 无活跃计划时快速出计划并实施 | rush | `actions/rush.md` |
-| 任务彻底完成、归档当前计划 | done | 运行 `agent-context done` |
+| 用户意图                         | 动作      | 协议文件                  |
+| -------------------------------- | --------- | ------------------------- |
+| 初始化项目上下文、补全 AGENTS    | init      | `actions/init.md`         |
+| 给需求出计划、拆分任务           | plan      | `actions/plan.md`         |
+| 重做计划、调整方案               | replan    | `actions/replan.md`       |
+| 按计划开始做、实现当前计划       | implement | `actions/implement.md`    |
+| 实施后不满意、追加需求、修补问题 | patch     | `actions/patch.md`        |
+| 无活跃计划时快速出计划并实施     | rush      | `actions/rush.md`         |
+| 任务彻底完成、归档当前计划       | done      | 运行 `agent-context done` |
 
 > **消歧**：存在已执行的当前计划时，用户提出变更需求：
+>
 > - 需求与当前计划**相关联**或用户本意是修补当前计划 → 走 **patch**。
 > - 需求与当前计划**完全无关** → 拒绝执行，提示先运行 `agent-context done` 归档当前计划后再创建新计划。
 

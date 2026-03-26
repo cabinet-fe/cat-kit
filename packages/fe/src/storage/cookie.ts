@@ -109,14 +109,8 @@ export const cookie = {
    * @param key - cookie 键名
    * @param options - 配置选项
    */
-  remove(
-    key: string,
-    options: Pick<CookieOptions, 'path' | 'domain'> = {}
-  ): void {
-    this.set(key, '', {
-      ...options,
-      expires: new Date(0)
-    })
+  remove(key: string, options: Pick<CookieOptions, 'path' | 'domain'> = {}): void {
+    this.set(key, '', { ...options, expires: new Date(0) })
   },
 
   /**
@@ -134,7 +128,7 @@ export const cookie = {
    */
   getAll(): Record<string, string> {
     const cookies: Record<string, string> = {}
-    document.cookie.split(';').forEach(cookie => {
+    document.cookie.split(';').forEach((cookie) => {
       const parts = cookie.trim().split('=')
       if (parts.length === 2) {
         const key = parts[0]
@@ -155,8 +149,6 @@ export const cookie = {
    */
   clear(): void {
     const cookies = this.getAll()
-    Object.keys(cookies).forEach(key => this.remove(key))
+    Object.keys(cookies).forEach((key) => this.remove(key))
   }
 }
-
-

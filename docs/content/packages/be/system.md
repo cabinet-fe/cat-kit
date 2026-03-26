@@ -44,6 +44,7 @@ console.log({ cpu, memory, disk, nics })
 获取 CPU 基本信息，包括型号、核心数、主频和平均负载。这些信息是静态的，不会随时间变化。
 
 **适用场景：**
+
 - 系统信息展示
 - 性能基准测试
 - 资源规划
@@ -70,9 +71,9 @@ function getCpuInfo(): CpuInfo
 
 ```typescript
 interface CpuInfo {
-  model: string                    // CPU 型号
-  cores: number                     // CPU 核心数
-  speed: number                     // CPU 主频（MHz）
+  model: string // CPU 型号
+  cores: number // CPU 核心数
+  speed: number // CPU 主频（MHz）
   loadAverage: [number, number, number] // 1分钟、5分钟、15分钟平均负载
 }
 ```
@@ -80,6 +81,7 @@ interface CpuInfo {
 **平均负载说明：**
 
 平均负载表示系统在特定时间间隔内的平均活跃进程数。三个值分别表示：
+
 - 第 1 个值：过去 1 分钟的平均负载
 - 第 2 个值：过去 5 分钟的平均负载
 - 第 3 个值：过去 15 分钟的平均负载
@@ -89,6 +91,7 @@ interface CpuInfo {
 通过采样获取 CPU 使用率。需要指定采样间隔，通过两次采样计算期间 CPU 的使用情况。
 
 **适用场景：**
+
 - 实时 CPU 监控
 - 性能分析
 - 资源告警
@@ -123,11 +126,11 @@ function getCpuUsage(interval?: number): Promise<CpuUsage>
 
 ```typescript
 interface CpuUsage {
-  user: number      // 用户时间（毫秒）
-  system: number    // 系统时间（毫秒）
-  idle: number      // 空闲时间（毫秒）
-  total: number     // 总时间（毫秒）
-  percent: number   // CPU 使用率（百分比）
+  user: number // 用户时间（毫秒）
+  system: number // 系统时间（毫秒）
+  idle: number // 空闲时间（毫秒）
+  total: number // 总时间（毫秒）
+  percent: number // CPU 使用率（百分比）
 }
 ```
 
@@ -142,6 +145,7 @@ interface CpuUsage {
 获取系统内存使用情况。返回总内存、已用内存、空闲内存和使用率。
 
 **适用场景：**
+
 - 内存监控
 - 内存告警
 - 资源规划
@@ -168,10 +172,10 @@ function getMemoryInfo(): MemoryInfo
 
 ```typescript
 interface MemoryInfo {
-  total: number        // 总内存（字节）
-  free: number         // 空闲内存（字节）
-  used: number         // 已用内存（字节）
-  usedPercent: number  // 内存使用率（百分比）
+  total: number // 总内存（字节）
+  free: number // 空闲内存（字节）
+  used: number // 已用内存（字节）
+  usedPercent: number // 内存使用率（百分比）
 }
 ```
 
@@ -182,6 +186,7 @@ interface MemoryInfo {
 获取指定路径所在磁盘的容量信息。可以指定任意路径，函数会返回该路径所在磁盘的信息。
 
 **适用场景：**
+
 - 磁盘空间监控
 - 磁盘告警
 - 存储容量规划
@@ -217,11 +222,11 @@ function getDiskInfo(path?: string): Promise<DiskInfo>
 
 ```typescript
 interface DiskInfo {
-  path: string         // 磁盘路径
-  total: number         // 总容量（字节）
-  free: number          // 剩余容量（字节）
-  used: number          // 已用容量（字节）
-  usedPercent: number   // 使用率（百分比）
+  path: string // 磁盘路径
+  total: number // 总容量（字节）
+  free: number // 剩余容量（字节）
+  used: number // 已用容量（字节）
+  usedPercent: number // 使用率（百分比）
 }
 ```
 
@@ -237,6 +242,7 @@ interface DiskInfo {
 获取本机所有网络接口信息。可以过滤内网接口，返回详细的网络接口信息。
 
 **适用场景：**
+
 - 网络接口监控
 - 多网卡环境处理
 - 网络配置分析
@@ -248,7 +254,7 @@ import { getNetworkInterfaces } from '@cat-kit/be'
 
 const interfaces = getNetworkInterfaces({ includeInternal: false })
 
-interfaces.forEach(iface => {
+interfaces.forEach((iface) => {
   console.log(`接口: ${iface.name}`)
   console.log(`  IP: ${iface.address}`)
   console.log(`  类型: ${iface.family}`)
@@ -263,9 +269,7 @@ interfaces.forEach(iface => {
 #### API参考
 
 ```typescript
-function getNetworkInterfaces(
-  options?: GetNetworkInterfacesOptions
-): NetworkInterfaceInfo[]
+function getNetworkInterfaces(options?: GetNetworkInterfacesOptions): NetworkInterfaceInfo[]
 ```
 
 **参数说明：**
@@ -276,13 +280,13 @@ function getNetworkInterfaces(
 
 ```typescript
 interface NetworkInterfaceInfo {
-  name: string              // 接口名称
-  address: string          // IP 地址
-  family: 'IPv4' | 'IPv6'  // 地址族
-  mac: string              // MAC 地址
-  internal: boolean        // 是否为内网地址
-  netmask: string          // 子网掩码
-  cidr?: string           // CIDR 表示法（如果可用）
+  name: string // 接口名称
+  address: string // IP 地址
+  family: 'IPv4' | 'IPv6' // 地址族
+  mac: string // MAC 地址
+  internal: boolean // 是否为内网地址
+  netmask: string // 子网掩码
+  cidr?: string // CIDR 表示法（如果可用）
 }
 ```
 
@@ -291,12 +295,7 @@ interface NetworkInterfaceInfo {
 ### 系统健康检查
 
 ```typescript
-import {
-  getCpuInfo,
-  getCpuUsage,
-  getMemoryInfo,
-  getDiskInfo
-} from '@cat-kit/be'
+import { getCpuInfo, getCpuUsage, getMemoryInfo, getDiskInfo } from '@cat-kit/be'
 
 async function healthCheck() {
   // CPU 信息
@@ -316,11 +315,7 @@ async function healthCheck() {
       usage: cpuUsage.percent,
       loadAverage: cpuInfo.loadAverage
     },
-    memory: {
-      total: memInfo.total,
-      used: memInfo.used,
-      usedPercent: memInfo.usedPercent
-    },
+    memory: { total: memInfo.total, used: memInfo.used, usedPercent: memInfo.usedPercent },
     disk: {
       path: diskInfo.path,
       total: diskInfo.total,
@@ -380,12 +375,7 @@ async function sendAlerts(alerts: string[]) {
 ### 性能指标收集
 
 ```typescript
-import {
-  getCpuInfo,
-  getCpuUsage,
-  getMemoryInfo,
-  getDiskInfo
-} from '@cat-kit/be'
+import { getCpuInfo, getCpuUsage, getMemoryInfo, getDiskInfo } from '@cat-kit/be'
 
 class MetricsCollector {
   async collect() {
@@ -449,7 +439,7 @@ async function checkDiskSpace(path: string, threshold = 0.9) {
   if (diskInfo.usedPercent / 100 > threshold) {
     throw new Error(
       `磁盘空间不足: ${diskInfo.usedPercent.toFixed(2)}% 已使用，` +
-      `剩余 ${(diskInfo.free / 1024 / 1024 / 1024).toFixed(2)}GB`
+        `剩余 ${(diskInfo.free / 1024 / 1024 / 1024).toFixed(2)}GB`
     )
   }
 
@@ -466,29 +456,16 @@ await checkDiskSpace('./data', 0.8)
 import { getCpuUsage, getMemoryInfo } from '@cat-kit/be'
 
 class ResourceTrendAnalyzer {
-  private history: Array<{
-    timestamp: number
-    cpu: number
-    memory: number
-  }> = []
+  private history: Array<{ timestamp: number; cpu: number; memory: number }> = []
 
   async record() {
-    const [cpuUsage, memInfo] = await Promise.all([
-      getCpuUsage(),
-      Promise.resolve(getMemoryInfo())
-    ])
+    const [cpuUsage, memInfo] = await Promise.all([getCpuUsage(), Promise.resolve(getMemoryInfo())])
 
-    this.history.push({
-      timestamp: Date.now(),
-      cpu: cpuUsage.percent,
-      memory: memInfo.usedPercent
-    })
+    this.history.push({ timestamp: Date.now(), cpu: cpuUsage.percent, memory: memInfo.usedPercent })
 
     // 只保留最近 1 小时的数据
     const oneHourAgo = Date.now() - 3600000
-    this.history = this.history.filter(
-      entry => entry.timestamp > oneHourAgo
-    )
+    this.history = this.history.filter((entry) => entry.timestamp > oneHourAgo)
   }
 
   getAverageUsage() {
@@ -497,17 +474,11 @@ class ResourceTrendAnalyzer {
     }
 
     const sum = this.history.reduce(
-      (acc, entry) => ({
-        cpu: acc.cpu + entry.cpu,
-        memory: acc.memory + entry.memory
-      }),
+      (acc, entry) => ({ cpu: acc.cpu + entry.cpu, memory: acc.memory + entry.memory }),
       { cpu: 0, memory: 0 }
     )
 
-    return {
-      cpu: sum.cpu / this.history.length,
-      memory: sum.memory / this.history.length
-    }
+    return { cpu: sum.cpu / this.history.length, memory: sum.memory / this.history.length }
   }
 
   start(interval = 60000) {

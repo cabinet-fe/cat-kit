@@ -8,9 +8,7 @@ const props = defineProps<{
   lineCount: number
 }>()
 
-const lineNumbers = computed(() =>
-  Array.from({ length: props.lineCount }, (_, i) => i + 1)
-)
+const lineNumbers = computed(() => Array.from({ length: props.lineCount }, (_, i) => i + 1))
 </script>
 
 <template>

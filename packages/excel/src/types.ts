@@ -56,12 +56,7 @@ export interface CellAlignmentStyle {
     | 'justify'
     | 'centerContinuous'
     | 'distributed'
-  vertical?:
-    | 'top'
-    | 'center'
-    | 'bottom'
-    | 'justify'
-    | 'distributed'
+  vertical?: 'top' | 'center' | 'bottom' | 'justify' | 'distributed'
   wrapText?: boolean
   textRotation?: number
   indent?: number
@@ -151,7 +146,4 @@ export interface StreamRowEvent {
   values: CellValue[]
 }
 
-export type StreamEvent =
-  | StreamSheetStartEvent
-  | StreamSheetEndEvent
-  | StreamRowEvent
+export type StreamEvent = StreamSheetStartEvent | StreamSheetEndEvent | StreamRowEvent

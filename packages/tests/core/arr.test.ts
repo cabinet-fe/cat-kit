@@ -1,12 +1,5 @@
+import { last, union, unionBy, eachRight, omitArr, arr } from '@cat-kit/core/src'
 import { describe, it, expect } from 'vitest'
-import {
-  last,
-  union,
-  unionBy,
-  eachRight,
-  omitArr,
-  arr
-} from '@cat-kit/core/src'
 
 describe('数组工具函数', () => {
   describe('last', () => {
@@ -54,7 +47,7 @@ describe('数组工具函数', () => {
 
       const result = unionBy('id', arr1, arr2)
       expect(result).toHaveLength(3)
-      expect(result.map(item => item.id)).toEqual([1, 2, 3])
+      expect(result.map((item) => item.id)).toEqual([1, 2, 3])
     })
 
     it('应该处理非对象元素', () => {
@@ -70,7 +63,7 @@ describe('数组工具函数', () => {
   describe('eachRight', () => {
     it('应该从右到左遍历数组', () => {
       const result: number[] = []
-      eachRight([1, 2, 3], val => {
+      eachRight([1, 2, 3], (val) => {
         result.push(val)
       })
       expect(result).toEqual([3, 2, 1])
@@ -86,7 +79,7 @@ describe('数组工具函数', () => {
 
     it('应该处理空数组', () => {
       const result: any[] = []
-      eachRight([], val => {
+      eachRight([], (val) => {
         result.push(val)
       })
       expect(result).toEqual([])
@@ -121,7 +114,7 @@ describe('数组工具函数', () => {
     describe('eachRight', () => {
       it('应该从右到左遍历', () => {
         const result: number[] = []
-        arr([1, 2, 3]).eachRight(val => {
+        arr([1, 2, 3]).eachRight((val) => {
           result.push(val)
         })
         expect(result).toEqual([3, 2, 1])
@@ -143,16 +136,8 @@ describe('数组工具函数', () => {
           { id: 3, name: 'Charlie', age: 25 }
         ]
 
-        expect(arr(items).find({ age: 25 })).toEqual({
-          id: 1,
-          name: 'Alice',
-          age: 25
-        })
-        expect(arr(items).find({ name: 'Bob' })).toEqual({
-          id: 2,
-          name: 'Bob',
-          age: 30
-        })
+        expect(arr(items).find({ age: 25 })).toEqual({ id: 1, name: 'Alice', age: 25 })
+        expect(arr(items).find({ name: 'Bob' })).toEqual({ id: 2, name: 'Bob', age: 30 })
         expect(arr(items).find({ age: 35 })).toBeUndefined()
       })
 
@@ -177,22 +162,12 @@ describe('数组工具函数', () => {
     describe('move', () => {
       it('应该向后移动元素', () => {
         expect(arr([1, 2, 3, 4]).move(0, 2)).toEqual([2, 3, 1, 4])
-        expect(arr(['a', 'b', 'c', 'd']).move(1, 3)).toEqual([
-          'a',
-          'c',
-          'd',
-          'b'
-        ])
+        expect(arr(['a', 'b', 'c', 'd']).move(1, 3)).toEqual(['a', 'c', 'd', 'b'])
       })
 
       it('应该向前移动元素', () => {
         expect(arr([1, 2, 3, 4]).move(3, 1)).toEqual([1, 4, 2, 3])
-        expect(arr(['a', 'b', 'c', 'd']).move(2, 0)).toEqual([
-          'c',
-          'a',
-          'b',
-          'd'
-        ])
+        expect(arr(['a', 'b', 'c', 'd']).move(2, 0)).toEqual(['c', 'a', 'b', 'd'])
       })
 
       it('应该处理相同索引', () => {
@@ -209,25 +184,17 @@ describe('数组工具函数', () => {
           { type: 'vegetable', name: 'lettuce' }
         ]
 
-        const grouped = arr(items).groupBy(item => item.type)
+        const grouped = arr(items).groupBy((item) => item.type)
 
         expect(grouped.fruit).toHaveLength(2)
         expect(grouped.vegetable).toHaveLength(2)
-        expect(grouped.fruit!.map(item => item.name)).toEqual([
-          'apple',
-          'banana'
-        ])
-        expect(grouped.vegetable!.map(item => item.name)).toEqual([
-          'carrot',
-          'lettuce'
-        ])
+        expect(grouped.fruit!.map((item) => item.name)).toEqual(['apple', 'banana'])
+        expect(grouped.vegetable!.map((item) => item.name)).toEqual(['carrot', 'lettuce'])
       })
 
       it('应该处理数字分组', () => {
         const numbers = [1, 2, 3, 4, 5, 6]
-        const grouped = arr(numbers).groupBy(num =>
-          num % 2 === 0 ? 'even' : 'odd'
-        )
+        const grouped = arr(numbers).groupBy((num) => (num % 2 === 0 ? 'even' : 'odd'))
 
         expect(grouped.even).toEqual([2, 4, 6])
         expect(grouped.odd).toEqual([1, 3, 5])

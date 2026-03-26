@@ -17,9 +17,7 @@ outline: deep
 import { Workbook, writeWorkbook } from '@cat-kit/excel'
 
 const workbook = new Workbook({ creator: 'cat-kit', createdAt: new Date() })
-const sheet = workbook.addWorksheet('Sales', {
-  frozenPane: { ySplit: 1, topLeftCell: 'A2' }
-})
+const sheet = workbook.addWorksheet('Sales', { frozenPane: { ySplit: 1, topLeftCell: 'A2' } })
 
 sheet
   .setCell('A1', '产品')

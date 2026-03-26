@@ -1,9 +1,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import type { MarkdownRenderer } from 'vitepress'
-import mdContainer from 'markdown-it-container'
+
 import { str } from '@cat-kit/core'
+import mdContainer from 'markdown-it-container'
 import { createHighlighter, type Highlighter } from 'shiki'
+import type { MarkdownRenderer } from 'vitepress'
 
 // 全局缓存 highlighter 实例
 let highlighter: Highlighter | null = null
@@ -61,10 +62,7 @@ export const demoContainer = async (md: MarkdownRenderer, options: DemoContainer
       // VitePress 的 CSS 会自动处理主题切换
       const html = hl.codeToHtml(code, {
         lang: 'vue',
-        themes: {
-          light: 'github-light',
-          dark: 'github-dark'
-        },
+        themes: { light: 'github-light', dark: 'github-dark' },
         defaultColor: false
       })
 

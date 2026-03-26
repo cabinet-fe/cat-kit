@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Observable } from '@cat-kit/core/src'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 interface TestState {
   count: number
@@ -46,7 +46,7 @@ describe('Observable', () => {
       observable.state.count = 5
 
       // 等待微任务执行
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 0))
 
       expect(callback).toHaveBeenCalledWith([5])
     })
@@ -58,7 +58,7 @@ describe('Observable', () => {
       observable.state.count = 10
       observable.state.name = 'changed'
 
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 0))
 
       expect(callback).toHaveBeenCalledTimes(2)
     })
@@ -90,7 +90,7 @@ describe('Observable', () => {
       observable.state.count = 2
       observable.state.count = 3
 
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 0))
 
       expect(callback).toHaveBeenCalledTimes(1)
       expect(callback).toHaveBeenCalledWith([1])
@@ -104,7 +104,7 @@ describe('Observable', () => {
       observable.state.count = 5
       observable.state.count = 5 // 相同值
 
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 0))
 
       expect(callback).toHaveBeenCalledTimes(1)
     })
@@ -120,7 +120,7 @@ describe('Observable', () => {
       unobserve()
       observable.state.count = 2
 
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 0))
 
       expect(callback).toHaveBeenCalledTimes(1)
       expect(callback).toHaveBeenCalledWith([1])
@@ -138,7 +138,7 @@ describe('Observable', () => {
       observable.state.count = 5
       observable.state.name = 'changed'
 
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 0))
 
       expect(callback1).not.toHaveBeenCalled()
       expect(callback2).toHaveBeenCalledWith(['changed'])
@@ -156,7 +156,7 @@ describe('Observable', () => {
       observable.state.count = 5
       observable.state.name = 'changed'
 
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 0))
 
       expect(callback1).not.toHaveBeenCalled()
       expect(callback2).not.toHaveBeenCalled()
@@ -170,7 +170,7 @@ describe('Observable', () => {
       observable.observe(['count'], callback)
       observable.trigger('count')
 
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 0))
 
       expect(callback).toHaveBeenCalledWith([0])
     })
@@ -202,7 +202,7 @@ describe('Observable', () => {
 
       observable.state.count = 5
 
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
 
       expect(consoleSpy).toHaveBeenCalled()
       expect(normalCallback).toHaveBeenCalledWith([5])
@@ -215,7 +215,7 @@ describe('Observable', () => {
     it('应该提供正确的类型推断', () => {
       observable.observe(
         ['count', 'name'],
-        values => {
+        (values) => {
           // TypeScript 应该能推断出 values 的类型
           expect(typeof values[0]).toBe('number')
           expect(typeof values[1]).toBe('string')

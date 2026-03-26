@@ -1,5 +1,6 @@
 import { readdir, rm } from 'node:fs/promises'
 import { join } from 'node:path'
+
 import { ensureDir } from './ensure-dir'
 
 /**
@@ -32,7 +33,5 @@ export async function emptyDir(dirPath: string): Promise<void> {
   const items = await readdir(dirPath)
 
   // 并行删除所有内容
-  await Promise.all(
-    items.map(item => rm(join(dirPath, item), { recursive: true, force: true }))
-  )
+  await Promise.all(items.map((item) => rm(join(dirPath, item), { recursive: true, force: true })))
 }

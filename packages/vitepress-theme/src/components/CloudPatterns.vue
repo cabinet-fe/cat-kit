@@ -1,10 +1,6 @@
 <template>
   <div class="cloud-patterns" :class="[position]" aria-hidden="true">
-    <svg
-      class="cloud-svg"
-      viewBox="0 0 1200 400"
-      preserveAspectRatio="xMidYMid slice"
-    >
+    <svg class="cloud-svg" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice">
       <defs>
         <!-- 移除 feTurbulence + feDisplacementMap 滤镜，保留渐变 -->
         <linearGradient id="cloud-gradient" x1="0%" y1="0%" x2="100%" y2="0%">

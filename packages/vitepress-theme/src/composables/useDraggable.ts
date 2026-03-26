@@ -17,13 +17,7 @@ export interface UseDraggableOptions {
  * 拖拽调整尺寸 composable
  */
 export function useDraggable(options: UseDraggableOptions = {}) {
-  const {
-    initial = 200,
-    min = 80,
-    max = 500,
-    direction = 'vertical',
-    reverse = true
-  } = options
+  const { initial = 200, min = 80, max = 500, direction = 'vertical', reverse = true } = options
 
   const value = ref(initial)
   const isDragging = ref(false)
@@ -63,10 +57,5 @@ export function useDraggable(options: UseDraggableOptions = {}) {
     document.removeEventListener('mouseup', onDragEnd)
   })
 
-  return {
-    value,
-    isDragging,
-    onDragStart
-  }
+  return { value, isDragging, onDragStart }
 }
-

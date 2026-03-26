@@ -23,7 +23,7 @@ function parsePart(value: string, { min, max }: CronFieldConfig): number[] {
     return Array.from({ length: max - min + 1 }, (_, i) => i + min)
   }
 
-  return value.split(',').flatMap(part => parseSegment(part, min, max))
+  return value.split(',').flatMap((part) => parseSegment(part, min, max))
 }
 
 function parseSegment(segment: string, min: number, max: number): number[] {
@@ -62,13 +62,7 @@ function parseSegment(segment: string, min: number, max: number): number[] {
   return buildRange(value, value, min, max, step)
 }
 
-function buildRange(
-  start: number,
-  end: number,
-  min: number,
-  max: number,
-  step: number
-): number[] {
+function buildRange(start: number, end: number, min: number, max: number, step: number): number[] {
   if (start < min || end > max) {
     throw new Error(`Cron value out of range: ${start}-${end}`)
   }

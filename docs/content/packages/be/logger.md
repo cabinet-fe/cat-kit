@@ -9,10 +9,7 @@
 ```typescript
 import { Logger, LogLevel, ConsoleTransport } from '@cat-kit/be'
 
-const logger = new Logger({
-  level: LogLevel.INFO,
-  transports: [new ConsoleTransport()]
-})
+const logger = new Logger({ level: LogLevel.INFO, transports: [new ConsoleTransport()] })
 
 await logger.info('service started', { port: 3000 })
 ```
@@ -49,25 +46,15 @@ await logger.info('service started', { port: 3000 })
 import { Logger, LogLevel, ConsoleTransport, FileTransport } from '@cat-kit/be'
 
 // 基础用法
-const logger = new Logger({
-  name: 'app',
-  level: LogLevel.INFO,
-  format: 'text'
-})
+const logger = new Logger({ name: 'app', level: LogLevel.INFO, format: 'text' })
 
 // 使用多个传输方式
 const logger = new Logger({
   name: 'app',
   level: LogLevel.DEBUG,
   format: 'json',
-  transports: [
-    new ConsoleTransport({ useColors: true }),
-    new FileTransport({ path: './logs' })
-  ],
-  context: {
-    app: 'my-app',
-    version: '1.0.0'
-  }
+  transports: [new ConsoleTransport({ useColors: true }), new FileTransport({ path: './logs' })],
+  context: { app: 'my-app', version: '1.0.0' }
 })
 ```
 
@@ -91,16 +78,16 @@ class Logger {
 
 **选项说明：**
 
-| 选项 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `name` | `string` | - | 日志记录器名称 |
-| `level` | `LogLevel` | `LogLevel.INFO` | 最低日志级别 |
-| `format` | `'text' \| 'json'` | `'text'` | 日志格式 |
-| `transports` | `Transport[]` | `[new ConsoleTransport()]` | 传输方式数组 |
-| `context` | `Record<string, unknown>` | - | 上下文信息 |
-| `timestampFormat` | `string` | `'yyyy-MM-dd HH:mm:ss'` | 时间戳格式 |
-| `utc` | `boolean` | `false` | 是否使用 UTC 时间 |
-| `textFormat` | `string \| TextFormatter` | - | Text 格式化配置 |
+| 选项              | 类型                      | 默认值                     | 说明              |
+| ----------------- | ------------------------- | -------------------------- | ----------------- |
+| `name`            | `string`                  | -                          | 日志记录器名称    |
+| `level`           | `LogLevel`                | `LogLevel.INFO`            | 最低日志级别      |
+| `format`          | `'text' \| 'json'`        | `'text'`                   | 日志格式          |
+| `transports`      | `Transport[]`             | `[new ConsoleTransport()]` | 传输方式数组      |
+| `context`         | `Record<string, unknown>` | -                          | 上下文信息        |
+| `timestampFormat` | `string`                  | `'yyyy-MM-dd HH:mm:ss'`    | 时间戳格式        |
+| `utc`             | `boolean`                 | `false`                    | 是否使用 UTC 时间 |
+| `textFormat`      | `string \| TextFormatter` | -                          | Text 格式化配置   |
 
 ### 时间戳配置
 
@@ -114,9 +101,7 @@ const logger = new Logger({
 })
 
 // 使用 UTC 时间
-const logger = new Logger({
-  utc: true
-})
+const logger = new Logger({ utc: true })
 // 输出: 2025-12-07 05:47:28 INFO hello
 ```
 
@@ -127,10 +112,7 @@ const logger = new Logger({
 **使用字符串模板：**
 
 ```typescript
-const logger = new Logger({
-  format: 'text',
-  textFormat: '[{timestamp}] {level} - {message}'
-})
+const logger = new Logger({ format: 'text', textFormat: '[{timestamp}] {level} - {message}' })
 // 输出: [2025-12-07 13:48:31] INFO  - hello
 ```
 
@@ -183,13 +165,11 @@ await logger.error('操作失败', new Error('Error'), { requestId: 'req-123' })
 import { ConsoleTransport, LogLevel } from '@cat-kit/be'
 
 const transport = new ConsoleTransport({
-  useColors: true,  // 启用颜色（默认 true）
-  level: LogLevel.DEBUG  // 传输器级别
+  useColors: true, // 启用颜色（默认 true）
+  level: LogLevel.DEBUG // 传输器级别
 })
 
-const logger = new Logger({
-  transports: [transport]
-})
+const logger = new Logger({ transports: [transport] })
 ```
 
 **选项说明：**
@@ -219,24 +199,19 @@ const fileTransport = new FileTransport({
 })
 
 // 目录模式：按日期创建文件，超过大小时添加时间戳后缀
-const dirTransport = new FileTransport({
-  path: './logs',
-  maxSize: 10 * 1024 * 1024
-})
+const dirTransport = new FileTransport({ path: './logs', maxSize: 10 * 1024 * 1024 })
 
-const logger = new Logger({
-  transports: [fileTransport]
-})
+const logger = new Logger({ transports: [fileTransport] })
 ```
 
 **选项说明：**
 
-| 选项 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `path` | `string` | 必填 | 日志路径（目录或文件） |
-| `maxSize` | `number` | - | 最大文件大小（字节） |
-| `newline` | `string` | `'\n'` | 换行符 |
-| `level` | `LogLevel` | - | 传输器日志级别 |
+| 选项      | 类型       | 默认值 | 说明                   |
+| --------- | ---------- | ------ | ---------------------- |
+| `path`    | `string`   | 必填   | 日志路径（目录或文件） |
+| `maxSize` | `number`   | -      | 最大文件大小（字节）   |
+| `newline` | `string`   | `'\n'` | 换行符                 |
+| `level`   | `LogLevel` | -      | 传输器日志级别         |
 
 **路径类型判断：**
 
@@ -318,15 +293,9 @@ const logger = new Logger({
   timestampFormat: 'yyyy-MM-dd HH:mm:ss',
   transports: [
     new ConsoleTransport({ useColors: true }),
-    new FileTransport({
-      path: './logs',
-      maxSize: 10 * 1024 * 1024
-    })
+    new FileTransport({ path: './logs', maxSize: 10 * 1024 * 1024 })
   ],
-  context: {
-    app: 'my-app',
-    version: '1.0.0'
-  }
+  context: { app: 'my-app', version: '1.0.0' }
 })
 
 // 应用启动
@@ -347,11 +316,7 @@ import { Transport, LogEntry, LogFormat, LogLevel } from '@cat-kit/be'
 class CustomTransport implements Transport {
   level = LogLevel.INFO
 
-  async write(
-    entry: LogEntry,
-    formatted: string,
-    format: LogFormat
-  ): Promise<void> {
+  async write(entry: LogEntry, formatted: string, format: LogFormat): Promise<void> {
     // 发送到远程日志服务
     await fetch('https://logs.example.com/api/logs', {
       method: 'POST',
@@ -361,12 +326,7 @@ class CustomTransport implements Transport {
   }
 }
 
-const logger = new Logger({
-  transports: [
-    new ConsoleTransport(),
-    new CustomTransport()
-  ]
-})
+const logger = new Logger({ transports: [new ConsoleTransport(), new CustomTransport()] })
 ```
 
 ### 环境配置
@@ -375,9 +335,7 @@ const logger = new Logger({
 import { Logger, LogLevel } from '@cat-kit/be'
 
 const logger = new Logger({
-  level: process.env.NODE_ENV === 'production'
-    ? LogLevel.INFO
-    : LogLevel.DEBUG,
+  level: process.env.NODE_ENV === 'production' ? LogLevel.INFO : LogLevel.DEBUG,
   format: process.env.LOG_FORMAT === 'json' ? 'json' : 'text',
   utc: process.env.TZ === 'UTC'
 })

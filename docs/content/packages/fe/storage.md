@@ -77,9 +77,12 @@ const expireTime = local.getExpire('otp')
 console.log(new Date(expireTime)) // 过期时间
 
 // 过期后获取会返回 null
-setTimeout(() => {
-  const otp = local.get('otp') // null
-}, 10 * 60 * 1000)
+setTimeout(
+  () => {
+    const otp = local.get('otp') // null
+  },
+  10 * 60 * 1000
+)
 ```
 
 ### 变更监听
@@ -134,9 +137,7 @@ cookie.set('token', 'xyz789', {
 })
 
 // 使用 Date 对象设置过期时间
-cookie.set('temp', 'value', {
-  expires: new Date('2025-12-31')
-})
+cookie.set('temp', 'value', { expires: new Date('2025-12-31') })
 
 // 获取 Cookie
 const sessionId = cookie.get('session_id')
@@ -151,10 +152,7 @@ if (cookie.has('token')) {
 cookie.remove('token')
 
 // 删除指定域名和路径的 Cookie
-cookie.remove('token', {
-  domain: '.example.com',
-  path: '/'
-})
+cookie.remove('token', { domain: '.example.com', path: '/' })
 
 // 获取所有 Cookie
 const allCookies = cookie.getAll()
@@ -197,10 +195,7 @@ const userStore = IDB.defineStore('users', {
   age: { type: Number, default: 18 }
 })
 
-const db = new IDB('myapp', {
-  version: 1,
-  stores: [userStore]
-})
+const db = new IDB('myapp', { version: 1, stores: [userStore] })
 
 await db.ready
 ```
@@ -217,12 +212,7 @@ const many = await userStore.findMany({ age: 18 })
 
 // 按 key 更新 / 替换
 await userStore.update(id, { age: 26 })
-await userStore.put(id, {
-  id,
-  name: 'Alice Updated',
-  email: 'alice@example.com',
-  age: 26
-})
+await userStore.put(id, { id, name: 'Alice Updated', email: 'alice@example.com', age: 26 })
 
 // 删除
 await userStore.delete({ id })

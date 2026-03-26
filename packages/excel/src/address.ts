@@ -20,20 +20,14 @@ export function columnToIndex(column: string): number {
   }
 
   if (result < 1 || result > MAX_COLUMN_INDEX) {
-    throw new ExcelValueError(
-      `Column index out of range: ${result}`,
-      'COLUMN_OUT_OF_RANGE'
-    )
+    throw new ExcelValueError(`Column index out of range: ${result}`, 'COLUMN_OUT_OF_RANGE')
   }
   return result
 }
 
 export function indexToColumn(index: number): string {
   if (!Number.isInteger(index) || index < 1 || index > MAX_COLUMN_INDEX) {
-    throw new ExcelValueError(
-      `Column index out of range: ${index}`,
-      'COLUMN_OUT_OF_RANGE'
-    )
+    throw new ExcelValueError(`Column index out of range: ${index}`, 'COLUMN_OUT_OF_RANGE')
   }
 
   let value = index

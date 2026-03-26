@@ -128,16 +128,8 @@ function resolveFiles(mode?: string, files?: string[]): string[] {
  * @param options - 加载选项
  * @returns 聚合后的环境变量映射
  */
-export async function loadEnv(
-  options: LoadEnvOptions = {}
-): Promise<EnvRecord> {
-  const {
-    cwd = process.cwd(),
-    mode,
-    files,
-    override = false,
-    injectToProcess = true
-  } = options
+export async function loadEnv(options: LoadEnvOptions = {}): Promise<EnvRecord> {
+  const { cwd = process.cwd(), mode, files, override = false, injectToProcess = true } = options
 
   const resolvedFiles = resolveFiles(mode, files)
   const env: EnvRecord = {}
@@ -209,11 +201,7 @@ export type EnvSchema<T extends Record<string, any>> = {
   [K in keyof T]: EnvDefinition<T[K]>
 }
 
-function coerceValue(
-  value: string | undefined,
-  key: string,
-  definition: EnvDefinition<any>
-): any {
+function coerceValue(value: string | undefined, key: string, definition: EnvDefinition<any>): any {
   const { type = 'string', delimiter = ',', default: defaultValue } = definition
 
   if (value === undefined || value === null || value === '') {
@@ -239,7 +227,7 @@ function coerceValue(
     case 'array':
       return value
         .split(delimiter)
-        .map(item => item.trim())
+        .map((item) => item.trim())
         .filter(Boolean)
     case 'string':
     default:
@@ -281,9 +269,7 @@ export function parseEnv<T extends Record<string, any>>(
     }
 
     const coerced = coerceValue(value, key, definition)
-    result[key as keyof T] = definition.transform
-      ? definition.transform(coerced, key)
-      : coerced
+    result[key as keyof T] = definition.transform ? definition.transform(coerced, key) : coerced
   }
 
   return result

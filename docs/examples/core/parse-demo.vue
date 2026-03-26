@@ -8,12 +8,22 @@
     <div class="demo-controls">
       <div class="control-group">
         <label>日期字符串</label>
-        <input type="text" v-model="dateString" class="demo-input wide" placeholder="例如: 2024-03-15 14:30:00" />
+        <input
+          type="text"
+          v-model="dateString"
+          class="demo-input wide"
+          placeholder="例如: 2024-03-15 14:30:00"
+        />
       </div>
 
       <div class="control-group">
         <label>格式模板</label>
-        <input type="text" v-model="formatTemplate" class="demo-input wide" placeholder="例如: yyyy-MM-dd HH:mm:ss" />
+        <input
+          type="text"
+          v-model="formatTemplate"
+          class="demo-input wide"
+          placeholder="例如: yyyy-MM-dd HH:mm:ss"
+        />
       </div>
 
       <div class="control-group">
@@ -97,7 +107,11 @@
 
     <div class="code-preview">
       <span class="code-label">代码：</span>
-      <code class="code-value">Dater.parse('{{ dateString }}', '{{ formatTemplate }}'{{ useUTC ? ", { utc: true }" : "" }})</code>
+      <code class="code-value"
+        >Dater.parse('{{ dateString }}', '{{ formatTemplate }}'{{
+          useUTC ? ', { utc: true }' : ''
+        }})</code
+      >
     </div>
 
     <div class="tips-section">
@@ -113,8 +127,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
 import { Dater } from '@cat-kit/core/src'
+import { ref, computed } from 'vue'
 
 const dateString = ref('2024-03-15 14:30:00')
 const formatTemplate = ref('yyyy-MM-dd HH:mm:ss')
@@ -132,7 +146,7 @@ const presets: Preset[] = [
   { label: '中文格式', date: '2024年3月15日', format: 'yyyy年M月d日' },
   { label: '斜杠分隔', date: '2024/03/15', format: 'yyyy/MM/dd' },
   { label: '无效日期 (2月30日)', date: '2024-02-30', format: 'yyyy-MM-dd' },
-  { label: '无效日期 (13月)', date: '2024-13-01', format: 'yyyy-MM-dd' },
+  { label: '无效日期 (13月)', date: '2024-13-01', format: 'yyyy-MM-dd' }
 ]
 
 function applyPreset(preset: Preset) {
@@ -163,7 +177,7 @@ const parsedDate = computed(() => {
     hours: d.hours,
     minutes: d.minutes,
     seconds: d.seconds,
-    timestamp: d.timestamp,
+    timestamp: d.timestamp
   }
 })
 

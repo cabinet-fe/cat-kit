@@ -44,10 +44,10 @@ agent-context init --scope alice
 agent-context init --yes
 ```
 
-| 选项 | 说明 |
-| ---- | ---- |
+| 选项             | 说明                                      |
+| ---------------- | ----------------------------------------- |
 | `--scope <name>` | 手动指定 SCOPE 名称，不使用 git user.name |
-| `--yes` | 非交互模式：自动覆盖已存在的 SCOPE |
+| `--yes`          | 非交互模式：自动覆盖已存在的 SCOPE        |
 
 如果 `.env` 中已有 SCOPE，默认会询问是否覆盖。
 
@@ -62,20 +62,20 @@ agent-context install --check --tools copilot
 agent-context install --yes
 ```
 
-| 选项 | 说明 |
-| ---- | ---- |
-| `--tools <tools>` | 指定目标工具，逗号分隔 |
-| `--check` | 只检查是否会产生变更，不写文件 |
-| `--yes` | 非交互模式：优先复用已安装工具，否则安装全部工具 |
+| 选项              | 说明                                             |
+| ----------------- | ------------------------------------------------ |
+| `--tools <tools>` | 指定目标工具，逗号分隔                           |
+| `--check`         | 只检查是否会产生变更，不写文件                   |
+| `--yes`           | 非交互模式：优先复用已安装工具，否则安装全部工具 |
 
 支持的工具：
 
-| 工具 | Skill 目录 |
-| ---- | ---------- |
-| Claude | `.claude/skills/agent-context/` |
-| Codex | `.codex/skills/agent-context/` |
-| Cursor | `.cursor/skills/agent-context/` |
-| Antigravity | `.agent/skills/agent-context/` |
+| 工具           | Skill 目录                      |
+| -------------- | ------------------------------- |
+| Claude         | `.claude/skills/agent-context/` |
+| Codex          | `.codex/skills/agent-context/`  |
+| Cursor         | `.cursor/skills/agent-context/` |
+| Antigravity    | `.agent/skills/agent-context/`  |
 | GitHub Copilot | `.github/skills/agent-context/` |
 
 Codex 会额外生成 `agents/openai.yaml` 元数据文件。
@@ -90,10 +90,10 @@ agent-context sync --tools codex,cursor
 agent-context sync --check
 ```
 
-| 选项 | 说明 |
-| ---- | ---- |
-| `--tools <tools>` | 指定目标工具，逗号分隔 |
-| `--check` | 只检查是否存在待同步内容，不写文件 |
+| 选项              | 说明                               |
+| ----------------- | ---------------------------------- |
+| `--tools <tools>` | 指定目标工具，逗号分隔             |
+| `--check`         | 只检查是否存在待同步内容，不写文件 |
 
 ### `agent-context validate`
 
@@ -135,8 +135,8 @@ agent-context done
 agent-context done --yes
 ```
 
-| 选项 | 说明 |
-| ---- | ---- |
+| 选项    | 说明               |
+| ------- | ------------------ |
 | `--yes` | 跳过确认，直接归档 |
 
 归档后的行为：
@@ -165,9 +165,9 @@ agent-context index
 
 ## 通用选项汇总
 
-| 选项 | 适用命令 | 作用 |
-| ---- | -------- | ---- |
-| `--tools <tools>` | `install` / `sync` | 指定工具列表，逗号分隔 |
-| `--check` | `install` / `sync` | 只检查，不写入文件 |
-| `--yes` | `install` / `init` / `done` | 跳过交互确认 |
-| `--scope <name>` | `init` | 手动指定 SCOPE 名称 |
+| 选项              | 适用命令                    | 作用                   |
+| ----------------- | --------------------------- | ---------------------- |
+| `--tools <tools>` | `install` / `sync`          | 指定工具列表，逗号分隔 |
+| `--check`         | `install` / `sync`          | 只检查，不写入文件     |
+| `--yes`           | `install` / `init` / `done` | 跳过交互确认           |
+| `--scope <name>`  | `init`                      | 手动指定 SCOPE 名称    |
