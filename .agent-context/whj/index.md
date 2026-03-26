@@ -7,4 +7,6 @@
 - [x] [修复 verify-commit 命令在 git hook 中的 bug](./done/plan-7-20260318/plan.md)
 - [x] [基于 SCOPE 的计划目录隔离](./done/plan-8-20260318/plan.md)
 - [x] [更新 Skill 协议与文档适配 SCOPE 机制](./done/plan-9-20260318/plan.md)
-- [x] [新增 index 命令生成人类可读的计划索引](./plan-10/plan.md)
+- [x] [新增 index 命令生成人类可读的计划索引](./done/plan-10-20260318/plan.md)
+- [x] [补充 README 并重写 agent-context 文档](./done/plan-11-20260318/plan.md)
+- [x] [封装 VitePress 水墨丹青主题为独立可复用包](./done/plan-12-20260319/plan.md)

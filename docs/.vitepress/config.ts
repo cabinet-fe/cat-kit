@@ -1,15 +1,15 @@
+import { defineThemeConfig } from '@cat-kit/vitepress-theme/config'
 import { VarletImportResolver } from '@varlet/import-resolver'
 import autoImport from 'unplugin-auto-import/vite'
 import components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vitepress'
 import llmstxt, { copyOrDownloadAsMarkdownButtons } from 'vitepress-plugin-llms'
 
-import { demoContainer } from './markdown/demo-container'
-import { importExamples } from './plugins/import-examples'
-import { mermaidPlugin } from './plugins/mermaid'
+import { EXAMPLES_DIR } from './shared'
 import { sidebar } from './sidebar'
 
 export default defineConfig({
+  extends: defineThemeConfig({ examplesDir: EXAMPLES_DIR }),
   title: 'CatKit',
   description: '基于 TS 的全环境开发工具包',
   lang: 'zh-CN',
@@ -96,11 +96,7 @@ export default defineConfig({
   },
 
   markdown: {
-    lineNumbers: true,
-
-    config: (md) => {
-      md.use(demoContainer)
-      md.use(mermaidPlugin)
+    config: async (md) => {
       // @ts-ignore
       md.use(copyOrDownloadAsMarkdownButtons)
     }
@@ -110,7 +106,6 @@ export default defineConfig({
     ssr: { noExternal: ['@varlet/ui'] },
     plugins: [
       llmstxt(),
-      importExamples(),
       components({ resolvers: [VarletImportResolver()] }),
       autoImport({ resolvers: [VarletImportResolver({ autoImport: true })] })
     ]

@@ -4,13 +4,13 @@ import { useData } from 'vitepress'
 import { computed, defineAsyncComponent } from 'vue'
 
 const CloudPatterns = defineAsyncComponent(
-  () => import('./components/CloudPatterns.vue')
+  () => import('./CloudPatterns.vue')
 )
 const SealStamp = defineAsyncComponent(
-  () => import('./components/SealStamp.vue')
+  () => import('./SealStamp.vue')
 )
 const BrushStrokes = defineAsyncComponent(
-  () => import('./components/BrushStrokes.vue')
+  () => import('./BrushStrokes.vue')
 )
 
 const { Layout: DefaultLayout } = DefaultTheme

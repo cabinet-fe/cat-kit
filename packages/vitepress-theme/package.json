@@ -1,0 +1,42 @@
+{
+  "name": "@cat-kit/vitepress-theme",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "CatKit 水墨丹青 VitePress 主题",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./config": {
+      "import": "./dist/config.js",
+      "types": "./src/config.ts"
+    },
+    "./src": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./style.css": "./dist/style.css",
+    "./styles/custom.css": "./dist/styles/custom.css"
+  },
+  "dependencies": {
+    "@cat-kit/core": "workspace:*",
+    "@cat-kit/fe": "workspace:*",
+    "lucide-vue-next": "^1.0.0",
+    "markdown-it-container": "^4.0.0",
+    "shiki": "^4.0.2"
+  },
+  "peerDependencies": {
+    "vitepress": "^2.0.0",
+    "vue": "^3.5.31"
+  },
+  "devDependencies": {
+    "@cat-kit/tsconfig": "workspace:*",
+    "@types/markdown-it-container": "^4.0.0",
+    "mermaid": "^11.13.0"
+  }
+}

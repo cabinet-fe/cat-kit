@@ -23,8 +23,11 @@ export async function buildLib(config: BuildConfig) {
         : [config.entry]
       : ['src/index.ts', 'index.ts']
     const entries = requestedEntries
-      .map((entry) => path.resolve(dir, entry))
-      .filter((entry) => existsSync(entry))
+      .map((entry) => {
+        const resolvedEntry = path.isAbsolute(entry) ? entry : path.resolve(dir, entry)
+        return existsSync(resolvedEntry) ? (path.isAbsolute(entry) ? path.relative(dir, entry) : entry) : null
+      })
+      .filter((entry): entry is string => entry !== null)
 
     if (entries.length === 0) {
       throw new Error('入口文件未找到')
@@ -34,6 +37,7 @@ export async function buildLib(config: BuildConfig) {
       entry: entries.length === 1 ? entries[0] : entries,
       outDir,
       cwd: dir,
+      root: config.root ? path.resolve(dir, config.root) : undefined,
       dts: dts !== false,
       sourcemap: output?.sourcemap !== false,
       deps,
@@ -49,7 +53,8 @@ export async function buildLib(config: BuildConfig) {
         visualizer({
           filename: path.resolve(dir, outDir, 'stats.html'),
           title: 'Cat-Kit Bundle 分析'
-        })
+        }),
+        ...(config.plugins || [])
       ]
     })
 

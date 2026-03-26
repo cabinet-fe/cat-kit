@@ -5,6 +5,12 @@ export interface BuildConfig {
   /** 包目录, 必须是个绝对路径 */
   dir: string
   /**
+   * 源码根目录（相对于包目录）
+   *
+   * 用于控制 preserve modules 时的输出目录结构
+   */
+  root?: string
+  /**
    * 入口文件路径
    *
    * 如果未指定:
@@ -24,6 +30,11 @@ export interface BuildConfig {
      * @description 这些依赖不会被打包进产物，哪怕他们是 peerDependencies 或 devDependencies
      */
     neverBundle?: string[]
+    /**
+     * 跳过 node_modules 打包
+     * @default false
+     */
+    skipNodeModulesBundle?: boolean
   }
   /**
    * 构建平台
@@ -62,6 +73,11 @@ export interface BuildConfig {
      */
     afterBuild?: (config: BuildConfig) => Promise<void> | void
   }
+
+  /**
+   * 扩展插件
+   */
+  plugins?: any[]
 }
 
 /**

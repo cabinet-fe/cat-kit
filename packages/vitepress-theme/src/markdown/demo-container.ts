@@ -3,7 +3,6 @@ import path from 'node:path'
 import type { MarkdownRenderer } from 'vitepress'
 import mdContainer from 'markdown-it-container'
 import { str } from '@cat-kit/core'
-import { EXAMPLES_DIR } from '../shared'
 import { createHighlighter, type Highlighter } from 'shiki'
 
 // 全局缓存 highlighter 实例
@@ -20,7 +19,13 @@ async function getHighlighter() {
   return highlighter
 }
 
-export const demoContainer = async (md: MarkdownRenderer) => {
+export interface DemoContainerOptions {
+  /** examples 目录的绝对路径 */
+  examplesDir: string
+}
+
+export const demoContainer = async (md: MarkdownRenderer, options: DemoContainerOptions) => {
+  const { examplesDir } = options
   const hl = await getHighlighter()
 
   md.use(mdContainer, 'demo', {
@@ -42,7 +47,7 @@ export const demoContainer = async (md: MarkdownRenderer) => {
         throw new Error('Demo路径不能为空')
       }
 
-      const absolutePath = path.join(EXAMPLES_DIR, demoPath)
+      const absolutePath = path.join(examplesDir, demoPath)
 
       // 检查文件是否存在
       if (!fs.existsSync(absolutePath)) {

@@ -1,6 +1,8 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import vue from '@vitejs/plugin-vue'
+
 import { Monorepo, WorkspaceGroup } from '@cat-kit/maintenance/src'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -53,6 +55,32 @@ export const groups: Record<string, ReleaseGroup> = {
     group: repo.group(['@cat-kit/maintenance']),
     build() {
       return this.group.build({ '@cat-kit/maintenance': { platform: 'node' } })
+    }
+  },
+  vitepressTheme: {
+    group: repo.group(['@cat-kit/vitepress-theme']),
+    build() {
+      return this.group.build({
+        '@cat-kit/vitepress-theme': {
+          platform: 'browser',
+          root: 'src',
+          entry: ['src/index.ts', 'src/config.ts'],
+          deps: {
+            skipNodeModulesBundle: true
+          },
+          plugins: [vue()],
+          dts: false,
+          hooks: {
+            afterBuild: async (config) => {
+              const { copyAssetsToDist } = await import('./copy-assets.js')
+              await copyAssetsToDist({
+                pkgDir: config.dir,
+                assets: ['styles']
+              })
+            }
+          }
+        }
+      })
     }
   }
 }

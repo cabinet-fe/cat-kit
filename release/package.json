@@ -7,7 +7,7 @@
     "react-dom": "^19.2.4",
     "@cat-kit/maintenance": "workspace:*",
     "@cat-kit/tsconfig": "workspace:*",
-    "@inquirer/prompts": "^8.3.0",
+    "@inquirer/prompts": "^8.3.2",
     "chalk": "^5.6.2",
     "execa": "^9.6.1"
   },
