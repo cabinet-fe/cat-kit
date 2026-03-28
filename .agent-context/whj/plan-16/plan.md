@@ -1,6 +1,6 @@
 # 优化 agent-context SKILL init 并验证工作流
 
-> 状态: 未执行
+> 状态: 已执行
 
 ## 目标
 
@@ -35,5 +35,22 @@
 6. **输出验证报告**：总结修改内容，说明各 action 的质量状态，标注遗留风险（如有）。
 
 ## 影响范围
+
+- `/Users/whj/Codes/cat-kit/.agents/skills/ac-workflow/SKILL.md`
+- `/Users/whj/Codes/cat-kit/.agents/skills/ac-workflow/actions/init.md`
+- `/Users/whj/Codes/cat-kit/.agents/skills/ac-workflow/actions/patch.md`
+- `/Users/whj/Codes/cat-kit/.agents/skills/ac-workflow/actions/rush.md`
+- `/Users/whj/Codes/cat-kit/.agent/skills/ac-workflow/SKILL.md`
+- `/Users/whj/Codes/cat-kit/.agent/skills/ac-workflow/actions/init.md`
+- `/Users/whj/Codes/cat-kit/.agent/skills/ac-workflow/actions/patch.md`
+- `/Users/whj/Codes/cat-kit/.agent/skills/ac-workflow/actions/rush.md`
+- `/Users/whj/Codes/cat-kit/.cursor/skills/ac-workflow/SKILL.md`
+- `/Users/whj/Codes/cat-kit/.cursor/skills/ac-workflow/actions/init.md`
+- `/Users/whj/Codes/cat-kit/.cursor/skills/ac-workflow/actions/patch.md`
+- `/Users/whj/Codes/cat-kit/.cursor/skills/ac-workflow/actions/rush.md`
+- `/Users/whj/Codes/cat-kit/.claude/skills/ac-workflow/SKILL.md`
+- `/Users/whj/Codes/cat-kit/.claude/skills/ac-workflow/actions/init.md`
+- `/Users/whj/Codes/cat-kit/.claude/skills/ac-workflow/actions/patch.md`
+- `/Users/whj/Codes/cat-kit/.claude/skills/ac-workflow/actions/rush.md`
 
 ## 历史补丁
