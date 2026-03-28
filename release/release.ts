@@ -186,7 +186,7 @@ async function releaseGroup(groupName: string): Promise<void> {
   // 6. Dry-run 验证发布
   console.log(chalk.bold('\n🔍 验证发布（dry-run）...'))
   try {
-    await group.publish({ dryRun: true })
+    await group.publish({ dryRun: true, registry: 'https://registry.npmjs.org' })
     console.log(chalk.green('✓ 发布验证通过'))
   } catch (err) {
     console.log(chalk.red('\n❌ 发布验证失败'))
@@ -218,7 +218,7 @@ async function releaseGroup(groupName: string): Promise<void> {
   // 8. 真正发布
   console.log(chalk.bold('\n🚀 正式发布中...'))
   try {
-    await group.publish({ access: 'public' })
+    await group.publish({ access: 'public', registry: 'https://registry.npmjs.org' })
   } catch (err) {
     console.log(chalk.red('\n⚠ 发布失败'))
     if (err instanceof Error) {
