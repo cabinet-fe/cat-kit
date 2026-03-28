@@ -24,7 +24,10 @@ program.name('agent-context').description('Agent Context Skills 安装工具').v
 program
   .command('install')
   .description('安装 ac-workflow Skill')
-  .option('--tools <tools>', '指定目标工具，逗号分隔：claude,codex,cursor,antigravity,copilot')
+  .option(
+    '--tools <tools>',
+    '指定目标工具，逗号分隔：claude,codex,cursor,antigravity,agents,gemini,copilot'
+  )
   .option('--yes', '非交互模式：优先复用已安装工具，否则安装全部工具')
   .option('--check', '仅检查是否存在待更新内容，不写入文件')
   .action(installCommand)
@@ -32,7 +35,10 @@ program
 program
   .command('sync')
   .description('同步已安装的 ac-workflow Skill')
-  .option('--tools <tools>', '指定目标工具，逗号分隔：claude,codex,cursor,antigravity,copilot')
+  .option(
+    '--tools <tools>',
+    '指定目标工具，逗号分隔：claude,codex,cursor,antigravity,agents,gemini,copilot'
+  )
   .option('--check', '仅检查是否存在待更新内容，不写入文件')
   .action(syncCommand)
 

@@ -10,3 +10,7 @@
 - [x] [新增 index 命令生成人类可读的计划索引](./done/plan-10-20260318/plan.md)
 - [x] [补充 README 并重写 agent-context 文档](./done/plan-11-20260318/plan.md)
 - [x] [封装 VitePress 水墨丹青主题为独立可复用包](./done/plan-12-20260319/plan.md)
+- [x] [vitepress-theme 构建报错修复与导出调整](./done/plan-13-20260326/plan.md)
+- [x] [更新 tsconfig 适应 TypeScript 6.0/大版本变更配置](./done/plan-14-20260328/plan.md)
+- [x] [修复 vitepress-theme 样式问题](./done/plan-15-20260328/plan.md)
+- [x] [优化 agent-context SKILL init 并验证工作流](./done/plan-16-20260328/plan.md)

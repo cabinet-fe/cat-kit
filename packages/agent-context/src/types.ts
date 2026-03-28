@@ -1,4 +1,4 @@
-export type ToolId = 'claude' | 'codex' | 'cursor' | 'antigravity' | 'copilot'
+export type ToolId = 'claude' | 'codex' | 'cursor' | 'antigravity' | 'agents' | 'gemini' | 'copilot'
 
 export type SkillFrontmatterProfile = 'standard' | 'claude' | 'copilot'
 export type SkillMetadataFile = 'openai'

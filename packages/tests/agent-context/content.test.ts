@@ -9,7 +9,7 @@ import { resolveSkillPaths, resolveToolTargets } from '../../agent-context/src/t
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(__dirname, '../../..')
-const targets = resolveToolTargets(['claude', 'cursor', 'antigravity'])
+const targets = resolveToolTargets(['claude', 'cursor', 'antigravity', 'agents', 'gemini'])
 
 describe('agent-context skill content', () => {
   for (const target of targets) {

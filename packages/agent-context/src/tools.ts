@@ -35,6 +35,20 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
     frontmatterProfile: 'standard',
     metadataFiles: []
   },
+  agents: {
+    id: 'agents',
+    name: 'Agent Skills（开放标准 · .agents）',
+    skillRootDir: '.agents/skills',
+    frontmatterProfile: 'standard',
+    metadataFiles: []
+  },
+  gemini: {
+    id: 'gemini',
+    name: 'Gemini CLI',
+    skillRootDir: '.gemini/skills',
+    frontmatterProfile: 'standard',
+    metadataFiles: []
+  },
   copilot: {
     id: 'copilot',
     name: 'GitHub Copilot',
@@ -44,7 +58,15 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
   }
 }
 
-export const DEFAULT_TOOL_ORDER: ToolId[] = ['claude', 'codex', 'cursor', 'antigravity', 'copilot']
+export const DEFAULT_TOOL_ORDER: ToolId[] = [
+  'agents',
+  'cursor',
+  'claude',
+  'codex',
+  'antigravity',
+  'gemini',
+  'copilot'
+]
 
 export interface ToolChoice {
   id: ToolId

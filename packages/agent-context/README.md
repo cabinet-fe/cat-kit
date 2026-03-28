@@ -61,11 +61,14 @@ agent-context install
 agent-context install --tools claude,codex,cursor
 ```
 
-安装完成后，CLI 会在对应目录生成 Skill 文件，例如：
+安装完成后，CLI 会在对应目录生成 Skill 文件（技能目录名为 `ac-workflow`），例如：
 
-- Codex: `.codex/skills/agent-context/`
-- Claude: `.claude/skills/agent-context/`
-- Cursor: `.cursor/skills/agent-context/`
+- Codex: `.codex/skills/ac-workflow/`
+- Claude: `.claude/skills/ac-workflow/`
+- Cursor: `.cursor/skills/ac-workflow/`
+- Antigravity: `.agent/skills/ac-workflow/`
+- Agent Skills（开放标准，如 Gemini CLI 等工具的 `.agents` 别名）: `.agents/skills/ac-workflow/`
+- Gemini CLI: `.gemini/skills/ac-workflow/`
 
 ## 快速开始
 
@@ -346,13 +349,15 @@ agent-context index
 
 ## 支持的工具
 
-| 工具           | Skill 目录                      |
-| -------------- | ------------------------------- |
-| Claude         | `.claude/skills/agent-context/` |
-| Codex          | `.codex/skills/agent-context/`  |
-| Cursor         | `.cursor/skills/agent-context/` |
-| Antigravity    | `.agent/skills/agent-context/`  |
-| GitHub Copilot | `.github/skills/agent-context/` |
+| 工具           | Skill 目录                     |
+| -------------- | ------------------------------ |
+| Claude         | `.claude/skills/ac-workflow/`  |
+| Codex          | `.codex/skills/ac-workflow/`   |
+| Cursor         | `.cursor/skills/ac-workflow/`  |
+| Antigravity    | `.agent/skills/ac-workflow/`   |
+| Agent Skills（开放标准） | `.agents/skills/ac-workflow/` |
+| Gemini CLI     | `.gemini/skills/ac-workflow/`  |
+| GitHub Copilot | `.github/skills/ac-workflow/`  |
 
 其中 Codex 会额外生成 `agents/openai.yaml` 元数据文件，其余工具只生成 Skill 内容本身。
 
