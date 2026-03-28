@@ -12,7 +12,7 @@ export async function syncCommand(options: SyncCommandOptions = {}): Promise<voi
   const cwd = process.cwd()
   const tools = resolveTools(cwd, options.tools)
   const check = options.check ?? false
-  const result = await runSync({ cwd, tools, check })
+  const result = await runSync({ cwd, check, ...(tools ? { tools } : {}) })
 
   if (check) {
     printCheckResult(result, cwd)

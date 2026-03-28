@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 
-import type { ContextSnapshot, PlanInfo } from '../types.js'
+import type { ContextSnapshot } from '../types.js'
 
 const H1_RE = /^#\s+(.+)$/m
 

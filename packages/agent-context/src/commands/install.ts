@@ -20,7 +20,7 @@ export async function installCommand(options: InstallCommandOptions = {}): Promi
   const cwd = process.cwd()
   const tools = await resolveTools(cwd, options)
   const check = options.check ?? false
-  const result = await runInstall({ cwd, tools, check })
+  const result = await runInstall({ cwd, check, ...(tools ? { tools } : {}) })
 
   if (check) {
     printCheckResult(result, cwd)

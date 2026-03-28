@@ -32,7 +32,7 @@ function renderNavigator(target: ToolTarget): string {
 ## 执行纪律
 
 - **协议先行**：匹配到动作后，必须先读取对应 \`actions/*.md\` 协议文件的完整内容，再逐步执行。禁止凭记忆、摘要或猜测跳过协议步骤。
-- **前置检查必做**：所有动作（done 除外）均包含「前置检查」，必须逐条执行，不可跳过。包括运行 \`agent-context validate\`。
+- **前置检查必做**：所有动作（done 除外）均包含「前置检查」，必须逐条执行，不可跳过。凡协议写明需运行 \`agent-context validate\` 时必须执行；\`init\` 在首次初始化且 \`.agent-context/\` 尚不存在时，先确认初始化场景成立，再按协议继续。
 - **禁止直接改动**：在 plan / rush 创建计划之前，不得直接修改项目代码文件。任何代码变更必须在已创建计划（implement）或已创建补丁（patch）的上下文中进行。
 - **顺序执行**：协议步骤必须按编号顺序逐项执行，不可跳步、合并或并行。
 
@@ -54,8 +54,6 @@ function renderNavigator(target: ToolTarget): string {
 
 ## 全局约束
 
-- 首次使用前需运行 \`agent-context init\` 初始化作用域。
-- SCOPE 由 git \`user.name\` 决定，计划编号在各 SCOPE 内独立递增。
 - 状态机两态：\`未执行\`、\`已执行\`。
 - 任意时刻最多一个当前计划：\`.agent-context/{scope}/plan-{number}\`。
 - 多个当前计划 → 拒绝执行，提示恢复单活跃状态。
@@ -87,7 +85,7 @@ function renderNavigator(target: ToolTarget): string {
 function renderFrontmatter(target: ToolTarget): string {
   const lines = ['---', `name: ${SKILL_NAME}`, `description: ${SKILL_DESCRIPTION}`]
 
-  if (target.frontmatterProfile === 'claude') {
+  if (target.frontmatterProfile !== 'copilot') {
     lines.push('argument-hint: [request]')
   }
 

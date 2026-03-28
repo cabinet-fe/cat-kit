@@ -52,5 +52,12 @@
 - `/Users/whj/Codes/cat-kit/.claude/skills/ac-workflow/actions/init.md`
 - `/Users/whj/Codes/cat-kit/.claude/skills/ac-workflow/actions/patch.md`
 - `/Users/whj/Codes/cat-kit/.claude/skills/ac-workflow/actions/rush.md`
+- `/Users/whj/Codes/cat-kit/packages/agent-context/src/commands/install.ts`
+- `/Users/whj/Codes/cat-kit/packages/agent-context/src/commands/sync.ts`
+- `/Users/whj/Codes/cat-kit/packages/agent-context/src/content/actions.ts`
+- `/Users/whj/Codes/cat-kit/packages/agent-context/src/content/index.ts`
+- `/Users/whj/Codes/cat-kit/packages/agent-context/src/context/indexer.ts`
+- `/Users/whj/Codes/cat-kit/packages/tests/agent-context/content.test.ts`
 
 ## 历史补丁
+- patch-1: 回填 agent-context Skill 模板源并补回归验证
