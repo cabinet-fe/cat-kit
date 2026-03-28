@@ -17,7 +17,7 @@
   --ink-trace: #ccc9c0;
 
   /* --- 纸张系统 (Paper System) --- */
-  /* 宣纸白 - 主背景（匹配 texture.jpg 的灰绿白调） */
+  /* 宣纸白 - 主背景（与下方 body 纹理层同色） */
   --paper-white: #eae8e2;
   /* 素笺 - 卡片/区块背景（半透明以透出纹理） */
   --paper-soft: rgba(226, 223, 216, 0.85);
@@ -120,8 +120,22 @@
   );
 }
 
+/* 浅色：宣纸 texture.jpg 为主纹理；SVG 噪点 + 渐变叠层（贴图失败时仍有纸感） */
 body {
-  background: url(texture.jpg) repeat;
+  background-color: var(--paper-white);
+  background-image:
+    url(./texture.jpg),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.052'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 120% 85% at 50% 35%, rgba(255, 252, 246, 0.28) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 55% at 0% 100%, rgba(205, 196, 178, 0.1) 0%, transparent 50%),
+    linear-gradient(168deg, #f2f0ea 0%, #eae8e2 48%, #e2dfd6 100%);
+  background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
+  background-size:
+    auto,
+    128px 128px,
+    100% 100%,
+    100% 100%,
+    100% 100%;
   background-attachment: fixed;
 }
 
@@ -317,6 +331,30 @@ html.dark body {
 
 .dark .vp-doc div[class*='language-'] {
   background-color: var(--vp-c-bg-alt);
+}
+
+/* 原生围栏 ```：pre/code 强制等宽，避免继承正文霞鹜文楷导致与行号列 metrics 不一致 */
+.vp-doc [class*='language-'] pre,
+.vp-doc [class*='language-'] code {
+  font-family: var(--vp-font-family-mono);
+}
+
+/* 行号列与代码显式共享相同行高，避免主题排版覆盖导致隔行错位 */
+.vp-doc [class*='language-'] code,
+.vp-doc .line-numbers-wrapper {
+  line-height: var(--vp-code-line-height);
+  font-size: var(--vp-code-font-size);
+}
+
+/* 行号按行盒对齐，避免 inline + <br> 造成的额外间距 */
+.vp-doc .line-numbers-wrapper .line-number {
+  font-family: var(--vp-font-family-mono);
+  display: block;
+  height: calc(var(--vp-code-line-height) * 1em);
+}
+
+.vp-doc .line-numbers-wrapper br {
+  display: none;
 }
 
 /* 6. 提示框 - 淡雅配色，透出纹理 */

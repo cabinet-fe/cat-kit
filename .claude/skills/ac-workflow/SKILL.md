@@ -1,6 +1,7 @@
 ---
 name: ac-workflow
 description: 管理 .agent-context 计划生命周期，按 init、plan、replan、implement、patch、rush、done 协议推进任务。
+argument-hint: [request]
 ---
 
 

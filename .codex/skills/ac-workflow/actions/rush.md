@@ -7,7 +7,6 @@
 ## 前置检查
 
 - 运行 `agent-context validate`，不通过则中止并报告错误。
-- SCOPE 未初始化（`.agent-context/.env` 不存在）→ 提示运行 `agent-context init`。
 - 描述为空 → 拒绝执行。
 - 存在未归档的已执行当前计划 → 判断新需求与当前计划的关联性：
   - 相关联或用户本意是修补 → 拒绝执行，提示改用 patch。

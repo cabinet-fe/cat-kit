@@ -18,6 +18,3 @@ export default {
 // 导出各模块供按需使用
 export { default as CatKitLayout } from './components/CatKitLayout.vue'
 export * from './composables'
-export * from './markdown/demo-container'
-export * from './markdown/mermaid'
-export * from './plugins/import-examples'

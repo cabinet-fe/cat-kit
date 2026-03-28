@@ -1,3 +1,4 @@
+import { copyFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -71,6 +72,11 @@ export const groups: Record<string, ReleaseGroup> = {
             afterBuild: async (config) => {
               const { copyAssetsToDist } = await import('./copy-assets.js')
               await copyAssetsToDist({ pkgDir: config.dir, assets: ['styles'] })
+              /* dist/style.css 引用 url(./texture.jpg)，需与 style.css 同目录 */
+              await copyFile(
+                path.join(config.dir, 'src/styles/texture.jpg'),
+                path.join(config.dir, 'dist/texture.jpg')
+              )
             }
           }
         }

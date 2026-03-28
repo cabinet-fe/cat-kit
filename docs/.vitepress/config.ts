@@ -8,8 +8,10 @@ import llmstxt, { copyOrDownloadAsMarkdownButtons } from 'vitepress-plugin-llms'
 import { EXAMPLES_DIR } from './shared'
 import { sidebar } from './sidebar'
 
+const catKitThemeConfig = defineThemeConfig({ examplesDir: EXAMPLES_DIR })
+
 export default defineConfig({
-  extends: defineThemeConfig({ examplesDir: EXAMPLES_DIR }),
+  extends: catKitThemeConfig,
   title: 'CatKit',
   description: '基于 TS 的全环境开发工具包',
   lang: 'zh-CN',
@@ -96,7 +98,9 @@ export default defineConfig({
   },
 
   markdown: {
+    lineNumbers: catKitThemeConfig.markdown?.lineNumbers ?? true,
     config: async (md) => {
+      await catKitThemeConfig.markdown?.config?.(md)
       // @ts-ignore
       md.use(copyOrDownloadAsMarkdownButtons)
     }
