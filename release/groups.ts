@@ -65,9 +65,8 @@ export const groups: Record<string, ReleaseGroup> = {
           platform: 'browser',
           root: 'src',
           entry: ['src/index.ts', 'src/config.ts'],
-          deps: { skipNodeModulesBundle: true },
+          dts: true,
           plugins: [vue()],
-          dts: false,
           hooks: {
             afterBuild: async (config) => {
               const { copyAssetsToDist } = await import('./copy-assets.js')

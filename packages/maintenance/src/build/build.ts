@@ -37,14 +37,16 @@ export async function buildLib(config: BuildConfig) {
       throw new Error('入口文件未找到')
     }
 
+    const entry = entries.length === 1 ? entries[0]! : entries
+
     await build({
-      entry: entries.length === 1 ? entries[0] : entries,
+      entry,
       outDir,
       cwd: dir,
-      root: config.root ? path.resolve(dir, config.root) : undefined,
+      ...(config.root ? { root: path.resolve(dir, config.root) } : {}),
       dts: dts !== false,
       sourcemap: output?.sourcemap !== false,
-      deps,
+      ...(deps !== undefined ? { deps } : {}),
       outExtensions: () => ({ js: '.js', dts: '.d.ts' }),
       format: 'es',
       platform,

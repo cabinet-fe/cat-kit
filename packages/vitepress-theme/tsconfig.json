@@ -7,6 +7,6 @@
     "skipDefaultLibCheck": true,
     "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo"
   },
-  "include": ["src/**/*.ts", "src/**/*.vue"],
+  "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts"],
   "exclude": ["tests", "**/*.test.ts", "**/*.spec.ts"]
 }

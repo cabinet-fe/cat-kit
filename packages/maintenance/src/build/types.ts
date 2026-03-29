@@ -20,6 +20,10 @@ export interface BuildConfig {
   entry?: string | string[]
   /**
    * 是否生成 d.ts 文件
+   *
+   * - `true`（默认）：使用 tsc 生成声明文件
+   * - `false`：不生成声明文件
+   *
    * @default true
    */
   dts?: boolean

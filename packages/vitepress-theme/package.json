@@ -4,7 +4,8 @@
   "description": "CatKit 水墨丹青 VitePress 主题",
   "files": [
     "dist",
-    "src"
+    "src",
+    "style.css.d.ts"
   ],
   "type": "module",
   "exports": {
@@ -20,8 +21,12 @@
       "import": "./src/index.ts",
       "types": "./src/index.ts"
     },
-    "./style.css": "./dist/style.css",
-    "./styles/custom.css": "./dist/styles/custom.css"
+    "./style.css": {
+      "types": "./style.css.d.ts",
+      "import": "./dist/style.css",
+      "default": "./dist/style.css"
+    },
+    "./styles/theme.css": "./dist/styles/theme.css"
   },
   "dependencies": {
     "@cat-kit/core": "workspace:*",
@@ -33,7 +38,8 @@
   "devDependencies": {
     "@cat-kit/tsconfig": "workspace:*",
     "@types/markdown-it-container": "^4.0.0",
-    "mermaid": "^11.13.0"
+    "mermaid": "^11.13.0",
+    "vue-tsc": "^3.2.6"
   },
   "peerDependencies": {
     "vitepress": "^2.0.0",

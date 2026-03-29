@@ -4,7 +4,7 @@ import CatKitLayout from './components/CatKitLayout.vue'
 import DemoContainer from './components/DemoContainer.vue'
 import Mermaid from './components/Mermaid.vue'
 
-import './styles/custom.css'
+import './styles/theme.css'
 
 export default {
   extends: DefaultTheme,
