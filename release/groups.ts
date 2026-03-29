@@ -65,7 +65,7 @@ export const groups: Record<string, ReleaseGroup> = {
           platform: 'browser',
           root: 'src',
           entry: ['src/index.ts', 'src/config.ts'],
-          dts: true,
+          dts: { vue: true },
           plugins: [vue()],
           hooks: {
             afterBuild: async (config) => {

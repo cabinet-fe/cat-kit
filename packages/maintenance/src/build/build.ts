@@ -44,7 +44,7 @@ export async function buildLib(config: BuildConfig) {
       outDir,
       cwd: dir,
       ...(config.root ? { root: path.resolve(dir, config.root) } : {}),
-      dts: dts !== false,
+      dts,
       sourcemap: output?.sourcemap !== false,
       ...(deps !== undefined ? { deps } : {}),
       outExtensions: () => ({ js: '.js', dts: '.d.ts' }),

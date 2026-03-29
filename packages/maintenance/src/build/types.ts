@@ -1,3 +1,5 @@
+import type { UserConfig } from 'tsdown'
+
 /**
  * 包构建配置
  */
@@ -26,7 +28,7 @@ export interface BuildConfig {
    *
    * @default true
    */
-  dts?: boolean
+  dts?: UserConfig['dts']
   /** 依赖管理 */
   deps?: {
     /**
