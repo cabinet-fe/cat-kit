@@ -57,3 +57,12 @@ argument-hint: [request]
 ```
 
 编号规则：在当前 scope 内扫描全部 `plan-N` 目录取 `max(N)+1`。
+
+## AskUserQuestion 规范
+
+所有协议在通过 **AskUserQuestion** 向用户提问时必须遵守：
+
+- 提问通俗易懂，不废话
+- 单选选项须标注推荐项并说明理由
+- 选项编号使用从 1 开始的正整数
+

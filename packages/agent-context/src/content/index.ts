@@ -1,5 +1,5 @@
 import type { SkillArtifacts, ToolTarget } from '../types.js'
-import { ACTION_NAMES, ACTION_RENDERERS } from './actions.js'
+import { ACTION_NAMES, ACTION_RENDERERS } from './actions/index.js'
 
 const SKILL_NAME = 'ac-workflow'
 const SKILL_DESCRIPTION =
@@ -77,6 +77,8 @@ function renderNavigator(target: ToolTarget): string {
 \`\`\`
 
 编号规则：在当前 scope 内扫描全部 \`plan-N\` 目录取 \`max(N)+1\`。
+
+${renderAskQuestionGuidelines()}
 `
 }
 
@@ -105,5 +107,18 @@ function renderOpenAIMetadata(): string {
 
 policy:
   allow_implicit_invocation: true
+`
+}
+
+// ── AskUserQuestion Guidelines ──────────────────────
+
+function renderAskQuestionGuidelines(): string {
+  return `## AskUserQuestion 规范
+
+所有协议在通过 **AskUserQuestion** 向用户提问时必须遵守：
+
+- 提问通俗易懂，不废话
+- 单选选项须标注推荐项并说明理由
+- 选项编号使用从 1 开始的正整数
 `
 }

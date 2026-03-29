@@ -14,3 +14,5 @@
 - [x] [更新 tsconfig 适应 TypeScript 6.0/大版本变更配置](./done/plan-14-20260328/plan.md)
 - [x] [修复 vitepress-theme 样式问题](./done/plan-15-20260328/plan.md)
 - [x] [优化 agent-context SKILL init 并验证工作流](./done/plan-16-20260328/plan.md)
+- [x] [修复 vitepress-theme 构建报错及声明文件缺失](./done/plan-17-20260329/plan.md)
+- [x] [提取 actions.ts 协议模板到独立文件](./done/plan-18-20260329/plan.md)
