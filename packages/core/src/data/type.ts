@@ -33,11 +33,12 @@ export function isObj(value: any): value is Record<string, any> {
 }
 
 /**
- * 是否是数组
+ * 是否是数组。实现委托 `Array.isArray`，与原生「是否为数组」的结论一致（含跨 realm 等边界）。
+ * 若仅需布尔判断且不需要本包导出的类型守卫，可直接使用 `Array.isArray`。
  * @param value 值
  */
 export function isArray(value: any): value is Array<any> {
-  return getDataType(value) === 'array'
+  return Array.isArray(value)
 }
 
 /**
@@ -81,20 +82,11 @@ export function isFunction(value: any): value is Function {
 }
 
 /**
- * 是否是布尔值（推荐命名）
+ * 是否是布尔值
  * @param value 值
  */
 export function isBool(value: any): value is boolean {
   return getDataType(value) === 'boolean'
-}
-
-/**
- * 是否是布尔值
- * @param value 值
- * @deprecated 请使用 {@link isBool}
- */
-export function isBol(value: any): value is boolean {
-  return isBool(value)
 }
 
 /**

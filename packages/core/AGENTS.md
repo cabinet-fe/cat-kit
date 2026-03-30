@@ -44,3 +44,21 @@ packages/core/src/
   - **定时器**（`debounce` / `throttle` / `sleep`）、**Observable** 等与时间与订阅相关，**必然含副作用**。
 - 独立函数导出，支持按需引入
 - 所有公共 API 通过 `src/index.ts` 统一导出
+
+## 与原生 API 对照
+
+部分 API 与标准库/原生写法接近，说明如下（减少「重复造轮子」的误判）：
+
+| API                   | 与原生关系                                     | 说明                                                                  |
+| --------------------- | ---------------------------------------------- | --------------------------------------------------------------------- |
+| `last`                | 运行时可写作 `arr.at(-1)`                      | 保留主要为 **tuple 尾元素** 的类型推断                                |
+| `union`               | 可用 `Set` / 展开合并等实现                    | 便利与风格封装                                                        |
+| `eachRight`           | 等价于自尾向头的 `for` 循环                    | 遍历风格封装                                                          |
+| `omitArr`             | 可用 `filter` + 索引集合实现                   | 便利封装                                                              |
+| `sleep`               | 等价于 `new Promise((r) => setTimeout(r, ms))` | 语义化异步暂停                                                        |
+| `isArray`             | 委托 `Array.isArray`                           | 与原生结论一致；仅需判断时也可用 `Array.isArray`                      |
+| `object` / `optional` | 无单一原生对等物                               | 校验 schema 组合的唯一公开命名（旧名 `vObject` / `vOptional` 已移除） |
+
+`obj2query` / `query2obj` 非 `URLSearchParams` 常规语义（见 `transform.ts` JSDoc）。`str2u8a` / `u8a2str` 优先 `TextEncoder` / `TextDecoder`，Node 下回退 `Buffer`，作为跨环境统一入口。
+
+`getRuntime` 先检测 `globalThis.window` 再 `globalThis.process`，Electron 等并存时结果为 `browser`（见 `env/env.ts`）。

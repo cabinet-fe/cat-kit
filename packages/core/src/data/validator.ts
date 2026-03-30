@@ -82,7 +82,6 @@ function prefixIssues(issues: ValidationIssue[], prefix: string): ValidationIssu
 
 /**
  * 对象校验器：按字段 schema 校验并返回（会尽量收集所有字段错误）
- * 对外组合 schema 时优先使用本函数；`vObject` 与其等价，仅为历史别名。
  *
  * @example
  * ```ts
@@ -138,7 +137,6 @@ export interface OptionalOptions<T> {
 
 /**
  * 可选字段：当输入为 undefined 时通过（返回 undefined 或 default）
- * 对外组合 schema 时优先使用本函数；`vOptional` 与其等价，仅为历史别名。
  */
 export function optional<T>(
   parser: Parser<T>,
@@ -152,21 +150,6 @@ export function optional<T>(
     }
     return parser(input)
   }
-}
-
-/** 与 {@link object} 相同，推荐使用 `object`。 */
-export function vObject<S extends Record<string, Parser<any>>>(
-  schema: S
-): Validator<InferObjectSchema<S>> {
-  return object(schema)
-}
-
-/** 与 {@link optional} 相同，推荐使用 `optional`。 */
-export function vOptional<T>(
-  parser: Parser<T>,
-  options?: OptionalOptions<T>
-): Parser<T | undefined> {
-  return optional(parser, options)
 }
 
 export function vString(): Parser<string> {

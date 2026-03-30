@@ -35,7 +35,7 @@ import {
   isArray,
   isString,
   isNumber,
-  isBol,
+  isBool,
   isDate,
   isFunction,
   isNull,
@@ -54,7 +54,7 @@ isObj({}) // true
 isArray([]) // true
 isString('hello') // true
 isNumber(123) // true
-isBol(true) // true
+isBool(true) // true
 isDate(new Date()) // true
 isFunction(() => {}) // true
 isNull(null) // true
@@ -448,7 +448,7 @@ buildApiUrl('https://api.example.com', 'users/search', { name: 'Alice', age: 25 
 
 - `getDataType(value)` - 获取值的类型字符串
 - `isObj/isArray/isString/isNumber` - 基础类型判断
-- `isDate/isFunction/isBol` - 特殊类型判断
+- `isDate/isFunction/isBool` - 特殊类型判断
 - `isNull/isUndef/isEmpty` - 空值判断
 - `isBlob/isFile/isFormData/isPromise` - 浏览器和 ES6+ 类型判断
 - TypedArray 判断系列

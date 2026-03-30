@@ -17,3 +17,4 @@
 - [x] [修复 vitepress-theme 构建报错及声明文件缺失](./done/plan-17-20260329/plan.md)
 - [x] [提取 actions.ts 协议模板到独立文件](./done/plan-18-20260329/plan.md)
 - [x] [@cat-kit/core 代码审视与改进项](./done/plan-19-20260330/plan.md)
+- [x] [@cat-kit/core 公开 API 与原生能力对照及收敛](./done/plan-20-20260330/plan.md)

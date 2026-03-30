@@ -1,16 +1,22 @@
 /**
  * 获取当前运行环境
+ *
+ * 通过 `globalThis` 探测，避免直接引用未声明的全局。判定顺序：
+ * 1. 若存在 `globalThis.window`（含 `undefined` 以外的占位），视为 `browser`。
+ * 2. 否则若存在 `globalThis.process`，视为 `node`。
+ *
+ * 因此 Electron 等同时存在 `window` 与 Node `process` 时结果为 `browser`。若未来改为优先 `process`，属 breaking，须 major 与迁移说明。
+ *
  * @returns 'browser' | 'node' | 'unknown'
  */
 export function getRuntime(): 'browser' | 'node' | 'unknown' {
-  if (typeof window !== 'undefined') {
+  const g = globalThis as typeof globalThis & { window?: unknown; process?: unknown }
+  if (typeof g.window !== 'undefined') {
     return 'browser'
   }
-
-  if (typeof process !== 'undefined') {
+  if (typeof g.process !== 'undefined') {
     return 'node'
   }
-
   return 'unknown'
 }
 

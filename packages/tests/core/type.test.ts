@@ -4,13 +4,9 @@ import {
   isArray,
   isString,
   isNumber,
-  isBlob,
   isDate,
   isFunction,
   isBool,
-  isBol,
-  isFile,
-  isFormData,
   isSymbol,
   isPromise,
   isArrayBuffer,
@@ -104,6 +100,13 @@ describe('类型判断函数', () => {
       expect(isArray({})).toBe(false)
       expect(isArray('string')).toBe(false)
     })
+
+    it('应与 Array.isArray 结论一致', () => {
+      const cases = [[], [1], Array.from({ length: 0 }), {}, null, undefined, 'a', 1, { length: 1 }]
+      for (const v of cases) {
+        expect(isArray(v)).toBe(Array.isArray(v))
+      }
+    })
   })
 
   describe('isString', () => {
@@ -167,13 +170,6 @@ describe('类型判断函数', () => {
       expect(isBool(1)).toBe(false)
       expect(isBool('true')).toBe(false)
       expect(isBool(null)).toBe(false)
-    })
-  })
-
-  describe('isBol', () => {
-    it('应与 isBool 行为一致', () => {
-      expect(isBol(true)).toBe(isBool(true))
-      expect(isBol(0)).toBe(isBool(0))
     })
   })
 
