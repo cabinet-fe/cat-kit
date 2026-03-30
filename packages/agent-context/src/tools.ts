@@ -12,49 +12,56 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
     name: 'Claude Code',
     skillRootDir: '.claude/skills',
     frontmatterProfile: 'claude',
-    metadataFiles: []
+    metadataFiles: [],
+    guideFileName: 'CLAUDE.md'
   },
   codex: {
     id: 'codex',
     name: 'Codex',
     skillRootDir: '.codex/skills',
     frontmatterProfile: 'standard',
-    metadataFiles: ['openai']
+    metadataFiles: ['openai'],
+    guideFileName: 'AGENTS.md'
   },
   cursor: {
     id: 'cursor',
     name: 'Cursor',
     skillRootDir: '.cursor/skills',
     frontmatterProfile: 'standard',
-    metadataFiles: []
+    metadataFiles: [],
+    guideFileName: 'AGENTS.md'
   },
   antigravity: {
     id: 'antigravity',
     name: 'Antigravity',
     skillRootDir: '.agent/skills',
     frontmatterProfile: 'standard',
-    metadataFiles: []
+    metadataFiles: [],
+    guideFileName: 'AGENTS.md'
   },
   agents: {
     id: 'agents',
     name: 'Agent Skills（开放标准 · .agents）',
     skillRootDir: '.agents/skills',
     frontmatterProfile: 'standard',
-    metadataFiles: []
+    metadataFiles: [],
+    guideFileName: 'AGENTS.md'
   },
   gemini: {
     id: 'gemini',
     name: 'Gemini CLI',
     skillRootDir: '.gemini/skills',
     frontmatterProfile: 'standard',
-    metadataFiles: []
+    metadataFiles: [],
+    guideFileName: 'AGENTS.md'
   },
   copilot: {
     id: 'copilot',
     name: 'GitHub Copilot',
     skillRootDir: '.github/skills',
     frontmatterProfile: 'copilot',
-    metadataFiles: []
+    metadataFiles: [],
+    guideFileName: 'AGENTS.md'
   }
 }
 

@@ -3,14 +3,14 @@ import { ACTION_NAMES, ACTION_RENDERERS } from './actions/index.js'
 
 const SKILL_NAME = 'ac-workflow'
 const SKILL_DESCRIPTION =
-  '管理 .agent-context 计划生命周期，按 init、plan、replan、implement、patch、rush、done 协议推进任务。'
+  '管理 .agent-context 计划生命周期，按 init、plan、replan、implement、patch、rush、review、done 协议推进任务。'
 
 export function renderSkillArtifacts(target: ToolTarget): SkillArtifacts {
   const files: SkillArtifacts['files'] = [
     { relativePath: 'SKILL.md', body: renderNavigator(target) },
     ...ACTION_NAMES.map((name) => ({
       relativePath: `actions/${name}.md`,
-      body: ACTION_RENDERERS[name]()
+      body: ACTION_RENDERERS[name](target)
     }))
   ]
 
@@ -40,13 +40,14 @@ function renderNavigator(target: ToolTarget): string {
 
 | 用户意图 | 动作 | 协议文件 |
 |----------|------|----------|
-| 初始化项目上下文、补全 AGENTS | init | \`actions/init.md\` |
+| 初始化项目上下文、补全 ${target.guideFileName} | init | \`actions/init.md\` |
 | 给需求出计划、拆分任务 | plan | \`actions/plan.md\` |
 | 重做计划、调整方案 | replan | \`actions/replan.md\` |
 | 按计划开始做、实现当前计划 | implement | \`actions/implement.md\` |
 | 实施后不满意、追加需求、修补问题 | patch | \`actions/patch.md\` |
 | 无活跃计划时快速出计划并实施 | rush | \`actions/rush.md\` |
 | 任务彻底完成、归档当前计划 | done | 运行 \`agent-context done\` |
+| 审查当前计划或实施结果 | review | \`actions/review.md\` |
 
 > **消歧**：存在已执行的当前计划时，用户提出变更需求：
 > - 需求与当前计划**相关联**或用户本意是修补当前计划 → 走 **patch**。

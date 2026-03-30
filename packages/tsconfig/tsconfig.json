@@ -12,29 +12,16 @@
     // 允许把 `import * as Space from 'x'` 简写成默认导入，兼容常见写法
     "allowSyntheticDefaultImports": true,
 
-    // ---- 严格类型检查
-    // bind/call/apply 的参数列表必须完全匹配
-    "strictBindCallApply": true,
-    // 函数类型必须严格协变/逆变，防止宽松赋值带来的隐患
-    "strictFunctionTypes": true,
-    // null/undefined 会被视作独立类型，杜绝“忘记判空”
-    "strictNullChecks": true,
+    // TypeScript 6.0 起 `strict` 默认为 true；不再逐项写 strict 子开关
+    // （含原 `noImplicitAny: false`，移除后与 strict 一致、启用 noImplicitAny）
+
+    // ---- 非 strict 合集、但需显式开启的额外检查
     // import/export 会按原样输出，避免多余的 helper 污染
     "verbatimModuleSyntax": true,
-    // catch 获取到的是 unknown，提醒我们显式收窄类型
-    "useUnknownInCatchVariables": true,
-    // 禁止隐式 this，必须显式声明 this 类型
-    "noImplicitThis": true,
-    // 允许隐式 any，方便 demo / 模板逐步补全
-    "noImplicitAny": false,
-    // 类方法重写必须使用 override 关键字，避免误覆盖
+    // 类方法重写必须使用 override 关键字，避免误覆盖（不在 strict 合集内）
     "noImplicitOverride": true,
     // 索引访问会自动加上 undefined，提示先做存在性判断
     "noUncheckedIndexedAccess": true,
-    // 检查是否有未处理副作用的导入
-    "noUncheckedSideEffectImports": true,
-    // 严格可选属性类型
-    "exactOptionalPropertyTypes": true,
     // 单文件模块编译隔离（保证所有文件都能安全转绎）
     "isolatedModules": true,
     // 强制将文件均视为模块

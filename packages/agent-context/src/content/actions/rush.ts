@@ -1,4 +1,6 @@
-export function renderRush(): string {
+import type { ToolTarget } from '../../types.js'
+
+export function renderRush(_target: ToolTarget): string {
   return `# rush
 
 快速通道：创建计划并立即实施，适合范围明确、无需多轮规划的任务。

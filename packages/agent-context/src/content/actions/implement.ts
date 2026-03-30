@@ -1,4 +1,6 @@
-export function renderImplement(): string {
+import type { ToolTarget } from '../../types.js'
+
+export function renderImplement(_target: ToolTarget): string {
   return `# implement
 
 实施当前计划 \`.agent-context/{scope}/plan-{number}/plan.md\` 中的全部步骤，通过验证循环后将状态更新为「已执行」。

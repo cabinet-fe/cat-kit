@@ -1,4 +1,6 @@
-export function renderPatch(): string {
+import type { ToolTarget } from '../../types.js'
+
+export function renderPatch(_target: ToolTarget): string {
   return `# patch
 
 基于当前已执行计划创建增量补丁，修复问题或追加变更。

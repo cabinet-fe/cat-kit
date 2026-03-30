@@ -1,4 +1,6 @@
-export function renderReplan(): string {
+import type { ToolTarget } from '../../types.js'
+
+export function renderReplan(_target: ToolTarget): string {
   return `# replan
 
 重新规划已有的未实施计划，保持「单当前计划 + preparing 队列」结构不变。

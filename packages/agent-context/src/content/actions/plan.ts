@@ -1,4 +1,6 @@
-export function renderPlan(): string {
+import type { ToolTarget } from '../../types.js'
+
+export function renderPlan(_target: ToolTarget): string {
   return `# plan
 
 创建新的执行计划，写入 \`.agent-context/{scope}/plan-{number}/plan.md\`。按复杂度可拆分为多个计划，维护「单当前计划 + preparing 队列」结构。
