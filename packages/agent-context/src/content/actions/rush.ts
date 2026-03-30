@@ -22,6 +22,7 @@ export function renderRush(_target: ToolTarget): string {
 ### 阶段一：plan（差异）
 
 - 仅在描述本身已足够明确时跳过「需求澄清」步骤；否则不得继续 rush。
+- 必须执行 plan 协议的「无模糊指令检查」自检项，发现模糊内容时通过 AskUserQuestion 澄清后修正，不可跳过。
 - 强制单计划，不拆分，不进入 preparing 队列。
 - 完成 plan 后**不等待用户确认**，直接进入阶段二。
 
