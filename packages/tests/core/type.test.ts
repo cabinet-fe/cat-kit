@@ -7,6 +7,7 @@ import {
   isBlob,
   isDate,
   isFunction,
+  isBool,
   isBol,
   isFile,
   isFormData,
@@ -156,16 +157,23 @@ describe('类型判断函数', () => {
     })
   })
 
-  describe('isBol', () => {
+  describe('isBool', () => {
     it('应该识别布尔值', () => {
-      expect(isBol(true)).toBe(true)
-      expect(isBol(false)).toBe(true)
+      expect(isBool(true)).toBe(true)
+      expect(isBool(false)).toBe(true)
     })
 
     it('应该排除非布尔值', () => {
-      expect(isBol(1)).toBe(false)
-      expect(isBol('true')).toBe(false)
-      expect(isBol(null)).toBe(false)
+      expect(isBool(1)).toBe(false)
+      expect(isBool('true')).toBe(false)
+      expect(isBool(null)).toBe(false)
+    })
+  })
+
+  describe('isBol', () => {
+    it('应与 isBool 行为一致', () => {
+      expect(isBol(true)).toBe(isBool(true))
+      expect(isBol(0)).toBe(isBool(0))
     })
   })
 

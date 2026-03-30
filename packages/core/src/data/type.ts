@@ -81,11 +81,20 @@ export function isFunction(value: any): value is Function {
 }
 
 /**
- * 是否是布尔值
+ * 是否是布尔值（推荐命名）
  * @param value 值
  */
-export function isBol(value: any): value is boolean {
+export function isBool(value: any): value is boolean {
   return getDataType(value) === 'boolean'
+}
+
+/**
+ * 是否是布尔值
+ * @param value 值
+ * @deprecated 请使用 {@link isBool}
+ */
+export function isBol(value: any): value is boolean {
+  return isBool(value)
 }
 
 /**

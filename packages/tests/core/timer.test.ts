@@ -34,6 +34,47 @@ describe('定时器工具函数', () => {
 
       expect(fn).toHaveBeenCalledWith('arg1', 'arg2')
     })
+
+    it('immediate=true 时连续快速调用应在收尾再执行一次', () => {
+      vi.useFakeTimers()
+      const fn = vi.fn()
+      const debounced = debounce(fn, 100, true)
+      debounced(1)
+      debounced(2)
+      expect(fn).toHaveBeenCalledTimes(1)
+      vi.advanceTimersByTime(100)
+      expect(fn).toHaveBeenCalledTimes(2)
+      expect(fn).toHaveBeenLastCalledWith(2)
+      vi.useRealTimers()
+    })
+
+    it('immediate=true 在 trailing 触发后再次调用应再次立即执行', () => {
+      vi.useFakeTimers()
+      const fn = vi.fn()
+      const debounced = debounce(fn, 100, true)
+      debounced(1)
+      vi.advanceTimersByTime(100)
+      expect(fn).toHaveBeenCalledTimes(1)
+      debounced(2)
+      expect(fn).toHaveBeenCalledTimes(2)
+      expect(fn).toHaveBeenLastCalledWith(2)
+      vi.useRealTimers()
+    })
+
+    it('immediate=false 时重置等待后应以最后一次参数执行', () => {
+      vi.useFakeTimers()
+      const fn = vi.fn()
+      const debounced = debounce(fn, 100, false)
+      debounced('a')
+      vi.advanceTimersByTime(50)
+      debounced('b')
+      vi.advanceTimersByTime(50)
+      expect(fn).not.toHaveBeenCalled()
+      vi.advanceTimersByTime(50)
+      expect(fn).toHaveBeenCalledTimes(1)
+      expect(fn).toHaveBeenCalledWith('b')
+      vi.useRealTimers()
+    })
   })
 
   describe('throttle', () => {

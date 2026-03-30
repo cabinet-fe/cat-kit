@@ -263,26 +263,33 @@ export type EnvironmentSummary =
       browser: BrowserType
       browserVersion: string | null
       device: DeviceType
+      touchSupported: boolean
     }
   | { runtime: 'node'; os: OSType; nodeVersion: string | null }
+  | { runtime: 'unknown'; os: OSType }
 
 /**
  * 获取环境信息摘要
  * @returns 环境信息对象
  */
-export function getEnvironmentSummary(): Record<string, any> {
+export function getEnvironmentSummary(): EnvironmentSummary {
   const runtime = getRuntime()
-
-  const summary: Record<string, any> = { runtime, os: getOSType() }
+  const os = getOSType()
 
   if (runtime === 'browser') {
-    summary.browser = getBrowserType()
-    summary.browserVersion = getBrowserVersion()
-    summary.device = getDeviceType()
-    summary.touchSupported = isTouchDevice()
-  } else if (runtime === 'node') {
-    summary.nodeVersion = getNodeVersion()
+    return {
+      runtime: 'browser',
+      os,
+      browser: getBrowserType(),
+      browserVersion: getBrowserVersion(),
+      device: getDeviceType(),
+      touchSupported: isTouchDevice()
+    }
   }
 
-  return summary
+  if (runtime === 'node') {
+    return { runtime: 'node', os, nodeVersion: getNodeVersion() }
+  }
+
+  return { runtime: 'unknown', os }
 }

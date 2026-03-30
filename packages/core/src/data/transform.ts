@@ -49,11 +49,26 @@ export function u8a2hex(u8a: Uint8Array): string {
 
 /**
  * 将十六进制字符串转换为 Uint8Array
- * @param hex 十六进制字符串
- * @returns Uint8Array 类型的数据
+ * @param hex 十六进制字符串（可选 `0x` 前缀；忽略首尾空白）
+ * @returns 空串或仅空白时返回长度为 0 的 `Uint8Array`
+ * @throws 长度为奇数、或含非十六进制字符时抛出 `Error`
  */
 export function hex2u8a(hex: string): Uint8Array {
-  return new Uint8Array(Array.from(hex.match(/.{1,2}/g)!).map((b) => parseInt(b, 16)))
+  const s = hex.trim().replace(/^0x/i, '')
+  if (s === '') {
+    return new Uint8Array(0)
+  }
+  if (s.length % 2 !== 0) {
+    throw new Error('hex2u8a: 十六进制字符串长度须为偶数')
+  }
+  if (!/^[0-9a-fA-F]+$/.test(s)) {
+    throw new Error('hex2u8a: 包含非十六进制字符')
+  }
+  const out = new Uint8Array(s.length / 2)
+  for (let i = 0; i < s.length; i += 2) {
+    out[i / 2] = parseInt(s.slice(i, i + 2), 16)
+  }
+  return out
 }
 
 /**
@@ -133,7 +148,9 @@ export function query2obj(query: string): Record<string, any> {
       .split('&')
       .filter((pair) => pair.includes('='))
       .map((pair) => {
-        const [key = '', value = ''] = pair.split('=')
+        const eq = pair.indexOf('=')
+        const key = pair.slice(0, eq)
+        const value = pair.slice(eq + 1)
         const decodedValue = decodeURIComponent(value)
 
         if (decodedValue === '') {

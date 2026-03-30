@@ -55,12 +55,24 @@ describe('数据转换函数', () => {
       expect(Array.from(converted)).toEqual(Array.from(u8a))
     })
 
-    it('应该处理空数组', () => {
+    it('应该处理空数组与空十六进制串', () => {
       const u8a = new Uint8Array([])
       const hex = u8a2hex(u8a)
 
       expect(hex).toBe('')
-      // 空字符串转换会有问题，跳过这个测试
+      expect(Array.from(hex2u8a(''))).toEqual([])
+    })
+
+    it('hex2u8a 应拒绝奇数长度', () => {
+      expect(() => hex2u8a('abc')).toThrow(/偶数/)
+    })
+
+    it('hex2u8a 应拒绝非法字符', () => {
+      expect(() => hex2u8a('ag')).toThrow(/非十六进制/)
+    })
+
+    it('hex2u8a 应接受 0x 前缀与首尾空白', () => {
+      expect(Array.from(hex2u8a(' 0x00ff '))).toEqual([0, 255])
     })
 
     it('应该正确填充零', () => {
@@ -163,6 +175,11 @@ describe('数据转换函数', () => {
       const obj = query2obj(query)
 
       expect(obj).toEqual({ validkey: 'value', anotherkey: 'value2' })
+    })
+
+    it('应保留 value 中第一个 = 之后的内容', () => {
+      const query = 'q=a=b&plain=1'
+      expect(query2obj(query)).toEqual({ q: 'a=b', plain: 1 })
     })
 
     it('应该无损还原原始类型', () => {

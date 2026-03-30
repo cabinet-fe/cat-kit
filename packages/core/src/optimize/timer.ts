@@ -10,17 +10,18 @@ export function debounce<T extends any[]>(
   delay = 300,
   immediate = true
 ): (this: any, ...args: T) => void {
-  let timer: NodeJS.Timeout | number | undefined = undefined
+  let timer: ReturnType<typeof setTimeout> | undefined = undefined
 
   return function (this: any, ...args: T) {
-    if (timer !== undefined) clearTimeout(timer)
+    const hadPending = timer !== undefined
+    if (hadPending) {
+      clearTimeout(timer)
+      timer = undefined
+    }
 
     if (immediate) {
-      // 空闲中
-      let isFree = timer === undefined
-      // 如果在开头已经调用则定时器中不再触发调用
       let hasCall = false
-      if (isFree) {
+      if (!hadPending) {
         fn.call(this, ...args)
         hasCall = true
       }
@@ -33,6 +34,7 @@ export function debounce<T extends any[]>(
     } else {
       timer = setTimeout(() => {
         fn.call(this, ...args)
+        timer = undefined
       }, delay)
     }
   }

@@ -46,9 +46,9 @@ class CatString {
  * @returns 字符串操作对象
  * @example
  * ```ts
- * const str = str('hello-world')
- * str.camelCase() // 'helloWorld'
- * str.kebabCase() // 'hello-world'
+ * const s = str('hello-world')
+ * s.camelCase() // 'helloWorld'
+ * s.kebabCase() // 'hello-world'
  * ```
  */
 export function str(str: string): CatString {

@@ -50,7 +50,7 @@ function renderNavigator(target: ToolTarget): string {
 
 > **消歧**：存在已执行的当前计划时，用户提出变更需求：
 > - 需求与当前计划**相关联**或用户本意是修补当前计划 → 走 **patch**。
-> - 需求与当前计划**完全无关** → 拒绝执行，提示先运行 \`agent-context done\` 归档当前计划后再创建新计划。
+> - 需求与当前计划**完全无关** → 通过 AskUserQuestion 提供选项：1) 运行 \`agent-context done\` 归档当前计划后创建新计划（推荐） 2) 终止操作，按用户选择执行。
 
 ## 全局约束
 
