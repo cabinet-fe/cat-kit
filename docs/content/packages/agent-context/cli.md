@@ -1,6 +1,6 @@
 ---
 title: CLI 命令
-description: 'agent-context CLI 的初始化、安装、同步、校验、状态、归档与索引命令'
+description: 'agent-context CLI 的初始化、安装、同步、校验、状态、归档、索引与 prompt-gen'
 outline: deep
 ---
 
@@ -8,12 +8,13 @@ outline: deep
 
 ## 介绍
 
-`agent-context` 的 CLI 不负责替代 Skill action。它只做四类事：
+`agent-context` 的 CLI 不负责替代 Skill action。它主要做这些事：
 
 - 初始化 SCOPE 与安装/同步 Skill 文件
 - 校验 `.agent-context/` 结构
 - 查看状态与归档当前计划
 - 生成或更新计划索引
+- 在用户主目录生成各工具的全局提示词文件（`prompt-gen`）
 
 对话里说"出计划""开始实现""补 patch"触发的是 Skill action，不是 CLI 子命令。
 
@@ -28,6 +29,7 @@ agent-context validate      # 校验目录结构
 agent-context status        # 查看当前状态
 agent-context done          # 归档已执行计划
 agent-context index         # 生成/更新计划索引
+agent-context prompt-gen    # 可选：写入本机全局提示词模板
 ```
 
 安装完成后，日常推进通常靠自然语言触发 Skill；CLI 更多用于初始化、检查和收尾。
@@ -68,17 +70,19 @@ agent-context install --yes
 | `--check`         | 只检查是否会产生变更，不写文件                   |
 | `--yes`           | 非交互模式：优先复用已安装工具，否则安装全部工具 |
 
-支持的工具：
+支持的工具（技能目录名均为 `ac-workflow`）：
 
 | 工具           | Skill 目录                      |
 | -------------- | ------------------------------- |
-| Claude         | `.claude/skills/agent-context/` |
-| Codex          | `.codex/skills/agent-context/`  |
-| Cursor         | `.cursor/skills/agent-context/` |
-| Antigravity    | `.agent/skills/agent-context/`  |
-| GitHub Copilot | `.github/skills/agent-context/` |
+| Agent Skills（`.agents`） | `.agents/skills/ac-workflow/` |
+| Cursor         | `.cursor/skills/ac-workflow/`   |
+| Claude Code    | `.claude/skills/ac-workflow/`   |
+| Codex          | `.codex/skills/ac-workflow/`    |
+| Antigravity    | `.agent/skills/ac-workflow/`    |
+| Gemini CLI     | `.gemini/skills/ac-workflow/`   |
+| GitHub Copilot | `.github/skills/ac-workflow/`   |
 
-Codex 会额外生成 `agents/openai.yaml` 元数据文件。
+Codex 会额外在技能目录下生成 `agents/openai.yaml` 元数据文件。
 
 ### `agent-context sync`
 
@@ -163,11 +167,39 @@ agent-context index
 
 归档计划时（`done`）会自动更新索引，也可手动运行。
 
+### `agent-context prompt-gen`
+
+在用户主目录下写入各 AI 工具的全局提示词模板（与项目内 `.agent-context/` 无关）。
+
+```bash
+agent-context prompt-gen
+agent-context prompt-gen --tools claude,codex
+agent-context prompt-gen --yes
+agent-context prompt-gen --check
+```
+
+| 选项              | 说明                                                         |
+| ----------------- | ------------------------------------------------------------ |
+| `--tools <tools>` | 指定目标工具，逗号分隔：`claude`、`codex`、`gemini`、`antigravity` |
+| `--yes`           | 非交互：已选工具一律覆盖写入                                 |
+| `--check`         | 只列出将要创建或覆盖的文件路径，不写入                       |
+
+各工具对应文件：
+
+| 工具        | 写入路径                         |
+| ----------- | -------------------------------- |
+| Claude Code | `~/.claude/CLAUDE.md`            |
+| Codex       | `~/.codex/AGENTS.md`             |
+| Gemini CLI  | `~/.gemini/GEMINI.md`            |
+| Antigravity | `~/.gemini/AGENTS.md`            |
+
+未传 `--tools` 且非 `--yes` / `--check` 时，会交互多选工具；默认全部勾选。
+
 ## 通用选项汇总
 
-| 选项              | 适用命令                    | 作用                   |
-| ----------------- | --------------------------- | ---------------------- |
-| `--tools <tools>` | `install` / `sync`          | 指定工具列表，逗号分隔 |
-| `--check`         | `install` / `sync`          | 只检查，不写入文件     |
-| `--yes`           | `install` / `init` / `done` | 跳过交互确认           |
-| `--scope <name>`  | `init`                      | 手动指定 SCOPE 名称    |
+| 选项              | 适用命令                              | 作用                   |
+| ----------------- | ------------------------------------- | ---------------------- |
+| `--tools <tools>` | `install` / `sync` / `prompt-gen`     | 指定工具列表，逗号分隔 |
+| `--check`         | `install` / `sync` / `prompt-gen`     | 只检查，不写入文件     |
+| `--yes`           | `install` / `init` / `done` / `prompt-gen` | 跳过或减少交互确认     |
+| `--scope <name>`  | `init`                                | 手动指定 SCOPE 名称    |

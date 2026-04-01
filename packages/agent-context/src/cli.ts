@@ -8,6 +8,7 @@ import { doneCommand } from './commands/done.js'
 import { indexCommand } from './commands/index-cmd.js'
 import { initCommand } from './commands/init.js'
 import { installCommand } from './commands/install.js'
+import { promptGenCommand } from './commands/prompt-gen.js'
 import { statusCommand } from './commands/status.js'
 import { syncCommand } from './commands/sync.js'
 import { validateCommand } from './commands/validate.js'
@@ -60,6 +61,17 @@ program
   .action(doneCommand)
 
 program.command('index').description('生成或更新计划索引文件').action(indexCommand)
+
+program
+  .command('prompt-gen')
+  .description('在用户主目录下生成各 AI 工具的全局提示词文件')
+  .option(
+    '--tools <tools>',
+    '指定目标工具，逗号分隔：claude,codex,gemini,antigravity'
+  )
+  .option('--yes', '文件已存在时直接覆盖，不询问')
+  .option('--check', '仅检查将要写入的内容，不实际写入')
+  .action(promptGenCommand)
 
 program.parseAsync().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error)

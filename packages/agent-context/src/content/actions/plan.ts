@@ -12,6 +12,7 @@ export function renderPlan(_target: ToolTarget): string {
 - 运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
 - 描述为空 → 向用户获取描述后继续执行。
 - 存在未归档的已执行当前计划 → 通过 AskUserQuestion 提供选项：1) 运行 \`agent-context done\` 归档后继续创建计划（推荐） 2) 终止操作，按用户选择执行。
+- 存在未实施的当前计划（状态为 \`未执行\`） → 通过 AskUserQuestion 提供选项：1) 通过 replan 调整现有计划（推荐，若新需求与现有计划相关） 2) 归档现有计划后创建新计划 3) 终止操作，按用户选择执行。
 - 存在多个当前计划 → 通过 AskUserQuestion 列出所有当前计划供用户选择保留哪个，清理后继续执行。
 
 ## 执行步骤

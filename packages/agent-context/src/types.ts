@@ -1,5 +1,7 @@
 export type ToolId = 'claude' | 'codex' | 'cursor' | 'antigravity' | 'agents' | 'gemini' | 'copilot'
 
+export type PromptToolId = 'claude' | 'codex' | 'gemini' | 'antigravity'
+
 export type SkillFrontmatterProfile = 'standard' | 'claude' | 'copilot'
 export type SkillMetadataFile = 'openai'
 

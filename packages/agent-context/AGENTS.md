@@ -16,6 +16,7 @@ packages/agent-context/src/
 │   ├── init.ts        # 初始化 SCOPE
 │   ├── install.ts     # 安装 Skill
 │   ├── printer.ts     # 输出格式化
+│   ├── prompt-gen.ts  # 生成全局提示词文件
 │   ├── status.ts      # 查看状态
 │   ├── sync.ts        # 同步 Skill
 │   └── validate.ts    # 验证计划

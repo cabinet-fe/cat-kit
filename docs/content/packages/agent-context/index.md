@@ -1,6 +1,6 @@
 ---
 title: Agent Context
-description: '@cat-kit/agent-context 为 AI 编程助手安装统一的 ac-workflow 协作工作流'
+description: '@cat-kit/agent-context 为 AI 编程助手安装 ac-workflow，统一管理 .agent-context 计划与 CLI 工具'
 outline: deep
 ---
 
@@ -11,7 +11,7 @@ outline: deep
 它由两部分组成：
 
 - **CLI**：安装 Skill、同步协议、校验目录结构、管理计划生命周期（归档、索引）
-- **Skill**：在对话中识别 `init / plan / replan / implement / patch / rush / done` 动作意图，按协议推进任务
+- **Skill**：在对话中识别 `init / plan / replan / implement / patch / rush / review / done` 动作意图，按协议推进任务
 
 目录结构：
 
@@ -30,7 +30,7 @@ outline: deep
         └── plan-{N}-{YYYYMMDD}/
 ```
 
-生命周期：
+生命周期（实线为主路径；虚线为按需触发的 **`review`**，典型后续取决于计划是否已执行）：
 
 ```mermaid
 flowchart TD
@@ -39,19 +39,28 @@ flowchart TD
     replan[replan 重做未执行计划]
     implement[implement 实施当前计划]
     patch[patch 补增量修改]
+    review[review 独立审查]
     done[done 归档当前计划]
     rush[rush 创建并立即实施]
 
     init --> plan
     init --> rush
-    plan -->|调整未执行计划| replan
-    plan -->|直接开始实施| implement
+    plan -->|未执行需调整| replan
+    plan -->|开始落地| implement
     replan --> implement
-    implement -->|追加增量修改| patch
-    implement -->|无需补丁，直接完成| done
+    plan -.-> review
+    implement -.-> review
+    patch -.-> review
+    review -.->|计划未执行时常见| replan
+    review -.->|计划已执行时常见| patch
+    implement -->|同一任务内继续改| patch
+    implement -->|无需再改| done
+    patch -->|可多次修补| patch
     patch --> done
-    rush -->|单计划快速处理| done
+    rush -->|等同 plan 后立刻 implement| done
 ```
+
+说明：`review` 不接受额外描述，协议要求用独立子代理做第三方视角审查；审查后通常建议走 `replan`（计划仍 `未执行`）或 `patch`（计划已 `已执行`），也可在确认无问题后继续原路径。
 
 ## 页面导航
 
