@@ -20,3 +20,4 @@
 - [x] [@cat-kit/core 公开 API 与原生能力对照及收敛](./done/plan-20-20260330/plan.md)
 - [x] [agent-context 支持 CLAUDE.md 及新增 review 协议](./done/plan-21-20260401/plan.md)
 - [x] [新增 prompt-gen 全局提示词生成命令](./done/plan-22-20260401/plan.md)
+- [x] [plan 协议增加完成后 review 询问](./done/plan-23-20260401/plan.md)
