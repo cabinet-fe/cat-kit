@@ -1,4 +1,4 @@
-import { HTTPClient, HTTPError } from '@cat-kit/http/src'
+import { HTTPClient, HTTPError, mergeRequestConfig } from '@cat-kit/http/src'
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 
 // Mock 全局 fetch
@@ -309,10 +309,7 @@ describe('HTTPClient', () => {
         name: 'HTTPError',
         message: '请求失败，状态码: 404',
         code: 'NETWORK',
-        response: expect.objectContaining({
-          code: 404,
-          data: { message: 'not found' }
-        })
+        response: expect.objectContaining({ code: 404, data: { message: 'not found' } })
       } satisfies Partial<HTTPError>)
     })
   })
@@ -429,6 +426,180 @@ describe('HTTPClient', () => {
         expect.stringContaining('/users?tag=a&tag=b&empty=null'),
         expect.any(Object)
       )
+    })
+  })
+
+  describe('signal 与超时', () => {
+    it('per-request signal 中止时抛出 ABORTED', async () => {
+      mockFetch.mockImplementation((_url, init) => {
+        return new Promise((_resolve, reject) => {
+          const sig = (init as RequestInit).signal
+          if (!sig) {
+            reject(new Error('no signal'))
+            return
+          }
+          const onAbort = (): void => {
+            const err = new Error('aborted')
+            err.name = 'AbortError'
+            reject(err)
+          }
+          if (sig.aborted) {
+            onAbort()
+            return
+          }
+          sig.addEventListener('abort', onAbort)
+        })
+      })
+
+      const client = new HTTPClient()
+      const ac = new AbortController()
+      const p = client.get('/users', { signal: ac.signal })
+      ac.abort()
+
+      await expect(p).rejects.toMatchObject({ name: 'HTTPError', code: 'ABORTED' })
+    })
+
+    it('超时触发 TIMEOUT，不与外部 signal 语义混淆', async () => {
+      vi.useFakeTimers()
+      mockFetch.mockImplementation((_url, init) => {
+        return new Promise((_resolve, reject) => {
+          const sig = (init as RequestInit).signal
+          if (!sig) {
+            reject(new Error('no signal'))
+            return
+          }
+          const onAbort = (): void => {
+            const err = new Error('aborted')
+            err.name = 'AbortError'
+            reject(err)
+          }
+          if (sig.aborted) {
+            onAbort()
+            return
+          }
+          sig.addEventListener('abort', onAbort)
+        })
+      })
+
+      const client = new HTTPClient()
+      const p = client.get('/slow', { timeout: 80 })
+      const assertRejected = expect(p).rejects.toMatchObject({ name: 'HTTPError', code: 'TIMEOUT' })
+
+      await vi.advanceTimersByTimeAsync(80)
+      await assertRejected
+      vi.useRealTimers()
+    })
+  })
+
+  describe('mergeRequestConfig', () => {
+    it('headers/query 对象合并且 undefined 不清空已有字段', () => {
+      const base: Parameters<typeof mergeRequestConfig>[0] = {
+        method: 'GET',
+        timeout: 5000,
+        headers: { a: '1', b: '2' },
+        query: { x: 1, y: 2 }
+      }
+      const patch = { headers: { b: '3', c: '4' }, query: { y: 9 }, timeout: 100 }
+      const m = mergeRequestConfig(base, patch)
+      expect(m.headers).toEqual({ a: '1', b: '3', c: '4' })
+      expect(m.query).toEqual({ x: 1, y: 9 })
+      expect(m.timeout).toBe(100)
+    })
+  })
+
+  describe('PluginContext.retry 与 onError 恢复', () => {
+    it('afterRespond 通过 context.retry 重试时 mockFetch 调用 2 次', async () => {
+      let n = 0
+      const afterRespond = vi.fn(async (_res, _url, _cfg, ctx) => {
+        n += 1
+        if (n === 1 && ctx) {
+          return ctx.retry()
+        }
+        return undefined
+      })
+
+      const client = new HTTPClient('', { plugins: [{ afterRespond }] })
+      await client.get('/users')
+
+      expect(mockFetch).toHaveBeenCalledTimes(2)
+    })
+
+    it('retry 合并 headers/query/timeout 符合规则', async () => {
+      let n = 0
+      const afterRespond = vi.fn(async (_res, _url, _cfg, ctx) => {
+        n += 1
+        if (n === 1 && ctx) {
+          return ctx.retry({ headers: { 'X-R': 'retry' }, query: { q: '1' }, timeout: 9999 })
+        }
+        return undefined
+      })
+
+      const client = new HTTPClient('', {
+        plugins: [{ afterRespond }],
+        headers: { 'X-Base': 'b' },
+        timeout: 100
+      })
+
+      await client.get('/api', { headers: { 'X-Req': 'r' }, timeout: 200, query: { a: '0' } })
+
+      const second = mockFetch.mock.calls[1] as [string, RequestInit]
+      expect(second[0]).toContain('q=1')
+      expect(second[0]).toContain('a=0')
+      const h = second[1].headers as Record<string, string>
+      expect(h['X-Base']).toBe('b')
+      expect(h['X-Req']).toBe('r')
+      expect(h['X-R']).toBe('retry')
+    })
+
+    it('onError 返回 HTTPResponse 时 request 不抛错', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('boom'))
+      const recovered = { data: { ok: true }, code: 200, headers: {} }
+      const onError = vi.fn(() => recovered)
+
+      const client = new HTTPClient('', { plugins: [{ onError }] })
+      const res = await client.get('/x')
+
+      expect(res).toEqual(recovered)
+      expect(onError).toHaveBeenCalledTimes(1)
+    })
+
+    it('onError 首个恢复结果不被后续插件覆盖且后续仍执行', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('boom'))
+      const first = { data: { which: 'first' }, code: 200, headers: {} }
+      const second = { data: { which: 'second' }, code: 201, headers: {} }
+      const side = vi.fn()
+      const client = new HTTPClient('', {
+        plugins: [
+          { onError: () => first },
+          {
+            onError: () => {
+              side()
+              return second
+            }
+          }
+        ]
+      })
+
+      const res = await client.get('/x')
+      expect(res.data).toEqual({ which: 'first' })
+      expect(side).toHaveBeenCalledTimes(1)
+    })
+
+    it('afterRespond 无限 retry 最终 RETRY_LIMIT_EXCEEDED', async () => {
+      const afterRespond = vi.fn(async (_res, _url, _cfg, ctx) => {
+        if (ctx) {
+          return ctx.retry()
+        }
+      })
+
+      const client = new HTTPClient('', { plugins: [{ afterRespond }] })
+
+      await expect(client.get('/loop')).rejects.toMatchObject({
+        code: 'RETRY_LIMIT_EXCEEDED',
+        message: expect.stringContaining('最大重试次数')
+      })
+
+      expect(mockFetch.mock.calls.length).toBe(11)
     })
   })
 })

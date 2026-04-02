@@ -8,8 +8,65 @@ import type {
   RequestConfig,
   HTTPResponse,
   AliasRequestConfig,
-  RequestContext
+  RequestContext,
+  PluginContext
 } from './types'
+import { HTTPError } from './types'
+
+/** 插件触发的单次请求最多允许的重试次数（retryCount 0 为首次，共最多 11 次尝试） */
+export const MAX_PLUGIN_RETRIES = 10
+
+const MERGE_SCALAR_KEYS: (keyof RequestConfig)[] = [
+  'method',
+  'body',
+  'timeout',
+  'credentials',
+  'responseType',
+  'signal',
+  'onUploadProgress',
+  'onDownloadProgress'
+]
+
+/**
+ * 合并请求配置：headers / query 做对象级合并；标量类字段仅在 patch 显式传入且非 undefined 时覆盖。
+ * `undefined` 不用于清空已有配置。
+ */
+export function mergeRequestConfig(base: RequestConfig, patch: RequestConfig): RequestConfig {
+  const headers = { ...base.headers }
+  if (patch.headers !== undefined) {
+    Object.assign(headers, patch.headers)
+  }
+
+  const out: RequestConfig = { ...base, headers }
+
+  if (patch.query !== undefined) {
+    out.query = { ...base.query, ...patch.query }
+  }
+
+  for (const key of MERGE_SCALAR_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(patch, key) && patch[key] !== undefined) {
+      ;(out as Record<string, unknown>)[key as string] = patch[key]
+    }
+  }
+
+  const patchRec = patch as Record<string, unknown>
+  const outRec = out as Record<string, unknown>
+  if (Object.prototype.hasOwnProperty.call(patchRec, '_retryAttempt')) {
+    outRec['_retryAttempt'] = patchRec['_retryAttempt']
+  }
+
+  return out
+}
+
+function isRecoveredHTTPResponse(value: unknown): value is HTTPResponse {
+  if (value === null || typeof value !== 'object') {
+    return false
+  }
+  const o = value as Record<string, unknown>
+  return (
+    typeof o.code === 'number' && 'data' in o && typeof o.headers === 'object' && o.headers !== null
+  )
+}
 
 /**
  * HTTP 请求客户端
@@ -136,14 +193,15 @@ export class HTTPClient {
     return { timeout, credentials, ...config, headers: { ...headers, ...config.headers } }
   }
 
-  private mergeRequestConfig(current: RequestConfig, patch: RequestConfig): RequestConfig {
-    return { ...current, ...patch, headers: { ...current.headers, ...patch.headers } }
-  }
-
-  private async runOnErrorPlugins(error: unknown, context: RequestContext): Promise<void> {
+  private async runOnErrorPlugins(
+    error: unknown,
+    context: RequestContext
+  ): Promise<HTTPResponse | undefined> {
     if (!this.config.plugins?.length) {
-      return
+      return undefined
     }
+
+    let recovered: HTTPResponse | undefined
 
     for (const plugin of this.config.plugins) {
       if (!plugin.onError) {
@@ -151,10 +209,102 @@ export class HTTPClient {
       }
 
       try {
-        await plugin.onError(error, context)
+        const result = await plugin.onError(error, context)
+        if (recovered === undefined && isRecoveredHTTPResponse(result)) {
+          recovered = result
+        }
       } catch {
         // 忽略插件错误，保留原始错误语义
       }
+    }
+
+    return recovered
+  }
+
+  private async _executeRequest<T = any>(
+    originalUrl: string,
+    originalConfig: RequestConfig,
+    retryCount: number
+  ): Promise<HTTPResponse<T>> {
+    let finalUrl = this.getRequestUrl(originalUrl, originalConfig)
+    let finalConfig = originalConfig
+
+    const pluginContext: PluginContext = {
+      retry: async (patch?: Partial<RequestConfig>) => {
+        if (retryCount >= MAX_PLUGIN_RETRIES) {
+          throw new HTTPError('超过最大重试次数', {
+            code: 'RETRY_LIMIT_EXCEEDED',
+            url: finalUrl,
+            config: originalConfig
+          })
+        }
+        const merged = mergeRequestConfig(originalConfig, (patch ?? {}) as RequestConfig)
+        return this._executeRequest<T>(originalUrl, merged, retryCount + 1)
+      }
+    }
+
+    try {
+      if (this.config.plugins?.length) {
+        for (const plugin of this.config.plugins) {
+          if (plugin.beforeRequest) {
+            const result = await plugin.beforeRequest(finalUrl, finalConfig)
+            if (result) {
+              if (result.url) {
+                finalUrl = result.url
+              }
+              if (result.config) {
+                finalConfig = mergeRequestConfig(finalConfig, result.config)
+              }
+            }
+          }
+        }
+      }
+
+      let response = await this.engine.request<T>(finalUrl, finalConfig)
+
+      if (this.config.plugins?.length) {
+        for (const plugin of this.config.plugins) {
+          if (plugin.afterRespond) {
+            const result = await plugin.afterRespond(response, finalUrl, finalConfig, pluginContext)
+            if (result) {
+              response = result
+            }
+          }
+        }
+      }
+
+      return response
+    } catch (error) {
+      if (
+        error instanceof HTTPError &&
+        error.response !== undefined &&
+        this.config.plugins?.length
+      ) {
+        let response = error.response as HTTPResponse<T>
+        let recoveredViaAfterRespond = false
+        for (const plugin of this.config.plugins) {
+          if (plugin.afterRespond) {
+            const result = await plugin.afterRespond(response, finalUrl, finalConfig, pluginContext)
+            if (result) {
+              response = result
+              recoveredViaAfterRespond = true
+            }
+          }
+        }
+        if (recoveredViaAfterRespond && response.code >= 200 && response.code < 300) {
+          return response
+        }
+      }
+
+      const recovered = await this.runOnErrorPlugins(error, {
+        url: finalUrl,
+        config: finalConfig,
+        retry: pluginContext.retry
+      })
+      if (recovered !== undefined) {
+        return recovered as HTTPResponse<T>
+      }
+      throw error
     }
   }
 
@@ -165,46 +315,8 @@ export class HTTPClient {
    * @returns Promise<HTTPResponse>
    */
   async request<T = any>(url: string, config: RequestConfig = {}): Promise<HTTPResponse<T>> {
-    let finalConfig = this.getRequestConfig(config)
-    let finalUrl = this.getRequestUrl(url, finalConfig)
-
-    try {
-      // 执行插件的 beforeRequest 钩子
-      if (this.config.plugins?.length) {
-        for (const plugin of this.config.plugins) {
-          if (plugin.beforeRequest) {
-            const result = await plugin.beforeRequest(finalUrl, finalConfig)
-            if (result) {
-              if (result.url) {
-                finalUrl = result.url
-              }
-              if (result.config) {
-                finalConfig = this.mergeRequestConfig(finalConfig, result.config)
-              }
-            }
-          }
-        }
-      }
-
-      let response = await this.engine.request<T>(finalUrl, finalConfig)
-
-      // 执行插件的 afterRespond 钩子
-      if (this.config.plugins?.length) {
-        for (const plugin of this.config.plugins) {
-          if (plugin.afterRespond) {
-            const result = await plugin.afterRespond(response, finalUrl, finalConfig)
-            if (result) {
-              response = result
-            }
-          }
-        }
-      }
-
-      return response
-    } catch (error) {
-      await this.runOnErrorPlugins(error, { url: finalUrl, config: finalConfig })
-      throw error
-    }
+    const mergedConfig = this.getRequestConfig(config)
+    return this._executeRequest<T>(url, mergedConfig, 0)
   }
 
   /**

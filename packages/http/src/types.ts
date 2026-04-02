@@ -76,6 +76,30 @@ export interface RequestConfig {
    * @default 'json'
    */
   responseType?: 'json' | 'text' | 'blob' | 'arraybuffer'
+
+  /** 用户传入的终止信号（per-request） */
+  signal?: AbortSignal
+
+  /** 上传进度（Fetch 引擎下会被静默忽略） */
+  onUploadProgress?: (info: ProgressInfo) => void
+
+  /** 下载进度（需引擎支持流式读取） */
+  onDownloadProgress?: (info: ProgressInfo) => void
+
+  /**
+   * @internal 内置重试逻辑写入的重试次数，业务代码勿依赖
+   */
+  _retryAttempt?: number
+}
+
+/** 传输进度信息 */
+export interface ProgressInfo {
+  /** 已传输字节数 */
+  loaded: number
+  /** 总字节数，未知时为 0 */
+  total: number
+  /** 进度百分比 0-100，total 为 0 时固定返回 0 */
+  percent: number
 }
 
 export type AliasRequestConfig = Omit<RequestConfig, 'method'>
@@ -91,7 +115,13 @@ export interface HTTPResponse<T = any> {
   raw?: Response | any
 }
 
-export type HttpErrorCode = 'TIMEOUT' | 'ABORTED' | 'NETWORK' | 'PARSE' | 'UNKNOWN'
+export type HttpErrorCode =
+  | 'TIMEOUT'
+  | 'ABORTED'
+  | 'NETWORK'
+  | 'PARSE'
+  | 'UNKNOWN'
+  | 'RETRY_LIMIT_EXCEEDED'
 
 export interface HTTPErrorOptions<T = any> {
   code: HttpErrorCode
@@ -122,6 +152,16 @@ export class HTTPError<T = any> extends Error {
 export interface RequestContext {
   url: string
   config: RequestConfig
+  /**
+   * 与 {@link PluginContext.retry} 相同，供 `onError` 中恢复请求时使用。
+   */
+  retry?: (patch?: Partial<RequestConfig>) => Promise<HTTPResponse>
+}
+
+/** 插件在 afterRespond 中可用的上下文 */
+export interface PluginContext {
+  /** 重试当前请求，可传入部分配置覆盖（与原始请求配置合并） */
+  retry: (config?: Partial<RequestConfig>) => Promise<HTTPResponse>
 }
 
 /**
@@ -157,13 +197,17 @@ export interface ClientPlugin {
   afterRespond?(
     response: HTTPResponse,
     url: string,
-    config: RequestConfig
+    config: RequestConfig,
+    context?: PluginContext
   ): Promise<HTTPResponse | void> | HTTPResponse | void
 
   /**
    * 错误钩子
    * - 请求链中出现错误时触发
-   * - 不返回值，仅用于记录、上报或副作用处理
+   * - 返回 HTTPResponse 时视为错误已恢复，以首个非空返回为准；后续插件仍会执行
    */
-  onError?(error: unknown, context: RequestContext): Promise<void> | void
+  onError?(
+    error: unknown,
+    context: RequestContext
+  ): Promise<HTTPResponse | void> | HTTPResponse | void
 }

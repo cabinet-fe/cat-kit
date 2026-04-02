@@ -50,6 +50,7 @@ cat-kit/
 │   ├── tsconfig/       # 共享 tsconfig
 │   └── agent-context/  # Agent Context 工具
 ├── release/            # 构建发布入口脚本
+├── skills/             # 仓库内 Agent Skill（见下文 use-cat-kit）
 ├── docs/               # VitePress 文档站
 ├── dist/               # 构建产物（gitignored）
 ├── .oxfmtrc.json       # oxfmt 配置
@@ -89,6 +90,14 @@ cat-kit/
 - 构建工具：tsdown（基于 Rolldown）
 - 构建产物输出到各包 `dist/` 目录
 - 各包 `package.json` 的 `exports` 定义了产物和源码双入口
+
+## AI 助手：use-cat-kit
+
+根目录 `skills/use-cat-kit/` 为本仓库各 `@cat-kit/*` 包的**按需查阅**文档技能（与 VitePress 站点 `docs/content/packages/` 同源能力，拆成细粒度 reference）。
+
+- **入口**：`skills/use-cat-kit/SKILL.md` — 包与子模块导航表
+- **详情**：`skills/use-cat-kit/references/` — 按包分子目录（如 `core/data.md`、`http/client.md`），**只读与当前问题相关的那一个文件**，避免一次加载整包文档占用上下文
+- **何时用**：编写或讲解 cat-kit API、选型子包、核对导入与用法时；需要完整长文与示例时仍以 `docs/` 站点为准
 
 ## 约束
 

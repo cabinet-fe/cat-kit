@@ -1,8 +1,38 @@
-import { TokenPlugin, MethodOverridePlugin } from '@cat-kit/http/src'
+import { HTTPClient, MethodOverridePlugin, RetryPlugin, TokenPlugin } from '@cat-kit/http/src'
 import type { RequestConfig } from '@cat-kit/http/src'
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+
+const mockFetch = vi.fn()
+
+if (typeof window === 'undefined') {
+  // @ts-expect-error test env
+  global.window = { fetch: mockFetch }
+} else {
+  window.fetch = mockFetch
+}
+
+global.fetch = mockFetch
+
+const okJsonResponse = {
+  ok: true,
+  status: 200,
+  headers: new Map([['content-type', 'application/json']]),
+  text: async () => '{"message": "success"}',
+  blob: async () => new Blob(),
+  arrayBuffer: async () => new ArrayBuffer(8)
+}
 
 describe('TokenPlugin', () => {
+  beforeEach(() => {
+    mockFetch.mockReset()
+    mockFetch.mockResolvedValue(okJsonResponse)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.useRealTimers()
+  })
+
   describe('基本功能', () => {
     it('应该能创建 Token 插件', () => {
       const plugin = TokenPlugin({ getter: () => 'test-token' })
@@ -150,6 +180,234 @@ describe('TokenPlugin', () => {
 
       expect(result?.config?.headers?.['Authorization']).toBe('Bearer api-token')
     })
+  })
+
+  describe('v2 刷新与排队', () => {
+    it('access_token 过期时刷新一次并成功带上新 token', async () => {
+      let token = 'old-token'
+      let expired = true
+      const onRefresh = vi.fn(async () => {
+        expired = false
+        token = 'new-token'
+      })
+
+      const client = new HTTPClient('', {
+        plugins: [
+          TokenPlugin({
+            getter: () => token,
+            authType: 'Bearer',
+            onRefresh,
+            isExpired: () => expired
+          })
+        ]
+      })
+
+      await client.get('/api')
+
+      expect(onRefresh).toHaveBeenCalledTimes(1)
+      const init = mockFetch.mock.calls[0]?.[1] as RequestInit
+      const h = init.headers as Record<string, string>
+      expect(h['Authorization']).toBe('Bearer new-token')
+    })
+
+    it('refresh_token 过期时调用 onRefreshExpired 并抛出错误', async () => {
+      const onRefreshExpired = vi.fn()
+      const client = new HTTPClient('', {
+        plugins: [
+          TokenPlugin({ getter: () => 'x', isRefreshExpired: () => true, onRefreshExpired })
+        ]
+      })
+
+      await expect(client.get('/api')).rejects.toMatchObject({
+        name: 'HTTPError',
+        message: '刷新令牌已过期',
+        code: 'UNKNOWN'
+      })
+      expect(onRefreshExpired).toHaveBeenCalledTimes(1)
+      expect(mockFetch).not.toHaveBeenCalled()
+    })
+
+    it('并发请求在 access 过期时只触发一次 onRefresh', async () => {
+      let expired = true
+      let refreshCount = 0
+      const onRefresh = vi.fn(async () => {
+        refreshCount += 1
+        await new Promise((r) => setTimeout(r, 15))
+        expired = false
+      })
+
+      const client = new HTTPClient('', {
+        plugins: [TokenPlugin({ getter: () => 'tok', onRefresh, isExpired: () => expired })]
+      })
+
+      await Promise.all([client.get('/a'), client.get('/b'), client.get('/c')])
+
+      expect(onRefresh).toHaveBeenCalledTimes(1)
+      expect(refreshCount).toBe(1)
+    })
+
+    it('shouldRefresh 遇 401 时刷新并通过 retry 得到 200', async () => {
+      const onRefresh = vi.fn(async () => {})
+      let call = 0
+      mockFetch.mockImplementation(() => {
+        call += 1
+        if (call === 1) {
+          return Promise.resolve({
+            ok: false,
+            status: 401,
+            headers: new Map([['content-type', 'application/json']]),
+            text: async () => '{}',
+            blob: async () => new Blob(),
+            arrayBuffer: async () => new ArrayBuffer(8)
+          })
+        }
+        return Promise.resolve(okJsonResponse)
+      })
+
+      const client = new HTTPClient('', {
+        plugins: [
+          TokenPlugin({
+            getter: () => 'access',
+            onRefresh,
+            shouldRefresh: (res) => res.code === 401
+          })
+        ]
+      })
+
+      const res = await client.get('/secure')
+      expect(res.code).toBe(200)
+      expect(onRefresh).toHaveBeenCalledTimes(1)
+      expect(mockFetch).toHaveBeenCalledTimes(2)
+    })
+
+    it('仅配置 shouldRefresh 而无 onRefresh 时不重试且不额外请求', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        headers: new Map([['content-type', 'application/json']]),
+        text: async () => '{}',
+        blob: async () => new Blob(),
+        arrayBuffer: async () => new ArrayBuffer(8)
+      })
+
+      const client = new HTTPClient('', {
+        plugins: [TokenPlugin({ getter: () => 'access', shouldRefresh: (res) => res.code === 401 })]
+      })
+
+      await expect(client.get('/secure')).rejects.toMatchObject({ name: 'HTTPError' })
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+    })
+  })
+})
+
+describe('RetryPlugin', () => {
+  beforeEach(() => {
+    mockFetch.mockReset()
+    mockFetch.mockResolvedValue(okJsonResponse)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.useRealTimers()
+  })
+
+  it('默认配置下网络错误重试直至成功', async () => {
+    mockFetch
+      .mockRejectedValueOnce(new Error('e1'))
+      .mockRejectedValueOnce(new Error('e2'))
+      .mockResolvedValueOnce(okJsonResponse)
+
+    const client = new HTTPClient('', { plugins: [RetryPlugin()] })
+    const res = await client.get('/x')
+    expect(res.code).toBe(200)
+    expect(mockFetch).toHaveBeenCalledTimes(3)
+  })
+
+  it('超过 maxRetries 后抛出原始错误', async () => {
+    mockFetch.mockRejectedValue(new Error('always'))
+
+    const client = new HTTPClient('', { plugins: [RetryPlugin({ maxRetries: 2 })] })
+
+    await expect(client.get('/x')).rejects.toThrow('网络错误')
+    expect(mockFetch).toHaveBeenCalledTimes(3)
+  })
+
+  it('retryOn 返回 false 时不重试', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('once'))
+
+    const client = new HTTPClient('', { plugins: [RetryPlugin({ retryOn: () => false })] })
+
+    await expect(client.get('/x')).rejects.toThrow('网络错误')
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('函数 delay 通过定时器生效', async () => {
+    vi.useFakeTimers()
+
+    mockFetch.mockRejectedValue(new Error('fail'))
+
+    const delayFn = vi.fn((a: number) => 100 + a * 50)
+    const client = new HTTPClient('', { plugins: [RetryPlugin({ maxRetries: 1, delay: delayFn })] })
+
+    const p = client.get('/t')
+    const assertFail = expect(p).rejects.toThrow('网络错误')
+    await vi.runAllTimersAsync()
+    await assertFail
+
+    expect(delayFn).toHaveBeenCalled()
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('固定 delay 通过定时器生效', async () => {
+    vi.useFakeTimers()
+
+    mockFetch.mockRejectedValue(new Error('fail'))
+
+    const client = new HTTPClient('', { plugins: [RetryPlugin({ maxRetries: 1, delay: 750 })] })
+
+    const p = client.get('/t')
+    const assertFail = expect(p).rejects.toThrow('网络错误')
+    await vi.runAllTimersAsync()
+    await assertFail
+
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('默认 delay 首次重试前等待 1000ms', async () => {
+    vi.useFakeTimers()
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout')
+
+    mockFetch.mockRejectedValueOnce(new Error('e1')).mockResolvedValueOnce(okJsonResponse)
+
+    const client = new HTTPClient('', { plugins: [RetryPlugin({ maxRetries: 2 })] })
+    const p = client.get('/backoff')
+    await vi.runAllTimersAsync()
+    await p
+
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 1000)
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+    setTimeoutSpy.mockRestore()
+  })
+
+  it('retryOnStatus 为 503 时在失败后重试成功', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        headers: new Map([['content-type', 'application/json']]),
+        text: async () => '{}',
+        blob: async () => new Blob(),
+        arrayBuffer: async () => new ArrayBuffer(8)
+      })
+      .mockResolvedValueOnce(okJsonResponse)
+
+    const client = new HTTPClient('', {
+      plugins: [RetryPlugin({ retryOnStatus: [503], delay: 0 })]
+    })
+
+    const res = await client.get('/svc')
+    expect(res.code).toBe(200)
+    expect(mockFetch).toHaveBeenCalledTimes(2)
   })
 })
 

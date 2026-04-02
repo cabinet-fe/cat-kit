@@ -20,7 +20,8 @@ packages/http/src/
 │   ├── fetch.ts       # Fetch API 引擎
 │   └── index.ts
 ├── plugins/           # 内置插件
-│   ├── token.ts       # Token 管理插件
+│   ├── token.ts       # Token 管理插件（含刷新/排队/响应级重试）
+│   ├── retry.ts       # 通用重试插件（onError + 退避）
 │   ├── method-override.ts  # HTTP 方法覆盖插件
 │   └── index.ts
 ├── client.ts          # HTTP 客户端实现
@@ -35,4 +36,4 @@ packages/http/src/
 - 基础工具函数从 `@cat-kit/core` 导入，禁止重复实现
 - 插件返回新配置对象而非修改原配置（不可变原则）
 - 新增插件放 `src/plugins/`，新增引擎放 `src/engine/`
-- 所有公共 API 通过 `src/index.ts` 统一导出
+- 客户端、类型与内置插件均由 `src/index.ts` 重导出；`package.json` 另提供 `@cat-kit/http/plugins` 子路径以便按需分包

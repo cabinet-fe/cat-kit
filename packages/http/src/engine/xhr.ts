@@ -1,7 +1,17 @@
-import type { RequestConfig, HTTPResponse } from '../types'
+import type { RequestConfig, HTTPResponse, ProgressInfo } from '../types'
 import { HTTPError } from '../types'
 import { HttpEngine } from './engine'
 import { buildRequestBody } from './shared'
+
+function buildXHRProgressInfo(
+  loaded: number,
+  lengthComputable: boolean,
+  totalRaw: number
+): ProgressInfo {
+  const total = lengthComputable ? totalRaw : 0
+  const percent = total > 0 ? Math.min(100, Math.max(0, Math.floor((loaded / total) * 100))) : 0
+  return { loaded, total, percent }
+}
 
 export class XHREngine extends HttpEngine {
   /** 请求中的实例 */
@@ -9,19 +19,44 @@ export class XHREngine extends HttpEngine {
 
   request<T = any>(url: string, config: RequestConfig): Promise<HTTPResponse<T>> {
     return new Promise<HTTPResponse<T>>((resolve, reject) => {
+      if (config.signal?.aborted) {
+        reject(new HTTPError('请求被中止', { code: 'ABORTED', url, config }))
+        return
+      }
+
       const { method = 'GET', timeout = 0, responseType = 'json', credentials = true } = config
 
       const xhr = new XMLHttpRequest()
       const headers = { ...config.headers }
       const requestBody = buildRequestBody(method, config.body, headers)
 
-      // 将 XHR 实例添加到集合中，以便可以中止请求
       this.xhrSets.add(xhr)
 
+      const onSignalAbort = (): void => {
+        xhr.abort()
+      }
+
+      if (config.signal) {
+        config.signal.addEventListener('abort', onSignalAbort)
+      }
+
       xhr.timeout = timeout
-      // 将 responseType 转换为 XMLHttpRequest 支持的类型
       xhr.responseType = responseType as XMLHttpRequestResponseType
       xhr.withCredentials = credentials
+
+      if (config.onUploadProgress && xhr.upload) {
+        xhr.upload.onprogress = (e: ProgressEvent) => {
+          config.onUploadProgress!(buildXHRProgressInfo(e.loaded, e.lengthComputable, e.total))
+        }
+      }
+
+      if (config.onDownloadProgress) {
+        xhr.onprogress = (e: ProgressEvent) => {
+          if (e.lengthComputable || e.loaded > 0) {
+            config.onDownloadProgress!(buildXHRProgressInfo(e.loaded, e.lengthComputable, e.total))
+          }
+        }
+      }
 
       xhr.onload = () => {
         const response: HTTPResponse<T> = {
@@ -61,8 +96,10 @@ export class XHREngine extends HttpEngine {
 
       this.sendHeaders(xhr, { ...config, headers })
 
-      // 从集合中移除已完成的请求
       xhr.onloadend = () => {
+        if (config.signal) {
+          config.signal.removeEventListener('abort', onSignalAbort)
+        }
         this.xhrSets.delete(xhr)
       }
 

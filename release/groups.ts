@@ -11,7 +11,7 @@ export const repo = new Monorepo(path.resolve(__dirname, '..'))
 
 export interface ReleaseGroup {
   group: WorkspaceGroup<string>
-  build?: () => Promise<void> | void
+  build?: (this: ReleaseGroup) => Promise<void> | void
 }
 
 export const groups: Record<string, ReleaseGroup> = {
@@ -26,7 +26,8 @@ export const groups: Record<string, ReleaseGroup> = {
     build() {
       return this.group.build({
         '@cat-kit/be': { platform: 'node' },
-        '@cat-kit/excel': { platform: 'browser' }
+        '@cat-kit/excel': { platform: 'browser' },
+        '@cat-kit/http': { platform: 'neutral' }
       })
     }
   },
