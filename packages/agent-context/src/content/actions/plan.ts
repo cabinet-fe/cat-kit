@@ -13,7 +13,6 @@ export function renderPlan(target: ToolTarget): string {
 - 描述为空 → 向用户获取描述后继续执行。
 - 存在未归档的已执行当前计划 → 通过 ${target.askToolName} 提供选项：1) 运行 \`agent-context done\` 归档后继续创建计划（推荐） 2) 终止操作，按用户选择执行。
 - 存在未实施的当前计划（状态为 \`未执行\`） → 通过 ${target.askToolName} 提供选项：1) 通过 replan 调整现有计划（推荐，若新需求与现有计划相关） 2) 归档现有计划后创建新计划 3) 终止操作，按用户选择执行。
-- 存在多个当前计划 → 通过 ${target.askToolName} 列出所有当前计划供用户选择保留哪个，清理后继续执行。
 
 ## 执行步骤
 
@@ -24,8 +23,8 @@ export function renderPlan(target: ToolTarget): string {
    - 涉及架构设计或文档编写但具体内容未明确（如"编写 XX 架构文档"但未说明包含哪些具体内容）。
 2. 按复杂度决定单计划或多计划拆分。
 3. 多计划拆分时：最小编号进入 \`.agent-context/{scope}/\` 作为当前计划，其余进入 \`.agent-context/{scope}/preparing/\`。单计划直接创建。
-4. 每个计划创建 \`plan.md\`，遵循下方模板。
-5. **自检**（不通过则修改后重新检查）：
+4. 每个计划创建 \`plan.md\`，遵循 **##plan.md 模板**。
+5. **自检循环直到通过，若发现模糊指令 → 通过 ${target.askToolName} 向用户澄清具体内容后修正计划，不可带着模糊内容生成计划。**：
    - 每个步骤可独立执行且有明确完成标准。
    - 不存在过度拆分或拆分不足。
    - 影响范围可预估。
@@ -34,8 +33,7 @@ export function renderPlan(target: ToolTarget): string {
      - 步骤中包含"等"、"其他"、"相关"等开放性词汇导致边界不清。
      - 步骤依赖尚未确定的技术选型或设计决策。
      - 步骤的产出物格式、内容结构未明确定义。
-   - 若发现模糊指令 → 通过 ${target.askToolName} 向用户澄清具体内容后修正计划，不可带着模糊内容生成计划。
-6. **Review 询问**：通过 ${target.askToolName} 询问用户是否对刚创建的计划进行审查。选项：1) 立即 review（推荐，review 由独立子代理执行，不影响当前上下文） 2) 跳过 review。若用户选择 review → 按 \`review\` 协议执行。
+6. 追问：通过 ${target.askToolName} 询问用户是否继续对刚创建的计划执行 review 协议。
 
 ## plan.md 模板
 
