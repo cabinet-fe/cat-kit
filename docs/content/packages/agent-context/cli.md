@@ -72,15 +72,15 @@ agent-context install --yes
 
 支持的工具（技能目录名均为 `ac-workflow`）：
 
-| 工具           | Skill 目录                      |
-| -------------- | ------------------------------- |
+| 工具                      | Skill 目录                    |
+| ------------------------- | ----------------------------- |
 | Agent Skills（`.agents`） | `.agents/skills/ac-workflow/` |
-| Cursor         | `.cursor/skills/ac-workflow/`   |
-| Claude Code    | `.claude/skills/ac-workflow/`   |
-| Codex          | `.codex/skills/ac-workflow/`    |
-| Antigravity    | `.agent/skills/ac-workflow/`    |
-| Gemini CLI     | `.gemini/skills/ac-workflow/`   |
-| GitHub Copilot | `.github/skills/ac-workflow/`   |
+| Cursor                    | `.cursor/skills/ac-workflow/` |
+| Claude Code               | `.claude/skills/ac-workflow/` |
+| Codex                     | `.codex/skills/ac-workflow/`  |
+| Antigravity               | `.agent/skills/ac-workflow/`  |
+| Gemini CLI                | `.gemini/skills/ac-workflow/` |
+| GitHub Copilot            | `.github/skills/ac-workflow/` |
 
 Codex 会额外在技能目录下生成 `agents/openai.yaml` 元数据文件。
 
@@ -178,28 +178,39 @@ agent-context prompt-gen --yes
 agent-context prompt-gen --check
 ```
 
-| 选项              | 说明                                                         |
-| ----------------- | ------------------------------------------------------------ |
+| 选项              | 说明                                                               |
+| ----------------- | ------------------------------------------------------------------ |
 | `--tools <tools>` | 指定目标工具，逗号分隔：`claude`、`codex`、`gemini`、`antigravity` |
-| `--yes`           | 非交互：已选工具一律覆盖写入                                 |
-| `--check`         | 只列出将要创建或覆盖的文件路径，不写入                       |
+| `--yes`           | 非交互：已选工具一律覆盖写入                                       |
+| `--check`         | 只列出将要创建或覆盖的文件路径，不写入                             |
 
 各工具对应文件：
 
-| 工具        | 写入路径                         |
-| ----------- | -------------------------------- |
-| Claude Code | `~/.claude/CLAUDE.md`            |
-| Codex       | `~/.codex/AGENTS.md`             |
-| Gemini CLI  | `~/.gemini/GEMINI.md`            |
-| Antigravity | `~/.gemini/AGENTS.md`            |
+| 工具        | 写入路径              |
+| ----------- | --------------------- |
+| Claude Code | `~/.claude/CLAUDE.md` |
+| Codex       | `~/.codex/AGENTS.md`  |
+| Gemini CLI  | `~/.gemini/GEMINI.md` |
+| Antigravity | `~/.gemini/AGENTS.md` |
 
 未传 `--tools` 且非 `--yes` / `--check` 时，会交互多选工具；默认全部勾选。
 
 ## 通用选项汇总
 
-| 选项              | 适用命令                              | 作用                   |
-| ----------------- | ------------------------------------- | ---------------------- |
-| `--tools <tools>` | `install` / `sync` / `prompt-gen`     | 指定工具列表，逗号分隔 |
-| `--check`         | `install` / `sync` / `prompt-gen`     | 只检查，不写入文件     |
+| 选项              | 适用命令                                   | 作用                   |
+| ----------------- | ------------------------------------------ | ---------------------- |
+| `--tools <tools>` | `install` / `sync` / `prompt-gen`          | 指定工具列表，逗号分隔 |
+| `--check`         | `install` / `sync` / `prompt-gen`          | 只检查，不写入文件     |
 | `--yes`           | `install` / `init` / `done` / `prompt-gen` | 跳过或减少交互确认     |
-| `--scope <name>`  | `init`                                | 手动指定 SCOPE 名称    |
+| `--scope <name>`  | `init`                                     | 手动指定 SCOPE 名称    |
+
+## 常见问题
+
+### Codex 中交互式引导不起作用
+
+你需要在 codex 配置中（用户目录：`～/.codex/config.toml` 或 项目根目录：`.codex/config.toml`）启用以下功能标识：
+
+```toml
+[features]
+default_mode_request_user_input = true
+```
