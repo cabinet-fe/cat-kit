@@ -132,17 +132,6 @@ policy:
 // ── AskUserQuestion Guidelines ──────────────────────
 
 function renderAskQuestionGuidelines(target: ToolTarget): string {
-  const codexConfigNote =
-    target.id === 'codex'
-      ? `
-
-> **Codex 配置要求**：\`request_user_input\` 需要启用 \`default_mode_request_user_input\` 配置才能在默认编码模式下使用。首次调用前请检查：
-> 1. 项目配置 \`.codex/config.toml\` 中是否包含 \`default_mode_request_user_input: true\`
-> 2. 若项目配置不存在或未启用，检查用户配置 \`~/.codex/config.toml\`
-> 3. 若均未启用，提醒用户在任一配置文件中添加 \`default_mode_request_user_input: true\`
-`
-      : ''
-
   return `## ${target.askToolName} 规范
 
 所有协议在通过 **${target.askToolName}** 向用户提问时必须遵守：
@@ -150,6 +139,5 @@ function renderAskQuestionGuidelines(target: ToolTarget): string {
 - 提问通俗易懂，不废话
 - 单选选项须标注推荐项并说明理由
 - 选项编号使用从 1 开始的正整数
-${codexConfigNote}
 `
 }
