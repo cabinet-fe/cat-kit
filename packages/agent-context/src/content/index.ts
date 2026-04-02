@@ -134,10 +134,10 @@ policy:
 function renderAskQuestionGuidelines(target: ToolTarget): string {
   return `## ${target.askToolName} 规范
 
-所有协议在通过 **${target.askToolName}** 向用户提问时必须遵守：
+**任何情况下使用 ${target.askToolName} 工具时必须遵守本规范。**
 
 - 提问通俗易懂，不废话
-- 单选选项须标注推荐项并说明理由
+- 单选提问须在问题末尾标注推荐项并说明理由
 - 选项编号使用从 1 开始的正整数
 `
 }

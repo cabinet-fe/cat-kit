@@ -7,10 +7,10 @@
 ## 前置检查
 
 - 运行 `agent-context validate`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
-- 描述为空 → 向用户获取描述后继续执行。
-- 描述仍存在范围边界、技术路径或验收标准歧义 → 通过 AskUserQuestion 提供选项：1) 转为 plan 协议分步规划（推荐） 2) 补充描述后重新尝试 rush 3) 终止操作，按用户选择执行。
-- 存在未归档的已执行当前计划 → 通过 AskUserQuestion 提供选项：1) 运行 `agent-context done` 归档后继续（推荐） 2) 终止操作，按用户选择执行。
-- 存在未实施的当前计划 → 通过 AskUserQuestion 提供选项：1) 先执行 implement 实施当前计划 2) 运行 `agent-context done` 归档后继续 rush 3) 终止操作，按用户选择执行。
+- 描述为空 → 通过 AskUserQuestion 向用户获取描述后继续执行。
+- 描述仍存在范围边界、技术路径或验收标准歧义 → 通过 AskUserQuestion 向用户提供合适的引导，按用户选择执行。
+- 存在已执行的当前计划 → 通过 AskUserQuestion 询问用户是否执行 `agent-context done` 归档后继续 rush。
+- 存在未实施的当前计划 → 通过 AskUserQuestion 询问用户是否直接执行当前计划。
 
 ## 执行步骤
 
@@ -26,3 +26,4 @@
 ### 阶段二：implement
 
 - 按 `implement` 协议**完整执行**（读取计划 → 实施变更 → 验证循环 → 更新状态与影响范围），无任何裁剪。
+- 实施完成后，通过 AskUserQuestion 询问用户是否对实施结果进行审查。选项：1) 立即 review（推荐） 2) 跳过 review。若用户选择 review → 按 `review` 协议执行。
