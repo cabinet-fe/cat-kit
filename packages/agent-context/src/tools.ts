@@ -13,7 +13,8 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
     skillRootDir: '.claude/skills',
     frontmatterProfile: 'claude',
     metadataFiles: [],
-    guideFileName: 'CLAUDE.md'
+    guideFileName: 'CLAUDE.md',
+    askToolName: 'AskUserQuestion'
   },
   codex: {
     id: 'codex',
@@ -21,7 +22,8 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
     skillRootDir: '.codex/skills',
     frontmatterProfile: 'standard',
     metadataFiles: ['openai'],
-    guideFileName: 'AGENTS.md'
+    guideFileName: 'AGENTS.md',
+    askToolName: 'request_user_input'
   },
   cursor: {
     id: 'cursor',
@@ -29,7 +31,8 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
     skillRootDir: '.cursor/skills',
     frontmatterProfile: 'standard',
     metadataFiles: [],
-    guideFileName: 'AGENTS.md'
+    guideFileName: 'AGENTS.md',
+    askToolName: 'AskUserQuestion'
   },
   antigravity: {
     id: 'antigravity',
@@ -37,7 +40,8 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
     skillRootDir: '.agent/skills',
     frontmatterProfile: 'standard',
     metadataFiles: [],
-    guideFileName: 'AGENTS.md'
+    guideFileName: 'AGENTS.md',
+    askToolName: 'AskUserQuestion'
   },
   agents: {
     id: 'agents',
@@ -45,7 +49,8 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
     skillRootDir: '.agents/skills',
     frontmatterProfile: 'standard',
     metadataFiles: [],
-    guideFileName: 'AGENTS.md'
+    guideFileName: 'AGENTS.md',
+    askToolName: 'AskUserQuestion'
   },
   gemini: {
     id: 'gemini',
@@ -53,7 +58,8 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
     skillRootDir: '.gemini/skills',
     frontmatterProfile: 'standard',
     metadataFiles: [],
-    guideFileName: 'AGENTS.md'
+    guideFileName: 'AGENTS.md',
+    askToolName: 'AskUserQuestion'
   },
   copilot: {
     id: 'copilot',
@@ -61,7 +67,8 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
     skillRootDir: '.github/skills',
     frontmatterProfile: 'copilot',
     metadataFiles: [],
-    guideFileName: 'AGENTS.md'
+    guideFileName: 'AGENTS.md',
+    askToolName: 'AskUserQuestion'
   }
 }
 

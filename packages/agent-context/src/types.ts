@@ -12,6 +12,7 @@ export interface ToolTarget {
   frontmatterProfile: SkillFrontmatterProfile
   metadataFiles: SkillMetadataFile[]
   guideFileName: string
+  askToolName: string
 }
 
 export interface SkillArtifacts {

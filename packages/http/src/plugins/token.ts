@@ -41,7 +41,7 @@ export interface TokenPluginOptions {
  * ```ts
  * import { TokenPlugin, HTTPClient } from '@cat-kit/http'
  *
- * const http = new HTTPClient({
+ * const http = new HTTPClient('', {
  *   plugins: [
  *     TokenPlugin({
  *       // 获取 token 的方法，可以是异步的

@@ -1,6 +1,6 @@
 import type { ToolTarget } from '../../types.js'
 
-export function renderImplement(_target: ToolTarget): string {
+export function renderImplement(target: ToolTarget): string {
   return `# implement
 
 实施当前计划 \`.agent-context/{scope}/plan-{number}/plan.md\` 中的全部步骤，通过验证循环后将状态更新为「已执行」。
@@ -10,12 +10,12 @@ export function renderImplement(_target: ToolTarget): string {
 ## 前置检查
 
 - 运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
-- 当前计划不存在 → 通过 AskUserQuestion 提供选项：1) 创建新计划 2) 终止操作，按用户选择执行。
-- 当前计划状态为 \`已执行\` → 通过 AskUserQuestion 提供选项：1) 通过 patch 追加变更（推荐，若有新需求） 2) 运行 \`agent-context done\` 归档后创建新计划 3) 终止操作，按用户选择执行。
-- 带描述且当前计划状态为 \`未执行\` → 通过 AskUserQuestion 提供选项：1) 忽略描述，直接实施当前计划（推荐） 2) 将描述作为 replan 输入调整计划 3) 终止操作，按用户选择执行。
+- 当前计划不存在 → 通过 ${target.askToolName} 提供选项：1) 创建新计划 2) 终止操作，按用户选择执行。
+- 当前计划状态为 \`已执行\` → 通过 ${target.askToolName} 提供选项：1) 通过 patch 追加变更（推荐，若有新需求） 2) 运行 \`agent-context done\` 归档后创建新计划 3) 终止操作，按用户选择执行。
+- 带描述且当前计划状态为 \`未执行\` → 通过 ${target.askToolName} 提供选项：1) 忽略描述，直接实施当前计划（推荐） 2) 将描述作为 replan 输入调整计划 3) 终止操作，按用户选择执行。
 - 带描述且当前计划状态为 \`已执行\` → 直接转入 patch 协议处理，将描述作为补丁描述。
-- \`## 目标\` 或 \`## 内容\` 为空 → 通过 AskUserQuestion 向用户获取缺失内容后更新 plan.md 并继续执行。
-- 存在多个当前计划 → 通过 AskUserQuestion 列出所有当前计划供用户选择保留哪个，清理后继续执行。
+- \`## 目标\` 或 \`## 内容\` 为空 → 通过 ${target.askToolName} 向用户获取缺失内容后更新 plan.md 并继续执行。
+- 存在多个当前计划 → 通过 ${target.askToolName} 列出所有当前计划供用户选择保留哪个，清理后继续执行。
 - 仅操作当前计划，不直接操作 \`preparing/\` 中的计划。
 - 遇到阻塞问题应向用户报告，不可静默跳过。
 

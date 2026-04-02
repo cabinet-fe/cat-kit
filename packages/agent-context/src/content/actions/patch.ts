@@ -1,6 +1,6 @@
 import type { ToolTarget } from '../../types.js'
 
-export function renderPatch(_target: ToolTarget): string {
+export function renderPatch(target: ToolTarget): string {
   return `# patch
 
 基于当前已执行计划创建增量补丁，修复问题或追加变更。
@@ -11,11 +11,11 @@ export function renderPatch(_target: ToolTarget): string {
 
 - 运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
 - 描述为空 → 向用户获取描述后继续执行。
-- 当前计划不存在 → 通过 AskUserQuestion 提供选项：1) 创建新计划（推荐） 2) 终止操作，按用户选择执行。
-- 当前计划状态为 \`未执行\` → 通过 AskUserQuestion 提供选项：1) 先执行 implement 再创建补丁（推荐） 2) 终止操作，按用户选择执行。
-- 存在多个当前计划 → 通过 AskUserQuestion 列出所有当前计划供用户选择保留哪个，清理后继续执行。
-- 补丁需求与当前计划的关联性不确定 → 通过 AskUserQuestion 提供选项：1) 与当前计划相关，继续创建补丁（推荐） 2) 与当前计划无关，需先归档，按用户选择执行。
-- 补丁需求与当前计划完全无关 → 通过 AskUserQuestion 提供选项：1) 运行 \`agent-context done\` 归档后继续新建计划（推荐） 2) 终止操作，按用户选择执行。
+- 当前计划不存在 → 通过 ${target.askToolName} 提供选项：1) 创建新计划（推荐） 2) 终止操作，按用户选择执行。
+- 当前计划状态为 \`未执行\` → 通过 ${target.askToolName} 提供选项：1) 先执行 implement 再创建补丁（推荐） 2) 终止操作，按用户选择执行。
+- 存在多个当前计划 → 通过 ${target.askToolName} 列出所有当前计划供用户选择保留哪个，清理后继续执行。
+- 补丁需求与当前计划的关联性不确定 → 通过 ${target.askToolName} 提供选项：1) 与当前计划相关，继续创建补丁（推荐） 2) 与当前计划无关，需先归档，按用户选择执行。
+- 补丁需求与当前计划完全无关 → 通过 ${target.askToolName} 提供选项：1) 运行 \`agent-context done\` 归档后继续新建计划（推荐） 2) 终止操作，按用户选择执行。
 - 补丁不改变计划状态，完成后保持 \`已执行\`。
 
 ## 执行步骤

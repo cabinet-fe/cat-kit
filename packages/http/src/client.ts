@@ -32,7 +32,7 @@ import type {
  * })
  *
  * // 请求别名
- * http.get('/user', { params: { name: 'Zhang San' } }).then(res => {
+ * http.get('/user', { query: { name: 'Zhang San' } }).then(res => {
  *   // ...do some things
  * })
  * ```

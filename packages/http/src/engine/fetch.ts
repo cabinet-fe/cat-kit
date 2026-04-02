@@ -57,6 +57,15 @@ export class FetchEngine extends HttpEngine {
         raw: response
       }
 
+      if (!response.ok) {
+        throw new HTTPError(`请求失败，状态码: ${response.status}`, {
+          code: 'NETWORK',
+          url,
+          config,
+          response: httpResponse
+        })
+      }
+
       return httpResponse
     } catch (error) {
       if ((error as Error).name === 'AbortError') {

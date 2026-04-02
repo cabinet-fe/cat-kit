@@ -12,7 +12,7 @@ export function renderReview(target: ToolTarget): string {
 
 - 运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
 - 当前计划不存在 → 提示无可审查内容，终止。
-- 存在多个当前计划 → 通过 AskUserQuestion 列出所有当前计划供用户选择保留哪个，清理后继续执行。
+- 存在多个当前计划 → 通过 ${target.askToolName} 列出所有当前计划供用户选择保留哪个，清理后继续执行。
 
 ## 执行步骤
 
@@ -49,7 +49,7 @@ export function renderReview(target: ToolTarget): string {
 
 4. **汇总审查结果**：将子代理返回的审查意见整理呈现给用户。
 
-5. **提供行动选项**：通过 AskUserQuestion 提供选项：
+5. **提供行动选项**：通过 ${target.askToolName} 提供选项：
    - 未执行计划：1) 按审查意见修订计划（走 replan）（推荐） 2) 忽略审查意见继续执行 3) 终止操作
    - 已执行计划：1) 按审查意见创建补丁修复（走 patch）（推荐） 2) 忽略审查意见 3) 终止操作
 

@@ -1,4 +1,4 @@
-import { HTTPClient } from '@cat-kit/http/src'
+import { HTTPClient, HTTPError } from '@cat-kit/http/src'
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 
 // Mock 全局 fetch
@@ -291,6 +291,29 @@ describe('HTTPClient', () => {
 
       expect(response.data).toBeNull()
       expect(response.code).toBe(204)
+    })
+
+    it('fetch 遇到非 2xx 响应时应抛出 HTTPError', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        headers: new Map([['content-type', 'application/json']]),
+        text: async () => '{"message": "not found"}',
+        blob: async () => new Blob(),
+        arrayBuffer: async () => new ArrayBuffer(8)
+      })
+
+      const client = new HTTPClient()
+
+      await expect(client.get('/missing')).rejects.toMatchObject({
+        name: 'HTTPError',
+        message: '请求失败，状态码: 404',
+        code: 'NETWORK',
+        response: expect.objectContaining({
+          code: 404,
+          data: { message: 'not found' }
+        })
+      } satisfies Partial<HTTPError>)
     })
   })
 

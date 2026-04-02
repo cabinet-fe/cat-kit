@@ -8,7 +8,7 @@
 ## 核心架构
 
 - **引擎（Engine）**：底层请求执行（XHR / Fetch），可替换
-- **插件（Plugin）**：横切关注点（认证、拦截、重试等），通过 `onRequest` / `onResponse` / `onError` 钩子介入
+- **插件（Plugin）**：横切关注点（认证、拦截、重试等），通过 `beforeRequest` / `afterRespond` / `onError` 钩子介入
 - **客户端（Client）**：用户交互的高级 API，管理引擎和插件
 
 ## 目录结构

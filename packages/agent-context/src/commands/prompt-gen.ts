@@ -12,19 +12,21 @@ interface PromptToolConfig {
   id: PromptToolId
   name: string
   globalFile: string
+  extraContent?: string
 }
 
 const PROMPT_TOOL_MAP: Record<PromptToolId, PromptToolConfig> = {
   claude: {
     id: 'claude',
     name: 'Claude Code',
-    globalFile: resolve(homedir(), '.claude', 'CLAUDE.md')
+    globalFile: resolve(homedir(), '.claude', 'CLAUDE.md'),
+    extraContent: `
+      ## 读取 CLAUDE.md
+
+      如果项目中不存在 CLAUDE.md，则将 AGENTS.md 视作 CLAUDE.md 的替代。
+    `
   },
-  codex: {
-    id: 'codex',
-    name: 'Codex',
-    globalFile: resolve(homedir(), '.codex', 'AGENTS.md')
-  },
+  codex: { id: 'codex', name: 'Codex', globalFile: resolve(homedir(), '.codex', 'AGENTS.md') },
   gemini: {
     id: 'gemini',
     name: 'Gemini CLI',

@@ -1,6 +1,6 @@
 import type { ToolTarget } from '../../types.js'
 
-export function renderReplan(_target: ToolTarget): string {
+export function renderReplan(target: ToolTarget): string {
   return `# replan
 
 重新规划已有的未实施计划，保持「单当前计划 + preparing 队列」结构不变。
@@ -11,10 +11,10 @@ export function renderReplan(_target: ToolTarget): string {
 
 - 运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
 - 描述为空 → 向用户获取重规划描述后继续执行。
-- 无未实施计划 → 通过 AskUserQuestion 提供选项：1) 创建新计划 2) 终止操作，按用户选择执行。
-- 存在多个当前计划 → 通过 AskUserQuestion 列出所有当前计划供用户选择保留哪个，清理后继续执行。
-- 目标计划编号不存在 → 通过 AskUserQuestion 列出可选计划供用户选择后继续执行。
-- 目标计划已执行 → 通过 AskUserQuestion 提供选项：1) 通过 patch 追加变更 2) 运行 \`agent-context done\` 归档后创建新计划 3) 终止操作，按用户选择执行。
+- 无未实施计划 → 通过 ${target.askToolName} 提供选项：1) 创建新计划 2) 终止操作，按用户选择执行。
+- 存在多个当前计划 → 通过 ${target.askToolName} 列出所有当前计划供用户选择保留哪个，清理后继续执行。
+- 目标计划编号不存在 → 通过 ${target.askToolName} 列出可选计划供用户选择后继续执行。
+- 目标计划已执行 → 通过 ${target.askToolName} 提供选项：1) 通过 patch 追加变更 2) 运行 \`agent-context done\` 归档后创建新计划 3) 终止操作，按用户选择执行。
 
 ## 作用域
 
@@ -25,7 +25,7 @@ export function renderReplan(_target: ToolTarget): string {
 
 ## 执行步骤
 
-1. 解析描述，确定重规划目标范围。若描述存在以下歧义，通过 AskUserQuestion 提问澄清后再继续：
+1. 解析描述，确定重规划目标范围。若描述存在以下歧义，通过 ${target.askToolName} 提问澄清后再继续：
    - 无法确定用户期望重规划哪些计划。
    - 重规划方向不明确（拆分方式、优先级调整、范围增减等）。
 2. 读取目标计划 \`plan.md\`，理解现有意图。

@@ -30,7 +30,7 @@ export interface MethodOverridePluginOptions {
  * @example
  * ```ts
  * import { MethodOverridePlugin, HTTPClient } from '@cat-kit/http'
- * const http = new HTTPClient({
+ * const http = new HTTPClient('', {
  *   plugins: [
  *     MethodOverridePlugin()
  *   ]

@@ -57,7 +57,7 @@ function renderNavigator(target: ToolTarget): string {
 | 重做计划、调整方案 | replan | \`actions/replan.md\` |
 | 审查当前计划 | review | \`actions/review.md\` |
 | 用户提出新需求且与当前计划**相关** | replan | \`actions/replan.md\` |
-| 用户提出新需求且与当前计划**无关** | → AskUserQuestion | 选项：1) 归档当前计划后创建新计划（推荐） 2) 终止操作 |
+| 用户提出新需求且与当前计划**无关** | → ${target.askToolName} | 选项：1) 归档当前计划后创建新计划（推荐） 2) 终止操作 |
 
 ### 状态 C：当前计划状态为「已执行」
 
@@ -67,9 +67,9 @@ function renderNavigator(target: ToolTarget): string {
 | 审查实施结果 | review | \`actions/review.md\` |
 | 任务彻底完成、归档当前计划 | done | 运行 \`agent-context done\` |
 | 用户提出新需求且与当前计划**相关** | patch | \`actions/patch.md\` |
-| 用户提出新需求且与当前计划**无关** | → AskUserQuestion | 选项：1) 归档后创建新计划（推荐） 2) 终止操作 |
+| 用户提出新需求且与当前计划**无关** | → ${target.askToolName} | 选项：1) 归档后创建新计划（推荐） 2) 终止操作 |
 
-> **关联性判断**：当用户提出变更需求时，对照当前 \`plan.md\` 的 \`## 目标\` 判断关联性。若无法确定 → 通过 AskUserQuestion 让用户确认。
+> **关联性判断**：当用户提出变更需求时，对照当前 \`plan.md\` 的 \`## 目标\` 判断关联性。若无法确定 → 通过 ${target.askToolName} 让用户确认。
 
 ## 全局约束
 
@@ -97,7 +97,7 @@ function renderNavigator(target: ToolTarget): string {
 
 编号规则：在当前 scope 内扫描全部 \`plan-N\` 目录取 \`max(N)+1\`。
 
-${renderAskQuestionGuidelines()}
+${renderAskQuestionGuidelines(target)}
 `
 }
 
@@ -120,7 +120,7 @@ function renderFrontmatter(target: ToolTarget): string {
 
 function renderOpenAIMetadata(): string {
   return `interface:
-  display_name: "Agent Context Workflow"
+  display_name: "代理上下文工作流"
   short_description: "统一管理 .agent-context 计划生命周期"
   default_prompt: "Use $ac-workflow to manage the current task through init, plan, replan, implement, patch, rush, or done."
 
@@ -131,13 +131,25 @@ policy:
 
 // ── AskUserQuestion Guidelines ──────────────────────
 
-function renderAskQuestionGuidelines(): string {
-  return `## AskUserQuestion 规范
+function renderAskQuestionGuidelines(target: ToolTarget): string {
+  const codexConfigNote =
+    target.id === 'codex'
+      ? `
 
-所有协议在通过 **AskUserQuestion** 向用户提问时必须遵守：
+> **Codex 配置要求**：\`request_user_input\` 需要启用 \`default_mode_request_user_input\` 配置才能在默认编码模式下使用。首次调用前请检查：
+> 1. 项目配置 \`.codex/config.toml\` 中是否包含 \`default_mode_request_user_input: true\`
+> 2. 若项目配置不存在或未启用，检查用户配置 \`~/.codex/config.toml\`
+> 3. 若均未启用，提醒用户在任一配置文件中添加 \`default_mode_request_user_input: true\`
+`
+      : ''
+
+  return `## ${target.askToolName} 规范
+
+所有协议在通过 **${target.askToolName}** 向用户提问时必须遵守：
 
 - 提问通俗易懂，不废话
 - 单选选项须标注推荐项并说明理由
 - 选项编号使用从 1 开始的正整数
+${codexConfigNote}
 `
 }

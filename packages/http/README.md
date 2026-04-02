@@ -114,9 +114,11 @@ const http = new HTTPClient('/api', {
 
 - `TIMEOUT`：请求超时
 - `ABORTED`：请求被主动中止
-- `NETWORK`：网络异常或非 2xx XHR 状态
+- `NETWORK`：网络异常或非 2xx HTTP 状态
 - `PARSE`：响应解析失败
 - `UNKNOWN`：未知错误（保留）
+
+`fetch` 与 `XMLHttpRequest` 引擎都会在非 2xx 响应时抛出 `HTTPError`，并把原始响应挂在 `error.response` 上。
 
 ```ts
 import { HTTPError } from '@cat-kit/http'
