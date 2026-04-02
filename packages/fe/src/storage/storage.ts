@@ -2,7 +2,7 @@ import { getDataType } from '@cat-kit/core'
 
 type Callback<T = any> = (key: StorageKey<T>, value?: T, temp?: { value: T; exp: number }) => void
 
-export interface StorageKey<T> extends String {}
+export type StorageKey<_> = {}
 
 export function storageKey<T>(str: string): StorageKey<T> {
   return str

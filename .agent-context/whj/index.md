@@ -24,3 +24,4 @@
 - [x] [按工具类型动态生成提问工具名称](./done/plan-24-20260402/plan.md)
 - [x] [@cat-kit/http 客户端核心增强](./done/plan-25-20260402/plan.md)
 - [x] [@cat-kit/http 认证与重试插件](./done/plan-26-20260402/plan.md)
+- [x] [优化 review 协议](./done/plan-27-20260402/plan.md)
