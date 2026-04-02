@@ -20,7 +20,7 @@ jobs:
     # 仅当提交信息以 'ci:' 开头时执行，或手动触发时执行
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      startsWith(github.event.head_commit.message, 'ci:')
+      startsWith(github.event.head_commit.message, 'docs:')
     steps:
       - name: 检出代码
         uses: actions/checkout@v6
