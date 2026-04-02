@@ -25,3 +25,4 @@
 - [x] [@cat-kit/http 客户端核心增强](./done/plan-25-20260402/plan.md)
 - [x] [@cat-kit/http 认证与重试插件](./done/plan-26-20260402/plan.md)
 - [x] [优化 review 协议](./done/plan-27-20260402/plan.md)
+- [x] [agent-context 协议渲染优化](./done/plan-28-20260402/plan.md)
