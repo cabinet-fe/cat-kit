@@ -21,3 +21,4 @@
 - [x] [agent-context 支持 CLAUDE.md 及新增 review 协议](./done/plan-21-20260401/plan.md)
 - [x] [新增 prompt-gen 全局提示词生成命令](./done/plan-22-20260401/plan.md)
 - [x] [plan 协议增加完成后 review 询问](./done/plan-23-20260401/plan.md)
+- [x] [按工具类型动态生成提问工具名称](./done/plan-24-20260402/plan.md)
