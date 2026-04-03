@@ -27,3 +27,4 @@
 - [x] [优化 review 协议](./done/plan-27-20260402/plan.md)
 - [x] [agent-context 协议渲染优化](./done/plan-28-20260402/plan.md)
 - [x] [@cat-kit/fe 模块精简与 API 现代化](./done/plan-29-20260403/plan.md)
+- [x] [增强需求澄清的"反向面试"能力](./done/plan-30-20260403/plan.md)
