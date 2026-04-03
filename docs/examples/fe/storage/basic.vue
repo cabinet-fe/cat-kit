@@ -8,8 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { storageKey, WebStorage } from '@cat-kit/fe'
-import { onMounted } from 'vue'
+import { storageKey, storage } from '@cat-kit/fe/src'
 
 // 类型安全
 const INFO_KEY = storageKey<{
@@ -17,14 +16,8 @@ const INFO_KEY = storageKey<{
   age: number
 }>('info')
 
-let storage: WebStorage
-
-onMounted(() => {
-  storage = new WebStorage(localStorage)
-})
-
 function setInfo() {
-  storage.set(
+  storage.local.set(
     INFO_KEY,
     {
       name: 'admin',
@@ -35,11 +28,11 @@ function setInfo() {
 }
 
 function getInfo() {
-  const info = storage.get(INFO_KEY)
+  const info = storage.local.get(INFO_KEY)
   console.log(info)
 }
 
 function removeInfo() {
-  storage.remove(INFO_KEY)
+  storage.local.remove(INFO_KEY)
 }
 </script>
