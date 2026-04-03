@@ -136,8 +136,8 @@ function renderAskQuestionGuidelines(target: ToolTarget): string {
 
 **任何情况下使用 ${target.askToolName} 工具时必须遵守本规范。**
 
-- 提问通俗易懂，不废话
+- 提问通俗易懂，不废话，选项也同理，不要拽特别的文风
 - 单选提问须在问题末尾标注推荐项并说明理由
-- 选项编号使用从 1 开始的正整数
+- 存在歧义时，深挖我可能没考虑到的难点
 `
 }

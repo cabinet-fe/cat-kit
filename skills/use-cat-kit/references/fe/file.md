@@ -3,21 +3,20 @@
 ## 分块读取
 
 ```typescript
-import { readFile } from '@cat-kit/fe'
+import { readChunks } from '@cat-kit/fe'
 
-await readFile(file, {
-  offset?: number,       // 默认 0
+for await (const chunk of readChunks(file, {
   chunkSize?: number,    // 默认 10MB
-  onChunk?: (chunk: Uint8Array, chunkIndex: number) => void
-})
+  offset?: number        // 默认 0
+})) {
+  // 处理每个 Uint8Array chunk
+}
 ```
 
 ## 保存文件
 
 ```typescript
-import { saveFromBlob, saveFromStream, saveFromURL } from '@cat-kit/fe'
+import { saveBlob } from '@cat-kit/fe'
 
-saveFromBlob(blob, 'output.txt')
-saveFromStream(stream, 'output.txt')
-await saveFromURL('https://example.com/file.pdf', 'doc.pdf')
+saveBlob(blob, 'output.txt')
 ```

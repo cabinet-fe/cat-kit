@@ -1,19 +1,6 @@
-import {
-  ReadableStream as NodeReadableStream,
-  WritableStream as NodeWritableStream
-} from 'node:stream/web'
-
-import { createWritableStream, saveFromStream, saveFromURL } from '@cat-kit/fe/src'
+import { saveBlob, readChunks } from '@cat-kit/fe/src'
 import { describe, it, expect, vi, afterAll } from 'vitest'
 
-if (!globalThis.ReadableStream) {
-  vi.stubGlobal('ReadableStream', NodeReadableStream)
-}
-if (!globalThis.WritableStream) {
-  vi.stubGlobal('WritableStream', NodeWritableStream)
-}
-
-const originalFetch = globalThis.fetch
 const originalDocument = globalThis.document
 const originalURL = globalThis.URL
 
@@ -33,29 +20,22 @@ function setupDownloadEnv() {
 }
 
 afterAll(() => {
-  if (originalFetch) {
-    vi.stubGlobal('fetch', originalFetch)
-  }
   Object.defineProperty(globalThis, 'document', { value: originalDocument, writable: true })
   if (originalURL) {
     vi.stubGlobal('URL', originalURL as any)
   }
 })
 
-describe('createWritableStream', () => {
-  it('写入、关闭时应触发下载与进度回调', async () => {
+describe('saveBlob', () => {
+  it('应该创建链接并触发下载', () => {
     const { urlMock, link, body } = setupDownloadEnv()
-    const onProgress = vi.fn()
 
     vi.useFakeTimers()
-    const writable = createWritableStream({ filename: 'demo.bin', onProgress })
+    const blob = new Blob(['hello'], { type: 'text/plain' })
+    saveBlob(blob, 'test.txt')
 
-    const writer = writable.getWriter()
-    await writer.write(new Uint8Array([1, 2, 3]))
-    await writer.close()
-
-    expect(onProgress).toHaveBeenLastCalledWith(3)
     expect(urlMock.createObjectURL).toHaveBeenCalledTimes(1)
+    expect(link.download).toBe('test.txt')
     expect(link.click).toHaveBeenCalledTimes(1)
     expect(body.appendChild).toHaveBeenCalledTimes(1)
     expect(body.removeChild).toHaveBeenCalledTimes(1)
@@ -66,45 +46,58 @@ describe('createWritableStream', () => {
   })
 })
 
-describe('saveFromStream', () => {
-  it('应该消费可读流并触发下载', async () => {
-    const { link } = setupDownloadEnv()
-    const onProgress = vi.fn()
+describe('readChunks', () => {
+  it('应该按 chunkSize 分块读取', async () => {
+    const data = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    const blob = new Blob([data])
 
-    const readable = new ReadableStream<Uint8Array>({
-      start(controller) {
-        controller.enqueue(new TextEncoder().encode('hello'))
-        controller.close()
-      }
-    })
+    const chunks: Uint8Array[] = []
+    for await (const chunk of readChunks(blob, { chunkSize: 3 })) {
+      chunks.push(chunk)
+    }
 
-    await saveFromStream(readable, 'stream.txt', { onProgress })
-
-    expect(onProgress).toHaveBeenCalledWith(5)
-    expect(link.click).toHaveBeenCalled()
+    expect(chunks).toHaveLength(4)
+    expect(chunks[0]).toEqual(new Uint8Array([1, 2, 3]))
+    expect(chunks[1]).toEqual(new Uint8Array([4, 5, 6]))
+    expect(chunks[2]).toEqual(new Uint8Array([7, 8, 9]))
+    expect(chunks[3]).toEqual(new Uint8Array([10]))
   })
-})
 
-describe('saveFromURL', () => {
-  it('应该使用 fetch 结果保存文件并透传 fetch 选项', async () => {
-    const { link } = setupDownloadEnv()
-    const onProgress = vi.fn()
+  it('应该支持 offset 偏移', async () => {
+    const data = new Uint8Array([1, 2, 3, 4, 5])
+    const blob = new Blob([data])
 
-    const response = new Response('cat', { headers: { 'content-length': '3' } })
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (_url, init) => {
-        expect(init?.headers).toEqual({ token: 'meow' })
-        return response
-      })
-    )
+    const chunks: Uint8Array[] = []
+    for await (const chunk of readChunks(blob, { chunkSize: 2, offset: 2 })) {
+      chunks.push(chunk)
+    }
 
-    await saveFromURL('/file.bin', 'file.bin', {
-      onProgress,
-      fetchOptions: { headers: { token: 'meow' } }
-    })
+    expect(chunks).toHaveLength(2)
+    expect(chunks[0]).toEqual(new Uint8Array([3, 4]))
+    expect(chunks[1]).toEqual(new Uint8Array([5]))
+  })
 
-    expect(onProgress).toHaveBeenLastCalledWith(3)
-    expect(link.click).toHaveBeenCalled()
+  it('应该支持 break 提前退出', async () => {
+    const data = new Uint8Array([1, 2, 3, 4, 5, 6])
+    const blob = new Blob([data])
+
+    const chunks: Uint8Array[] = []
+    for await (const chunk of readChunks(blob, { chunkSize: 2 })) {
+      chunks.push(chunk)
+      if (chunks.length === 2) break
+    }
+
+    expect(chunks).toHaveLength(2)
+  })
+
+  it('空文件不应产生任何 chunk', async () => {
+    const blob = new Blob([])
+
+    const chunks: Uint8Array[] = []
+    for await (const chunk of readChunks(blob)) {
+      chunks.push(chunk)
+    }
+
+    expect(chunks).toHaveLength(0)
   })
 })

@@ -44,8 +44,8 @@ import { o, date } from '@cat-kit/core'
 
 | 模块 | 关键 API | 文件 |
 |---|---|---|
-| 存储 | `WebStorage` `cookie` `IDB` | [fe/storage.md](references/fe/storage.md) |
-| 文件 | `readFile` `saveFromBlob` `saveFromURL` | [fe/file.md](references/fe/file.md) |
+| 存储 | `storage` `storageKey` `cookie` | [fe/storage.md](references/fe/storage.md) |
+| 文件 | `readChunks` `saveBlob` | [fe/file.md](references/fe/file.md) |
 | Web API | `clipboard` `queryPermission` | [fe/web-api.md](references/fe/web-api.md) |
 | 虚拟滚动 | `Virtualizer` `VirtualContainer` | [fe/virtualizer.md](references/fe/virtualizer.md) |
 

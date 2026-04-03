@@ -10,7 +10,7 @@ export function storageKey<T>(str: string): StorageKey<T> {
 
 export type ExtractStorageKey<T> = T extends StorageKey<infer K> ? K : never
 
-export class WebStorage {
+class WebStorage {
   static enabledType: Set<string> = new Set(['string', 'number', 'object', 'boolean', 'bigint'])
 
   private storage: Storage
@@ -97,7 +97,7 @@ export class WebStorage {
    * 移除一个缓存值
    * @param key 需要移除的值的键
    */
-  remove<T>(key: StorageKey<any>): WebStorage
+  remove(key: StorageKey<any>): WebStorage
   /**
    * 移除多个缓存值
    * @param keys 需要移除的值的键的数组
@@ -155,5 +155,17 @@ export class WebStorage {
     } else if (Array.isArray(key)) {
       key.forEach((item: string) => this.off(item))
     }
+  }
+}
+
+let _local: WebStorage | null = null
+let _session: WebStorage | null = null
+
+export const storage = {
+  get local() {
+    return (_local ??= new WebStorage(localStorage))
+  },
+  get session() {
+    return (_session ??= new WebStorage(sessionStorage))
   }
 }
