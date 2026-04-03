@@ -10,7 +10,7 @@ export function renderInit(target: ToolTarget): string {
 
 ## 前置检查
 
-- 若已存在 \`.agent-context/\`：运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
+- 若已存在 \`.agent-context/\`：在 shell 中运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
 - 若 \`.agent-context/\` 不存在：确认这是首次初始化场景；若目录残缺或状态异常，向用户报告，不可继续假设。
 - 新项目缺少关键决策信息时，必须通过 ${target.askToolName} 主动提问或确认，不可直接生成 \`${guide}\` 或进入 plan。
 - 遇到阻塞问题应通过 \`${target.askToolName}\` 工具向用户报告并请求决策，不可静默跳过。

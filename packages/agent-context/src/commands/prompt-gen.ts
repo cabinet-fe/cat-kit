@@ -79,7 +79,7 @@ export async function promptGenCommand(options: PromptGenCommandOptions = {}): P
   const toolsToWrite = yes ? tools : await confirmOverwrites(tools)
 
   if (toolsToWrite.length === 0) {
-    console.log('\n⚠️  没有选择任何工具，操作取消') // eslint-disable-line no-console
+    console.log('\n未选择任何工具，已取消。') // eslint-disable-line no-console
     return
   }
 
@@ -145,7 +145,7 @@ function isPromptToolId(value: string): value is PromptToolId {
 }
 
 function runCheckMode(tools: PromptToolId[]): void {
-  console.log('\n以下文件将被写入：\n') // eslint-disable-line no-console
+  console.log('\n将写入以下文件：\n') // eslint-disable-line no-console
   for (const id of tools) {
     const config = PROMPT_TOOL_MAP[id]
     const status = existsSync(config.globalFile) ? '覆盖' : '新建'
@@ -179,7 +179,7 @@ function printSummary(result: {
   updated: string[]
   skipped: PromptToolId[]
 }): void {
-  console.log('\n✅ prompt-gen 完成') // eslint-disable-line no-console
+  console.log('\nprompt-gen 已完成。') // eslint-disable-line no-console
 
   if (result.created.length > 0) {
     console.log(`\n新建 ${result.created.length} 个文件:`) // eslint-disable-line no-console

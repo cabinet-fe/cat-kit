@@ -5,12 +5,12 @@ export async function validateCommand(): Promise<void> {
   const result = validate(snapshot, currentPlanCount)
 
   if (result.context === null) {
-    console.log('⚠️ 无 .agent-context 目录')
+    console.log('未找到 .agent-context 目录。')
     return
   }
 
   if (result.valid) {
-    console.log('✅ 校验通过')
+    console.log('校验通过。')
     const ctx = result.context
     console.log(`  当前作用域: ${ctx.scope}`)
     const current = ctx.currentPlan
@@ -23,7 +23,7 @@ export async function validateCommand(): Promise<void> {
   }
 
   for (const error of result.errors) {
-    console.log(`❌ ${error}`)
+    console.log(error)
   }
   process.exitCode = 1
 }

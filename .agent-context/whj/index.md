@@ -29,3 +29,4 @@
 - [x] [@cat-kit/fe 模块精简与 API 现代化](./done/plan-29-20260403/plan.md)
 - [x] [增强需求澄清的"反向面试"能力](./done/plan-30-20260403/plan.md)
 - [x] [agent-context CLI：新增 upgrade、移除 printer](./done/plan-31-20260403/plan.md)
+- [ ] [优化 agent-context 命令行输出文案](./plan-32/plan.md)

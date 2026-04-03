@@ -7,7 +7,7 @@ export function renderImplement(target: ToolTarget): string {
 
 ## 前置检查
 
-- 运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
+- 在 shell 中运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
 - 不存在当前计划或当前计划状态为 \`已执行\` → 终止执行。
 - \`## 目标\` 或 \`## 内容\` 为空 → 通过 ${target.askToolName} 向用户获取缺失内容后更新 plan.md 并继续执行。
 - 仅操作当前计划，不直接操作 \`preparing/\` 中的计划。

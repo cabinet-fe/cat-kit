@@ -6,14 +6,14 @@ export async function statusCommand(): Promise<void> {
 
   if (!result.valid) {
     for (const error of result.errors) {
-      console.log(`❌ ${error}`) // eslint-disable-line no-console
+      console.log(error) // eslint-disable-line no-console
     }
     process.exitCode = 1
     return
   }
 
   if (result.context === null) {
-    console.log('ℹ 无活跃上下文') // eslint-disable-line no-console
+    console.log('当前没有活跃上下文。') // eslint-disable-line no-console
     return
   }
 
@@ -25,8 +25,8 @@ export async function statusCommand(): Promise<void> {
     ctx.preparing.length > 0 ? ctx.preparing.map((p) => `plan-${p.number}`).join(', ') : '无'
 
   console.log('')
-  console.log('Agent Context Status')
-  console.log('────────────────────')
+  console.log('Agent Context')
+  console.log('-------------')
   console.log(`当前作用域: ${ctx.scope}`)
   console.log(`当前计划:  ${current}`)
   console.log(`待执行队列: ${preparing}`)

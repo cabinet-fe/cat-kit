@@ -30,7 +30,7 @@ export async function initCommand(options: InitCommandOptions = {}): Promise<voi
       if (!options.yes) {
         const overwrite = await confirm({ message: '是否覆盖当前 SCOPE？' })
         if (!overwrite) {
-          console.log('已取消') // eslint-disable-line no-console
+          console.log('已取消。') // eslint-disable-line no-console
           return
         }
       }
@@ -38,6 +38,6 @@ export async function initCommand(options: InitCommandOptions = {}): Promise<voi
   }
 
   const scope = await initScope(acRoot, options.scope)
-  console.log(`✅ SCOPE 已设置: ${scope}`) // eslint-disable-line no-console
-  console.log(`   目录: .agent-context/${scope}/`) // eslint-disable-line no-console
+  console.log(`SCOPE 已设置为 ${scope}。`) // eslint-disable-line no-console
+  console.log(`目录: .agent-context/${scope}/`) // eslint-disable-line no-console
 }
