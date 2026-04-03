@@ -56,6 +56,7 @@ review(任何有计划时) → replan 或 patch
 | `agent-context done [--yes]` | 归档当前已执行计划 |
 | `agent-context index` | 生成/更新计划索引 |
 | `agent-context prompt-gen [--tools <tools>] [--yes] [--check]` | 写入全局提示词模板 |
+| `agent-context upgrade` | 升级 CLI 到最新版本 |
 
 支持的 `--tools`：claude, codex, cursor, copilot, gemini, antigravity（逗号分隔）。
 

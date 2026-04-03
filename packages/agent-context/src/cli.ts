@@ -11,6 +11,7 @@ import { installCommand } from './commands/install.js'
 import { promptGenCommand } from './commands/prompt-gen.js'
 import { statusCommand } from './commands/status.js'
 import { syncCommand } from './commands/sync.js'
+import { upgradeCommand } from './commands/upgrade.js'
 import { validateCommand } from './commands/validate.js'
 
 const packageJson = JSON.parse(
@@ -72,6 +73,8 @@ program
   .option('--yes', '文件已存在时直接覆盖，不询问')
   .option('--check', '仅检查将要写入的内容，不实际写入')
   .action(promptGenCommand)
+
+program.command('upgrade').description('升级 @cat-kit/agent-context 到最新版本').action(upgradeCommand)
 
 program.parseAsync().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error)

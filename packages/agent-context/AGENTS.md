@@ -15,10 +15,10 @@ packages/agent-context/src/
 │   ├── index-cmd.ts   # 生成计划索引
 │   ├── init.ts        # 初始化 SCOPE
 │   ├── install.ts     # 安装 Skill
-│   ├── printer.ts     # 输出格式化
 │   ├── prompt-gen.ts  # 生成全局提示词文件
 │   ├── status.ts      # 查看状态
 │   ├── sync.ts        # 同步 Skill
+│   ├── upgrade.ts     # 升级 CLI 版本
 │   └── validate.ts    # 验证计划
 ├── content/           # 内容处理
 │   ├── actions.ts     # 动作定义

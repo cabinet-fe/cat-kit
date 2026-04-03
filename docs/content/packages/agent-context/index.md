@@ -10,7 +10,7 @@ outline: deep
 
 它由两部分组成：
 
-- **CLI**：安装 Skill、同步协议、校验目录结构、管理计划生命周期（归档、索引）
+- **CLI**：安装 Skill、同步协议、校验目录结构、管理计划生命周期（归档、索引）、升级自身
 - **Skill**：在对话中识别 `init、plan、replan、implement、patch、rush、review、done` 动作意图（与 `renderSkillArtifacts` 生成的 `SKILL.md` 一致），按协议推进任务
 
 目录结构：
@@ -94,3 +94,14 @@ flowchart LR
 - [Action 说明](./actions) — 每个动作的适用时机、前置条件和产物
 - [AI 协作场景](./collaboration) — 按任务类型选择正确动作的具体流程
 - [CLI 命令](./cli) — 安装、同步、校验、状态、归档、索引
+
+## 常见问题
+
+### Codex 中交互式引导不起作用
+
+你需要在 codex 配置中（用户目录：`～/.codex/config.toml` 或 项目根目录：`.codex/config.toml`）启用以下功能标识：
+
+```toml
+[features]
+default_mode_request_user_input = true
+```

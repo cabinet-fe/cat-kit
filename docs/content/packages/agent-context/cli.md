@@ -1,6 +1,6 @@
 ---
 title: CLI 命令
-description: 'agent-context CLI 的初始化、安装、同步、校验、状态、归档、索引与 prompt-gen'
+description: 'agent-context CLI 的初始化、安装、同步、校验、状态、归档、索引、prompt-gen 与 upgrade'
 outline: deep
 ---
 
@@ -15,6 +15,7 @@ outline: deep
 - 查看状态与归档当前计划
 - 生成或更新计划索引
 - 在用户主目录生成各工具的全局提示词文件（`prompt-gen`）
+- 升级 CLI 自身到最新版本（`upgrade`）
 
 对话里说"出计划""开始实现""补 patch"触发的是 Skill action，不是 CLI 子命令。
 
@@ -30,6 +31,7 @@ agent-context status        # 查看当前状态
 agent-context done          # 归档已执行计划
 agent-context index         # 生成/更新计划索引
 agent-context prompt-gen    # 可选：写入本机全局提示词模板
+agent-context upgrade       # 升级到最新版本
 ```
 
 安装完成后，日常推进通常靠自然语言触发 Skill；CLI 更多用于初始化、检查和收尾。
@@ -195,6 +197,16 @@ agent-context prompt-gen --check
 
 未传 `--tools` 且非 `--yes` / `--check` 时，会交互多选工具；默认全部勾选。
 
+### `agent-context upgrade`
+
+升级全局安装的 `@cat-kit/agent-context` 到最新版本。
+
+```bash
+agent-context upgrade
+```
+
+等价于手动执行 `npm update -g @cat-kit/agent-context`。升级完成后建议运行 `agent-context sync` 同步项目中已安装的 Skill 内容。
+
 ## 通用选项汇总
 
 | 选项              | 适用命令                                   | 作用                   |
@@ -204,13 +216,6 @@ agent-context prompt-gen --check
 | `--yes`           | `install` / `init` / `done` / `prompt-gen` | 跳过或减少交互确认     |
 | `--scope <name>`  | `init`                                     | 手动指定 SCOPE 名称    |
 
-## 常见问题
+```
 
-### Codex 中交互式引导不起作用
-
-你需要在 codex 配置中（用户目录：`～/.codex/config.toml` 或 项目根目录：`.codex/config.toml`）启用以下功能标识：
-
-```toml
-[features]
-default_mode_request_user_input = true
 ```
