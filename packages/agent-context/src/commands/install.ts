@@ -18,6 +18,7 @@ export interface InstallCommandOptions {
 }
 
 export async function installCommand(options: InstallCommandOptions = {}): Promise<void> {
+  printInstallBanner()
   const cwd = process.cwd()
   const tools = await resolveTools(cwd, options)
   const check = options.check ?? false
@@ -32,6 +33,15 @@ export async function installCommand(options: InstallCommandOptions = {}): Promi
   }
 
   printRunSummary(result, cwd)
+}
+
+function printInstallBanner(): void {
+  const bar = '═'.repeat(42)
+  console.log('') // eslint-disable-line no-console
+  console.log(bar) // eslint-disable-line no-console
+  console.log('  Agent Context Workflow') // eslint-disable-line no-console
+  console.log(bar) // eslint-disable-line no-console
+  console.log('') // eslint-disable-line no-console
 }
 
 function printRunSummary(result: RunResult, cwd: string): void {

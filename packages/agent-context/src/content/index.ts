@@ -1,17 +1,25 @@
+import { readAgentContextPackageVersion } from '../package-version.js'
 import type { SkillArtifacts, ToolTarget } from '../types.js'
 import { ACTION_NAMES, ACTION_RENDERERS } from './actions/index.js'
 
 const SKILL_NAME = 'ac-workflow'
+/** 供 frontmatter / 工具匹配的短描述：品牌名 + 核心能力与关键词 */
 const SKILL_DESCRIPTION =
-  '管理 .agent-context 计划生命周期，按 init、plan、replan、implement、patch、rush、review、done 协议推进任务。'
+  '简洁高效的代理上下文工作流。当提及初始化、计划、重构、重新计划、上下文工作流、规划、实现、优化、补丁、快速实现时使用。'
+
+const PROTOCOL_DIR = 'references'
 
 export function renderSkillArtifacts(target: ToolTarget): SkillArtifacts {
   const files: SkillArtifacts['files'] = [
     { relativePath: 'SKILL.md', body: renderNavigator(target) },
     ...ACTION_NAMES.map((name) => ({
-      relativePath: `actions/${name}.md`,
+      relativePath: `${PROTOCOL_DIR}/${name}.md`,
       body: ACTION_RENDERERS[name](target)
-    }))
+    })),
+    {
+      relativePath: `${PROTOCOL_DIR}/ask-user-question.md`,
+      body: renderAskUserQuestionReference(target)
+    }
   ]
 
   if (target.metadataFiles.includes('openai')) {
@@ -25,17 +33,20 @@ export function renderSkillArtifacts(target: ToolTarget): SkillArtifacts {
 
 function renderNavigator(target: ToolTarget): string {
   return `${renderFrontmatter(target)}
-# Agent Context
+# 代理上下文工作流（ac-workflow）
 
-管理项目中的 \`.agent-context/\` 计划生命周期。**每次交互**必须先判断当前计划状态，再按路由表选择动作，最后读取对应协议文件完整内容并逐步执行。
+统一管理仓库根目录 \`.agent-context/\` 下的计划：\`init\` → \`plan\` / \`replan\` → \`implement\` → \`patch\` → \`review\` → \`done\`；也可用 \`rush\` 在一条流程内完成 \`plan\` + \`implement\`。
 
-## 执行纪律
+## 执行纪律（摘要）
 
-- **状态先查**：任何操作前，必须先读取 \`.agent-context/{scope}/\` 目录，确定当前计划状态（无计划 / 未执行 / 已执行）。此步骤不可跳过。
-- **协议先行**：匹配到动作后，必须先读取对应 \`actions/*.md\` 协议文件的完整内容，再逐步执行。禁止凭记忆、摘要或猜测跳过协议步骤。
-- **前置检查必做**：所有动作（done 除外）均包含「前置检查」，必须逐条执行，不可跳过。凡协议写明需运行 \`agent-context validate\` 时必须执行；\`init\` 在首次初始化且 \`.agent-context/\` 尚不存在时，先确认初始化场景成立，再按协议继续。
-- **禁止直接改动**：在 plan / rush 创建计划之前，不得直接修改项目代码文件。任何代码变更必须在已创建计划（implement）或已创建补丁（patch）的上下文中进行。
-- **顺序执行**：协议步骤必须按编号顺序逐项执行，不可跳步、合并或并行。
+完整步骤始终以 \`${PROTOCOL_DIR}/<动作>.md\` 为准；此处仅作索引，**不可替代协议全文**。
+
+- **状态先查**：任何操作前先查看 \`.agent-context/{scope}/\`，判定：无当前计划 / 当前 **未执行** / 当前 **已执行**
+- **协议先行**：选定动作后，**完整**读取 \`${PROTOCOL_DIR}/<动作>.md\` 再逐步执行；禁止凭记忆、摘要或猜测跳过协议步骤
+- **前置检查**：各协议中的「前置检查」逐条执行；协议要求运行 \`agent-context validate\` 时必须执行
+- **禁止直接改动**：在 **plan** / **rush** 创建计划之前，不得修改业务代码；代码变更仅在 **implement** 或 **patch** 上下文中进行
+- **顺序执行**：协议内步骤按编号顺序执行，不跳步、不合并、不并行
+- **提问工具**：使用 ${target.askToolName} 时须遵守 \`${PROTOCOL_DIR}/ask-user-question.md\`
 
 ## 路由决策
 
@@ -45,28 +56,28 @@ function renderNavigator(target: ToolTarget): string {
 
 | 用户意图 | 动作 | 协议文件 |
 |----------|------|----------|
-| 初始化项目上下文、补全 ${target.guideFileName} | init | \`actions/init.md\` |
-| 给需求出计划、拆分任务 | plan | \`actions/plan.md\` |
-| 快速出计划并实施 | rush | \`actions/rush.md\` |
+| 初始化项目上下文、补全 ${target.guideFileName} | init | \`${PROTOCOL_DIR}/init.md\` |
+| 给需求出计划、拆分任务 | plan | \`${PROTOCOL_DIR}/plan.md\` |
+| 快速出计划并实施 | rush | \`${PROTOCOL_DIR}/rush.md\` |
 
 ### 状态 B：当前计划状态为「未执行」
 
 | 用户意图 | 动作 | 协议文件 |
 |----------|------|----------|
-| 按计划开始做、实现当前计划 | implement | \`actions/implement.md\` |
-| 重做计划、调整方案 | replan | \`actions/replan.md\` |
-| 审查当前计划 | review | \`actions/review.md\` |
-| 用户提出新需求且与当前计划**相关** | replan | \`actions/replan.md\` |
+| 按计划开始做、实现当前计划 | implement | \`${PROTOCOL_DIR}/implement.md\` |
+| 重做计划、调整方案 | replan | \`${PROTOCOL_DIR}/replan.md\` |
+| 审查当前计划 | review | \`${PROTOCOL_DIR}/review.md\` |
+| 用户提出新需求且与当前计划**相关** | replan | \`${PROTOCOL_DIR}/replan.md\` |
 | 用户提出新需求且与当前计划**无关** | → ${target.askToolName} | 选项：1) 归档当前计划后创建新计划（推荐） 2) 终止操作 |
 
 ### 状态 C：当前计划状态为「已执行」
 
 | 用户意图 | 动作 | 协议文件 |
 |----------|------|----------|
-| 实施后不满意、追加需求、修补问题 | patch | \`actions/patch.md\` |
-| 审查实施结果 | review | \`actions/review.md\` |
+| 实施后不满意、追加需求、修补问题 | patch | \`${PROTOCOL_DIR}/patch.md\` |
+| 审查实施结果 | review | \`${PROTOCOL_DIR}/review.md\` |
 | 任务彻底完成、归档当前计划 | done | 运行 \`agent-context done\` |
-| 用户提出新需求且与当前计划**相关** | patch | \`actions/patch.md\` |
+| 用户提出新需求且与当前计划**相关** | patch | \`${PROTOCOL_DIR}/patch.md\` |
 | 用户提出新需求且与当前计划**无关** | → ${target.askToolName} | 选项：1) 归档后创建新计划（推荐） 2) 终止操作 |
 
 > **关联性判断**：当用户提出变更需求时，对照当前 \`plan.md\` 的 \`## 目标\` 判断关联性。若无法确定 → 通过 ${target.askToolName} 让用户确认。
@@ -96,19 +107,20 @@ function renderNavigator(target: ToolTarget): string {
 \`\`\`
 
 编号规则：在当前 scope 内扫描全部 \`plan-N\` 目录取 \`max(N)+1\`。
-
-${renderAskQuestionGuidelines(target)}
 `
 }
 
 // ── Frontmatter & Metadata ──────────────────────────
 
 function renderFrontmatter(target: ToolTarget): string {
-  const lines = ['---', `name: ${SKILL_NAME}`, `description: ${SKILL_DESCRIPTION}`]
-
-  if (target.frontmatterProfile !== 'copilot') {
-    lines.push('argument-hint: [request]')
-  }
+  const pkgVersion = readAgentContextPackageVersion()
+  const lines = [
+    '---',
+    `name: ${SKILL_NAME}`,
+    `description: ${SKILL_DESCRIPTION}`,
+    'metadata:',
+    `  version: ${pkgVersion}`
+  ]
 
   if (target.frontmatterProfile === 'copilot') {
     lines.push('license: MIT')
@@ -120,19 +132,19 @@ function renderFrontmatter(target: ToolTarget): string {
 
 function renderOpenAIMetadata(): string {
   return `interface:
-  display_name: "代理上下文工作流"
-  short_description: "统一管理 .agent-context 计划生命周期"
-  default_prompt: "Use $ac-workflow to manage the current task through init, plan, replan, implement, patch, rush, or done."
+  display_name: "Agent Context Workflow"
+  short_description: "Agent Context Workflow：.agent-context 计划生命周期，按 references 内协议分步执行"
+  default_prompt: "Use ac-workflow: check .agent-context state, then read the matching file under references/ (init, plan, replan, implement, patch, rush, review) or run agent-context done."
 
 policy:
   allow_implicit_invocation: true
 `
 }
 
-// ── AskUserQuestion Guidelines ──────────────────────
+// ── AskUserQuestion reference（渐进式披露：详情在本文件，SKILL 仅指针）─
 
-function renderAskQuestionGuidelines(target: ToolTarget): string {
-  return `## ${target.askToolName} 规范
+function renderAskUserQuestionReference(target: ToolTarget): string {
+  return `# ${target.askToolName} 规范
 
 **任何情况下使用 ${target.askToolName} 工具时必须遵守本规范**：
 
@@ -140,6 +152,7 @@ function renderAskQuestionGuidelines(target: ToolTarget): string {
 
 - 提问通俗易懂，不废话，选项也同理，不要拽花哨的文风
 - 单选提问须在问题末尾标注推荐项并说明理由
+- 一次提问聚焦一个主题，不在单个问题中混杂多个无关决策
 
 ### 反向面试
 

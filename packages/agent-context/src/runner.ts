@@ -3,6 +3,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 
 import { renderSkillArtifacts } from './content/index.js'
+import { readAgentContextPackageVersion } from './package-version.js'
+import { parseSkillMdMetadataVersion, replaceVersionInSkillDirectory } from './skill-metadata.js'
 import type { SkillPaths } from './tools.js'
 import { resolveToolTargets, resolveSkillPaths } from './tools.js'
 import type {
@@ -28,6 +30,21 @@ async function run(mode: 'install' | 'sync', options: RunOptions): Promise<RunRe
   const cwd = options.cwd ?? process.cwd()
   const tools = dedup(options.tools)
   const targets = resolveToolTargets(tools)
+
+  if (mode === 'sync' && !options.check) {
+    const pkgVersion = readAgentContextPackageVersion()
+    await Promise.all(
+      targets.map(async (target) => {
+        const paths = resolveSkillPaths(target, cwd)
+        if (!existsSync(paths.skillFile)) return
+        const skillMd = await readFile(paths.skillFile, 'utf-8')
+        const embedded = parseSkillMdMetadataVersion(skillMd)
+        if (embedded !== undefined && embedded !== pkgVersion) {
+          await replaceVersionInSkillDirectory(paths.skillDir, embedded, pkgVersion)
+        }
+      })
+    )
+  }
 
   const mutations: FileMutation[] = targets.flatMap((target) => buildMutations(target, cwd))
 
