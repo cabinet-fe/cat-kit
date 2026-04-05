@@ -9,7 +9,9 @@ export function parseSkillMdMetadataVersion(skillMd: string): string | undefined
   if (!fm) return undefined
   const m = fm.match(/metadata:\s*\r?\n\s*version:\s*([^\s\r\n#]+)/)
   if (!m) return undefined
-  let v = m[1]
+  const raw = m[1]
+  if (raw === undefined) return undefined
+  let v = raw
   if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
     v = v.slice(1, -1)
   }

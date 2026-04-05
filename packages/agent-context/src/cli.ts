@@ -36,11 +36,7 @@ program
 
 program
   .command('sync')
-  .description('同步已安装的 ac-workflow Skill')
-  .option(
-    '--tools <tools>',
-    '指定目标工具，逗号分隔：claude,codex,cursor,antigravity,agents,gemini,copilot'
-  )
+  .description('同步项目中所有已安装路径下的 ac-workflow Skill（整目录）')
   .option('--check', '仅检查是否存在待更新内容，不写入文件')
   .action(syncCommand)
 
@@ -66,15 +62,15 @@ program.command('index').description('生成或更新计划索引文件').action
 program
   .command('prompt-gen')
   .description('在用户主目录下生成各 AI 工具的全局提示词文件')
-  .option(
-    '--tools <tools>',
-    '指定目标工具，逗号分隔：claude,codex,gemini,antigravity'
-  )
+  .option('--tools <tools>', '指定目标工具，逗号分隔：claude,codex,gemini,antigravity')
   .option('--yes', '文件已存在时直接覆盖，不询问')
   .option('--check', '仅检查将要写入的内容，不实际写入')
   .action(promptGenCommand)
 
-program.command('upgrade').description('升级 @cat-kit/agent-context 到最新版本').action(upgradeCommand)
+program
+  .command('upgrade')
+  .description('升级 @cat-kit/agent-context 到最新版本')
+  .action(upgradeCommand)
 
 program.parseAsync().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error)

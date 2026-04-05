@@ -61,6 +61,13 @@ function printRunSummary(result: RunResult, cwd: string): void {
     }
   }
 
+  if (result.removed.length > 0) {
+    console.log(`\n移除 ${result.removed.length} 个遗留路径:`) // eslint-disable-line no-console
+    for (const filePath of result.removed) {
+      console.log(`- ${relative(cwd, filePath)}`) // eslint-disable-line no-console
+    }
+  }
+
   if (result.unchanged.length > 0) {
     console.log(`\n未变更 ${result.unchanged.length} 个文件。`) // eslint-disable-line no-console
   }

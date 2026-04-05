@@ -1,12 +1,12 @@
 ---
 name: ac-workflow
-description: Agent Context Workflow：管理 .agent-context 计划生命周期（init、plan、replan、implement、patch、rush、review、done）；先查状态再完整读取 references 下对应协议后执行。
+description: 简洁高效的代理上下文工作流。当提及初始化、计划、重构、重新计划、上下文工作流、规划、实现、优化、补丁、快速实现时使用。
 metadata:
   version: 1.3.2
 ---
 
 
-# Agent Context Workflow（ac-workflow）
+# 代理上下文工作流（ac-workflow）
 
 统一管理仓库根目录 `.agent-context/` 下的计划：`init` → `plan` / `replan` → `implement` → `patch` → `review` → `done`；也可用 `rush` 在一条流程内完成 `plan` + `implement`。
 

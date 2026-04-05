@@ -29,6 +29,8 @@ export interface ApplyMutationResult {
   updated: string[]
   unchanged: string[]
   changed: string[]
+  /** sync/install 清理掉的非清单内路径（文件与已删除的空目录） */
+  removed: string[]
 }
 
 export interface RunOptions {

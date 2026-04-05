@@ -291,11 +291,10 @@ agent-context install --yes
 
 ### `agent-context sync`
 
-当你升级了 `@cat-kit/agent-context` 版本后，用它把项目中的 Skill 内容同步到最新协议。
+当你升级了 `@cat-kit/agent-context` 版本后，用它把项目中**所有已安装路径**下的 ac-workflow Skill（整目录）同步到最新协议。同步后会按当前清单重写应存在的文件，并**删除目录内不在清单中的遗留路径**（例如旧版 `actions/`）。
 
 ```bash
 agent-context sync
-agent-context sync --tools cursor,codex
 agent-context sync --check
 ```
 

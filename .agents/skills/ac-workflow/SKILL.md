@@ -1,9 +1,12 @@
 ---
 name: ac-workflow
-description: 简洁高效的代理：管理 .agent-context 计划生命周期（init、plan、replan、implement、patch、rush、review、done）；先查状态再完整读取 references 下对应协议后执行。
+description: 简洁高效的代理上下文工作流。当提及初始化、计划、重构、重新计划、上下文工作流、规划、实现、优化、补丁、快速实现时使用。
+metadata:
+  version: 1.3.2
 ---
 
-# Agent Context Workflow（ac-workflow）
+
+# 代理上下文工作流（ac-workflow）
 
 统一管理仓库根目录 `.agent-context/` 下的计划：`init` → `plan` / `replan` → `implement` → `patch` → `review` → `done`；也可用 `rush` 在一条流程内完成 `plan` + `implement`。
 
@@ -24,30 +27,30 @@ description: 简洁高效的代理：管理 .agent-context 计划生命周期（
 
 ### 状态 A：无当前计划
 
-| 用户意图                         | 动作 | 协议文件             |
-| -------------------------------- | ---- | -------------------- |
+| 用户意图 | 动作 | 协议文件 |
+|----------|------|----------|
 | 初始化项目上下文、补全 AGENTS.md | init | `references/init.md` |
-| 给需求出计划、拆分任务           | plan | `references/plan.md` |
-| 快速出计划并实施                 | rush | `references/rush.md` |
+| 给需求出计划、拆分任务 | plan | `references/plan.md` |
+| 快速出计划并实施 | rush | `references/rush.md` |
 
 ### 状态 B：当前计划状态为「未执行」
 
-| 用户意图                           | 动作              | 协议文件                                              |
-| ---------------------------------- | ----------------- | ----------------------------------------------------- |
-| 按计划开始做、实现当前计划         | implement         | `references/implement.md`                             |
-| 重做计划、调整方案                 | replan            | `references/replan.md`                                |
-| 审查当前计划                       | review            | `references/review.md`                                |
-| 用户提出新需求且与当前计划**相关** | replan            | `references/replan.md`                                |
+| 用户意图 | 动作 | 协议文件 |
+|----------|------|----------|
+| 按计划开始做、实现当前计划 | implement | `references/implement.md` |
+| 重做计划、调整方案 | replan | `references/replan.md` |
+| 审查当前计划 | review | `references/review.md` |
+| 用户提出新需求且与当前计划**相关** | replan | `references/replan.md` |
 | 用户提出新需求且与当前计划**无关** | → AskUserQuestion | 选项：1) 归档当前计划后创建新计划（推荐） 2) 终止操作 |
 
 ### 状态 C：当前计划状态为「已执行」
 
-| 用户意图                           | 动作              | 协议文件                                      |
-| ---------------------------------- | ----------------- | --------------------------------------------- |
-| 实施后不满意、追加需求、修补问题   | patch             | `references/patch.md`                         |
-| 审查实施结果                       | review            | `references/review.md`                        |
-| 任务彻底完成、归档当前计划         | done              | 运行 `agent-context done`                     |
-| 用户提出新需求且与当前计划**相关** | patch             | `references/patch.md`                         |
+| 用户意图 | 动作 | 协议文件 |
+|----------|------|----------|
+| 实施后不满意、追加需求、修补问题 | patch | `references/patch.md` |
+| 审查实施结果 | review | `references/review.md` |
+| 任务彻底完成、归档当前计划 | done | 运行 `agent-context done` |
+| 用户提出新需求且与当前计划**相关** | patch | `references/patch.md` |
 | 用户提出新需求且与当前计划**无关** | → AskUserQuestion | 选项：1) 归档后创建新计划（推荐） 2) 终止操作 |
 
 > **关联性判断**：当用户提出变更需求时，对照当前 `plan.md` 的 `## 目标` 判断关联性。若无法确定 → 通过 AskUserQuestion 让用户确认。

@@ -1,19 +1,22 @@
 import { relative } from 'node:path'
 
 import { runSync } from '../runner.js'
-import { detectConfiguredToolIds, parseToolIds } from '../tools.js'
-import type { RunResult, ToolId } from '../types.js'
+import { detectConfiguredToolIds } from '../tools.js'
+import type { RunResult } from '../types.js'
 
 export interface SyncCommandOptions {
-  tools?: string
   check?: boolean
 }
 
 export async function syncCommand(options: SyncCommandOptions = {}): Promise<void> {
   const cwd = process.cwd()
-  const tools = resolveTools(cwd, options.tools)
   const check = options.check ?? false
-  const result = await runSync({ cwd, check, ...(tools ? { tools } : {}) })
+
+  if (detectConfiguredToolIds(cwd).length === 0) {
+    throw new Error('未检测到已安装的 Skill，请先执行 install')
+  }
+
+  const result = await runSync({ cwd, check })
 
   if (check) {
     printCheckResult(result, cwd)
@@ -24,20 +27,6 @@ export async function syncCommand(options: SyncCommandOptions = {}): Promise<voi
   }
 
   printRunSummary(result, cwd)
-}
-
-function resolveTools(cwd: string, raw?: string): ToolId[] | undefined {
-  if (!raw || raw.trim().length === 0) {
-    const configuredTools = detectConfiguredToolIds(cwd)
-
-    if (configuredTools.length > 0) {
-      return configuredTools
-    }
-
-    throw new Error('未检测到已安装的 Skill，请先执行 install 或通过 --tools 显式指定工具')
-  }
-
-  return parseToolIds(raw)
 }
 
 function printRunSummary(result: RunResult, cwd: string): void {
@@ -53,6 +42,13 @@ function printRunSummary(result: RunResult, cwd: string): void {
   if (result.updated.length > 0) {
     console.log(`\n更新 ${result.updated.length} 个文件:`) // eslint-disable-line no-console
     for (const filePath of result.updated) {
+      console.log(`- ${relative(cwd, filePath)}`) // eslint-disable-line no-console
+    }
+  }
+
+  if (result.removed.length > 0) {
+    console.log(`\n移除 ${result.removed.length} 个遗留路径:`) // eslint-disable-line no-console
+    for (const filePath of result.removed) {
       console.log(`- ${relative(cwd, filePath)}`) // eslint-disable-line no-console
     }
   }

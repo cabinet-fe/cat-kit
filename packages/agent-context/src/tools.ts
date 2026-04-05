@@ -121,6 +121,15 @@ export function resolveToolTargets(tools?: ToolId[]): ToolTarget[] {
   return selected.map((id) => ({ ...TOOL_TARGET_MAP[id] }))
 }
 
+/** sync：项目中每一处已检测到 SKILL.md 的 ac-workflow 安装路径（整目录产物同步） */
+export function resolveSyncToolTargets(cwd: string): ToolTarget[] {
+  return detectConfiguredToolIds(cwd).map((id) => resolveToolTargetById(id))
+}
+
+export function resolveToolTargetById(id: ToolId): ToolTarget {
+  return { ...TOOL_TARGET_MAP[id] }
+}
+
 export function detectConfiguredToolIds(cwd: string): ToolId[] {
   return DEFAULT_TOOL_ORDER.filter((toolId) => {
     const target = TOOL_TARGET_MAP[toolId]
