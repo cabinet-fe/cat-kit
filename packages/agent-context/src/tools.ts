@@ -7,6 +7,15 @@ const SKILL_FILE_NAME = 'SKILL.md'
 const SKILL_NAME = 'ac-workflow'
 
 const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
+  agents: {
+    id: 'agents',
+    name: 'Agent Skills（开放标准）',
+    skillRootDir: '.agents/skills',
+    frontmatterProfile: 'standard',
+    metadataFiles: [],
+    guideFileName: 'AGENTS.md',
+    askToolName: 'AskUserQuestion'
+  },
   claude: {
     id: 'claude',
     name: 'Claude Code',
@@ -43,15 +52,6 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
     guideFileName: 'AGENTS.md',
     askToolName: 'AskUserQuestion'
   },
-  agents: {
-    id: 'agents',
-    name: 'Agent Skills（开放标准 · .agents）',
-    skillRootDir: '.agents/skills',
-    frontmatterProfile: 'standard',
-    metadataFiles: [],
-    guideFileName: 'AGENTS.md',
-    askToolName: 'AskUserQuestion'
-  },
   gemini: {
     id: 'gemini',
     name: 'Gemini CLI',
@@ -68,7 +68,7 @@ const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
     frontmatterProfile: 'copilot',
     metadataFiles: [],
     guideFileName: 'AGENTS.md',
-    askToolName: 'AskUserQuestion'
+    askToolName: 'askQuestions'
   }
 }
 
