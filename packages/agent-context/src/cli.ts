@@ -4,15 +4,15 @@ import { readFileSync } from 'node:fs'
 
 import { Command } from 'commander'
 
-import { doneCommand } from './commands/done.js'
-import { indexCommand } from './commands/index-cmd.js'
-import { initCommand } from './commands/init.js'
-import { installCommand } from './commands/install.js'
-import { promptGenCommand } from './commands/prompt-gen.js'
-import { statusCommand } from './commands/status.js'
-import { syncCommand } from './commands/sync.js'
-import { upgradeCommand } from './commands/upgrade.js'
-import { validateCommand } from './commands/validate.js'
+import { doneCommand } from './commands/done'
+import { indexCommand } from './commands/index-cmd'
+import { initCommand } from './commands/init'
+import { installCommand } from './commands/install'
+import { promptGenCommand } from './commands/prompt-gen'
+import { statusCommand } from './commands/status'
+import { syncCommand } from './commands/sync'
+import { upgradeCommand } from './commands/upgrade'
+import { validateCommand } from './commands/validate'
 
 const packageJson = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8')

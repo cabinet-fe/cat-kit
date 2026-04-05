@@ -2,22 +2,12 @@ import { existsSync } from 'node:fs'
 import { readdir, rmdir, unlink } from 'node:fs/promises'
 import { join, relative, sep } from 'node:path'
 
+import { listFilesRecursive } from './fs-utils'
+
 function toPosixRelative(fromDir: string, absolutePath: string): string {
   const rel = relative(fromDir, absolutePath)
   if (rel === '') return ''
   return rel.split(sep).join('/')
-}
-
-async function walkFilesRecursive(dir: string, out: string[]): Promise<void> {
-  const entries = await readdir(dir, { withFileTypes: true })
-  for (const e of entries) {
-    const p = join(dir, e.name)
-    if (e.isDirectory()) {
-      await walkFilesRecursive(p, out)
-    } else {
-      out.push(p)
-    }
-  }
 }
 
 async function collectSubdirs(root: string): Promise<string[]> {
@@ -67,8 +57,7 @@ export async function pruneSkillDirectory(
     return { removed, checkDirty }
   }
 
-  const allFiles: string[] = []
-  await walkFilesRecursive(skillDir, allFiles)
+  const allFiles = await listFilesRecursive(skillDir)
 
   const orphanFiles = allFiles.filter((abs) => {
     const rel = toPosixRelative(skillDir, abs)

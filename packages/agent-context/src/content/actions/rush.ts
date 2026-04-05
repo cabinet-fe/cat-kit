@@ -1,4 +1,4 @@
-import type { ToolTarget } from '../../types.js'
+import type { ToolTarget } from '../../types'
 
 export function renderRush(target: ToolTarget): string {
   return `# rush

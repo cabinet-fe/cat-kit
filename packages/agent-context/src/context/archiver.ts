@@ -1,7 +1,8 @@
 import { rename, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import type { ArchiveResult, ContextSnapshot } from '../types.js'
+import { DONE_DIR } from '../constants'
+import type { ArchiveResult, ContextSnapshot } from '../types'
 
 export async function archive(context: ContextSnapshot): Promise<ArchiveResult> {
   if (!context.currentPlan) {
@@ -13,7 +14,7 @@ export async function archive(context: ContextSnapshot): Promise<ArchiveResult> 
   }
 
   const archiveName = `plan-${context.currentPlan.number}-${formatDate()}`
-  const doneDir = join(context.root, 'done')
+  const doneDir = join(context.root, DONE_DIR)
   const archivedTo = join(doneDir, archiveName)
 
   await mkdir(doneDir, { recursive: true })

@@ -1,8 +1,9 @@
 import { existsSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
-import { join, relative } from 'node:path'
+import { basename, join, relative } from 'node:path'
 
-import type { ContextSnapshot } from '../types.js'
+import { PLAN_FILE_NAME } from '../constants'
+import type { ContextSnapshot } from '../types'
 
 const H1_RE = /^#\s+(.+)$/m
 
@@ -16,20 +17,20 @@ export async function generateIndex(context: ContextSnapshot): Promise<IndexResu
 
   for (const plan of context.done) {
     const title = await extractTitle(plan.dir)
-    const rel = `./${relative(context.root, plan.dir)}/plan.md`
+    const rel = `./${relative(context.root, plan.dir)}/${PLAN_FILE_NAME}`
     lines.push(`- [x] [${title}](${rel})`)
   }
 
   if (context.currentPlan) {
     const title = await extractTitle(context.currentPlan.dir)
-    const rel = `./${relative(context.root, context.currentPlan.dir)}/plan.md`
+    const rel = `./${relative(context.root, context.currentPlan.dir)}/${PLAN_FILE_NAME}`
     const check = context.currentPlan.status === '已执行' ? 'x' : ' '
     lines.push(`- [${check}] [${title}](${rel})`)
   }
 
   for (const plan of context.preparing) {
     const title = await extractTitle(plan.dir)
-    const rel = `./${relative(context.root, plan.dir)}/plan.md`
+    const rel = `./${relative(context.root, plan.dir)}/${PLAN_FILE_NAME}`
     lines.push(`- [ ] [${title}](${rel})`)
   }
 
@@ -40,13 +41,14 @@ export async function generateIndex(context: ContextSnapshot): Promise<IndexResu
 }
 
 async function extractTitle(planDir: string): Promise<string> {
-  const planFile = join(planDir, 'plan.md')
+  const planFile = join(planDir, PLAN_FILE_NAME)
+  const fallback = `plan-${basename(planDir) || 'unknown'}`
 
   if (!existsSync(planFile)) {
-    return `plan-${planDir.split('/').pop() ?? 'unknown'}`
+    return fallback
   }
 
   const content = await readFile(planFile, 'utf-8')
   const match = content.match(H1_RE)
-  return match?.[1]?.trim() ?? `plan-${planDir.split('/').pop() ?? 'unknown'}`
+  return match?.[1]?.trim() ?? fallback
 }

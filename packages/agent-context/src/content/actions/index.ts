@@ -1,11 +1,11 @@
-import type { ToolTarget } from '../../types.js'
-import { renderImplement } from './implement.js'
-import { renderInit } from './init.js'
-import { renderPatch } from './patch.js'
-import { renderPlan } from './plan.js'
-import { renderReplan } from './replan.js'
-import { renderReview } from './review.js'
-import { renderRush } from './rush.js'
+import type { ToolTarget } from '../../types'
+import { renderImplement } from './implement'
+import { renderInit } from './init'
+import { renderPatch } from './patch'
+import { renderPlan } from './plan'
+import { renderReplan } from './replan'
+import { renderReview } from './review'
+import { renderRush } from './rush'
 
 export const ACTION_NAMES = [
   'init',

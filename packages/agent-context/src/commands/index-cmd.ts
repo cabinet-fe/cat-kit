@@ -1,6 +1,7 @@
 import { relative } from 'node:path'
 
-import { readRawContext, validate, generateIndex } from '../context/index.js'
+import { AC_ROOT_DIR } from '../constants'
+import { readRawContext, validate, generateIndex } from '../context/index'
 
 export async function indexCommand(): Promise<void> {
   const cwd = process.cwd()
@@ -16,7 +17,7 @@ export async function indexCommand(): Promise<void> {
   }
 
   if (!snapshot) {
-    console.log('未找到 .agent-context 目录。') // eslint-disable-line no-console
+    console.log(`未找到 ${AC_ROOT_DIR} 目录。`) // eslint-disable-line no-console
     process.exitCode = 1
     return
   }

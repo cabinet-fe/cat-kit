@@ -3,17 +3,21 @@ import { existsSync } from 'node:fs'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
+import { ENV_FILE_NAME } from '../constants'
+
+const SCOPE_RE = /^SCOPE=(.+)$/m
+
+export async function readExistingScope(acRoot: string): Promise<string | null> {
+  const envPath = join(acRoot, ENV_FILE_NAME)
+  if (!existsSync(envPath)) return null
+  const content = await readFile(envPath, 'utf-8')
+  const match = content.match(SCOPE_RE)
+  return match?.[1]?.trim() ?? null
+}
+
 export async function resolveScope(acRoot: string): Promise<string> {
-  const envPath = join(acRoot, '.env')
-
-  if (existsSync(envPath)) {
-    const content = await readFile(envPath, 'utf-8')
-    const match = content.match(/^SCOPE=(.+)$/m)
-    if (match?.[1]) {
-      return match[1].trim()
-    }
-  }
-
+  const existing = await readExistingScope(acRoot)
+  if (existing) return existing
   return initScope(acRoot)
 }
 
@@ -37,7 +41,7 @@ export async function initScope(acRoot: string, manualScope?: string): Promise<s
     scope = normalizeScope(userName)
   }
 
-  const envPath = join(acRoot, '.env')
+  const envPath = join(acRoot, ENV_FILE_NAME)
   await writeFile(envPath, `SCOPE=${scope}\n`, 'utf-8')
 
   await ensureGitignoreHasEnv(acRoot)

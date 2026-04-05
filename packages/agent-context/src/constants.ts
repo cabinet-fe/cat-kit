@@ -1,0 +1,5 @@
+export const SKILL_NAME = 'ac-workflow'
+export const AC_ROOT_DIR = '.agent-context'
+export const PLAN_FILE_NAME = 'plan.md'
+export const DONE_DIR = 'done'
+export const ENV_FILE_NAME = '.env'

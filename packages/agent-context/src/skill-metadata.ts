@@ -1,5 +1,7 @@
-import { readdir, readFile, writeFile } from 'node:fs/promises'
-import { extname, join } from 'node:path'
+import { readFile, writeFile } from 'node:fs/promises'
+import { extname } from 'node:path'
+
+import { listFilesRecursive } from './fs-utils'
 
 const TEXT_EXTENSIONS = new Set(['.md', '.yaml', '.yml', '.json', '.txt', '.mdx'])
 
@@ -21,20 +23,6 @@ export function parseSkillMdMetadataVersion(skillMd: string): string | undefined
 function extractYamlFrontmatter(source: string): string | undefined {
   const m = source.match(/^---\r?\n([\s\S]*?)\r?\n---/)
   return m?.[1]
-}
-
-async function listFilesRecursive(dir: string): Promise<string[]> {
-  const out: string[] = []
-  const entries = await readdir(dir, { withFileTypes: true })
-  for (const e of entries) {
-    const p = join(dir, e.name)
-    if (e.isDirectory()) {
-      out.push(...(await listFilesRecursive(p)))
-    } else {
-      out.push(p)
-    }
-  }
-  return out
 }
 
 /**

@@ -2,8 +2,9 @@ import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import type { ContextSnapshot, PlanInfo, PlanStatus } from '../types.js'
-import { resolveScope } from './scope.js'
+import { AC_ROOT_DIR, DONE_DIR, PLAN_FILE_NAME } from '../constants'
+import type { ContextSnapshot, PlanInfo, PlanStatus } from '../types'
+import { resolveScope } from './scope'
 
 const PLAN_DIR_RE = /^plan-(\d+)$/
 const DONE_DIR_RE = /^plan-(\d+)(?:-\d{8})?$/
@@ -20,7 +21,7 @@ export async function readContext(cwd: string): Promise<ContextSnapshot | null> 
 export async function readRawContext(
   cwd: string
 ): Promise<{ snapshot: ContextSnapshot | null; currentPlanCount: number }> {
-  const acRoot = join(cwd, '.agent-context')
+  const acRoot = join(cwd, AC_ROOT_DIR)
 
   if (!existsSync(acRoot)) {
     return { snapshot: null, currentPlanCount: 0 }
@@ -31,7 +32,7 @@ export async function readRawContext(
 
   const currentPlans = await readPlanDirs(root)
   const preparing = await readPlanDirs(join(root, 'preparing'))
-  const done = await readDonePlans(join(root, 'done'))
+  const done = await readDonePlans(join(root, DONE_DIR))
 
   const snapshot: ContextSnapshot = {
     root,
@@ -45,7 +46,7 @@ export async function readRawContext(
 }
 
 export async function readPlanStatus(planDir: string): Promise<PlanStatus> {
-  const planFile = join(planDir, 'plan.md')
+  const planFile = join(planDir, PLAN_FILE_NAME)
 
   if (!existsSync(planFile)) {
     return '未执行'

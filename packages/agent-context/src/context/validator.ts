@@ -1,7 +1,8 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
-import type { ContextSnapshot, ValidateResult } from '../types.js'
+import { PLAN_FILE_NAME } from '../constants'
+import type { ContextSnapshot, ValidateResult } from '../types'
 
 export function validate(
   snapshot: ContextSnapshot | null,
@@ -18,7 +19,7 @@ export function validate(
   }
 
   if (snapshot.currentPlan) {
-    const planMd = join(snapshot.currentPlan.dir, 'plan.md')
+    const planMd = join(snapshot.currentPlan.dir, PLAN_FILE_NAME)
     if (!existsSync(planMd)) {
       errors.push(`当前计划 plan-${snapshot.currentPlan.number} 缺少 plan.md。`)
     }

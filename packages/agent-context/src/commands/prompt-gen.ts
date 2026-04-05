@@ -4,7 +4,8 @@ import { dirname, resolve } from 'node:path'
 
 import { checkbox } from '@inquirer/prompts'
 
-import type { PromptToolId } from '../types.js'
+import { parseCommaSeparatedIds } from '../tools'
+import type { PromptToolId } from '../types'
 
 const PROMPT_TOOL_ORDER: PromptToolId[] = ['claude', 'codex', 'gemini', 'antigravity']
 
@@ -123,21 +124,7 @@ async function resolvePromptToolIds(
     })
   }
 
-  const parsed = raw
-    .split(',')
-    .map((item) => item.trim().toLowerCase())
-    .filter(Boolean)
-
-  const result: PromptToolId[] = []
-  for (const value of parsed) {
-    if (!isPromptToolId(value)) {
-      throw new Error(`不支持的工具标识: ${value}。可选值: ${PROMPT_TOOL_ORDER.join(', ')}`)
-    }
-    if (!result.includes(value)) {
-      result.push(value)
-    }
-  }
-  return result
+  return parseCommaSeparatedIds(raw, isPromptToolId, PROMPT_TOOL_ORDER)
 }
 
 function isPromptToolId(value: string): value is PromptToolId {

@@ -1,11 +1,12 @@
-import { readRawContext, validate } from '../context/index.js'
+import { AC_ROOT_DIR } from '../constants'
+import { readRawContext, validate } from '../context/index'
 
 export async function validateCommand(): Promise<void> {
   const { snapshot, currentPlanCount } = await readRawContext(process.cwd())
   const result = validate(snapshot, currentPlanCount)
 
   if (result.context === null) {
-    console.log('未找到 .agent-context 目录。')
+    console.log(`未找到 ${AC_ROOT_DIR} 目录。`)
     return
   }
 

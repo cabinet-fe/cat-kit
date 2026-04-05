@@ -1,8 +1,8 @@
-import { readAgentContextPackageVersion } from '../package-version.js'
-import type { SkillArtifacts, ToolTarget } from '../types.js'
-import { ACTION_NAMES, ACTION_RENDERERS } from './actions/index.js'
+import { SKILL_NAME } from '../constants'
+import { readAgentContextPackageVersion } from '../package-version'
+import type { SkillArtifacts, ToolTarget } from '../types'
+import { ACTION_NAMES, ACTION_RENDERERS } from './actions/index'
 
-const SKILL_NAME = 'ac-workflow'
 /** 供 frontmatter / 工具匹配的短描述：品牌名 + 核心能力与关键词 */
 const SKILL_DESCRIPTION =
   '简洁高效的代理上下文工作流。当提及初始化、计划、重构、重新计划、上下文工作流、规划、实现、优化、补丁、快速实现时使用。'

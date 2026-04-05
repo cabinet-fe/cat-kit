@@ -1,10 +1,10 @@
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-import type { ToolId, ToolTarget } from './types.js'
+import { SKILL_NAME } from './constants'
+import type { ToolId, ToolTarget } from './types'
 
 const SKILL_FILE_NAME = 'SKILL.md'
-const SKILL_NAME = 'ac-workflow'
 
 const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
   agents: {
@@ -91,29 +91,31 @@ export function getToolChoices(): ToolChoice[] {
   return DEFAULT_TOOL_ORDER.map((id) => ({ id, name: TOOL_TARGET_MAP[id].name }))
 }
 
-export function parseToolIds(toolsText: string): ToolId[] {
-  const parsed = toolsText
+export function parseCommaSeparatedIds<T extends string>(
+  raw: string,
+  isValid: (value: string) => value is T,
+  validOptions: readonly T[]
+): T[] {
+  const parsed = raw
     .split(',')
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean)
 
-  if (parsed.length === 0) {
-    return [...DEFAULT_TOOL_ORDER]
-  }
-
-  const uniqueIds: ToolId[] = []
-
+  const result: T[] = []
   for (const value of parsed) {
-    if (!isToolId(value)) {
-      throw new Error(`不支持的工具标识: ${value}。可选值: ${DEFAULT_TOOL_ORDER.join(', ')}`)
+    if (!isValid(value)) {
+      throw new Error(`不支持的工具标识: ${value}。可选值: ${validOptions.join(', ')}`)
     }
-
-    if (!uniqueIds.includes(value)) {
-      uniqueIds.push(value)
+    if (!result.includes(value)) {
+      result.push(value)
     }
   }
+  return result
+}
 
-  return uniqueIds
+export function parseToolIds(toolsText: string): ToolId[] {
+  const result = parseCommaSeparatedIds(toolsText, isToolId, DEFAULT_TOOL_ORDER)
+  return result.length === 0 ? [...DEFAULT_TOOL_ORDER] : result
 }
 
 export function resolveToolTargets(tools?: ToolId[]): ToolTarget[] {

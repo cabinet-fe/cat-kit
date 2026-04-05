@@ -1,4 +1,4 @@
-import type { ToolTarget } from '../../types.js'
+import type { ToolTarget } from '../../types'
 
 export function renderPlan(target: ToolTarget): string {
   return `# plan
