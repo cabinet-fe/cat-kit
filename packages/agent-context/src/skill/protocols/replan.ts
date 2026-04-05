@@ -1,3 +1,4 @@
+import { AC_ROOT_DIR } from '../../constants'
 import type { ToolTarget } from '../../types'
 
 export function renderReplan(target: ToolTarget): string {
@@ -9,14 +10,13 @@ export function renderReplan(target: ToolTarget): string {
 
 ## 前置检查
 
-- 在 shell 中运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
 - 描述为空 → 向用户获取重规划描述后继续执行。
 - 无未实施计划 → 通过 ${target.askToolName} 提供选项：1) 创建新计划 2) 终止操作，按用户选择执行。
 
 ## 作用域
 
 - 固定覆盖**全部**未执行计划，不支持部分重规划。
-- 未执行计划包括：当前计划（当且仅当其状态为 \`未执行\`）+ \`.agent-context/{scope}/preparing/\` 中全部计划。
+- 未执行计划包括：当前计划（当且仅当其状态为 \`未执行\`）+ \`${AC_ROOT_DIR}/{scope}/preparing/\` 中全部计划。
 - 当前计划为 \`已执行\` → 当前计划不纳入重规划；仅对 \`preparing/\` 队列中的计划进行重规划。
 
 ## 执行步骤

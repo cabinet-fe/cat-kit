@@ -1,11 +1,11 @@
-import { SKILL_NAME } from '../constants'
+import { AC_ROOT_DIR, SKILL_NAME } from '../constants'
 import type { SkillArtifacts, ToolTarget } from '../types'
 import { PROTOCOL_NAMES, PROTOCOL_RENDERERS } from './protocols/index'
 import { readAgentContextPackageVersion } from './version'
 
 /** 供 frontmatter / 工具匹配的短描述：品牌名 + 核心能力与关键词 */
 const SKILL_DESCRIPTION =
-  '简洁高效的代理上下文工作流。当提及初始化、计划、重构、重新计划、上下文工作流、规划、实现、优化、补丁、快速实现时使用。'
+  '基于协议的、简洁高效的代理上下文工作流。当提及初始化、计划、重构、重新计划、上下文工作流、规划、实现、优化、补丁、快速实现时使用。'
 
 const PROTOCOL_DIR = 'references'
 
@@ -32,25 +32,35 @@ export function renderSkillArtifacts(target: ToolTarget): SkillArtifacts {
 // ── Navigator ────────────────────────────────────────
 
 function renderNavigator(target: ToolTarget): string {
+  const protocolFile = `${PROTOCOL_DIR}/<protocol>.md`
   return `${renderFrontmatter(target)}
 # 代理上下文工作流（ac-workflow）
 
-统一管理仓库根目录 \`.agent-context/\` 下的计划：\`init\` → \`plan\` / \`replan\` → \`implement\` → \`patch\` → \`review\` → \`done\`；也可用 \`rush\` 在一条流程内完成 \`plan\` + \`implement\`。
+严格基于\`${PROTOCOL_DIR}\`中的文件作为开发工作流协议：
 
-## 执行纪律（摘要）
+- **init**: 初始化项目上下文，根据新项目或旧项目有不同的处理流程。
+- **plan**：给需求出计划、拆分任务。
+- **replan**：重做计划、调整方案。
+- **implement**：按计划开始做、实现当前计划。
+- **rush**：快速出计划并实施， 等于 \`plan\` + \`implement\` 的连续执行。
+- **patch**：实施后不满意、追加需求、修补问题。
+- **review**：审查实施结果。
+- **done**：任务彻底完成、归档当前计划。
 
-完整步骤始终以 \`${PROTOCOL_DIR}/<动作>.md\` 为准；此处仅作索引，**不可替代协议全文**。
+## 最高守则
 
-- **状态先查**：任何操作前先查看 \`.agent-context/{scope}/\`，判定：无当前计划 / 当前 **未执行** / 当前 **已执行**
-- **协议先行**：选定动作后，**完整**读取 \`${PROTOCOL_DIR}/<动作>.md\` 再逐步执行；禁止凭记忆、摘要或猜测跳过协议步骤
-- **前置检查**：各协议中的「前置检查」逐条执行；协议要求运行 \`agent-context validate\` 时必须执行
-- **禁止直接改动**：在 **plan** / **rush** 创建计划之前，不得修改业务代码；代码变更仅在 **implement** 或 **patch** 上下文中进行
+- **全局校验**：在执行任何协议之前，必须先在 shell 中运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
+- **判断当前计划状态**：任何操作前先检查 \`${AC_ROOT_DIR}/{scope}/\`，判断出当前计划状态：无当前计划 / 当前 **未执行** / 当前 **已执行**
+- **协议先行**：选定协议后，**完整**读取 \`${protocolFile}\` 再逐步执行；禁止凭记忆、摘要或猜测跳过协议步骤
+- **禁止直接改动**：在 **plan** / **rush** 创建计划之前，不得修改业务代码；代码变更仅在 **implement** 或 **patch** 协议中进行
 - **顺序执行**：协议内步骤按编号顺序执行，不跳步、不合并、不并行
-- **提问工具**：使用 ${target.askToolName} 时须遵守 \`${PROTOCOL_DIR}/ask-user-question.md\`
+- **提问引导规范**：使用 ${target.askToolName} 时须遵守 \`${PROTOCOL_DIR}/ask-user-question.md\`
 
-## 路由决策
+## 协议选择决策
 
-> **必须先确定当前计划状态，再按下表选择动作。禁止跳过状态判断直接匹配动作。**
+如果用户明确指定要执行某个协议，退出协议选择决策，直接执行该协议。
+
+> **必须先确定当前计划状态，再按下表选择协议。禁止跳过状态判断直接匹配动作。**
 
 ### 状态 A：无当前计划
 
@@ -84,16 +94,15 @@ function renderNavigator(target: ToolTarget): string {
 
 ## 全局约束
 
-- 状态机两态：\`未执行\`、\`已执行\`。
-- 任意时刻最多一个当前计划：\`.agent-context/{scope}/plan-{number}\`。
-- 多个当前计划 → 拒绝执行，提示恢复单活跃状态。
-- 计划编号全局递增，不复用。补丁编号在单计划目录内递增，不复用。
-- 影响范围（\`## 影响范围\`）不得包含 \`.agent-context/\` 目录下的文件。
+- 计划状态两态：\`未执行\`、\`已执行\`。
+- 任意时刻最多一个当前计划：\`${AC_ROOT_DIR}/{scope}/plan-{number}\`。
+- 计划编号从 1 开始全局递增，不复用。补丁编号在单计划目录内从 1 开始递增，不复用。
+- 影响范围（\`## 影响范围\`）不得包含 \`${AC_ROOT_DIR}/\` 目录下的文件。
 
-## 目录结构
+## 上下文目录结构
 
 \`\`\`text
-.agent-context/
+${AC_ROOT_DIR}/
 ├── .env               # SCOPE 配置（SCOPE=<name>）
 ├── .gitignore
 └── {scope}/           # 作用域目录（按协作者隔离）
@@ -132,8 +141,8 @@ function renderFrontmatter(target: ToolTarget): string {
 
 function renderOpenAIMetadata(): string {
   return `interface:
-  display_name: "Agent Context Workflow"
-  short_description: "Agent Context Workflow：.agent-context 计划生命周期，按 references 内协议分步执行"
+  display_name: "代理上下文工作流"
+  short_description: "${SKILL_DESCRIPTION}"
   default_prompt: "Use ac-workflow: check .agent-context state, then read the matching file under references/ (init, plan, replan, implement, patch, rush, review) or run agent-context done."
 
 policy:
@@ -150,8 +159,8 @@ function renderAskUserQuestionReference(target: ToolTarget): string {
 
 ### 基础规范
 
-- 提问通俗易懂，不废话，选项也同理，不要拽花哨的文风
-- 单选提问须在问题末尾标注推荐项并说明理由
+- 提问要通俗易懂，不要废话，禁止拽花哨、华而不实的文风，给出的选项同理。
+- 单选提问**必须**在问题末尾标注推荐项并说明理由
 - 一次提问聚焦一个主题，不在单个问题中混杂多个无关决策
 
 ### 反向面试

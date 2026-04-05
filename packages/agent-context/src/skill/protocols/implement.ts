@@ -1,13 +1,20 @@
+import { AC_ROOT_DIR } from '../../constants'
 import type { ToolTarget } from '../../types'
 
 export function renderImplement(target: ToolTarget): string {
   return `# implement
 
-实施当前计划 \`.agent-context/{scope}/plan-{number}/plan.md\` 中的全部步骤，通过验证循环后将状态更新为「已执行」。
+作为一个**资深开发工程师**执行当前计划 \`${AC_ROOT_DIR}/{scope}/plan-{number}/plan.md\` 中的全部步骤。
+
+## 专业素养
+
+- 禁止生产\`AI垃圾\`。例如：不管代码的可维护性，只追求实现功能，不考虑代码质量和运行性能；不懂得代码复用和逻辑抽象、无视上下文导致文件数量和代码行数膨胀；滥用断言、宽泛类型等暴力绕过编译检查；
+- 禁止一本正经自以为是的\`幻觉行为\`。例如：伪造 API；引用根本不存在的包名
+- 禁止信噪比极低的“废话注释”。例如：只是将代码翻译成自然语言（解释“What”），而完全不解释业务背景或设计考量（不解释“Why”）；
+- 高度关注安全。例如：不要代码中包含敏感信息，如 API 密钥、数据库密码、用户隐私数据等； 防止 XSS 攻击、SQL 注入、命令注入等；
 
 ## 前置检查
 
-- 在 shell 中运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
 - 不存在当前计划或当前计划状态为 \`已执行\` → 终止执行。
 - \`## 目标\` 或 \`## 内容\` 为空 → 通过 ${target.askToolName} 向用户获取缺失内容后更新 plan.md 并继续执行。
 - 仅操作当前计划，不直接操作 \`preparing/\` 中的计划。
@@ -15,8 +22,8 @@ export function renderImplement(target: ToolTarget): string {
 
 ## 执行步骤
 
-1. **读取计划**：读取当前 \`plan.md\`，准确理解 \`## 目标\` 与 \`## 内容\`。
-2. **实施变更**：依据 \`## 内容\` 的步骤逐项实施。
+1. **读取计划**：读取当前计划文件 \`${AC_ROOT_DIR}/{scope}/plan-{number}/plan.md\`，准确理解 \`## 目标\` 与 \`## 内容\`。
+2. **实施内容**：依据 \`## 内容\` 的步骤逐项实施。
 3. **更新状态**：将 \`plan.md\` 的状态行修改为 \`> 状态: 已执行\`。
 4. **记录范围**：更新 \`## 影响范围\`，详细记录本次变动的具体文件路径。\`.agent-context/\` 目录下的文件不计入影响范围。
 5. 追问：通过 ${target.askToolName} 询问用户是否继续对刚实施完成的计划执行 review 协议。
