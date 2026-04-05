@@ -31,3 +31,4 @@
 - [x] [agent-context CLI：新增 upgrade、移除 printer](./done/plan-31-20260403/plan.md)
 - [x] [优化 agent-context 命令行输出文案](./done/plan-32-20260405/plan.md)
 - [x] [agent-context：references 布局、安装横幅与 SKILL 渐进披露](./done/plan-33-20260405/plan.md)
+- [x] [agent-context 源码重构：消灭 AI 垃圾代码](./done/plan-34-20260405/plan.md)
