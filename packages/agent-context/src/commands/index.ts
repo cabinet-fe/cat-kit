@@ -1,7 +1,7 @@
 import { relative } from 'node:path'
 
 import { AC_ROOT_DIR } from '../constants'
-import { readRawContext, validate, generateIndex } from '../context/index'
+import { readRawContext, validate, generateIndex } from '../workspace/index'
 
 export async function indexCommand(): Promise<void> {
   const cwd = process.cwd()

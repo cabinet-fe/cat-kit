@@ -2,18 +2,6 @@ import { existsSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 
-import { renderSkillArtifacts } from './content/index'
-import { readAgentContextPackageVersion } from './package-version'
-import { parseSkillMdMetadataVersion, replaceVersionInSkillDirectory } from './skill-metadata'
-import { pruneSkillDirectory } from './skill-prune'
-import type { SkillPaths } from './tools'
-import {
-  detectConfiguredToolIds,
-  resolveSkillPaths,
-  resolveSyncToolTargets,
-  resolveToolTargetById,
-  resolveToolTargets
-} from './tools'
 import type {
   ApplyMutationResult,
   FileMutation,
@@ -21,7 +9,19 @@ import type {
   RunResult,
   ToolId,
   ToolTarget
-} from './types'
+} from '../types'
+import { parseSkillMdMetadataVersion, replaceVersionInSkillDirectory } from './metadata'
+import { pruneSkillDirectory } from './prune'
+import { renderSkillArtifacts } from './render'
+import {
+  detectConfiguredToolIds,
+  resolveSkillPaths,
+  resolveSyncToolTargets,
+  resolveToolTargetById,
+  resolveToolTargets
+} from './targets'
+import type { SkillPaths } from './targets'
+import { readAgentContextPackageVersion } from './version'
 
 export async function runInstall(options: RunOptions = {}): Promise<RunResult> {
   return run('install', options)

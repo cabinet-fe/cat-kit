@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { extname } from 'node:path'
 
-import { listFilesRecursive } from './fs-utils'
+import { listFilesRecursive } from './fs'
 
 const TEXT_EXTENSIONS = new Set(['.md', '.yaml', '.yml', '.json', '.txt', '.mdx'])
 

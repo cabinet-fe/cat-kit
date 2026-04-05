@@ -1,4 +1,4 @@
-import { readRawContext, validate } from '../context/index'
+import { readRawContext, validate } from '../workspace/index'
 
 export async function statusCommand(): Promise<void> {
   const { snapshot, currentPlanCount } = await readRawContext(process.cwd())

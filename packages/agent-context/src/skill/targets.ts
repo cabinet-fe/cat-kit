@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-import { SKILL_NAME } from './constants'
-import type { ToolId, ToolTarget } from './types'
+import { SKILL_NAME } from '../constants'
+import type { ToolId, ToolTarget } from '../types'
 
 const SKILL_FILE_NAME = 'SKILL.md'
 

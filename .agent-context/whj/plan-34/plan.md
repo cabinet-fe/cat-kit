@@ -111,38 +111,40 @@ export function parseCommaSeparatedIds<T extends string>(
 
 ## 影响范围
 
-- `packages/agent-context/src/constants.ts`（新增）
-- `packages/agent-context/src/fs-utils.ts`（新增）
-- `packages/agent-context/src/commands/print-result.ts`（新增）
 - `packages/agent-context/src/cli.ts`
-- `packages/agent-context/src/runner.ts`
-- `packages/agent-context/src/tools.ts`
-- `packages/agent-context/src/skill-metadata.ts`
-- `packages/agent-context/src/skill-prune.ts`
-- `packages/agent-context/src/content/index.ts`
-- `packages/agent-context/src/content/actions/index.ts`
-- `packages/agent-context/src/content/actions/init.ts`
-- `packages/agent-context/src/content/actions/patch.ts`
-- `packages/agent-context/src/content/actions/plan.ts`
-- `packages/agent-context/src/content/actions/replan.ts`
-- `packages/agent-context/src/content/actions/review.ts`
-- `packages/agent-context/src/content/actions/rush.ts`
-- `packages/agent-context/src/content/actions/implement.ts`
-- `packages/agent-context/src/context/index.ts`
-- `packages/agent-context/src/context/archiver.ts`
-- `packages/agent-context/src/context/indexer.ts`
-- `packages/agent-context/src/context/reader.ts`
-- `packages/agent-context/src/context/scope.ts`
-- `packages/agent-context/src/context/validator.ts`
 - `packages/agent-context/src/commands/done.ts`
-- `packages/agent-context/src/commands/index-cmd.ts`
+- `packages/agent-context/src/commands/index.ts`
 - `packages/agent-context/src/commands/init.ts`
 - `packages/agent-context/src/commands/install.ts`
+- `packages/agent-context/src/commands/print-result.ts`
 - `packages/agent-context/src/commands/prompt-gen.ts`
 - `packages/agent-context/src/commands/status.ts`
 - `packages/agent-context/src/commands/sync.ts`
 - `packages/agent-context/src/commands/validate.ts`
+- `packages/agent-context/src/constants.ts`
+- `packages/agent-context/src/skill/fs.ts`
+- `packages/agent-context/src/skill/installer.ts`
+- `packages/agent-context/src/skill/metadata.ts`
+- `packages/agent-context/src/skill/prune.ts`
+- `packages/agent-context/src/skill/protocols/implement.ts`
+- `packages/agent-context/src/skill/protocols/index.ts`
+- `packages/agent-context/src/skill/protocols/init.ts`
+- `packages/agent-context/src/skill/protocols/patch.ts`
+- `packages/agent-context/src/skill/protocols/plan.ts`
+- `packages/agent-context/src/skill/protocols/replan.ts`
+- `packages/agent-context/src/skill/protocols/review.ts`
+- `packages/agent-context/src/skill/protocols/rush.ts`
+- `packages/agent-context/src/skill/render.ts`
+- `packages/agent-context/src/skill/targets.ts`
+- `packages/agent-context/src/skill/version.ts`
+- `packages/agent-context/src/workspace/archive.ts`
+- `packages/agent-context/src/workspace/index-file.ts`
+- `packages/agent-context/src/workspace/index.ts`
+- `packages/agent-context/src/workspace/reader.ts`
+- `packages/agent-context/src/workspace/scope.ts`
+- `packages/agent-context/src/workspace/validate.ts`
 
 ## 历史补丁
 
 - patch-1: 修复 `print-result.ts` 硬编码 `'ac-workflow'`，`index-cmd.ts` / `validate.ts` 硬编码 `'.agent-context'` 提示文字，统一使用常量
+- patch-2: 以 `commands / skill / workspace` 重组 `packages/agent-context/src`，统一职责边界并收敛怪异命名

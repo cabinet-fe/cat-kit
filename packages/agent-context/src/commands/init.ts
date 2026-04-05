@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { confirm } from '@inquirer/prompts'
 
 import { AC_ROOT_DIR } from '../constants'
-import { initScope, readExistingScope } from '../context/scope'
+import { initScope, readExistingScope } from '../workspace/scope'
 
 export interface InitCommandOptions {
   scope?: string

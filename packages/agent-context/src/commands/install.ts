@@ -1,14 +1,14 @@
 import { checkbox } from '@inquirer/prompts'
 
-import { printCheckResult, printRunSummary } from './print-result'
-import { runInstall } from '../runner'
+import { runInstall } from '../skill/installer'
 import {
   DEFAULT_TOOL_ORDER,
   detectConfiguredToolIds,
   getToolChoices,
   parseToolIds
-} from '../tools'
+} from '../skill/targets'
 import type { ToolId } from '../types'
+import { printCheckResult, printRunSummary } from './print-result'
 
 export interface InstallCommandOptions {
   tools?: string

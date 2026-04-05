@@ -2,7 +2,7 @@ import { basename } from 'node:path'
 
 import { confirm } from '@inquirer/prompts'
 
-import { archive, generateIndex, readContext, readRawContext, validate } from '../context/index'
+import { archive, generateIndex, readContext, readRawContext, validate } from '../workspace/index'
 
 export async function doneCommand(options: { yes?: boolean }): Promise<void> {
   const { snapshot, currentPlanCount } = await readRawContext(process.cwd())

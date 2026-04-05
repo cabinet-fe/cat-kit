@@ -7,7 +7,7 @@ import { renderReplan } from './replan'
 import { renderReview } from './review'
 import { renderRush } from './rush'
 
-export const ACTION_NAMES = [
+export const PROTOCOL_NAMES = [
   'init',
   'plan',
   'replan',
@@ -16,9 +16,9 @@ export const ACTION_NAMES = [
   'rush',
   'review'
 ] as const
-type ActionName = (typeof ACTION_NAMES)[number]
+type ProtocolName = (typeof PROTOCOL_NAMES)[number]
 
-export const ACTION_RENDERERS: Record<ActionName, (target: ToolTarget) => string> = {
+export const PROTOCOL_RENDERERS: Record<ProtocolName, (target: ToolTarget) => string> = {
   init: renderInit,
   plan: renderPlan,
   replan: renderReplan,

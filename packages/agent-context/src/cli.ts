@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs'
 import { Command } from 'commander'
 
 import { doneCommand } from './commands/done'
-import { indexCommand } from './commands/index-cmd'
+import { indexCommand } from './commands/index'
 import { initCommand } from './commands/init'
 import { installCommand } from './commands/install'
 import { promptGenCommand } from './commands/prompt-gen'

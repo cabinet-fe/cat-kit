@@ -1,7 +1,7 @@
 import { SKILL_NAME } from '../constants'
-import { readAgentContextPackageVersion } from '../package-version'
 import type { SkillArtifacts, ToolTarget } from '../types'
-import { ACTION_NAMES, ACTION_RENDERERS } from './actions/index'
+import { PROTOCOL_NAMES, PROTOCOL_RENDERERS } from './protocols/index'
+import { readAgentContextPackageVersion } from './version'
 
 /** 供 frontmatter / 工具匹配的短描述：品牌名 + 核心能力与关键词 */
 const SKILL_DESCRIPTION =
@@ -12,9 +12,9 @@ const PROTOCOL_DIR = 'references'
 export function renderSkillArtifacts(target: ToolTarget): SkillArtifacts {
   const files: SkillArtifacts['files'] = [
     { relativePath: 'SKILL.md', body: renderNavigator(target) },
-    ...ACTION_NAMES.map((name) => ({
+    ...PROTOCOL_NAMES.map((name) => ({
       relativePath: `${PROTOCOL_DIR}/${name}.md`,
-      body: ACTION_RENDERERS[name](target)
+      body: PROTOCOL_RENDERERS[name](target)
     })),
     {
       relativePath: `${PROTOCOL_DIR}/ask-user-question.md`,

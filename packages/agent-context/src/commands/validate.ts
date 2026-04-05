@@ -1,5 +1,5 @@
 import { AC_ROOT_DIR } from '../constants'
-import { readRawContext, validate } from '../context/index'
+import { readRawContext, validate } from '../workspace/index'
 
 export async function validateCommand(): Promise<void> {
   const { snapshot, currentPlanCount } = await readRawContext(process.cwd())

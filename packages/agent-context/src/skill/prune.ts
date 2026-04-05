@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { readdir, rmdir, unlink } from 'node:fs/promises'
 import { join, relative, sep } from 'node:path'
 
-import { listFilesRecursive } from './fs-utils'
+import { listFilesRecursive } from './fs'
 
 function toPosixRelative(fromDir: string, absolutePath: string): string {
   const rel = relative(fromDir, absolutePath)
@@ -43,7 +43,7 @@ async function dirOnlyOrphansOrEmpty(
 }
 
 /**
- * 删除技能目录中不在 allowlist 内的文件，并移除因此变空的子目录（如遗留的 actions/）
+ * 删除技能目录中不在 allowlist 内的文件，并移除因此变空的遗留子目录
  */
 export async function pruneSkillDirectory(
   skillDir: string,

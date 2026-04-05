@@ -1,6 +1,6 @@
+import { runSync } from '../skill/installer'
+import { detectConfiguredToolIds } from '../skill/targets'
 import { printCheckResult, printRunSummary } from './print-result'
-import { runSync } from '../runner'
-import { detectConfiguredToolIds } from '../tools'
 
 export interface SyncCommandOptions {
   check?: boolean

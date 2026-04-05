@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path'
 
 import { checkbox } from '@inquirer/prompts'
 
-import { parseCommaSeparatedIds } from '../tools'
+import { parseCommaSeparatedIds } from '../skill/targets'
 import type { PromptToolId } from '../types'
 
 const PROMPT_TOOL_ORDER: PromptToolId[] = ['claude', 'codex', 'gemini', 'antigravity']
