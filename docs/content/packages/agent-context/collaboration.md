@@ -8,7 +8,7 @@ outline: deep
 
 ## 介绍
 
-`agent-context` 最有价值的地方，不是"多了几个动作名"，而是把一类常见协作场景固定成统一流程。
+`agent-context` 最有价值的地方，不是"多了几个协议名"，而是把一类常见协作场景固定成统一流程。
 
 如果你不确定什么时候该 `plan`、什么时候该 `patch`，这页给出按任务类型划分的具体工作流。
 
@@ -71,7 +71,7 @@ outline: deep
 推荐指令：
 
 ```text
-rush 一下，把 agent-context 文档中的 action 说明补全
+rush 一下，把 agent-context 文档中的 protocol 说明补全
 ```
 
 为什么这样做：

@@ -11,7 +11,7 @@ outline: deep
 它由两部分组成：
 
 - **CLI**：安装 Skill、同步协议、校验目录结构、管理计划生命周期（归档、索引）、升级自身
-- **Skill**：在对话中识别 `init、plan、replan、implement、patch、rush、review、done` 动作意图（与 `renderSkillArtifacts` 生成的 `SKILL.md` 一致），按协议推进任务
+- **Skill**：在对话中识别 `init、plan、replan、implement、patch、rush、review、done` 协议意图（与 `renderSkillArtifacts` 生成的 `SKILL.md` 一致），按协议推进任务
 
 目录结构：
 
@@ -32,7 +32,7 @@ outline: deep
 
 ### 动作依赖图（主路径与 review）
 
-与 `packages/agent-context/src/content/actions/*.ts` 一致：`rush` 在单条流程里先按 `plan` 的差异规则写好 `plan.md`，再**完整**执行 `implement`（无裁剪），因此落地后与普通 `plan → implement` 相同，可继续 `patch`、`review`、`done`，而不是跳过实施直接归档。
+与 `packages/agent-context/src/skill/protocols/*.ts` 一致：`rush` 在单条流程里先按 `plan` 的差异规则写好 `plan.md`，再**完整**执行 `implement`（无裁剪），因此落地后与普通 `plan → implement` 相同，可继续 `patch`、`review`、`done`，而不是跳过实施直接归档。
 
 ```mermaid
 flowchart TD
@@ -64,7 +64,7 @@ flowchart TD
 
 说明：`plan` / `implement` / `rush` 在协议末尾均可按 Skill 约定询问用户是否立刻 `review`。`review` 不接受额外描述；审查后常见后续为 `replan`（仍 `未执行`）或 `patch`（已 `已执行`）。
 
-### 状态机与路由（与 `content/index.ts` 路由表一致）
+### 状态机与路由
 
 校验与状态由 CLI `validate` / `status` 与 `plan.md` 状态行驱动；两态为 **`未执行`**、**`已执行`**。下图表示「目录里有没有当前计划、计划处于哪一态」之间的转移；`review` 不改变状态行，故不单独画状态迁移。
 
@@ -91,7 +91,7 @@ flowchart LR
 
 ## 页面导航
 
-- [Action 说明](./actions) — 每个动作的适用时机、前置条件和产物
+- [Protocol 说明](./protocols) — 每个协议的适用时机、前置条件和产物
 - [AI 协作场景](./collaboration) — 按任务类型选择正确动作的具体流程
 - [CLI 命令](./cli) — 安装、同步、校验、状态、归档、索引
 

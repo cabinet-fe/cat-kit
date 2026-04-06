@@ -1,14 +1,14 @@
 ---
-title: Action 说明
-description: '理解 ac-workflow 的各个 action：适用时机、状态要求与产物'
+title: Protocol 说明
+description: '理解 ac-workflow 的各个 protocol：适用时机、状态要求与产物'
 outline: deep
 ---
 
-# Action 说明
+# Protocol 说明
 
 ## 介绍
 
-`ac-workflow` 的 action 不是 CLI 子命令，而是安装 Skill 后你在对话里对 AI 说出的动作意图。AI 会根据当前 `.agent-context/` 的状态决定该创建计划、执行计划还是做增量修补。
+`ac-workflow` 的 protocol 不是 CLI 子命令，而是安装 Skill 后你在对话里对 AI 触发的动作协议。AI 会根据当前 `.agent-context/` 的状态决定该创建计划、执行计划还是做增量修补。
 
 核心规则：
 
@@ -37,7 +37,7 @@ review
 
 ## API参考
 
-| Action      | 适用时机                     | 前置状态                      | 典型产物                                  |
+| Protocol    | 适用时机                     | 前置状态                      | 典型产物                                  |
 | ----------- | ---------------------------- | ----------------------------- | ----------------------------------------- |
 | `init`      | 项目还没有稳定协作规则       | 无                            | 新建或补全 `AGENTS.md`，初始化 SCOPE      |
 | `plan`      | 新需求需要正式拆分步骤       | 不能有冲突的当前计划          | `.agent-context/{scope}/plan-{N}/plan.md` |
@@ -89,7 +89,7 @@ review
 执行重点：
 
 - 先做必要澄清，避免目标模糊
-- 创建 `plan.md`，包含目标、内容、影响范围和历史补丁四个部分（模板见同步的 `actions/plan.md`）
+- 创建 `plan.md`，包含目标、内容、影响范围和历史补丁四个部分（模板见同步的 `protocols/plan.md`）
 - 复杂任务可拆成「一个当前计划 + 多个 `preparing/` 计划」；多计划时最小编号为当前计划，其余入队
 - 自检通过前须消除 `## 内容` 中的模糊指令；完成后可按协议询问用户是否对新建计划执行 `review`
 - 计划编号在当前 SCOPE 内扫描全部 `plan-N` 目录取 `max(N)+1`
@@ -175,14 +175,14 @@ review
 典型输入：
 
 ```text
-rush 一下，把 README 里的 action 解释补完整
+rush 一下，把 README 里的 protocol 解释补完整
 ```
 
 执行重点：
 
 - 仍然会创建计划（`plan.md`）；强制单计划，不拆分、不进入 `preparing/` 队列
 - 仅在描述已足够明确时跳过 `plan` 的「需求澄清」；须做「无模糊指令检查」，有歧义时向用户提问澄清，不得硬 rush
-- 完成 `plan` 后**不等待用户确认**，直接进入 `implement`，且须按 `implement` 协议**完整执行**（验证循环、状态改为 `已执行`、`## 影响范围` 等），与 `packages/agent-context/src/content/actions/rush.ts` 一致
+- 完成 `plan` 后**不等待用户确认**，直接进入 `implement`，且须按 `implement` 协议**完整执行**（验证循环、状态改为 `已执行`、`## 影响范围` 等），与 `packages/agent-context/src/skill/protocols/rush.ts` 一致
 - 前置（与源码一致）：已存在**已执行**的当前计划时，应询问是否先 `agent-context done` 再 rush；已存在**未执行**的当前计划时，应询问是否改走当前计划的 `implement` 等
 - 实施结束后可按协议询问用户是否立即 `review`（与 `implement` 协议末尾一致）
 - 不适合需求范围模糊的大任务

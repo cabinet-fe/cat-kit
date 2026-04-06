@@ -8,7 +8,7 @@ outline: deep
 
 ## 介绍
 
-`agent-context` 的 CLI 不负责替代 Skill action。它主要做这些事：
+`agent-context` 的 CLI 不负责替代 Skill protocol。它主要做这些事：
 
 - 初始化 SCOPE 与安装/同步 Skill 文件
 - 校验 `.agent-context/` 结构
@@ -17,7 +17,7 @@ outline: deep
 - 在用户主目录生成各工具的全局提示词文件（`prompt-gen`）
 - 升级 CLI 自身到最新版本（`upgrade`）
 
-对话里说"出计划""开始实现""补 patch"触发的是 Skill action，不是 CLI 子命令。
+对话里说"出计划""开始实现""补 patch"触发的是 Skill protocol，不是 CLI 子命令。
 
 ## 快速使用
 
