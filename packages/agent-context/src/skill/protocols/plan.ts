@@ -4,7 +4,11 @@ import type { ToolTarget } from '../../types'
 export function renderPlan(target: ToolTarget): string {
   return `# plan
 
-作为一个精通业务和技术的架构师、资深开发工程师，创建新的执行计划，写入 \`${AC_ROOT_DIR}/{scope}/plan-{number}/plan.md\`。根据需求复杂度生成单个或多个计划，维护「单个当前计划 + preparing 队列」结构。
+作为一个精通业务和技术的架构师、资深开发工程师，创建新的执行计划。根据需求复杂度生成单个或多个计划，维护「单个当前计划 + preparing 队列」结构。
+
+> **前提**：此协议的所有路径和编号均来自上下文脚本输出，禁止自行扫描目录计算编号。
+> - 新计划编号使用 \`nextPlanNumber\`
+> - 当前计划路径使用 \`currentPlanDir\` / \`currentPlanFile\`
 
 必须附带计划描述。
 
@@ -16,8 +20,8 @@ export function renderPlan(target: ToolTarget): string {
 ## 前置检查
 
 - 描述为空 → 向用户获取描述后继续执行。
-- 存在未归档的已执行当前计划 → 通过 ${target.askToolName} 提供选项：1) 运行 \`agent-context done\` 归档后继续创建计划（推荐） 2) 终止操作，按用户选择执行。
-- 存在未实施的当前计划（状态为 \`未执行\`） → 通过 ${target.askToolName} 提供选项：1) 通过 replan 调整现有计划（推荐，若新需求与现有计划相关） 2) 归档现有计划后创建新计划 3) 终止操作，按用户选择执行。
+- \`currentPlanStatus\` 为 \`"已执行"\` → 通过 ${target.askToolName} 提供选项：1) 运行 \`agent-context done\` 归档后继续创建计划（推荐） 2) 终止操作，按用户选择执行。
+- \`currentPlanStatus\` 为 \`"未执行"\` → 通过 ${target.askToolName} 提供选项：1) 通过 replan 调整现有计划（推荐，若新需求与现有计划相关） 2) 归档现有计划后创建新计划 3) 终止操作，按用户选择执行。
 
 ## 执行步骤
 
@@ -29,7 +33,7 @@ export function renderPlan(target: ToolTarget): string {
       - 涉及架构设计或文档编写但具体内容未明确（如"编写 XX 架构文档"但未说明包含哪些具体内容）。
    b. 无论上述条件是否命中，对需求描述执行反向面试（按 ${target.askToolName} 规范中的方法）：分析隐含假设、未覆盖的边界情况和潜在风险，对最关键的发现通过 ${target.askToolName} 提问。若未发现显著盲区可直接跳到步骤 2。
 2. 按复杂度决定单计划或多计划拆分。
-3. 多计划拆分时：最小编号进入 \`${AC_ROOT_DIR}/{scope}/\` 作为当前计划，其余进入 \`${AC_ROOT_DIR}/{scope}/preparing/\`。单计划直接创建。
+3. 多计划拆分时：最小编号进入 \`${AC_ROOT_DIR}/{scope}/\` 作为当前计划（编号使用 \`nextPlanNumber\`），其余依次递增进入 \`${AC_ROOT_DIR}/{scope}/preparing/\`。单计划直接创建。
 4. 每个计划创建 \`plan.md\`，遵循 **##plan.md 模板**。
 5. **自检循环直到通过，若发现模糊指令 → 通过 ${target.askToolName} 向用户澄清具体内容后修正计划，不可带着模糊内容生成计划。**：
    - 每个步骤可独立执行且有明确完成标准。

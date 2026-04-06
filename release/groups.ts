@@ -38,7 +38,13 @@ export const groups: Record<string, ReleaseGroup> = {
         '@cat-kit/agent-context': {
           platform: 'node',
           entry: 'src/cli.ts',
-          output: { sourcemap: false }
+          output: { sourcemap: false },
+          hooks: {
+            afterBuild: async (config) => {
+              const { copyAssetsToDist } = await import('./copy-assets.js')
+              await copyAssetsToDist({ pkgDir: config.dir, assets: ['skill/scripts'] })
+            }
+          }
         }
       })
     }
