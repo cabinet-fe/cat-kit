@@ -1,6 +1,6 @@
 {
   "name": "@cat-kit/agent-context",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "代理上下文管理工具",
   "bin": {
     "agent-context": "./dist/cli.js"

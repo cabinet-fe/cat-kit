@@ -2,7 +2,13 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { AC_ROOT_DIR, SKILL_NAME } from '../constants'
+import {
+  AC_ROOT_DIR,
+  CONTEXT_SCRIPT_NAME,
+  PROTOCOL_DIR,
+  SCRIPTS_DIR,
+  SKILL_NAME
+} from '../constants'
 import type { SkillArtifacts, ToolTarget } from '../types'
 import { PROTOCOL_NAMES, PROTOCOL_RENDERERS } from './protocols/index'
 import { readAgentContextPackageVersion } from './version'
@@ -10,10 +16,6 @@ import { readAgentContextPackageVersion } from './version'
 /** 供 frontmatter / 工具匹配的短描述：品牌名 + 核心能力与关键词 */
 const SKILL_DESCRIPTION =
   '基于协议的、简洁高效的代理上下文工作流。当提及初始化、计划、重构、重新计划、上下文工作流、规划、实现、优化、补丁、快速实现时使用。'
-
-const PROTOCOL_DIR = 'references'
-const SCRIPTS_DIR = 'scripts'
-const CONTEXT_SCRIPT_NAME = 'get-context-info.mjs'
 
 export function renderSkillArtifacts(target: ToolTarget): SkillArtifacts {
   const files: SkillArtifacts['files'] = [
@@ -26,10 +28,7 @@ export function renderSkillArtifacts(target: ToolTarget): SkillArtifacts {
       relativePath: `${PROTOCOL_DIR}/ask-user-question.md`,
       body: renderAskUserQuestionReference(target)
     },
-    {
-      relativePath: `${SCRIPTS_DIR}/${CONTEXT_SCRIPT_NAME}`,
-      body: readContextScript()
-    }
+    { relativePath: `${SCRIPTS_DIR}/${CONTEXT_SCRIPT_NAME}`, body: readContextScript() }
   ]
 
   if (target.metadataFiles.includes('openai')) {
