@@ -93,11 +93,12 @@ cat-kit/
 
 ## AI 助手：use-cat-kit
 
-根目录 `skills/use-cat-kit/` 为本仓库各 `@cat-kit/*` 包的**按需查阅**文档技能（与 VitePress 站点 `docs/content/packages/` 同源能力，拆成细粒度 reference）。
+根目录 `skills/use-cat-kit/` 为本仓库各 `@cat-kit/*` 的**按需查阅**技能：**权威 typings** 为 `skills/use-cat-kit/generated/`（由各包 `dist/**/*.d.ts` 镜像，与 npm 发布物一致）。刷新：`bun run sync-use-cat-kit-api` 或 `bun run sync-use-cat-kit-api:build`（根目录）。
 
-- **入口**：`skills/use-cat-kit/SKILL.md` — 包与子模块导航表
-- **详情**：`skills/use-cat-kit/references/` — 按包分子目录（如 `core/data.md`、`http/client.md`），**只读与当前问题相关的那一个文件**，避免一次加载整包文档占用上下文
-- **何时用**：编写或讲解 cat-kit API、选型子包、核对导入与用法时；需要完整长文与示例时仍以 `docs/` 站点为准
+- **入口**：`skills/use-cat-kit/SKILL.md` — 导航与刷新命令
+- **类型**：`skills/use-cat-kit/generated/<pkg>/` — 优先阅读对应 `.d.ts`
+- **主题索引**：`skills/use-cat-kit/references/` — 指向 `generated` 子路径，避免手写摘录漂移
+- **何时用**：编写或讲解 cat-kit API、核对签名时；长文与示例以 `docs/` 为准
 
 ## 约束
 
