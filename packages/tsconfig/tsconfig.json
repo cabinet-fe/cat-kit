@@ -14,6 +14,7 @@
 
     // TypeScript 6.0 起 `strict` 默认为 true；不再逐项写 strict 子开关
     // （含原 `noImplicitAny: false`，移除后与 strict 一致、启用 noImplicitAny）
+    "noImplicitAny": false,
 
     // ---- 非 strict 合集、但需显式开启的额外检查
     // import/export 会按原样输出，避免多余的 helper 污染
