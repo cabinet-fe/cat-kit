@@ -50,7 +50,7 @@ cat-kit/
 │   ├── tsconfig/       # 共享 tsconfig
 │   └── agent-context/  # Agent Context 工具
 ├── release/            # 构建发布入口脚本
-├── skills/             # 仓库内 Agent Skill（见下文 use-cat-kit）
+├── skills/             # 仓库内 Agent Skill（见下文 cat-kit 技能）
 ├── docs/               # VitePress 文档站
 ├── dist/               # 构建产物（gitignored）
 ├── .oxfmtrc.json       # oxfmt 配置
@@ -91,13 +91,14 @@ cat-kit/
 - 构建产物输出到各包 `dist/` 目录
 - 各包 `package.json` 的 `exports` 定义了产物和源码双入口
 
-## AI 助手：use-cat-kit
+## AI 助手：cat-kit 技能（按包）
 
-根目录 `skills/use-cat-kit/` 为本仓库各 `@cat-kit/*` 的**按需查阅**技能：**权威 typings** 为 `skills/use-cat-kit/generated/`（由各包 `dist/**/*.d.ts` 镜像，与 npm 发布物一致）。刷新：`bun run sync-use-cat-kit-api` 或 `bun run sync-use-cat-kit-api:build`（根目录）。
+`skills/use-cat-kit/SKILL.md` 为**路由**：按正在使用的 npm 包打开 `skills/cat-kit-<短名>/`（共 10 个子技能）。各子技能内 **`generated/`** 与 npm 发布物对齐（多数为 `dist` 下 `.d.ts`；`@cat-kit/tsconfig` 为 JSON 预设）。
 
-- **入口**：`skills/use-cat-kit/SKILL.md` — 导航与刷新命令
-- **类型**：`skills/use-cat-kit/generated/<pkg>/` — 优先阅读对应 `.d.ts`
-- **主题索引**：`skills/use-cat-kit/references/` — 指向 `generated` 子路径，避免手写摘录漂移
+**刷新（仓库根）**：`bun run sync-cat-kit-skills-api` 或 `bun run sync-cat-kit-skills-api:build`（兼容别名 `sync-use-cat-kit-api` / `:build`）。脚本：`scripts/sync-cat-kit-skills-api.ts`。
+
+- **路由**：`skills/use-cat-kit/SKILL.md`
+- **子技能**：`skills/cat-kit-core/`、`cat-kit-http/`、`cat-kit-fe/`、`cat-kit-be/`、`cat-kit-excel/`、`cat-kit-maintenance/`、`cat-kit-agent-context/`、`cat-kit-cli/`、`cat-kit-tsconfig/`、`cat-kit-vitepress-theme/`（各含 `SKILL.md`、`generated/`、`references/` 或等价索引、`examples.md`）
 - **何时用**：编写或讲解 cat-kit API、核对签名时；长文与示例以 `docs/` 为准
 
 ## 约束

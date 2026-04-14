@@ -14,8 +14,10 @@
   ],
   "scripts": {
     "update": "bun update -i -r",
-    "sync-use-cat-kit-api": "bun run skills/use-cat-kit/scripts/sync-api-from-dist.ts",
-    "sync-use-cat-kit-api:build": "bun run skills/use-cat-kit/scripts/sync-api-from-dist.ts -- --build"
+    "sync-cat-kit-skills-api": "bun run scripts/sync-cat-kit-skills-api.ts",
+    "sync-cat-kit-skills-api:build": "bun run scripts/sync-cat-kit-skills-api.ts -- --build",
+    "sync-use-cat-kit-api": "bun run scripts/sync-cat-kit-skills-api.ts",
+    "sync-use-cat-kit-api:build": "bun run scripts/sync-cat-kit-skills-api.ts -- --build"
   },
   "devDependencies": {
     "@tsdown/css": "^0.21.7",
