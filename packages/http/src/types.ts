@@ -1,3 +1,5 @@
+import type { HttpEngine } from './engine/engine'
+
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'
 
 /** 请求客户端配置 */
@@ -37,7 +39,14 @@ export interface ClientConfig {
    * 插件
    * - 插件是一种扩展机制，可以用于修改请求和响应。
    */
-  plugins?: ClientPlugin[]
+  plugins?: HTTPClientPlugin[]
+
+  /**
+   * 自定义请求引擎
+   * - 未传入时，自动选择 FetchEngine（全局 fetch 可用）或 XHREngine
+   * - 可传入自定义 HttpEngine 子类实例以对接其他底层（如 undici、msw mock）
+   */
+  engine?: HttpEngine
 }
 
 export interface RequestConfig {
@@ -122,6 +131,7 @@ export type HttpErrorCode =
   | 'PARSE'
   | 'UNKNOWN'
   | 'RETRY_LIMIT_EXCEEDED'
+  | 'PLUGIN'
 
 export interface HTTPErrorOptions<T = any> {
   code: HttpErrorCode
@@ -175,7 +185,9 @@ export interface PluginHookResult {
 }
 
 /** 请求客户端插件 */
-export interface ClientPlugin {
+export interface HTTPClientPlugin {
+  /** 插件名称 */
+  name: string
   /**
    * 请求前钩子
    * @param url 请求 URL

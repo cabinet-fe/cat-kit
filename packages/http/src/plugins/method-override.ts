@@ -1,9 +1,9 @@
-import type { ClientPlugin, PluginHookResult, RequestMethod, RequestConfig } from '../types'
+import type { HTTPClientPlugin, PluginHookResult, RequestMethod, RequestConfig } from '../types'
 
 /**
  * 方法重写插件配置
  */
-export interface MethodOverridePluginOptions {
+export interface HTTPMethodOverridePluginOptions {
   /**
    * 需要被重写的请求方法
    * - 默认为 ['DELETE', 'PUT', 'PATCH']
@@ -37,7 +37,9 @@ export interface MethodOverridePluginOptions {
  * })
  * ```
  */
-export function MethodOverridePlugin(options: MethodOverridePluginOptions = {}): ClientPlugin {
+export function HTTPMethodOverridePlugin(
+  options: HTTPMethodOverridePluginOptions = {}
+): HTTPClientPlugin {
   const {
     methods = ['DELETE', 'PUT', 'PATCH'],
     overrideMethod = 'POST',
@@ -45,6 +47,7 @@ export function MethodOverridePlugin(options: MethodOverridePluginOptions = {}):
   } = options
 
   return {
+    name: 'method-override',
     beforeRequest(_url: string, config: RequestConfig): PluginHookResult {
       const { method } = config
 

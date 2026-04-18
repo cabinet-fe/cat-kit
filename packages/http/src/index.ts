@@ -4,6 +4,9 @@ export * from './client'
 // 导出类型
 export * from './types'
 
+// 导出引擎层（HttpEngine 抽象基类 + 内置实现）
+export * from './engine'
+
 // 导出内置插件
 export * from './plugins/method-override'
 export * from './plugins/retry'

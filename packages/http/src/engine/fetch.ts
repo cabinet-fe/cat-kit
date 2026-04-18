@@ -83,10 +83,6 @@ function mergeAbortSignals(
 export class FetchEngine extends HttpEngine {
   private controllers: Set<AbortController> = new Set()
 
-  constructor() {
-    super()
-  }
-
   async request<T = any>(url: string, config: RequestConfig): Promise<HTTPResponse<T>> {
     const {
       method = 'GET',

@@ -1,4 +1,4 @@
-import type { ClientPlugin, HTTPResponse, RequestConfig, RequestContext } from '../types'
+import type { HTTPClientPlugin, HTTPResponse, RequestConfig, RequestContext } from '../types'
 import { HTTPError } from '../types'
 
 const DEFAULT_RETRY_STATUSES = [408, 429, 500, 502, 503, 504]
@@ -21,7 +21,7 @@ export interface RetryPluginOptions {
 /**
  * 在请求失败时按策略自动重试（通过 `onError` + `context.retry`）。
  */
-export function RetryPlugin(options: RetryPluginOptions = {}): ClientPlugin {
+export function RetryPlugin(options: RetryPluginOptions = {}): HTTPClientPlugin {
   const maxRetries = options.maxRetries ?? 3
   const delayOpt = options.delay
   const retryOnStatus = options.retryOnStatus ?? DEFAULT_RETRY_STATUSES
@@ -50,6 +50,7 @@ export function RetryPlugin(options: RetryPluginOptions = {}): ClientPlugin {
   }
 
   return {
+    name: 'retry',
     async onError(error: unknown, context: RequestContext): Promise<HTTPResponse | void> {
       if (!context.retry) {
         return undefined

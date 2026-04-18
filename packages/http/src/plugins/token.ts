@@ -1,5 +1,5 @@
 import type {
-  ClientPlugin,
+  HTTPClientPlugin,
   HTTPResponse,
   PluginContext,
   PluginHookResult,
@@ -10,17 +10,18 @@ import { HTTPError } from '../types'
 /**
  * Token 插件配置
  */
-export interface TokenPluginOptions {
+export interface HTTPTokenPluginOptions {
   /**
    * 获取令牌的方法
    * - 可以是同步或异步的
    * - 返回 null 或 undefined 时不会添加令牌
+   * - 建议从内存中获取，例如状态管理中获取
    */
   getter: () => string | null | undefined | Promise<string | null | undefined>
 
   /**
    * 请求头名称
-   * - 默认为 'Authorization'
+   * @default 'Authorization'
    */
   headerName?: string
 
@@ -80,7 +81,7 @@ export interface TokenPluginOptions {
  * })
  * ```
  */
-export function TokenPlugin(options: TokenPluginOptions): ClientPlugin {
+export function HTTPTokenPlugin(options: HTTPTokenPluginOptions): HTTPClientPlugin {
   const {
     getter,
     authType = 'Bearer',
@@ -123,6 +124,7 @@ export function TokenPlugin(options: TokenPluginOptions): ClientPlugin {
   }
 
   return {
+    name: 'token',
     async beforeRequest(url: string, config: RequestConfig): Promise<PluginHookResult> {
       if (isRefreshExpired?.()) {
         onRefreshExpired?.()

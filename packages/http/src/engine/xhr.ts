@@ -94,7 +94,7 @@ export class XHREngine extends HttpEngine {
 
       xhr.open(method, url, true)
 
-      this.sendHeaders(xhr, { ...config, headers })
+      this.sendHeaders(xhr, headers)
 
       xhr.onloadend = () => {
         if (config.signal) {
@@ -138,18 +138,10 @@ export class XHREngine extends HttpEngine {
     return headers
   }
 
-  sendHeaders(xhr: XMLHttpRequest, options: RequestConfig): void {
-    const { headers, credentials } = options
-
-    if (credentials !== false) {
-      xhr.withCredentials = true
-    }
-
-    if (headers) {
-      Object.entries(headers).forEach(([key, value]) => {
-        xhr.setRequestHeader(key, value)
-      })
-    }
+  sendHeaders(xhr: XMLHttpRequest, headers: Record<string, string>): void {
+    Object.entries(headers).forEach(([key, value]) => {
+      xhr.setRequestHeader(key, value)
+    })
   }
 
   abort(): void {

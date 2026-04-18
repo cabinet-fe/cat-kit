@@ -108,6 +108,19 @@ const http = new HTTPClient('/api', {
 })
 ```
 
+### 运行时动态注册插件
+
+```ts
+const http = new HTTPClient('/api')
+
+http.registerPlugin({
+  name: 'audit',
+  beforeRequest(url) {
+    console.log('[audit]', url)
+  }
+})
+```
+
 ## 错误处理
 
 `@cat-kit/http` 使用 `HTTPError` 表示标准化错误：

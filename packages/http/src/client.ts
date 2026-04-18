@@ -9,7 +9,8 @@ import type {
   HTTPResponse,
   AliasRequestConfig,
   RequestContext,
-  PluginContext
+  PluginContext,
+  HTTPClientPlugin
 } from './types'
 import { HTTPError } from './types'
 
@@ -105,6 +106,12 @@ export class HTTPClient {
   /** 请求引擎 */
   private engine: HttpEngine
 
+  /** 父 client（仅由 group() 内部赋值；根 client 为 undefined） */
+  private parent?: HTTPClient
+
+  /** 当前 client 自身持有的插件列表（不含父链继承） */
+  private ownPlugins: HTTPClientPlugin[] = []
+
   /**
    * 创建 HTTP 客户端实例
    * @param prefix 请求前缀
@@ -114,7 +121,44 @@ export class HTTPClient {
     this.prefix = prefix
     this.config = config
 
-    this.engine = typeof fetch === 'undefined' ? new XHREngine() : new FetchEngine()
+    this.engine =
+      config.engine ?? (typeof fetch === 'undefined' ? new XHREngine() : new FetchEngine())
+
+    for (const plugin of config.plugins ?? []) {
+      this.registerPluginInternal(plugin)
+    }
+  }
+
+  /**
+   * 计算当前 client 在运行时生效的插件列表：父链在前、子在后
+   */
+  private getEffectivePlugins(): HTTPClientPlugin[] {
+    return [...(this.parent?.getEffectivePlugins() ?? []), ...this.ownPlugins]
+  }
+
+  /**
+   * 注册插件（运行时动态装配）
+   * - 插件必须拥有非空字符串 `name`，否则抛 HTTPError({ code: 'PLUGIN' })
+   * - 插件名在 client 自身及其父链范围内必须唯一，冲突时抛 HTTPError({ code: 'PLUGIN' })
+   */
+  registerPlugin(plugin: HTTPClientPlugin): void {
+    if (
+      plugin == null ||
+      typeof plugin !== 'object' ||
+      typeof plugin.name !== 'string' ||
+      plugin.name === ''
+    ) {
+      throw new HTTPError('插件必须提供非空 name 字段', { code: 'PLUGIN' })
+    }
+    this.registerPluginInternal(plugin)
+  }
+
+  private registerPluginInternal(plugin: HTTPClientPlugin): void {
+    const existingNames = new Set(this.getEffectivePlugins().map((p) => p.name))
+    if (existingNames.has(plugin.name)) {
+      throw new HTTPError(`插件名称冲突: ${plugin.name}`, { code: 'PLUGIN' })
+    }
+    this.ownPlugins.push(plugin)
   }
 
   private getRequestUrl(url: string, config: RequestConfig): string {
@@ -195,15 +239,16 @@ export class HTTPClient {
 
   private async runOnErrorPlugins(
     error: unknown,
-    context: RequestContext
+    context: RequestContext,
+    plugins: HTTPClientPlugin[]
   ): Promise<HTTPResponse | undefined> {
-    if (!this.config.plugins?.length) {
+    if (!plugins.length) {
       return undefined
     }
 
     let recovered: HTTPResponse | undefined
 
-    for (const plugin of this.config.plugins) {
+    for (const plugin of plugins) {
       if (!plugin.onError) {
         continue
       }
@@ -224,7 +269,8 @@ export class HTTPClient {
   private async _executeRequest<T = any>(
     originalUrl: string,
     originalConfig: RequestConfig,
-    retryCount: number
+    retryCount: number,
+    effectivePlugins: HTTPClientPlugin[] = this.getEffectivePlugins()
   ): Promise<HTTPResponse<T>> {
     let finalUrl = this.getRequestUrl(originalUrl, originalConfig)
     let finalConfig = originalConfig
@@ -239,13 +285,13 @@ export class HTTPClient {
           })
         }
         const merged = mergeRequestConfig(originalConfig, (patch ?? {}) as RequestConfig)
-        return this._executeRequest<T>(originalUrl, merged, retryCount + 1)
+        return this._executeRequest<T>(originalUrl, merged, retryCount + 1, effectivePlugins)
       }
     }
 
     try {
-      if (this.config.plugins?.length) {
-        for (const plugin of this.config.plugins) {
+      if (effectivePlugins.length) {
+        for (const plugin of effectivePlugins) {
           if (plugin.beforeRequest) {
             const result = await plugin.beforeRequest(finalUrl, finalConfig)
             if (result) {
@@ -262,8 +308,8 @@ export class HTTPClient {
 
       let response = await this.engine.request<T>(finalUrl, finalConfig)
 
-      if (this.config.plugins?.length) {
-        for (const plugin of this.config.plugins) {
+      if (effectivePlugins.length) {
+        for (const plugin of effectivePlugins) {
           if (plugin.afterRespond) {
             const result = await plugin.afterRespond(response, finalUrl, finalConfig, pluginContext)
             if (result) {
@@ -275,14 +321,10 @@ export class HTTPClient {
 
       return response
     } catch (error) {
-      if (
-        error instanceof HTTPError &&
-        error.response !== undefined &&
-        this.config.plugins?.length
-      ) {
+      if (error instanceof HTTPError && error.response !== undefined && effectivePlugins.length) {
         let response = error.response as HTTPResponse<T>
         let recoveredViaAfterRespond = false
-        for (const plugin of this.config.plugins) {
+        for (const plugin of effectivePlugins) {
           if (plugin.afterRespond) {
             const result = await plugin.afterRespond(response, finalUrl, finalConfig, pluginContext)
             if (result) {
@@ -296,11 +338,11 @@ export class HTTPClient {
         }
       }
 
-      const recovered = await this.runOnErrorPlugins(error, {
-        url: finalUrl,
-        config: finalConfig,
-        retry: pluginContext.retry
-      })
+      const recovered = await this.runOnErrorPlugins(
+        error,
+        { url: finalUrl, config: finalConfig, retry: pluginContext.retry },
+        effectivePlugins
+      )
       if (recovered !== undefined) {
         return recovered as HTTPResponse<T>
       }
@@ -423,6 +465,13 @@ export class HTTPClient {
    * @param prefix 分组前缀
    * @returns HTTPClient 新的客户端实例
    *
+   * 插件继承语义：
+   * - 子 client 通过父链继承插件；父后续 `registerPlugin` 会自动反映到子（父影响子）
+   * - 子 `registerPlugin` 仅改动 `child.ownPlugins`（子不影响父）
+   * - 同名校验跨父子层级生效
+   *
+   * 注意：父子共享同一 `engine` 实例，`abort()` 会中止父或子任意一方触发该引擎的所有在途请求。
+   *
    * @example
    * ```ts
    * const http = new HTTPClient()
@@ -436,8 +485,14 @@ export class HTTPClient {
    * ```
    */
   group(prefix: string): HTTPClient {
-    const group = new HTTPClient($str.joinUrlPath(this.prefix, prefix), this.config)
-
-    return group
+    const child = new HTTPClient($str.joinUrlPath(this.prefix, prefix), {
+      origin: this.config.origin,
+      timeout: this.config.timeout,
+      credentials: this.config.credentials,
+      headers: this.config.headers,
+      engine: this.engine
+    })
+    child.parent = this
+    return child
   }
 }
