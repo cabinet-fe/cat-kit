@@ -44,6 +44,7 @@ const logs = ref<string[]>([])
 // 确认删除插件
 function ConfirmDeletePlugin(): ClientPlugin {
   return {
+    name: 'confirm-delete',
     async beforeRequest(url, config) {
       if (config.method === 'DELETE') {
         try {

@@ -22,6 +22,8 @@ export interface HTTPMethodOverridePluginOptions {
   headerName?: string
 }
 
+export type MethodOverridePluginOptions = HTTPMethodOverridePluginOptions
+
 /**
  * 方法重写插件
  *
@@ -67,3 +69,5 @@ export function HTTPMethodOverridePlugin(
     }
   }
 }
+
+export const MethodOverridePlugin = HTTPMethodOverridePlugin

@@ -1,6 +1,6 @@
 # @cat-kit/fe - 前端工具包
 
-浏览器专用前端工具包，提供存储、虚拟滚动、Web API 封装和文件处理等功能。
+浏览器专用前端工具包，提供存储、Tween 动画、虚拟滚动、Web API 封装和文件处理等功能。
 
 **依赖**：`@cat-kit/core`
 **运行环境**：仅浏览器
@@ -9,13 +9,13 @@
 
 ```
 packages/fe/src/
+├── tween.ts           # Tween 补间动画
 ├── storage/           # 存储解决方案
 │   ├── cookie.ts      # Cookie 操作
 │   ├── indexed-db.ts  # IndexedDB 封装
 │   ├── unified.ts     # 统一存储 API
 │   └── index.ts
 ├── virtualizer/       # 虚拟滚动
-│   ├── core.ts        # 虚拟滚动核心实现
 │   └── index.ts
 ├── web-api/           # Web API 封装
 │   ├── clipboard.ts   # 剪贴板 API

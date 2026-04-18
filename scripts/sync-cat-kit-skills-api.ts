@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 /**
  * 将各 @cat-kit/* 发布物 typings（或 tsconfig JSON 预设）镜像到 skills/cat-kit-<pkg>/generated/，
- * 供按包拆分的 Cursor 技能离线查阅；与 npm 包内 dist / files 对齐。
+ * 供按包拆分的技能离线查阅；与 npm 包内 dist / files 对齐。
  *
  * 用法（仓库根目录）：
  *   bun run sync-cat-kit-skills-api              # 仅复制（需已构建 dist）
- *   bun run sync-cat-kit-skills-api -- --build   # 先 tsdown / tsc 再复制
+ *   bun run sync-cat-kit-skills-api -- --build   # 先执行各包 build 再复制
  */
 
 import { existsSync } from 'node:fs'
@@ -13,36 +13,21 @@ import { copyFile, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promi
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import vue from '@vitejs/plugin-vue'
-
-import { buildLib } from '../packages/maintenance/src/build/build.ts'
-import { copyAssetsToDist } from '../release/copy-assets.ts'
-
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
-
-type Platform = 'neutral' | 'node' | 'browser'
-
-const TSDOWN_PACKAGES: { name: string; platform?: Platform }[] = [
-  { name: 'core' },
-  { name: 'http' },
-  { name: 'fe', platform: 'browser' },
-  { name: 'be', platform: 'node' },
-  { name: 'excel' },
-  { name: 'maintenance', platform: 'node' }
-]
-
-const TSC_PACKAGES = ['agent-context', 'cli'] as const
-
 const SKILL_PREFIX = 'cat-kit-'
 
-/** 除 tsconfig 外、按 dist .d.ts 镜像的包（含 vitepress-theme） */
-const DIST_PACKAGES = [
-  ...TSDOWN_PACKAGES.map((p) => p.name),
-  'vitepress-theme',
-  ...TSC_PACKAGES
+const BUILD_PACKAGES = [
+  'core',
+  'http',
+  'fe',
+  'be',
+  'agent-context',
+  'cli',
+  'vitepress-theme'
 ] as const
 
+const DIST_PACKAGES = BUILD_PACKAGES
 const TSCONFIG_PKG = 'tsconfig' as const
 
 type DistPkg = (typeof DIST_PACKAGES)[number]
@@ -51,17 +36,42 @@ function skillGeneratedRoot(pkg: string): string {
   return join(REPO_ROOT, 'skills', `${SKILL_PREFIX}${pkg}`, 'generated')
 }
 
+async function runPackageBuild(pkg: string): Promise<void> {
+  const cwd = join(REPO_ROOT, 'packages', pkg)
+  if (!existsSync(join(cwd, 'package.json'))) {
+    console.warn(`[sync] skip missing package: ${pkg}`)
+    return
+  }
+
+  console.log(`[sync] build: @cat-kit/${pkg}`)
+
+  const proc = Bun.spawnSync(['bun', 'run', 'build'], {
+    cwd,
+    stdout: 'inherit',
+    stderr: 'inherit'
+  })
+
+  if (proc.exitCode !== 0) {
+    throw new Error(`build failed for ${pkg} (exit ${proc.exitCode})`)
+  }
+}
+
 async function walkDtsFiles(dir: string): Promise<string[]> {
   const out: string[] = []
   const entries = await readdir(dir, { withFileTypes: true })
-  for (const e of entries) {
-    const p = join(dir, e.name)
-    if (e.isDirectory()) {
-      out.push(...(await walkDtsFiles(p)))
-    } else if (e.isFile() && e.name.endsWith('.d.ts')) {
-      out.push(p)
+
+  for (const entry of entries) {
+    const abs = join(dir, entry.name)
+    if (entry.isDirectory()) {
+      out.push(...(await walkDtsFiles(abs)))
+      continue
+    }
+
+    if (entry.isFile() && entry.name.endsWith('.d.ts')) {
+      out.push(abs)
     }
   }
+
   return out
 }
 
@@ -70,71 +80,10 @@ async function readJson(path: string): Promise<{ name?: string; version?: string
   return JSON.parse(raw) as { name?: string; version?: string }
 }
 
-async function buildWithTsdown(): Promise<void> {
-  for (const { name, platform = 'neutral' } of TSDOWN_PACKAGES) {
-    const dir = join(REPO_ROOT, 'packages', name)
-    if (!existsSync(join(dir, 'package.json'))) {
-      console.warn(`[sync] skip missing package: ${name}`)
-      continue
-    }
-    console.log(`[sync] tsdown: @cat-kit/${name} (${platform})`)
-    const result = await buildLib({ dir, platform })
-    if (!result.success) {
-      throw new Error(`buildLib failed for ${name}: ${result.error?.message ?? 'unknown'}`)
-    }
-  }
-}
-
-/** 与 release/groups.ts 中 vitepressTheme.build 对齐 */
-async function buildVitepressTheme(): Promise<void> {
-  const dir = join(REPO_ROOT, 'packages', 'vitepress-theme')
-  if (!existsSync(join(dir, 'package.json'))) {
-    console.warn('[sync] skip vitepress-theme (missing)')
-    return
-  }
-  console.log('[sync] tsdown: @cat-kit/vitepress-theme (browser, vue dts)')
-  const result = await buildLib({
-    dir,
-    platform: 'browser',
-    root: 'src',
-    entry: ['src/index.ts', 'src/config.ts'],
-    dts: { vue: true },
-    plugins: [vue()],
-    hooks: {
-      afterBuild: async (config) => {
-        await copyAssetsToDist({ pkgDir: config.dir, assets: ['styles'] })
-        await copyFile(
-          join(config.dir, 'src/styles/texture.jpg'),
-          join(config.dir, 'dist/texture.jpg')
-        )
-      }
-    }
-  })
-  if (!result.success) {
-    throw new Error(`buildLib failed for vitepress-theme: ${result.error?.message ?? 'unknown'}`)
-  }
-}
-
-async function buildWithTsc(pkg: string): Promise<void> {
-  const tsconfig = join(REPO_ROOT, 'packages', pkg, 'tsconfig.json')
-  if (!existsSync(tsconfig)) {
-    console.warn(`[sync] skip tsc (no tsconfig): ${pkg}`)
-    return
-  }
-  console.log(`[sync] tsc: @cat-kit/${pkg}`)
-  const proc = Bun.spawnSync(['bun', 'x', 'tsc', '-p', tsconfig], {
-    cwd: REPO_ROOT,
-    stdout: 'inherit',
-    stderr: 'inherit'
-  })
-  if (proc.exitCode !== 0) {
-    throw new Error(`tsc failed for ${pkg} (exit ${proc.exitCode})`)
-  }
-}
-
 async function mirrorDistDtsToSkill(pkg: DistPkg): Promise<number> {
   const dist = join(REPO_ROOT, 'packages', pkg, 'dist')
   const outRoot = skillGeneratedRoot(pkg)
+
   await rm(outRoot, { recursive: true, force: true })
   await mkdir(outRoot, { recursive: true })
 
@@ -144,29 +93,31 @@ async function mirrorDistDtsToSkill(pkg: DistPkg): Promise<number> {
   }
 
   const files = await walkDtsFiles(dist)
-  let n = 0
+  let count = 0
+
   for (const abs of files) {
     const rel = relative(dist, abs)
     const dest = join(outRoot, rel)
     await mkdir(dirname(dest), { recursive: true })
     await copyFile(abs, dest)
-    n++
+    count++
   }
 
   if (pkg === 'vitepress-theme') {
     const styleDts = join(REPO_ROOT, 'packages', 'vitepress-theme', 'style.css.d.ts')
     if (existsSync(styleDts)) {
       await copyFile(styleDts, join(outRoot, 'style.css.d.ts'))
-      n++
+      count++
     }
   }
 
-  return n
+  return count
 }
 
 async function mirrorTsconfigJson(): Promise<number> {
   const srcDir = join(REPO_ROOT, 'packages', TSCONFIG_PKG)
   const outRoot = skillGeneratedRoot(TSCONFIG_PKG)
+
   await rm(outRoot, { recursive: true, force: true })
   await mkdir(outRoot, { recursive: true })
 
@@ -178,28 +129,32 @@ async function mirrorTsconfigJson(): Promise<number> {
     'tsconfig.vue.json',
     'README.md'
   ]
-  let n = 0
+
+  let count = 0
   for (const name of names) {
     const src = join(srcDir, name)
-    if (existsSync(src)) {
-      await copyFile(src, join(outRoot, name))
-      n++
+    if (!existsSync(src)) {
+      continue
     }
+    await copyFile(src, join(outRoot, name))
+    count++
   }
-  return n
+
+  return count
 }
 
 async function writeSkillGeneratedReadme(
   outRoot: string,
   opts: { kind: 'dts' | 'json'; npmName: string }
 ): Promise<void> {
-  const base =
+  const body =
     opts.kind === 'json'
       ? `本目录由脚本生成，**勿手改**。内容为 **${opts.npmName}** 包内与 npm \`files\` 一致的 JSON 预设与说明。`
       : `本目录由脚本生成，**勿手改**。内容为 **${opts.npmName}** 包 \`dist\` 下 **.d.ts** 的镜像（与 npm typings 对齐）。`
+
   await writeFile(
     join(outRoot, 'README.md'),
-    `${base}
+    `${body}
 
 - 入口：通常从 \`index.d.ts\` 起读（若有）。
 - 元数据：\`manifest.json\`
@@ -226,28 +181,28 @@ async function main(): Promise<void> {
   const doBuild = args.includes('--build')
 
   if (doBuild) {
-    await buildWithTsdown()
-    await buildVitepressTheme()
-    for (const p of TSC_PACKAGES) {
-      await buildWithTsc(p)
+    for (const pkg of BUILD_PACKAGES) {
+      await runPackageBuild(pkg)
     }
   }
 
-  let totalArtifacts = 0
   const generatedAt = new Date().toISOString()
+  let totalArtifacts = 0
 
   for (const pkg of DIST_PACKAGES) {
     const pkgJsonPath = join(REPO_ROOT, 'packages', pkg, 'package.json')
     let npmName = `@cat-kit/${pkg}`
     let version = '0.0.0'
+
     if (existsSync(pkgJsonPath)) {
-      const pj = await readJson(pkgJsonPath)
-      if (pj.name) npmName = pj.name
-      if (pj.version) version = pj.version
+      const manifest = await readJson(pkgJsonPath)
+      if (manifest.name) npmName = manifest.name
+      if (manifest.version) version = manifest.version
     }
 
     const count = await mirrorDistDtsToSkill(pkg)
     totalArtifacts += count
+
     const outRoot = skillGeneratedRoot(pkg)
     await writeManifest(outRoot, {
       generatedAt,
@@ -257,20 +212,23 @@ async function main(): Promise<void> {
       artifactCount: count
     })
     await writeSkillGeneratedReadme(outRoot, { kind: 'dts', npmName })
-    console.log(`[sync] ${pkg}: ${count} artifacts → ${relative(REPO_ROOT, outRoot)}`)
+    console.log(`[sync] ${pkg}: ${count} artifacts -> ${relative(REPO_ROOT, outRoot)}`)
   }
 
   {
     const pkgJsonPath = join(REPO_ROOT, 'packages', TSCONFIG_PKG, 'package.json')
     let npmName = '@cat-kit/tsconfig'
     let version = '0.0.0'
+
     if (existsSync(pkgJsonPath)) {
-      const pj = await readJson(pkgJsonPath)
-      if (pj.name) npmName = pj.name
-      if (pj.version) version = pj.version
+      const manifest = await readJson(pkgJsonPath)
+      if (manifest.name) npmName = manifest.name
+      if (manifest.version) version = manifest.version
     }
+
     const count = await mirrorTsconfigJson()
     totalArtifacts += count
+
     const outRoot = skillGeneratedRoot(TSCONFIG_PKG)
     await writeManifest(outRoot, {
       generatedAt,
@@ -280,17 +238,15 @@ async function main(): Promise<void> {
       artifactCount: count
     })
     await writeSkillGeneratedReadme(outRoot, { kind: 'json', npmName })
-    console.log(`[sync] ${TSCONFIG_PKG}: ${count} artifacts → ${relative(REPO_ROOT, outRoot)}`)
+    console.log(`[sync] ${TSCONFIG_PKG}: ${count} artifacts -> ${relative(REPO_ROOT, outRoot)}`)
   }
 
-  console.log(`[sync] done: ${totalArtifacts} total artifacts`)
-  if (totalArtifacts === 0 && !doBuild) {
+  if (totalArtifacts === 0) {
     console.error('[sync] hint: empty output; run with --build or build packages first')
-    process.exitCode = 1
   }
 }
 
-main().catch((e) => {
-  console.error(e)
-  process.exit(1)
+main().catch((error) => {
+  console.error('[sync] failed:', error)
+  process.exitCode = 1
 })

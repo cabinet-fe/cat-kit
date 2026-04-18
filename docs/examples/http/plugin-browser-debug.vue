@@ -76,6 +76,7 @@ const http = new HTTPClient('', {
       overrideMethod: 'POST'
     }),
     {
+      name: 'debug-logger',
       beforeRequest(url, config) {
         requestMeta.method = config.method ?? '-'
         requestMeta.headers = JSON.stringify(config.headers ?? {})

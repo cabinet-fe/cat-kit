@@ -7,6 +7,12 @@
     "src"
   ],
   "type": "module",
+  "scripts": {
+    "build": "tsdown",
+    "lint": "bunx oxlint .",
+    "test": "bunx vitest run --globals",
+    "typecheck": "bunx tsc -p tsconfig.json --noEmit"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",

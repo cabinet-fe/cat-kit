@@ -35,11 +35,10 @@ const PACKAGE_LABELS: Record<string, string> = {
   core: '核心工具',
   http: 'HTTP 请求',
   fe: '前端工具',
-  excel: 'Excel文件操作工具',
   be: '后端工具',
-  maintenance: '包维护工具',
   cli: 'CLI 工具',
-  'agent-context': 'Agent 上下文'
+  'agent-context': 'Agent 上下文',
+  'vitepress-theme': 'VitePress 主题'
 }
 
 export const sidebar: DefaultTheme.Sidebar = generateSidebar({

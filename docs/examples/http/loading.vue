@@ -33,6 +33,7 @@ function LoadingPlugin(): ClientPlugin {
   let requestCount = 0
 
   return {
+    name: 'loading-state',
     beforeRequest(url) {
       if (requestCount === 0) {
         Snackbar.loading('请求中...')
@@ -54,6 +55,7 @@ function LoadingPlugin(): ClientPlugin {
 // 创建消息提示插件
 function MessagePlugin(): ClientPlugin {
   return {
+    name: 'message-feedback',
     afterRespond(response, url) {
       if (response.code >= 400) {
         Snackbar.error(`请求失败: ${response.code}`)

@@ -15,8 +15,6 @@ description: >
 | `@cat-kit/http`            | [cat-kit-http/](../cat-kit-http/SKILL.md)                       |
 | `@cat-kit/fe`              | [cat-kit-fe/](../cat-kit-fe/SKILL.md)                           |
 | `@cat-kit/be`              | [cat-kit-be/](../cat-kit-be/SKILL.md)                           |
-| `@cat-kit/excel`           | [cat-kit-excel/](../cat-kit-excel/SKILL.md)                     |
-| `@cat-kit/maintenance`     | [cat-kit-maintenance/](../cat-kit-maintenance/SKILL.md)         |
 | `@cat-kit/agent-context`   | [cat-kit-agent-context/](../cat-kit-agent-context/SKILL.md)     |
 | `@cat-kit/cli`             | [cat-kit-cli/](../cat-kit-cli/SKILL.md)                         |
 | `@cat-kit/tsconfig`        | [cat-kit-tsconfig/](../cat-kit-tsconfig/SKILL.md)               |

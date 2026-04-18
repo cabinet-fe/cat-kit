@@ -6,6 +6,12 @@
     "dist"
   ],
   "type": "module",
+  "scripts": {
+    "build": "tsdown",
+    "lint": "bunx oxlint .",
+    "test": "bunx vitest run --globals",
+    "typecheck": "bunx tsc -p tsconfig.json --noEmit"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

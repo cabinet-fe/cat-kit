@@ -1,8 +1,8 @@
 import type { UserConfig } from 'vitepress'
 
-import { demoContainer, type DemoContainerOptions } from './markdown/demo-container'
-import { mermaidPlugin } from './markdown/mermaid'
-import { importExamples, type ImportExamplesOptions } from './plugins/import-examples'
+import { demoContainer, type DemoContainerOptions } from './markdown/demo-container.js'
+import { mermaidPlugin } from './markdown/mermaid.js'
+import { importExamples, type ImportExamplesOptions } from './plugins/import-examples.js'
 
 export interface CatKitThemeOptions {
   /** examples 目录的绝对路径 */
@@ -30,13 +30,8 @@ export function defineThemeConfig(options: CatKitThemeOptions): Partial<UserConf
   }
 }
 
-// @ts-ignore
-export { demoContainer } from './markdown/demo-container.ts'
-// @ts-ignore
-export type { DemoContainerOptions } from './markdown/demo-container.ts'
-// @ts-ignore
-export { mermaidPlugin } from './markdown/mermaid.ts'
-// @ts-ignore
-export { importExamples } from './plugins/import-examples.ts'
-// @ts-ignore
-export type { ImportExamplesOptions } from './plugins/import-examples.ts'
+export { demoContainer } from './markdown/demo-container.js'
+export type { DemoContainerOptions } from './markdown/demo-container.js'
+export { mermaidPlugin } from './markdown/mermaid.js'
+export { importExamples } from './plugins/import-examples.js'
+export type { ImportExamplesOptions } from './plugins/import-examples.js'

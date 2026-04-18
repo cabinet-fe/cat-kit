@@ -223,3 +223,5 @@ export interface HTTPClientPlugin {
     context: RequestContext
   ): Promise<HTTPResponse | void> | HTTPResponse | void
 }
+
+export type ClientPlugin = HTTPClientPlugin

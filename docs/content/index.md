@@ -4,7 +4,7 @@ layout: home
 hero:
   name: 'CatKit'
   text: '喵喵工具箱'
-  tagline: 一站式 TypeScript 工具库，统一浏览器与 Node.js 开发体验，告别片段化依赖管理。
+  tagline: 一站式 TypeScript 工具库，统一浏览器、Node.js 与 Bun 开发体验。
   image:
     src: /logo.png
     alt: CatKit
@@ -33,8 +33,8 @@ features:
   - title: 全栈链路
     details: 统一的 API 设计，支持浏览器和 Node.js/Bun 环境各种工具。
 
-  - title: 完善文档
-    details: 详尽易读的文档、完整的类型定义和 LLM 上下文支持，人机协作开发体验俱佳。
+  - title: 工程化友好
+    details: 使用 Turborepo、Changesets 与 tsdown 维护 monorepo，开发、测试和发布链路清晰。
 ---
 
 ## 安装

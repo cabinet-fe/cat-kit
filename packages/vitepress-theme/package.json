@@ -8,6 +8,11 @@
     "style.css.d.ts"
   ],
   "type": "module",
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "lint": "bunx oxlint .",
+    "typecheck": "bunx vue-tsc -p tsconfig.json --noEmit"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -15,7 +20,7 @@
     },
     "./config": {
       "import": "./dist/config.js",
-      "types": "./src/config.ts"
+      "types": "./dist/config.d.ts"
     },
     "./src": {
       "import": "./src/index.ts",
@@ -23,8 +28,8 @@
     },
     "./style.css": {
       "types": "./style.css.d.ts",
-      "import": "./dist/style.css",
-      "default": "./dist/style.css"
+      "import": "./dist/styles/theme.css",
+      "default": "./dist/styles/theme.css"
     },
     "./styles/theme.css": "./dist/styles/theme.css"
   },

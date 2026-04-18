@@ -29,15 +29,16 @@ function parsePart(value: string, { min, max }: CronFieldConfig): number[] {
 function parseSegment(segment: string, min: number, max: number): number[] {
   const [rangePart, stepPart] = segment.split('/')
   const step = stepPart ? parseInt(stepPart, 10) : 1
+  const normalizedRangePart = rangePart ?? '*'
 
   if (Number.isNaN(step) || step <= 0) {
     throw new Error(`Invalid cron step "${segment}"`)
   }
 
-  if (rangePart.includes('-')) {
-    const [startStr, endStr] = rangePart.split('-')
-    const start = parseInt(startStr, 10)
-    const end = parseInt(endStr, 10)
+  if (normalizedRangePart.includes('-')) {
+    const [startStr, endStr] = normalizedRangePart.split('-')
+    const start = parseInt(startStr ?? '', 10)
+    const end = parseInt(endStr ?? '', 10)
 
     if (Number.isNaN(start) || Number.isNaN(end)) {
       throw new Error(`Invalid cron range "${segment}"`)
@@ -50,11 +51,11 @@ function parseSegment(segment: string, min: number, max: number): number[] {
     return buildRange(start, end, min, max, step)
   }
 
-  if (rangePart === '*') {
+  if (normalizedRangePart === '*') {
     return buildRange(min, max, min, max, step)
   }
 
-  const value = parseInt(rangePart, 10)
+  const value = parseInt(normalizedRangePart, 10)
   if (Number.isNaN(value)) {
     throw new Error(`Invalid cron value "${segment}"`)
   }

@@ -92,13 +92,11 @@ export function memoize<F extends (...args: any[]) => any>(
         cache.set(key, value, options.ttl)
         return value
       })
-      // @ts-expect-error - aligning return type
-      return promise
+      return promise as ReturnType<F>
     }
 
     cache.set(key, result as Awaited<ReturnType<F>>, options.ttl)
-    // @ts-expect-error - aligning return type
-    return result
+    return result as ReturnType<F>
   } as F & { cache: CacheAdapter<unknown, Awaited<ReturnType<F>>>; clear(): void }
 
   memoized.cache = cache

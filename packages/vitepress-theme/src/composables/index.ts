@@ -1,3 +1,3 @@
-export * from './useConsoleInterceptor'
-export * from './useFullscreen'
-export * from './useDraggable'
+export * from './useConsoleInterceptor.js'
+export * from './useFullscreen.js'
+export * from './useDraggable.js'

@@ -1,288 +1,558 @@
-// 高虚拟化器
-// 功能：
-// 1. 支持数据追加，不重新刷新状态
-// 2. 高效的虚拟滚动实现
+export type EstimateSize = (index: number) => number
+export type VirtualAlign = 'auto' | 'start' | 'center' | 'end'
+export type VirtualizerSubscriber = (snapshot: VirtualSnapshot) => void
 
-type EstimateSize = (index: number) => number
-
-type VirtualizerChange = (ctx: { items: VirtualItem[]; totalSize: number }) => void
-
-interface VirtualizerOption {
-  /** 长度 */
-  length?: number
-  /** 缓冲数量 */
-  buffer?: number
-  /** 推断每项高度 */
+export interface VirtualizerOptions {
+  count?: number
+  overscan?: number
+  horizontal?: boolean
+  paddingStart?: number
+  paddingEnd?: number
+  initialOffset?: number
+  initialViewport?: number
   estimateSize?: EstimateSize
-  /** 数据变更 */
-  onChange?: VirtualizerChange
+  onChange?: VirtualizerSubscriber
 }
 
-type UpdateOption = Pick<VirtualizerOption, 'length' | 'buffer'> & {
-  /** 容器尺寸 */
-  containerSize?: number
-  /** 偏移量 */
-  offsetSize?: number
-}
-
-interface VirtualItem {
+export interface VirtualItem {
   index: number
   start: number
+  end: number
   size: number
 }
 
+export interface VirtualRange {
+  startIndex: number
+  endIndex: number
+}
+
+export interface VirtualSnapshot {
+  items: VirtualItem[]
+  range: VirtualRange | null
+  totalSize: number
+  beforeSize: number
+  afterSize: number
+  offset: number
+  viewportSize: number
+  horizontal: boolean
+  isScrolling: boolean
+}
+
+export interface VirtualScrollOptions {
+  align?: VirtualAlign
+  behavior?: ScrollBehavior
+}
+
+const DEFAULT_ESTIMATE_SIZE = () => 36
+const DEFAULT_SCROLL_END_DELAY = 120
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max)
+}
+
+function getMeasuredSize(element: Element, horizontal: boolean): number {
+  const rect = element.getBoundingClientRect()
+  return Math.round(horizontal ? rect.width : rect.height)
+}
+
 export class Virtualizer {
-  private length = 0
-  private buffer = 5
-  private estimateSize: EstimateSize = () => 36
-  private onChange?: VirtualizerChange
+  private count = 0
+  private overscan = 6
+  private horizontal = false
+  private paddingStart = 0
+  private paddingEnd = 0
+  private estimateSize: EstimateSize = DEFAULT_ESTIMATE_SIZE
+  private onChange?: VirtualizerSubscriber
 
-  private totalSize = 0
-  private itemSizeDict: Record<number, number> = {}
-  private itemStartCache: Record<number, number> = {}
+  private offset = 0
+  private viewportSize = 0
+  private isScrolling = false
 
-  private containerSize = 0
-  private offsetSize = 0
+  private measuredSizes = new Map<number, number>()
+  private starts: number[] = []
+  private ends: number[] = []
+  private sizes: number[] = []
+  private dirtyIndex = 0
 
-  constructor(option: VirtualizerOption) {
-    Object.keys(option).forEach((key) => {
-      const optionVal = option[key]
-      if (optionVal !== undefined) {
-        this[key] = option[key]
+  private snapshot: VirtualSnapshot = {
+    items: [],
+    range: null,
+    totalSize: 0,
+    beforeSize: 0,
+    afterSize: 0,
+    offset: 0,
+    viewportSize: 0,
+    horizontal: false,
+    isScrolling: false
+  }
+
+  private subscribers = new Set<VirtualizerSubscriber>()
+  private scrollElement: HTMLElement | null = null
+  private elementIndexes = new WeakMap<Element, number>()
+  private mountedItems = new Map<number, Element>()
+  private itemObserver: ResizeObserver | null = null
+  private containerObserver: ResizeObserver | null = null
+  private scrollEndTimer: ReturnType<typeof setTimeout> | null = null
+
+  constructor(options: VirtualizerOptions = {}) {
+    this.applyOptions(options)
+    this.recompute()
+  }
+
+  setOptions(options: VirtualizerOptions): this {
+    this.applyOptions(options)
+    this.recompute()
+    return this
+  }
+
+  setCount(count: number): this {
+    this.count = Math.max(0, Math.trunc(count))
+    this.pruneCaches()
+    this.invalidateFrom(0)
+    this.recompute()
+    return this
+  }
+
+  setViewport(size: number): this {
+    this.viewportSize = Math.max(0, Math.round(size))
+    this.offset = this.clampOffset(this.offset)
+    this.recompute()
+    return this
+  }
+
+  setOffset(offset: number): this {
+    this.offset = this.clampOffset(offset)
+    this.recompute()
+    return this
+  }
+
+  mount(element: HTMLElement | null): this {
+    if (!element) {
+      this.unmount()
+      return this
+    }
+
+    if (this.scrollElement === element) {
+      this.syncFromElement()
+      return this
+    }
+
+    this.unmount()
+    this.scrollElement = element
+    this.scrollElement.addEventListener('scroll', this.handleScroll, { passive: true })
+    this.observeContainer(element)
+    this.syncFromElement()
+    return this
+  }
+
+  unmount(): this {
+    if (this.scrollElement) {
+      this.scrollElement.removeEventListener('scroll', this.handleScroll)
+    }
+
+    this.scrollElement = null
+    this.containerObserver?.disconnect()
+    this.containerObserver = null
+    this.stopScrollTracking()
+    return this
+  }
+
+  destroy(): void {
+    this.unmount()
+    this.itemObserver?.disconnect()
+    this.itemObserver = null
+    this.mountedItems.clear()
+    this.subscribers.clear()
+  }
+
+  subscribe(listener: VirtualizerSubscriber): () => void {
+    this.subscribers.add(listener)
+    listener(this.snapshot)
+    return () => {
+      this.subscribers.delete(listener)
+    }
+  }
+
+  measure(index: number, size: number): this {
+    if (index < 0 || index >= this.count) {
+      return this
+    }
+
+    const normalized = Math.max(0, Math.round(size))
+    if (this.measuredSizes.get(index) === normalized) {
+      return this
+    }
+
+    this.measuredSizes.set(index, normalized)
+    this.invalidateFrom(index)
+    this.recompute()
+    return this
+  }
+
+  resizeItem(index: number, size: number): this {
+    return this.measure(index, size)
+  }
+
+  measureElement(index: number, element: Element | null): void {
+    const current = this.mountedItems.get(index)
+
+    if (current && current !== element) {
+      this.itemObserver?.unobserve(current)
+      this.mountedItems.delete(index)
+    }
+
+    if (!element) {
+      return
+    }
+
+    this.mountedItems.set(index, element)
+    this.elementIndexes.set(element, index)
+    this.ensureItemObserver()?.observe(element)
+    this.measure(index, getMeasuredSize(element, this.horizontal))
+  }
+
+  scrollToOffset(offset: number, options: VirtualScrollOptions = {}): this {
+    const target = this.clampOffset(offset)
+
+    if (this.scrollElement) {
+      this.scrollElement.scrollTo({
+        [this.horizontal ? 'left' : 'top']: target,
+        behavior: options.behavior
+      })
+    }
+
+    this.offset = target
+    this.recompute()
+    return this
+  }
+
+  scrollToIndex(index: number, options: VirtualScrollOptions = {}): this {
+    if (!this.count) {
+      return this
+    }
+
+    const targetIndex = clamp(Math.trunc(index), 0, this.count - 1)
+    const item = this.getItem(targetIndex)
+    const { align = 'auto', behavior } = options
+    const viewportEnd = this.offset + this.viewportSize
+
+    let nextOffset = this.offset
+
+    if (align === 'start') {
+      nextOffset = item.start
+    } else if (align === 'end') {
+      nextOffset = item.end - this.viewportSize
+    } else if (align === 'center') {
+      nextOffset = item.start - (this.viewportSize - item.size) / 2
+    } else if (item.start < this.offset) {
+      nextOffset = item.start
+    } else if (item.end > viewportEnd) {
+      nextOffset = item.end - this.viewportSize
+    }
+
+    return this.scrollToOffset(nextOffset, { behavior })
+  }
+
+  reset(): this {
+    this.measuredSizes.clear()
+    this.starts = []
+    this.ends = []
+    this.sizes = []
+    this.dirtyIndex = 0
+    this.offset = 0
+    this.recompute()
+    return this
+  }
+
+  getSnapshot(): VirtualSnapshot {
+    return this.snapshot
+  }
+
+  getItems(): VirtualItem[] {
+    return this.snapshot.items
+  }
+
+  getRange(): VirtualRange | null {
+    return this.snapshot.range
+  }
+
+  getTotalSize(): number {
+    this.ensureMeasurements()
+    if (!this.count) {
+      return this.paddingStart + this.paddingEnd
+    }
+
+    return this.ends[this.count - 1]! + this.paddingEnd
+  }
+
+  getItem(index: number): VirtualItem {
+    this.ensureMeasurements()
+
+    if (index < 0 || index >= this.count) {
+      throw new RangeError(`Virtual item index out of range: ${index}`)
+    }
+
+    return {
+      index,
+      start: this.starts[index]!,
+      end: this.ends[index]!,
+      size: this.sizes[index]!
+    }
+  }
+
+  private applyOptions(options: VirtualizerOptions): void {
+    if (options.count !== undefined) {
+      this.count = Math.max(0, Math.trunc(options.count))
+      this.pruneCaches()
+    }
+
+    if (options.overscan !== undefined) {
+      this.overscan = Math.max(0, Math.trunc(options.overscan))
+    }
+
+    if (options.horizontal !== undefined) {
+      this.horizontal = options.horizontal
+    }
+
+    if (options.paddingStart !== undefined) {
+      this.paddingStart = Math.max(0, Math.round(options.paddingStart))
+      this.invalidateFrom(0)
+    }
+
+    if (options.paddingEnd !== undefined) {
+      this.paddingEnd = Math.max(0, Math.round(options.paddingEnd))
+      this.invalidateFrom(0)
+    }
+
+    if (options.estimateSize !== undefined) {
+      this.estimateSize = options.estimateSize
+      this.invalidateFrom(0)
+    }
+
+    if (options.initialOffset !== undefined) {
+      this.offset = Math.max(0, Math.round(options.initialOffset))
+    }
+
+    if (options.initialViewport !== undefined) {
+      this.viewportSize = Math.max(0, Math.round(options.initialViewport))
+    }
+
+    if (options.onChange !== undefined) {
+      this.onChange = options.onChange
+    }
+  }
+
+  private pruneCaches(): void {
+    for (const index of this.measuredSizes.keys()) {
+      if (index >= this.count) {
+        this.measuredSizes.delete(index)
       }
-    })
-
-    if (this.length) {
-      this.calcTotalSize()
-    }
-  }
-
-  private getItemSize(index: number): number {
-    return this.itemSizeDict[index] ?? this.estimateSize(index)
-  }
-
-  private getItemStart(index: number): number {
-    if (index === 0) return 0
-
-    // 检查缓存
-    if (this.itemStartCache[index] !== undefined) {
-      return this.itemStartCache[index]
     }
 
-    let start = 0
-    for (let i = 0; i < index; i++) {
-      start += this.getItemSize(i)
-    }
-
-    // 缓存结果
-    this.itemStartCache[index] = start
-    return start
-  }
-
-  private getItems(): VirtualItem[] {
-    const { containerSize, offsetSize, buffer, length } = this
-
-    if (!containerSize || !length) return []
-
-    // 找到开始索引
-    let startIndex = 0
-    let currentOffset = 0
-
-    for (let i = 0; i < length; i++) {
-      const itemSize = this.getItemSize(i)
-      if (currentOffset + itemSize > offsetSize) {
-        startIndex = Math.max(0, i - buffer)
-        break
+    for (const [index, element] of this.mountedItems) {
+      if (index >= this.count) {
+        this.itemObserver?.unobserve(element)
+        this.mountedItems.delete(index)
       }
-      currentOffset += itemSize
     }
 
-    // 找到结束索引
+    this.starts.length = this.count
+    this.ends.length = this.count
+    this.sizes.length = this.count
+  }
+
+  private invalidateFrom(index: number): void {
+    this.dirtyIndex = Math.min(this.dirtyIndex, Math.max(0, index))
+  }
+
+  private ensureMeasurements(): void {
+    if (this.count === 0) {
+      this.starts = []
+      this.ends = []
+      this.sizes = []
+      this.dirtyIndex = 0
+      return
+    }
+
+    const startIndex = clamp(this.dirtyIndex, 0, this.count)
+    if (startIndex >= this.count) {
+      return
+    }
+
+    for (let index = startIndex; index < this.count; index++) {
+      const size = this.measuredSizes.get(index) ?? this.estimateSize(index)
+      const start = index === 0 ? this.paddingStart : this.ends[index - 1]!
+      const end = start + size
+
+      this.starts[index] = start
+      this.ends[index] = end
+      this.sizes[index] = size
+    }
+
+    this.dirtyIndex = this.count
+  }
+
+  private recompute(): void {
+    this.ensureMeasurements()
+
+    const totalSize = this.getTotalSize()
+    const range = this.calculateRange()
+    const items =
+      range === null
+        ? []
+        : this.createItems(
+            Math.max(0, range.startIndex - this.overscan),
+            Math.min(this.count - 1, range.endIndex + this.overscan)
+          )
+
+    this.offset = this.clampOffset(this.offset)
+    this.snapshot = {
+      items,
+      range,
+      totalSize,
+      beforeSize: items[0]?.start ?? this.paddingStart,
+      afterSize: items.length === 0 ? totalSize : Math.max(0, totalSize - items[items.length - 1]!.end),
+      offset: this.offset,
+      viewportSize: this.viewportSize,
+      horizontal: this.horizontal,
+      isScrolling: this.isScrolling
+    }
+
+    this.notify()
+  }
+
+  private calculateRange(): VirtualRange | null {
+    if (!this.count || this.viewportSize <= 0) {
+      return null
+    }
+
+    const startIndex = this.findStartIndex(this.offset)
+    const viewportEnd = this.offset + this.viewportSize
     let endIndex = startIndex
-    let visibleSize = 0
 
-    for (let i = startIndex; i < length; i++) {
-      const itemSize = this.getItemSize(i)
-      visibleSize += itemSize
-      endIndex = i
-
-      if (visibleSize >= containerSize) {
-        // 向下滚动时也添加缓冲
-        endIndex = Math.min(length - 1, endIndex + buffer)
-        break
-      }
+    while (endIndex < this.count - 1 && this.starts[endIndex + 1]! < viewportEnd) {
+      endIndex++
     }
 
-    // 生成虚拟项
+    return { startIndex, endIndex }
+  }
+
+  private createItems(startIndex: number, endIndex: number): VirtualItem[] {
     const items: VirtualItem[] = []
-    for (let i = startIndex; i <= Math.min(endIndex, length - 1); i++) {
-      items.push({ index: i, start: this.getItemStart(i), size: this.getItemSize(i) })
+
+    for (let index = startIndex; index <= endIndex; index++) {
+      items.push({
+        index,
+        start: this.starts[index]!,
+        end: this.ends[index]!,
+        size: this.sizes[index]!
+      })
     }
 
     return items
   }
 
-  /** 更新长度并重新计算尺寸 */
-  private updateLength(length: number) {
-    this.length = length
-    this.calcTotalSize()
-  }
+  private findStartIndex(offset: number): number {
+    let low = 0
+    let high = this.count - 1
+    let result = 0
 
-  /** 更新选项 */
-  update(option: UpdateOption): void {
-    const { length, ...rest } = option
-    if (length !== undefined) {
-      this.updateLength(length)
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2)
+      const end = this.ends[mid]!
+
+      if (end > offset) {
+        result = mid
+        high = mid - 1
+      } else {
+        low = mid + 1
+      }
     }
 
-    Object.keys(rest).forEach((key) => {
-      const optionVal = rest[key]
-      if (optionVal !== undefined) {
-        this[key] = optionVal
+    return result
+  }
+
+  private clampOffset(offset: number): number {
+    const maxOffset = Math.max(0, this.getTotalSize() - this.viewportSize)
+    return clamp(Math.round(offset), 0, maxOffset)
+  }
+
+  private observeContainer(element: HTMLElement): void {
+    if (typeof ResizeObserver === 'undefined') {
+      return
+    }
+
+    this.containerObserver = new ResizeObserver(() => {
+      this.syncFromElement()
+    })
+
+    this.containerObserver.observe(element)
+  }
+
+  private ensureItemObserver(): ResizeObserver | null {
+    if (this.itemObserver || typeof ResizeObserver === 'undefined') {
+      return this.itemObserver
+    }
+
+    this.itemObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const index = this.elementIndexes.get(entry.target)
+        if (index === undefined) {
+          continue
+        }
+
+        const box = entry.borderBoxSize?.[0]
+        const size = box
+          ? Math.round(this.horizontal ? box.inlineSize : box.blockSize)
+          : getMeasuredSize(entry.target, this.horizontal)
+
+        this.measure(index, size)
       }
     })
 
-    this.onChange?.({ items: this.getItems(), totalSize: this.totalSize })
+    return this.itemObserver
   }
 
-  private calcTotalSize(): void {
-    let totalSize = 0
-    for (let i = 0; i < this.length; i++) {
-      totalSize += this.getItemSize(i)
+  private syncFromElement(): void {
+    if (!this.scrollElement) {
+      return
     }
-    this.totalSize = totalSize
+
+    this.viewportSize = this.horizontal ? this.scrollElement.clientWidth : this.scrollElement.clientHeight
+    this.offset = this.horizontal ? this.scrollElement.scrollLeft : this.scrollElement.scrollTop
+    this.offset = this.clampOffset(this.offset)
+    this.recompute()
   }
 
-  /**
-   * 更新虚拟项尺寸
-   * @param index 元素索引
-   * @param size 尺寸
-   */
-  updateItemSize(index: number, size: number): void {
-    const oldSize = this.getItemSize(index)
-    const diff = size - oldSize
-    this.itemSizeDict[index] = size
-    this.totalSize += diff
-
-    // 清除受影响的缓存
-    this.clearStartCacheFrom(index + 1)
-
-    // 触发更新
-    this.onChange?.({ items: this.getItems(), totalSize: this.totalSize })
-  }
-
-  private clearStartCacheFrom(index: number): void {
-    for (let i = index; i < this.length; i++) {
-      delete this.itemStartCache[i]
+  private handleScroll = (): void => {
+    if (!this.scrollElement) {
+      return
     }
+
+    this.isScrolling = true
+    this.offset = this.clampOffset(
+      this.horizontal ? this.scrollElement.scrollLeft : this.scrollElement.scrollTop
+    )
+    this.recompute()
+
+    this.stopScrollTracking()
+    this.scrollEndTimer = setTimeout(() => {
+      this.isScrolling = false
+      this.recompute()
+    }, DEFAULT_SCROLL_END_DELAY)
   }
 
-  /** 重置虚拟状态 */
-  reset(): void {
-    this.itemSizeDict = {}
-    this.itemStartCache = {}
-    this.offsetSize = 0
-    this.calcTotalSize()
-    this.onChange?.({ items: this.getItems(), totalSize: this.totalSize })
-  }
-
-  /** 获取总尺寸 */
-  getTotalSize(): number {
-    return this.totalSize
-  }
-
-  /** 获取当前可见项 */
-  getVisibleItems(): VirtualItem[] {
-    return this.getItems()
-  }
-}
-
-export class VirtualContainer {
-  private horizontal?: Virtualizer
-  private vertical?: Virtualizer
-
-  private container: HTMLElement | null = null
-  private scrollDistance = 0
-  private resizeObserver?: ResizeObserver
-
-  constructor(option?: { horizontal?: Virtualizer; vertical?: Virtualizer }) {
-    if (option) {
-      Object.keys(option).forEach((key) => {
-        this[key] = option[key]
-      })
+  private stopScrollTracking(): void {
+    if (this.scrollEndTimer !== null) {
+      clearTimeout(this.scrollEndTimer)
+      this.scrollEndTimer = null
     }
   }
 
-  private handleScroll = (e: Event) => {
-    const target = e.target as HTMLElement
-    this.scrollDistance = target.scrollTop
-
-    // 更新垂直虚拟化器的偏移量
-    this.vertical?.update({ offsetSize: this.scrollDistance })
-
-    // 更新水平虚拟化器的偏移量（如果存在）
-    if (this.horizontal) {
-      this.horizontal.update({ offsetSize: target.scrollLeft })
-    }
-  }
-
-  private watchContainerSize() {
-    if (!this.container) return
-
-    this.resizeObserver = new ResizeObserver(([entry]) => {
-      const boxSize = entry?.contentBoxSize?.[0]
-      if (!boxSize) return
-
-      this.vertical?.update({ containerSize: boxSize.blockSize })
-      this.horizontal?.update({ containerSize: boxSize.inlineSize })
-    })
-
-    this.resizeObserver.observe(this.container)
-  }
-
-  connect(el: string | HTMLElement): void {
-    if (typeof el === 'string') {
-      el = document.querySelector(el) as HTMLElement
-    }
-    if (!el) return
-
-    // 清理之前的连接
-    this.disconnect()
-
-    this.container = el
-
-    this.watchContainerSize()
-
-    this.container.addEventListener('scroll', this.handleScroll, { passive: true })
-  }
-
-  disconnect(): void {
-    if (this.container) {
-      this.container.removeEventListener('scroll', this.handleScroll)
-      this.container = null
-    }
-
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect()
-      this.resizeObserver = undefined
-    }
-  }
-
-  /** 滚动到指定位置 */
-  scrollTo(offset: number): void {
-    if (this.container) {
-      this.container.scrollTop = offset
-    }
-  }
-
-  /** 滚动到指定索引 */
-  scrollToIndex(index: number): void {
-    if (this.vertical) {
-      const items = this.vertical.getVisibleItems()
-      const targetItem = items.find((item) => item.index === index)
-      if (targetItem) {
-        this.scrollTo(targetItem.start)
-      }
+  private notify(): void {
+    this.onChange?.(this.snapshot)
+    for (const subscriber of this.subscribers) {
+      subscriber(this.snapshot)
     }
   }
 }

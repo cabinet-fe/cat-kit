@@ -1,6 +1,6 @@
 <!--
 本文件用于指导 AI / 贡献者为 CatKit（VitePress 2）编写技术文档。
-目标：为 <project-root>/packages 下的各 workspace（core/http/fe/excel/be/maintenance…）编写清晰、可维护、可导航的文档。
+目标：为 <project-root>/packages 下的现存 workspace（core/http/fe/be/cli/agent-context/vitepress-theme…）编写清晰、可维护、可导航的文档。
 -->
 
 ## 写作提示词（请严格遵守）

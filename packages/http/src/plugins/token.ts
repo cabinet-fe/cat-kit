@@ -61,6 +61,8 @@ export interface HTTPTokenPluginOptions {
   onRefreshExpired?: () => void
 }
 
+export type TokenPluginOptions = HTTPTokenPluginOptions
+
 /**
  * Token 插件
  * 用于自动在请求头中添加令牌
@@ -167,3 +169,5 @@ export function HTTPTokenPlugin(options: HTTPTokenPluginOptions): HTTPClientPlug
     }
   }
 }
+
+export const TokenPlugin = HTTPTokenPlugin

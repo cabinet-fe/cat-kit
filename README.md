@@ -1,6 +1,6 @@
 # 喵喵工具箱
 
-喵喵工具箱是专为浏览器和 Node.js 端提供简洁、易用和高性能的开发工具包。
+喵喵工具箱是面向浏览器、Node.js 与 Bun 的 TypeScript 工具包集合，强调统一 API、细粒度导出与轻量依赖。
 
 ## 特性
 
@@ -30,8 +30,8 @@ pnpm add @cat-kit/core
 | `@cat-kit/http`        | 基于插件架构的现代 HTTP 客户端                           | 通用    |
 | `@cat-kit/fe`          | 前端工具包，提供存储、虚拟滚动、Web API 封装、文件处理   | 浏览器  |
 | `@cat-kit/be`          | 后端工具包，提供文件系统、日志、配置管理、缓存等功能     | Node.js |
-| `@cat-kit/excel`       | Excel 文件处理库，支持流式读写大型文件                   | 通用    |
-| `@cat-kit/maintenance` | Monorepo 维护工具，提供依赖管理、版本控制、构建和发布    | Node.js |
+| `@cat-kit/cli`         | 提交信息校验等命令行能力                                 | Node.js |
+| `@cat-kit/agent-context` | Agent Context 协作工作流工具                           | Node.js |
 
 ## 快速开始
 
@@ -66,22 +66,19 @@ client.use(tokenPlugin({ getToken: () => localStorage.getItem('token') }))
 const response = await client.get('/users')
 ```
 
-### Excel 处理
+### 前端虚拟化
 
 ```typescript
-import { readWorkbookStream, StreamWorkbookWriter } from '@cat-kit/excel'
+import { Virtualizer } from '@cat-kit/fe'
 
-// 流式读取
-for await (const { row } of await readWorkbookStream(file)) {
-  console.log(row)
-}
+const virtualizer = new Virtualizer({
+  count: 1000,
+  estimateSize: () => 44
+})
 
-// 流式写入
-const writer = new StreamWorkbookWriter()
-const sheet = writer.createSheet('Sheet1')
-sheet.addRow(['Name', 'Age'])
-sheet.addRow(['Alice', 25])
-await writer.download('data.xlsx')
+virtualizer.setViewport(480)
+virtualizer.setOffset(0)
+console.log(virtualizer.getItems())
 ```
 
 ## 项目结构
@@ -92,9 +89,10 @@ packages/
 ├── http/          # HTTP 客户端
 ├── fe/            # 前端工具包
 ├── be/            # 后端工具包
-├── excel/         # Excel 处理库
-├── maintenance/   # Monorepo 维护工具
-└── tests/         # 测试文件
+├── cli/           # 命令行工具
+├── agent-context/ # Agent Context 工具
+├── tsconfig/      # TypeScript 配置预设
+└── vitepress-theme/ # 文档主题
 ```
 
 ## 开发
@@ -106,8 +104,11 @@ bun install
 # 构建所有包
 bun run build
 
-# 运行测试
+# 运行所有测试
 bun run test
+
+# 生成 changeset
+bun run changeset
 ```
 
 ## 许可证
