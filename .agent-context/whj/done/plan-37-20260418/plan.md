@@ -36,6 +36,8 @@
 - `docs/content/packages/fe/index.md`
 - `docs/content/packages/fe/tween.md`
 - `docs/content/packages/fe/virtualizer.md`
+- `docs/examples/fe/tween/basic.vue`
+- `docs/examples/fe/virtualizer/basic.vue`
 - `docs/examples/http/confirm.vue`
 - `docs/examples/http/loading.vue`
 - `docs/examples/http/plugin-browser-debug.vue`
@@ -104,3 +106,7 @@
 - `skills/cat-kit-maintenance/**/*`（删除）
 
 ## 历史补丁
+
+- `patch-1`: 为 Tween 与 Virtualizer 补充文档示例
+- `patch-2`: 强化 Virtualizer 的异高列表示例
+- `patch-3`: 修正 Virtualizer 示例跳转与容器高度
