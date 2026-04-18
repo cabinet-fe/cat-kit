@@ -292,12 +292,7 @@ export class Virtualizer {
       throw new RangeError(`Virtual item index out of range: ${index}`)
     }
 
-    return {
-      index,
-      start: this.starts[index]!,
-      end: this.ends[index]!,
-      size: this.sizes[index]!
-    }
+    return { index, start: this.starts[index]!, end: this.ends[index]!, size: this.sizes[index]! }
   }
 
   private applyOptions(options: VirtualizerOptions): void {
@@ -411,7 +406,8 @@ export class Virtualizer {
       range,
       totalSize,
       beforeSize: items[0]?.start ?? this.paddingStart,
-      afterSize: items.length === 0 ? totalSize : Math.max(0, totalSize - items[items.length - 1]!.end),
+      afterSize:
+        items.length === 0 ? totalSize : Math.max(0, totalSize - items[items.length - 1]!.end),
       offset: this.offset,
       viewportSize: this.viewportSize,
       horizontal: this.horizontal,
@@ -518,7 +514,9 @@ export class Virtualizer {
       return
     }
 
-    this.viewportSize = this.horizontal ? this.scrollElement.clientWidth : this.scrollElement.clientHeight
+    this.viewportSize = this.horizontal
+      ? this.scrollElement.clientWidth
+      : this.scrollElement.clientHeight
     this.offset = this.horizontal ? this.scrollElement.scrollLeft : this.scrollElement.scrollTop
     this.offset = this.clampOffset(this.offset)
     this.recompute()

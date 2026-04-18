@@ -35,6 +35,13 @@ const tween = new Tween({
 tween.play()
 ```
 
+## 交互示例
+
+下面的 demo 会把 `state`、`progress`、`value` 和 easing 切换放在同一个面板里，适合先感受 `Tween` 的时间推进方式，再回头看 API。
+
+::: demo fe/tween/basic.vue
+:::
+
 ## API参考
 
 ### 构造参数

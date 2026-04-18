@@ -21,11 +21,7 @@ sidebarOrder: 4
 ```typescript
 import { Virtualizer } from '@cat-kit/fe'
 
-const virtualizer = new Virtualizer({
-  count: 10_000,
-  overscan: 6,
-  estimateSize: () => 44
-})
+const virtualizer = new Virtualizer({ count: 10_000, overscan: 6, estimateSize: () => 44 })
 
 virtualizer.setViewport(480)
 virtualizer.setOffset(120)
@@ -40,6 +36,13 @@ console.log(snapshot.items, snapshot.totalSize)
 virtualizer.mount(containerEl)
 virtualizer.measureElement(index, itemEl)
 ```
+
+## 交互示例
+
+下面的 demo 会实时展示 `scrollToIndex`、当前可见范围以及实际渲染项数量。示例会先按卡片档位给出较接近真实值的 `estimateSize`，目标项挂载后再补一次对齐，同时保留不等高 item，方便直观看到 `measureElement` 对异高列表的修正效果。
+
+::: demo fe/virtualizer/basic.vue
+:::
 
 ## API参考
 
