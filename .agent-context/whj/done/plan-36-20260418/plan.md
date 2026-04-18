@@ -208,5 +208,14 @@ engine?: HttpEngine
 - `packages/http/AGENTS.md`：更新 `engine/` 目录子树，「核心架构」追加自定义引擎说明，「约束」追加插件唯一性与父子继承两条。
 - `packages/http/README.md`：插件系统末尾新增“运行时动态注册插件”最小示例。
 - `packages/tests/http/client-register-plugin.test.ts`：**新建**，覆盖 6 个场景。
+- `packages/tests/http/client.test.ts`：补全 10 处匿名插件 fixture 的 `name` 字段（patch-1）。
+- `packages/tests/http/engine.test.ts`：移除 `MockXHR` 未读字段 `_method` / `_url`，`open()` 形参以下划线标记未使用（patch-1）。
+- `packages/tests/http/plugins.test.ts`：以 `import as` 别名修正 `HTTPTokenPlugin` / `HTTPMethodOverridePlugin` 的导入名不匹配（patch-1）。
+- `packages/tests/tsconfig.json`：`include` 扩展各工作区包源码目录，修复 composite 项目 `TS6307` 报错（patch-1）。
+- `packages/http/README.md`：同步插件 API 新名称、`ClientConfig` / `HTTPClientPlugin` 声明、错误码表与父子插件继承说明，新增「迁移说明」小节（patch-2）。
+- `packages/tests/AGENTS.md`：「测试范围」列表与 `df3257a` 删包后的实际 workspace 对齐（移除 excel、maintenance，新增 cli）（patch-2）。
 
 ## 历史补丁
+
+- patch-1: 修复 http 包类型错误
+- patch-2: 补充插件 API 重命名迁移说明 + 同步 tests 测试范围文档

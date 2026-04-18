@@ -7,7 +7,7 @@
 - 支持标准 HTTP 方法（`GET`/`POST`/`PUT`/`DELETE`/`PATCH`/`HEAD`/`OPTIONS`）
 - 支持请求分组（`group`）与批量中止（`abort`）
 - 支持插件扩展（请求前、响应后、错误钩子）
-- 内置 `TokenPlugin` 与 `MethodOverridePlugin`
+- 内置 `HTTPTokenPlugin`、`HTTPMethodOverridePlugin` 与 `RetryPlugin`
 - 完整 TypeScript 类型支持
 
 ## 安装
@@ -45,7 +45,8 @@ interface ClientConfig {
   timeout?: number
   headers?: Record<string, string>
   credentials?: boolean
-  plugins?: ClientPlugin[]
+  plugins?: HTTPClientPlugin[]
+  engine?: HttpEngine
 }
 
 interface RequestConfig {
@@ -62,7 +63,9 @@ interface RequestConfig {
 ## 插件系统
 
 ```ts
-interface ClientPlugin {
+interface HTTPClientPlugin {
+  /** 插件名称（必填、同一 client 及其父链中唯一） */
+  name: string
   beforeRequest?(
     url: string,
     config: RequestConfig
@@ -70,20 +73,24 @@ interface ClientPlugin {
   afterRespond?(
     response: HTTPResponse,
     url: string,
-    config: RequestConfig
+    config: RequestConfig,
+    context?: PluginContext
   ): HTTPResponse | void | Promise<HTTPResponse | void>
-  onError?(error: unknown, context: RequestContext): void | Promise<void>
+  onError?(
+    error: unknown,
+    context: RequestContext
+  ): HTTPResponse | void | Promise<HTTPResponse | void>
 }
 ```
 
-### TokenPlugin
+### HTTPTokenPlugin
 
 ```ts
-import { HTTPClient, TokenPlugin } from '@cat-kit/http'
+import { HTTPClient, HTTPTokenPlugin } from '@cat-kit/http'
 
 const http = new HTTPClient('/api', {
   plugins: [
-    TokenPlugin({
+    HTTPTokenPlugin({
       getter: () => localStorage.getItem('token'),
       authType: 'Bearer',
       headerName: 'Authorization'
@@ -92,14 +99,14 @@ const http = new HTTPClient('/api', {
 })
 ```
 
-### MethodOverridePlugin
+### HTTPMethodOverridePlugin
 
 ```ts
-import { HTTPClient, MethodOverridePlugin } from '@cat-kit/http'
+import { HTTPClient, HTTPMethodOverridePlugin } from '@cat-kit/http'
 
 const http = new HTTPClient('/api', {
   plugins: [
-    MethodOverridePlugin({
+    HTTPMethodOverridePlugin({
       methods: ['DELETE', 'PUT', 'PATCH'],
       overrideMethod: 'POST',
       headerName: 'X-HTTP-Method-Override'
@@ -129,6 +136,8 @@ http.registerPlugin({
 - `ABORTED`：请求被主动中止
 - `NETWORK`：网络异常或非 2xx HTTP 状态
 - `PARSE`：响应解析失败
+- `RETRY_LIMIT_EXCEEDED`：重试次数超出上限
+- `PLUGIN`：插件注册违规（缺失非空 `name` 或名称冲突）
 - `UNKNOWN`：未知错误（保留）
 
 `fetch` 与 `XMLHttpRequest` 引擎都会在非 2xx 响应时抛出 `HTTPError`，并把原始响应挂在 `error.response` 上。
@@ -155,3 +164,21 @@ await user.get('/profile') // /api/users/profile
 
 user.abort() // 中止该分组引擎内请求
 ```
+
+子 client 通过父链继承插件：**父影响子、子不影响父**，同名校验跨父子层级生效；父子共享同一 `engine` 实例，`abort()` 会中止父或子任意一方触发该引擎的所有在途请求。
+
+## 迁移说明（插件 API 重命名）
+
+从旧版本升级到当前版本时，插件相关 API 做了以下重命名（行为等价，仅名称变更；同时插件 `name` 字段从可选变为**必填且唯一**）：
+
+| 旧名 | 新名 |
+|------|------|
+| `ClientPlugin` | `HTTPClientPlugin` |
+| `TokenPlugin` | `HTTPTokenPlugin` |
+| `TokenPluginOptions` | `HTTPTokenPluginOptions` |
+| `MethodOverridePlugin` | `HTTPMethodOverridePlugin` |
+| `MethodOverridePluginOptions` | `HTTPMethodOverridePluginOptions` |
+
+`RetryPlugin` / `RetryPluginOptions` 命名保持不变。
+
+内置插件均已自带 `name`（`token` / `method-override` / `retry`），用户自定义插件需手动补齐非空 `name`；若与已注册插件（含父链）重名，会抛 `HTTPError({ code: 'PLUGIN' })`。

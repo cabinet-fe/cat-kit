@@ -7,11 +7,10 @@
 ### 测试范围
 
 - `packages/be`
+- `packages/cli`
 - `packages/core`
-- `packages/excel`
 - `packages/fe`
 - `packages/http`
-- `packages/maintenance`
 
 ### 测试框架
 

@@ -7,5 +7,12 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true
   },
-  "include": ["**/*.test.ts"]
+  "include": [
+    "**/*.test.ts",
+    "../be/src/**/*.ts",
+    "../cli/src/**/*.ts",
+    "../core/src/**/*.ts",
+    "../fe/src/**/*.ts",
+    "../http/src/**/*.ts"
+  ]
 }

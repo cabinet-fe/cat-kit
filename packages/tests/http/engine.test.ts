@@ -89,8 +89,6 @@ class MockXHR {
   responseType: XMLHttpRequestResponseType = ''
   response: unknown = null
   status = 200
-  private _method = ''
-  private _url = ''
   private _headers: Record<string, string> = {}
   aborted = false
 
@@ -98,10 +96,7 @@ class MockXHR {
     MockXHR.instances.push(this)
   }
 
-  open(method: string, url: string): void {
-    this._method = method
-    this._url = url
-  }
+  open(_method: string, _url: string): void {}
 
   setRequestHeader(key: string, value: string): void {
     this._headers[key] = value

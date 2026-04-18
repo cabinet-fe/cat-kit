@@ -234,6 +234,7 @@ describe('HTTPClient', () => {
       const client = new HTTPClient('/api', {
         plugins: [
           {
+            name: 'noop',
             beforeRequest() {
               return
             }
@@ -322,7 +323,7 @@ describe('HTTPClient', () => {
         }
       })
 
-      const client = new HTTPClient('/api', { plugins: [{ beforeRequest }] })
+      const client = new HTTPClient('/api', { plugins: [{ name: 'before-request', beforeRequest }] })
 
       await client.get('/users')
 
@@ -340,7 +341,7 @@ describe('HTTPClient', () => {
         return { ...response, data: { ...response.data, modified: true } }
       })
 
-      const client = new HTTPClient('/api', { plugins: [{ afterRespond }] })
+      const client = new HTTPClient('/api', { plugins: [{ name: 'after-respond', afterRespond }] })
 
       const response = await client.get('/users')
 
@@ -352,6 +353,7 @@ describe('HTTPClient', () => {
       const order: number[] = []
 
       const plugin1 = {
+        name: 'plugin-1',
         beforeRequest: vi.fn(async () => {
           order.push(1)
           return {}
@@ -359,6 +361,7 @@ describe('HTTPClient', () => {
       }
 
       const plugin2 = {
+        name: 'plugin-2',
         beforeRequest: vi.fn(async () => {
           order.push(2)
           return {}
@@ -377,7 +380,7 @@ describe('HTTPClient', () => {
       const networkError = new Error('fetch failed')
       mockFetch.mockRejectedValueOnce(networkError)
 
-      const client = new HTTPClient('/api', { plugins: [{ onError }] })
+      const client = new HTTPClient('/api', { plugins: [{ name: 'on-error', onError }] })
 
       await expect(client.get('/users')).rejects.toThrow('网络错误')
 
@@ -518,7 +521,7 @@ describe('HTTPClient', () => {
         return undefined
       })
 
-      const client = new HTTPClient('', { plugins: [{ afterRespond }] })
+      const client = new HTTPClient('', { plugins: [{ name: 'retry-ctx', afterRespond }] })
       await client.get('/users')
 
       expect(mockFetch).toHaveBeenCalledTimes(2)
@@ -535,7 +538,7 @@ describe('HTTPClient', () => {
       })
 
       const client = new HTTPClient('', {
-        plugins: [{ afterRespond }],
+        plugins: [{ name: 'retry-merge', afterRespond }],
         headers: { 'X-Base': 'b' },
         timeout: 100
       })
@@ -556,7 +559,7 @@ describe('HTTPClient', () => {
       const recovered = { data: { ok: true }, code: 200, headers: {} }
       const onError = vi.fn(() => recovered)
 
-      const client = new HTTPClient('', { plugins: [{ onError }] })
+      const client = new HTTPClient('', { plugins: [{ name: 'recover', onError }] })
       const res = await client.get('/x')
 
       expect(res).toEqual(recovered)
@@ -570,8 +573,9 @@ describe('HTTPClient', () => {
       const side = vi.fn()
       const client = new HTTPClient('', {
         plugins: [
-          { onError: () => first },
+          { name: 'recover-first', onError: () => first },
           {
+            name: 'recover-second',
             onError: () => {
               side()
               return second
@@ -592,7 +596,7 @@ describe('HTTPClient', () => {
         }
       })
 
-      const client = new HTTPClient('', { plugins: [{ afterRespond }] })
+      const client = new HTTPClient('', { plugins: [{ name: 'retry-loop', afterRespond }] })
 
       await expect(client.get('/loop')).rejects.toMatchObject({
         code: 'RETRY_LIMIT_EXCEEDED',

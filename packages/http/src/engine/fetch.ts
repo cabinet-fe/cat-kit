@@ -228,7 +228,7 @@ export class FetchEngine extends HttpEngine {
     }
 
     if (resolvedType === 'blob') {
-      return new Blob([bytes]) as T
+      return new Blob([bytes as BlobPart]) as T
     }
 
     if (resolvedType === 'arraybuffer') {
