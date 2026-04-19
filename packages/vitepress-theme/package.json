@@ -1,6 +1,6 @@
 {
   "name": "@cat-kit/vitepress-theme",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CatKit 水墨丹青 VitePress 主题",
   "files": [
     "dist",
