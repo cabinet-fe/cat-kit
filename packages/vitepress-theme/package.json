@@ -1,6 +1,6 @@
 {
   "name": "@cat-kit/vitepress-theme",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CatKit 水墨丹青 VitePress 主题",
   "files": [
     "dist",
@@ -34,8 +34,8 @@
     "./styles/theme.css": "./dist/styles/theme.css"
   },
   "dependencies": {
-    "@cat-kit/core": "workspace:*",
-    "@cat-kit/fe": "workspace:*",
+    "@cat-kit/core": "^1.0.2",
+    "@cat-kit/fe": "^1.0.2",
     "lucide-vue-next": "^1.0.0",
     "markdown-it-container": "^4.0.0",
     "shiki": "^4.0.2"
