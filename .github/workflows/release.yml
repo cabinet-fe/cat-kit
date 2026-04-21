@@ -59,6 +59,9 @@ jobs:
       - name: 构建所有包
         run: bun run build:packages
 
+      - name: 规范化 workspace 依赖（供 npm publish 使用）
+        run: bun run scripts/normalize-workspace-dependencies.ts
+
       - name: 发布到 npm 并准备 GitHub Release
         id: changesets
         uses: changesets/action@v1
