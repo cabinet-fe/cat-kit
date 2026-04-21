@@ -35,3 +35,4 @@
 - [x] [更新 agent-context 对应文档](./done/plan-35-20260406/plan.md)
 - [x] [http 插件注册 API 与 engine 结构性收敛](./done/plan-36-20260418/plan.md)
 - [x] [仓库瘦身与前端基础能力重构](./done/plan-37-20260418/plan.md)
+- [x] [基于 Changesets 的按包选择式半自动发布流水线](./done/plan-38-20260421/plan.md)
