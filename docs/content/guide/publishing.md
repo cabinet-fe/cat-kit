@@ -6,7 +6,18 @@ outline: deep
 
 # 发布流程
 
-CatKit 使用「本地选择 + 远端 GitHub Actions」的半自动流水线发布 `@cat-kit/*` 到 npm。本地负责版本升级和推送，远端由 `packages/*/CHANGELOG.md` 的变更自动触发，执行构建、发布、打 tag、建 GitHub Release。
+CatKit 把发布拆成**本地两步**和**远端自动化**：
+
+- **本地**：只负责录入变更（`bun run changeset`）和本地升版本 + 推送（`bun run release`）。
+- **远端**（`.github/workflows/release.yml`）：由 `packages/*/CHANGELOG.md` 路径变更自动触发，负责跑测试、构建、发布到 npm、为每个包打 git tag、创建 GitHub Release（release notes 直接取自 `CHANGELOG.md` 该版本对应的小节）。
+
+**发布范围由 `.changeset/` 下保留的 changeset 决定**：
+
+- 只想发 fixed 组（core/http/fe/be）→ 本轮只保留 fixed 组相关的 changeset。
+- 只想发某个独立包 → 本轮只保留该包的 changeset。
+- 想一起发 → 两边都留着。
+
+这样既不需要本地菜单，也不需要 CI 的 `workflow_dispatch` 输入参数，录入环节就是**唯一**决定发布范围的地方。
 
 ## 录入变更
 
@@ -24,36 +35,29 @@ bun run changeset
 | `minor` | 新增功能、新增公开 API、不破坏既有兼容性 |
 | `major` | 破坏性变更（删除/重命名公开 API、行为不兼容） |
 
-摘要（summary）需包含足够背景以便在 CHANGELOG 中被用户读懂：**改了什么 + 为什么 + 对调用方的影响**。
+摘要（summary）需包含足够背景以便在 CHANGELOG 中被用户读懂：**改了什么 + 为什么 + 对调用方的影响**。摘要会被 `changeset version` 合并进每个包的 `CHANGELOG.md`，并由远端 `changesets/action@v1` 作为每个包 GitHub Release 的正文。
 
 ### fixed 组的自动传染
 
-`@cat-kit/core / http / fe / be` 是 fixed 组，版本号强制同步。为其中任意一个录入 changeset，`changeset version` 会把同一个版本号应用到组内全部 4 个包。**不要手工为组内其它包再写一条 changeset**，避免 version 冲突。
-
-### 纪律：单次只为本轮要发的包录入
-
-本地 `bun run release` 会做「待消费 changeset 影响包集合 == 本轮选择集合」的强一致校验（fixed 组按整体计算）。如果 `.changeset/` 同时存在「独立包 A」和「独立包 B」的 changeset，但本轮只想发 A，则 B 的 changeset 必须先从 `.changeset/` 中移除（或等到下一轮随 B 一起发）。**禁止「默默升无关包」**。
+`@cat-kit/core / http / fe / be` 是 fixed 组，版本号强制同步。为其中任意一个录入 changeset，`changeset version` 会把同一个版本号应用到组内全部 4 个包。**不要手工为组内其它包再写一条 changeset**，以免 version 冲突。
 
 ## 发布流程
 
-仅维护者执行（要求本地已登录 `gh` 并在 main 分支，工作区干净）：
+仅维护者执行（要求本地在 main 分支、工作区干净、未落后于 origin/main）：
 
 ```bash
-bun run release                           # 交互选择
-bun run release --select fixed,cli        # 非交互
-bun run release --dry-run                 # 跑到 version 阶段并回滚
-bun run release --force                   # 允许非 main 分支
+bun run release              # 正常发布
+bun run release --dry-run    # 跑到 version 阶段后回滚（不 commit/push）
+bun run release --force      # 允许非 main 分支
+bun run release --help       # 打印帮助
 ```
 
-本地脚本按 7 个阶段串行：
+本地脚本按 4 个阶段串行：
 
-1. **前置检查**：工作区干净、分支为 `main`（非 main 需 `--force`）、本地未落后于 `origin/main`、存在未消费 changeset、能读到 `gh auth token`（`gh` CLI 仅用于为 `changeset version` 提供 `GITHUB_TOKEN`，以便 `@changesets/changelog-github` 写入 PR/commit 链接；**不再用 `gh workflow run`**）。
-2. **解析 changeset 影响包集合**：扫描 `.changeset/*.md` frontmatter，收集 `@cat-kit/xxx: patch|minor|major`；若命中 fixed 组任一成员则整组展开。
-3. **选择发布范围**：交互式 checkbox 或 `--select <csv>`；可选单元共 5 个（1 个 fixed 组 + 4 个独立包）。
-4. **一致性校验**：`effective` 与 `selected` 必须**严格相等**，否则列出差集并报错退出。
-5. **执行 `changeset version`**：以 `GITHUB_TOKEN` 环境运行；`changelog-github` 自动插入 PR/commit 链接。随后 `bun install` 同步 lockfile。
-6. **提交产物**：`git add .changeset packages package.json bun.lock` → `git commit -m "chore(release): publish <short-names>"`。
-7. **推送**：`git push origin HEAD`。push 后远端 workflow 由 `packages/*/CHANGELOG.md` 路径变更自动触发，脚本打印 commit hash、包列表、Actions 链接即退出。
+1. **前置检查**：工作区干净、分支为 `main`（非 main 需 `--force`）、本地未落后于 `origin/main`、存在未消费 changeset。本地脚本**不依赖** `gh` CLI，也不需要本地 `GITHUB_TOKEN`。
+2. **`changeset version` + `bun install`**：升版本、写 CHANGELOG、更新内部依赖（`workspace:^` → 具体版本号）、同步 `bun.lock`。
+3. **提交产物**：`git add .changeset packages package.json bun.lock` → `git commit -m "chore(release): publish <pkg-short-names>"`。
+4. **推送**：`git push origin HEAD`。push 后远端 workflow 由 `packages/*/CHANGELOG.md` 路径变更自动触发，脚本打印 commit hash 与 Actions 链接即退出。
 
 远端 GitHub Actions 触发条件与执行链路：
 
@@ -92,7 +96,7 @@ push: branches: [main], paths: ['packages/*/CHANGELOG.md']
 
 ### 场景 A：本地脚本在 push 前失败
 
-例如 changeset version 报错、一致性校验失败、`gh` 未登录等。此时尚未产生 commit/push，只需回滚工作区：
+例如 `changeset version` 报错、工作区不干净、本地落后 origin/main 等。此时尚未产生 commit/push，只需回滚工作区：
 
 ```bash
 git restore -- .                  # 撤销未暂存的改动

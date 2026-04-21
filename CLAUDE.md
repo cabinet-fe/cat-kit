@@ -17,10 +17,10 @@ bun --cwd packages/core run test ./test/arr.test.ts
 # 构建所有包
 bun run build
 
-# 录入变更（开发者每次完成功能后执行）
+# 录入变更（开发者每次完成功能后执行；发布范围由本次保留的 changeset 决定）
 bun run changeset
 
-# 发布（维护者执行，交互选择本轮要发的包，触发 GitHub Actions）
+# 发布（维护者执行：跑 `changeset version` + commit + push；其余在 GitHub Actions 中完成）
 bun run release
 
 # 格式化
@@ -95,7 +95,8 @@ cat-kit/
 
 - Monorepo 任务编排：Turborepo
 - 版本管理：Changesets（`fixed` 组：core/http/fe/be 共版本；其它包独立版本）
-- 发布流程：本地 `bun run release`（选包 + `changeset version` + push）→ 远端 Actions 由 `packages/*/CHANGELOG.md` 路径变更自动触发，执行构建与 publish
+- 发布流程：本地仅 `bun run changeset`（录入） + `bun run release`（封装 `changeset version` + commit + push）；远端 Actions 由 `packages/*/CHANGELOG.md` 路径变更自动触发，执行测试/构建/`changeset publish`/打 tag/建 GitHub Release
+- 发布范围：由本轮保留的 changeset 决定——只想发 fixed 组就只留 fixed 组相关 changeset，只想发独立包就只留该包 changeset
 - 构建工具：tsdown（基于 Rolldown）
 - 构建产物输出到各包 `dist/` 目录
 - 各包 `package.json` 的 `exports` 定义了产物和源码双入口

@@ -393,8 +393,8 @@ title: 发布流程
 
 ## 影响范围
 
-- `.changeset/config.json`：`changelog` 切换为 `@changesets/changelog-github`（repo: `cabinet-fe/cat-kit`），`fixed` 配置为 `[["@cat-kit/core","@cat-kit/http","@cat-kit/fe","@cat-kit/be"]]`
-- `package.json`（仓库根）：`scripts` 删除 `version`、`release` 改为 `bun run scripts/release.ts`、新增 `release:publish`；`devDependencies` 新增 `@changesets/changelog-github` 与 `@inquirer/prompts`
+- `.changeset/config.json`：`fixed` 配置为 `[["@cat-kit/core","@cat-kit/http","@cat-kit/fe","@cat-kit/be"]]`；`changelog` 在 patch-2 回退为 `@changesets/cli/changelog`
+- `package.json`（仓库根）：`scripts` 删除 `version`、`release` 改为 `bun run scripts/release.ts`、新增 `release:publish`；`devDependencies` 由 patch-2 移除 `@inquirer/prompts` 与 `@changesets/changelog-github`
 - `packages/be/package.json`：`@cat-kit/core` 依赖迁移到 `workspace:^`
 - `packages/fe/package.json`：`@cat-kit/core` 依赖迁移到 `workspace:^`
 - `packages/http/package.json`：`@cat-kit/core` 依赖迁移到 `workspace:^`
@@ -404,6 +404,7 @@ title: 发布流程
 - `CLAUDE.md`：「常用命令」块的「版本与发布」替换为 `bun run changeset` + `bun run release`；「构建约定」中 `版本与发布：Changesets` 扩写为「版本管理」与「发布流程」两条
 - `AGENTS.md`：同 `CLAUDE.md` 的两处一致变更
 - `docs/content/guide/publishing.md`：新增，包含「录入变更 / 发布流程 / 版本策略 / 故障恢复」四个 H2 小节
+- `.changeset/README.md`：同步新流程说明（patch-2）
 - `bun.lock`：因依赖变更自动同步
 
 未执行的验证项（需要真实 npm 凭证与远端 workflow 触发，本地无法安全完成）：计划步骤 7.1 中涉及真实 `bun run changeset`、`bun run release --select cli` 完整 8 阶段、fixed 组整体升版、错配校验两条 changeset 场景等端到端 checklist。本地已验证：依赖安装、完整 build、完整 test、`docs` 构建生成 `publishing.html`、`scripts/release.ts` 的 `--help`、oxfmt、oxlint、非干净工作区前置检查阻断行为。
@@ -411,3 +412,4 @@ title: 发布流程
 ## 历史补丁
 
 - patch-1: 发布 workflow 由 `gh workflow run` 切换为 push 路径触发
+- patch-2: 简化发布流水线：本地仅 `changeset` + `changeset version`，其余全部归 GitHub Actions
