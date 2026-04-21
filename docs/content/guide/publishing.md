@@ -6,7 +6,7 @@ outline: deep
 
 # 发布流程
 
-CatKit 使用「本地选择 + 远端 GitHub Actions」的半自动流水线发布 `@cat-kit/*` 到 npm。本地负责版本升级和触发，远端负责构建、发布、打 tag、建 GitHub Release。
+CatKit 使用「本地选择 + 远端 GitHub Actions」的半自动流水线发布 `@cat-kit/*` 到 npm。本地负责版本升级和推送，远端由 `packages/*/CHANGELOG.md` 的变更自动触发，执行构建、发布、打 tag、建 GitHub Release。
 
 ## 录入变更
 
@@ -45,27 +45,29 @@ bun run release --dry-run                 # 跑到 version 阶段并回滚
 bun run release --force                   # 允许非 main 分支
 ```
 
-本地脚本按 8 个阶段串行：
+本地脚本按 7 个阶段串行：
 
-1. **前置检查**：工作区干净、分支为 `main`（非 main 需 `--force`）、本地未落后于 `origin/main`、存在未消费 changeset、能读到 `gh auth token`。
+1. **前置检查**：工作区干净、分支为 `main`（非 main 需 `--force`）、本地未落后于 `origin/main`、存在未消费 changeset、能读到 `gh auth token`（`gh` CLI 仅用于为 `changeset version` 提供 `GITHUB_TOKEN`，以便 `@changesets/changelog-github` 写入 PR/commit 链接；**不再用 `gh workflow run`**）。
 2. **解析 changeset 影响包集合**：扫描 `.changeset/*.md` frontmatter，收集 `@cat-kit/xxx: patch|minor|major`；若命中 fixed 组任一成员则整组展开。
 3. **选择发布范围**：交互式 checkbox 或 `--select <csv>`；可选单元共 5 个（1 个 fixed 组 + 4 个独立包）。
 4. **一致性校验**：`effective` 与 `selected` 必须**严格相等**，否则列出差集并报错退出。
 5. **执行 `changeset version`**：以 `GITHUB_TOKEN` 环境运行；`changelog-github` 自动插入 PR/commit 链接。随后 `bun install` 同步 lockfile。
 6. **提交产物**：`git add .changeset packages package.json bun.lock` → `git commit -m "chore(release): publish <short-names>"`。
-7. **推送**：`git push origin HEAD`。
-8. **触发远端 workflow**：`gh workflow run release.yml --ref main -f packages="<csv>"`；打印 commit hash、包列表、Actions 链接。
+7. **推送**：`git push origin HEAD`。push 后远端 workflow 由 `packages/*/CHANGELOG.md` 路径变更自动触发，脚本打印 commit hash、包列表、Actions 链接即退出。
 
-远端 GitHub Actions 执行链路：
+远端 GitHub Actions 触发条件与执行链路：
 
+```text
+push: branches: [main], paths: ['packages/*/CHANGELOG.md']
+  └── checkout → setup-bun → setup-node → bun install --frozen-lockfile
+      → bun run test → bun run build:packages
+      → changesets/action@v1 publish
+              ├── bun run release:publish（= changeset publish）
+              ├── per-pkg git tag（@cat-kit/xxx@x.y.z）并推送
+              └── 为每个 publish 成功的包创建 GitHub Release
 ```
-checkout → setup-bun → setup-node → bun install --frozen-lockfile
-         → bun run test → bun run build:packages
-         → changesets/action@v1 publish
-                 ├── bun run release:publish（= changeset publish）
-                 ├── per-pkg git tag（@cat-kit/xxx@x.y.z）并推送
-                 └── 为每个 publish 成功的包创建 GitHub Release
-```
+
+> **为什么用 paths 过滤而不是 `workflow_dispatch`？** `changeset version` 必然更新 `packages/*/CHANGELOG.md`，这是 release commit 的唯一可靠信号；普通功能提交不会命中这个路径，因此不会白跑 CI。同时 `changesets/action@v1` 的 publish 模式对「无可发布版本」幂等（直接打印 `No unreleased changesets found, creating nothing`），偶发误触发也安全。
 
 ## 版本策略
 
@@ -99,12 +101,12 @@ git reset --hard HEAD             # 彻底回滚到 HEAD（必要时）
 
 修复根因后重新运行 `bun run release`。
 
-### 场景 B：`gh workflow run` 成功但 CI publish 失败
+### 场景 B：push 成功但 CI publish 失败
 
 打开 Actions 页面定位失败 step：
 
 - **多数情况**（npm token 偶发失败、测试偶发 flake 等）：直接点击 **Re-run failed jobs**，不需要重跑 version。本地 commit 中的版本号已固定，重试会在同一组版本号上继续 publish。
-- **需代码修复**：在 `main` 继续提 commit 推动修复，然后在 Actions 页面对同一次 workflow run 点 Re-run，或重新手工触发 `workflow_dispatch`（参数填相同的 `packages` csv）。`.changeset/` 中的 changeset 已被上一步 `version` 消费掉，不需重写，也不需再跑 `bun run release`。
+- **需代码修复**：在 `main` 继续提 commit 推动修复；修复 commit 若恰好再次改动 `packages/*/CHANGELOG.md`（罕见），workflow 会再次自动触发；否则在 Actions 页面对原 run 点 **Re-run failed jobs** 即可。`.changeset/` 中的 changeset 已被上一步 `version` 消费掉，不需重写，也不需再跑 `bun run release`。
 
 ### 场景 C：部分包已 publish 但其余包失败
 

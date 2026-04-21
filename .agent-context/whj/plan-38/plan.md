@@ -409,3 +409,5 @@ title: 发布流程
 未执行的验证项（需要真实 npm 凭证与远端 workflow 触发，本地无法安全完成）：计划步骤 7.1 中涉及真实 `bun run changeset`、`bun run release --select cli` 完整 8 阶段、fixed 组整体升版、错配校验两条 changeset 场景等端到端 checklist。本地已验证：依赖安装、完整 build、完整 test、`docs` 构建生成 `publishing.html`、`scripts/release.ts` 的 `--help`、oxfmt、oxlint、非干净工作区前置检查阻断行为。
 
 ## 历史补丁
+
+- patch-1: 发布 workflow 由 `gh workflow run` 切换为 push 路径触发

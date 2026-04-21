@@ -1,12 +1,10 @@
 name: 发布到 npm
 
 on:
-  workflow_dispatch:
-    inputs:
-      packages:
-        description: '本次发布范围（csv，来自本地 release 脚本；仅用于审计与日志，实际 publish 由 changeset publish 根据 registry 差异决定）'
-        required: true
-        type: string
+  push:
+    branches: [main]
+    paths:
+      - 'packages/*/CHANGELOG.md'
 
 permissions:
   contents: write
@@ -24,9 +22,6 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: 打印本次发布范围
-        run: echo "packages=${{ inputs.packages }}"
 
       - name: 安装 Bun
         uses: oven-sh/setup-bun@v2

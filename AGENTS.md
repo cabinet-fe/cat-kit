@@ -95,7 +95,7 @@ cat-kit/
 
 - Monorepo 任务编排：Turborepo
 - 版本管理：Changesets（`fixed` 组：core/http/fe/be 共版本；其它包独立版本）
-- 发布流程：本地 `bun run release`（选包 + `changeset version` + push）→ `gh workflow run` 触发远端 Actions 执行构建与 publish
+- 发布流程：本地 `bun run release`（选包 + `changeset version` + push）→ 远端 Actions 由 `packages/*/CHANGELOG.md` 路径变更自动触发，执行构建与 publish
 - 构建工具：tsdown（基于 Rolldown）
 - 构建产物输出到各包 `dist/` 目录
 - 各包 `package.json` 的 `exports` 定义了产物和源码双入口

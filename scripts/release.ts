@@ -6,9 +6,10 @@
  * 2. 交互/CLI 指定本轮要发的包范围
  * 3. 强一致校验：待消费 changeset 与本轮选择必须严格相等
  * 4. 本地执行 `changeset version` + commit + push
- * 5. 通过 `gh workflow run release.yml -f packages=...` 触发远端 Actions
  *
- * 远端 Actions 负责构建、测试、`changeset publish`、per-pkg tag、GitHub Release。
+ * push 后，`.github/workflows/release.yml` 监听 main 分支上
+ * `packages/*\/CHANGELOG.md` 的路径变更自动触发；远端 Actions 负责
+ * 构建、测试、`changeset publish`、per-pkg tag、GitHub Release。
  *
  * 用法：
  *   bun run release                        # 交互式
@@ -70,7 +71,7 @@ const SELECTABLE_UNITS: readonly SelectableUnit[] = [
 const UNIT_BY_ID = new Map(SELECTABLE_UNITS.map((u) => [u.id, u]))
 const ALL_PKGS = new Set<string>([...FIXED_GROUP, ...INDEPENDENT_PKGS])
 
-const ROLLBACK_HELP = `\n若触发后 CI 发布失败：\n  1. 在 GitHub Actions 页面重跑该次 workflow run（参数已记录）。\n  2. 若需完全回滚本次本地 commit（CI 尚未 publish）：\n       git reset --hard HEAD~1\n       git push --force-with-lease origin main\n`
+const ROLLBACK_HELP = `\n若 CI 发布失败：\n  1. 在 GitHub Actions 页面重跑该次 workflow run（同一 commit 继续 publish，无需重跑 version）。\n  2. 若需完全回滚本次本地 commit（CI 尚未 publish）：\n       git reset --hard HEAD~1\n       git push --force-with-lease origin main\n`
 
 type CliArgs = { dryRun: boolean; select: string | null; force: boolean; help: boolean }
 
@@ -100,7 +101,7 @@ function printHelp(): void {
   console.log(`用法：bun run release [flags]
 
 flags：
-  --dry-run              走完前置 1-5 阶段后回滚（不 commit/push/触发 CI）
+  --dry-run              走完前置 1-5 阶段后回滚（不 commit/push）
   --select <csv>         非交互式指定单元 id，如 fixed,cli
   --force                允许非 main 分支执行
   -h, --help             打印本帮助
@@ -327,7 +328,7 @@ async function main(): Promise<void> {
     return
   }
 
-  console.log('[release] 阶段 1/8：前置检查')
+  console.log('[release] 阶段 1/7：前置检查')
   await ensureCleanWorkTree()
   await ensureBranchOk(args.force)
   await ensureUpToDate()
@@ -339,23 +340,23 @@ async function main(): Promise<void> {
 
   const token = await resolveGhToken()
 
-  console.log('[release] 阶段 2/8：解析 changeset 影响包集合')
+  console.log('[release] 阶段 2/7：解析 changeset 影响包集合')
   const affected = await resolveAffectedPkgs(changesetFiles)
   if (!affected.size) {
     fatal('解析 changeset 未得到任何 @cat-kit/* 包，请检查文件 frontmatter')
   }
   printSet('影响包（fixed 组已展开）', affected)
 
-  console.log('[release] 阶段 3/8：选择发布范围')
+  console.log('[release] 阶段 3/7：选择发布范围')
   const affectedUnits = unitsForPkgs(affected)
   const selected = await chooseSelection(affectedUnits, args.select)
   printSet('本轮选择', selected)
 
-  console.log('[release] 阶段 4/8：一致性校验')
+  console.log('[release] 阶段 4/7：一致性校验')
   ensureConsistency(affected, selected)
   console.log('[release] ✓ 选择与 changeset 影响包集合一致')
 
-  console.log('[release] 阶段 5/8：执行 changeset version')
+  console.log('[release] 阶段 5/7：执行 changeset version')
   const versionCode = runInherit('bunx', ['changeset', 'version'], { GITHUB_TOKEN: token })
   if (versionCode !== 0) fatal('`changeset version` 失败')
 
@@ -363,7 +364,7 @@ async function main(): Promise<void> {
   if (installCode !== 0) fatal('`bun install` 失败')
 
   if (args.dryRun) {
-    console.log('[release] (dry-run) 阶段 6-8 跳过，回滚本地变更')
+    console.log('[release] (dry-run) 阶段 6-7 跳过，回滚本地变更')
     const restore = runInherit('git', ['restore', '--', '.'])
     if (restore !== 0) {
       console.warn('[release] ! git restore 失败，请手动检查工作区')
@@ -371,7 +372,7 @@ async function main(): Promise<void> {
     return
   }
 
-  console.log('[release] 阶段 6/8：提交产物')
+  console.log('[release] 阶段 6/7：提交产物')
   const title = commitTitleFor(selected)
   const addCode = runInherit('git', ['add', '.changeset', 'packages', 'package.json', 'bun.lock'])
   if (addCode !== 0) fatal('git add 失败')
@@ -384,26 +385,16 @@ async function main(): Promise<void> {
   const commit = runInherit('git', ['commit', '-m', title])
   if (commit !== 0) fatal('git commit 失败')
 
-  console.log('[release] 阶段 7/8：推送')
+  console.log('[release] 阶段 7/7：推送（push 后远端 Actions 自动触发）')
   const push = runInherit('git', ['push', 'origin', 'HEAD'])
   if (push !== 0) fatal('git push 失败')
 
-  console.log('[release] 阶段 8/8：触发远端 workflow')
   const packagesArg = [...selected].sort().join(',')
-  const trigger = runInherit('gh', [
-    'workflow',
-    'run',
-    'release.yml',
-    '--ref',
-    'main',
-    '-f',
-    `packages=${packagesArg}`
-  ])
-  if (trigger !== 0) fatal('`gh workflow run release.yml` 失败')
-
   const head = runCapture('git', ['rev-parse', '--short', 'HEAD'])
   const sha = head.stdout.trim()
-  console.log(`\n✓ 已触发发布流水线`)
+  console.log(
+    `\n✓ 已推送发布 commit，远端 release workflow 将由 packages/*/CHANGELOG.md 变更自动触发`
+  )
   console.log(`  分支:   main`)
   console.log(`  提交:   ${sha}`)
   console.log(`  包:     ${packagesArg}`)
