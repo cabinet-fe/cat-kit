@@ -1,5 +1,11 @@
 # @cat-kit/agent-context
 
+## 2.0.0
+
+### Major Changes
+
+- b0c2948: 修复技能脚本缺失问题
+
 ## 1.4.5
 
 ### Patch Changes
