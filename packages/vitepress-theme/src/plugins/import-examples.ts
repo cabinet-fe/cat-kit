@@ -35,9 +35,21 @@ export function importExamples(options: ImportExamplesOptions): Plugin {
             ${importExpressions.join('\n')}
             </script>`
 
-        code = `${script}\n${code}`
+        code = insertScriptAfterFrontmatter(code, script)
       }
       return code
     }
   }
+}
+
+function insertScriptAfterFrontmatter(code: string, script: string) {
+  const frontmatterMatch = code.match(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/)
+
+  if (!frontmatterMatch) {
+    return `${script}\n${code}`
+  }
+
+  const frontmatter = frontmatterMatch[0]
+  const rest = code.slice(frontmatter.length)
+  return `${frontmatter}${script}\n${rest}`
 }

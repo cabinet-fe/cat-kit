@@ -6,3 +6,5 @@ npm `exports` 中与类型相关的主要入口：
 
 - `.` → `dist/index.js` / `dist/index.d.ts`
 - `./config` → 主题配置侧代码（部分类型可能仍指向源码发布字段，以 `generated` 镜像为准）
+
+`./config` 提供的 `importExamples` 用于给 `::: demo` 页面自动注入示例组件导入，并且会保留 Markdown 顶部 frontmatter 的解析位置。

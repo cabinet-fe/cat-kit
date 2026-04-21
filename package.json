@@ -22,8 +22,8 @@
     "typecheck": "turbo run typecheck",
     "format": "bunx oxfmt --write .",
     "changeset": "changeset",
-    "version": "changeset version",
-    "release": "changeset publish",
+    "release": "bun run scripts/release.ts",
+    "release:publish": "changeset publish",
     "update": "bun update -i -r",
     "sync-cat-kit-skills-api": "bun run scripts/sync-cat-kit-skills-api.ts",
     "sync-cat-kit-skills-api:build": "bun run scripts/sync-cat-kit-skills-api.ts -- --build",
@@ -31,7 +31,9 @@
     "sync-use-cat-kit-api:build": "bun run scripts/sync-cat-kit-skills-api.ts -- --build"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.6.0",
     "@changesets/cli": "^2.29.6",
+    "@inquirer/prompts": "^8.4.2",
     "@tsdown/css": "^0.21.7",
     "@types/bun": "^1.3.11",
     "@types/node": "^24.12.0",

@@ -1,8 +1,11 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
-  "changelog": "@changesets/cli/changelog",
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "cabinet-fe/cat-kit" }
+  ],
   "commit": false,
-  "fixed": [],
+  "fixed": [["@cat-kit/core", "@cat-kit/http", "@cat-kit/fe", "@cat-kit/be"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",

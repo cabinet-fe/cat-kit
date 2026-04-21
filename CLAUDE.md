@@ -17,9 +17,11 @@ bun --cwd packages/core run test ./test/arr.test.ts
 # 构建所有包
 bun run build
 
-# 版本与发布
+# 录入变更（开发者每次完成功能后执行）
 bun run changeset
-bun run version
+
+# 发布（维护者执行，交互选择本轮要发的包，触发 GitHub Actions）
+bun run release
 
 # 格式化
 bunx oxfmt --write .
@@ -92,7 +94,8 @@ cat-kit/
 ## 构建约定
 
 - Monorepo 任务编排：Turborepo
-- 版本与发布：Changesets
+- 版本管理：Changesets（`fixed` 组：core/http/fe/be 共版本；其它包独立版本）
+- 发布流程：本地 `bun run release`（选包 + `changeset version` + push）→ `gh workflow run` 触发远端 Actions 执行构建与 publish
 - 构建工具：tsdown（基于 Rolldown）
 - 构建产物输出到各包 `dist/` 目录
 - 各包 `package.json` 的 `exports` 定义了产物和源码双入口

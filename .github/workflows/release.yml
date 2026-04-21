@@ -1,0 +1,66 @@
+name: 发布到 npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: '本次发布范围（csv，来自本地 release 脚本；仅用于审计与日志，实际 publish 由 changeset publish 根据 registry 差异决定）'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 打印本次发布范围
+        run: echo "packages=${{ inputs.packages }}"
+
+      - name: 安装 Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: 安装 Node.js（供 npm publish 使用）
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: 缓存 Bun 依赖
+        uses: actions/cache@v5
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: 安装依赖
+        run: bun install --frozen-lockfile
+
+      - name: 运行测试
+        run: bun run test
+
+      - name: 构建所有包
+        run: bun run build:packages
+
+      - name: 发布到 npm 并创建 GitHub Release
+        uses: changesets/action@v1
+        with:
+          publish: bun run release:publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

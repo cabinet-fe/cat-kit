@@ -23,7 +23,7 @@
     }
   },
   "dependencies": {
-    "@cat-kit/core": "^1.0.2"
+    "@cat-kit/core": "workspace:^"
   },
   "devDependencies": {
     "@cat-kit/tsconfig": "workspace:*"

@@ -1,6 +1,6 @@
 ---
 title: 浏览器调试示例
-description: 在浏览器中直接调试 @cat-kit/http 的请求与插件能力
+description: '在浏览器中直接调试 @cat-kit/http 的请求与插件能力'
 sidebarOrder: 4
 ---
 

@@ -72,6 +72,8 @@ defineThemeConfig(options: { examplesDir: string }): Partial<UserConfig>
 - `md.use(mermaidPlugin)`
 - `vite.plugins = [importExamples({ examplesDir })]`
 
+其中 `importExamples` 会自动为 `::: demo` 语法注入对应的 Vue 示例组件导入，同时保留 Markdown 文件顶部的 frontmatter，不会影响 `title`、`description` 等页面元信息解析。
+
 ### 按需导出
 
 ```ts
