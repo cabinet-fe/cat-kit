@@ -1,0 +1,10 @@
+{
+  "extends": "@cat-kit/tsconfig/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node", "vitest/globals"],
+    "tsBuildInfoFile": "./node_modules/.cache/test.tsbuildinfo"
+  },
+  "include": ["packages/**/*.test.ts"],
+  "exclude": []
+}

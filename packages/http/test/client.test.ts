@@ -323,7 +323,9 @@ describe('HTTPClient', () => {
         }
       })
 
-      const client = new HTTPClient('/api', { plugins: [{ name: 'before-request', beforeRequest }] })
+      const client = new HTTPClient('/api', {
+        plugins: [{ name: 'before-request', beforeRequest }]
+      })
 
       await client.get('/users')
 

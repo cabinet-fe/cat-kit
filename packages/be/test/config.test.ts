@@ -25,7 +25,9 @@ describe('@cat-kit/be 配置工具', () => {
       PORT: { type: 'number', default: 3000 },
       TAGS: { type: 'array', delimiter: ';', default: [] as string[] },
       META: { type: 'json', default: { foo: 'bar' } }
-    }
+    } satisfies Parameters<
+      typeof parseEnv<{ ENABLED: boolean; PORT: number; TAGS: string[]; META: { foo: string } }>
+    >[0]
 
     const source = { ENABLED: 'true', PORT: '8080', TAGS: 'a;b;c', META: '{"foo":"baz"}' }
 
@@ -48,7 +50,7 @@ describe('@cat-kit/be 配置工具', () => {
   })
 
   it('应该深度合并配置对象', () => {
-    const result = mergeConfig(
+    const result = mergeConfig<{ foo: { value?: number; extra?: boolean }; arr: number[] }>(
       { foo: { value: 1 }, arr: [1, 2] },
       { foo: { extra: true }, arr: [3] }
     )

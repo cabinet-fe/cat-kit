@@ -9,7 +9,7 @@ outline: deep
 CatKit 把发布拆成**本地两步**和**远端自动化**：
 
 - **本地**：只负责录入变更（`bun run changeset`）和本地升版本 + 推送（`bun run release`）。
-- **远端**（`.github/workflows/release.yml`）：由 `packages/*/CHANGELOG.md` 路径变更自动触发，负责跑测试、构建、发布到 npm、为每个包打 git tag、创建 GitHub Release（release notes 直接取自 `CHANGELOG.md` 该版本对应的小节）。
+- **远端**（`.github/workflows/release.yml`）：由 `packages/*/CHANGELOG.md` 路径变更自动触发，负责跑测试、构建、发布到 npm、为每个包打 git tag，并按仓库规则创建 GitHub Release（独立包各 1 条，fixed 组聚合为 1 条）。
 
 **发布范围由 `.changeset/` 下保留的 changeset 决定**：
 
@@ -35,7 +35,7 @@ bun run changeset
 | `minor` | 新增功能、新增公开 API、不破坏既有兼容性 |
 | `major` | 破坏性变更（删除/重命名公开 API、行为不兼容） |
 
-摘要（summary）需包含足够背景以便在 CHANGELOG 中被用户读懂：**改了什么 + 为什么 + 对调用方的影响**。摘要会被 `changeset version` 合并进每个包的 `CHANGELOG.md`，并由远端 `changesets/action@v1` 作为每个包 GitHub Release 的正文。
+摘要（summary）需包含足够背景以便在 CHANGELOG 中被用户读懂：**改了什么 + 为什么 + 对调用方的影响**。摘要会被 `changeset version` 合并进各包 `CHANGELOG.md`，远端 release 脚本会直接读取对应版本小节来生成 GitHub Release 正文。
 
 ### fixed 组的自动传染
 
@@ -66,9 +66,11 @@ push: branches: [main], paths: ['packages/*/CHANGELOG.md']
   └── checkout → setup-bun → setup-node → bun install --frozen-lockfile
       → bun run test → bun run build:packages
       → changesets/action@v1 publish
-              ├── bun run release:publish（= changeset publish）
+              ├── changeset publish
               ├── per-pkg git tag（@cat-kit/xxx@x.y.z）并推送
-              └── 为每个 publish 成功的包创建 GitHub Release
+              └── 仓库脚本创建 GitHub Release
+                      ├── fixed 组聚合为 1 条（tag: cat-kit-fixed@x.y.z）
+                      └── 独立包按包各 1 条
 ```
 
 > **为什么用 paths 过滤而不是 `workflow_dispatch`？** `changeset version` 必然更新 `packages/*/CHANGELOG.md`，这是 release commit 的唯一可靠信号；普通功能提交不会命中这个路径，因此不会白跑 CI。同时 `changesets/action@v1` 的 publish 模式对「无可发布版本」幂等（直接打印 `No unreleased changesets found, creating nothing`），偶发误触发也安全。
@@ -79,6 +81,12 @@ push: branches: [main], paths: ['packages/*/CHANGELOG.md']
 |------|------|------|
 | **fixed 组** | `@cat-kit/core`、`@cat-kit/http`、`@cat-kit/fe`、`@cat-kit/be` | 版本号必须一致，单包 changeset 会整组升级 |
 | **独立包** | `@cat-kit/cli`、`@cat-kit/agent-context`、`@cat-kit/vitepress-theme`、`@cat-kit/tsconfig` | 各自独立版本号 |
+
+### GitHub Release 规则
+
+- fixed 组仍然保留 4 个 package tag（如 `@cat-kit/core@1.0.4`），以保持 npm 与源码 tag 的一一对应。
+- GitHub Releases 页面只保留 **1 条 fixed 组 release**，聚合 tag 为 `cat-kit-fixed@<version>`，正文按 `core/http/fe/be` 顺序拼接同版本 changelog。
+- 独立包继续使用各自的 package tag 创建 release。
 
 内部依赖统一使用 **`workspace:^`** 协议，在 `changeset version` 时会被替换为实际版本号。例如 `@cat-kit/http` 的 `dependencies` 中：
 

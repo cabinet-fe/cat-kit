@@ -16,7 +16,12 @@ describe('并行处理函数', () => {
     })
 
     it('应该处理不同返回类型', async () => {
-      const tasks = [() => 'string', () => 123, () => ({ key: 'value' }), () => [1, 2, 3]]
+      const tasks: Array<() => unknown> = [
+        () => 'string',
+        () => 123,
+        () => ({ key: 'value' }),
+        () => [1, 2, 3]
+      ]
 
       const results = await parallel(tasks)
       expect(results).toEqual(['string', 123, { key: 'value' }, [1, 2, 3]])

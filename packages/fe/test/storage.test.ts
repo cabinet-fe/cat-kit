@@ -56,8 +56,7 @@ describe('storage', () => {
     storage.local
       .set(TOKEN, 'meow')
       .set(COUNT, 3)
-      // @ts-expect-error: 函数类型应被忽略
-      .set('fn', () => 'nope')
+      .set('fn' as any, (() => 'nope') as any)
 
     expect(storage.local.get([TOKEN, COUNT])).toEqual(['meow', 3])
     expect(memory.length).toBe(2)

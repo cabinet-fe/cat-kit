@@ -2,6 +2,17 @@ import { dfs, bfs, TreeNode, TreeManager, type ITreeNode } from '@cat-kit/core/s
 import { describe, it, expect } from 'vitest'
 
 type DataItem = { id: number; name?: string; type?: string; children?: DataItem[] }
+type DefaultTreeNode = TreeNode<DataItem> & Record<string, unknown>
+type InterfaceTreeNode = ITreeNode<DataItem> & Record<string, unknown>
+type ItemTreeData = { id: number; items?: ItemTreeData[] }
+type ItemTreeNode = TreeNode<ItemTreeData> & Record<string, unknown>
+
+function createTree(data: DataItem) {
+  return new TreeManager<DataItem, DefaultTreeNode>(data, {
+    createNode: (d, index, depth, parent) =>
+      new TreeNode<DataItem, any>(d, index, depth, parent as any) as DefaultTreeNode
+  })
+}
 
 describe('树结构', () => {
   describe('dfs - 深度优先遍历函数', () => {
@@ -312,9 +323,7 @@ describe('树结构', () => {
         ]
       }
 
-      const tree = new TreeManager(data, {
-        createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-      })
+      const tree = createTree(data)
 
       expect(tree.root).toBeInstanceOf(TreeNode)
       expect(tree.root.data.id).toBe(1)
@@ -326,8 +335,8 @@ describe('树结构', () => {
     it('应该使用 ITreeNode 接口创建节点', () => {
       const data: DataItem = { id: 1, children: [{ id: 2 }, { id: 3 }] }
 
-      const tree = new TreeManager(data, {
-        createNode: (data, index, depth, parent): ITreeNode<DataItem> => ({
+      const tree = new TreeManager<DataItem, InterfaceTreeNode>(data, {
+        createNode: (data, index, depth, parent): InterfaceTreeNode => ({
           data,
           index,
           depth,
@@ -347,9 +356,7 @@ describe('树结构', () => {
     it('构建的节点应该有正确的 depth 和 parent', () => {
       const data: DataItem = { id: 1, children: [{ id: 2, children: [{ id: 3 }] }] }
 
-      const tree = new TreeManager(data, {
-        createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-      })
+      const tree = createTree(data)
 
       expect(tree.root.depth).toBe(0)
       expect(tree.root.children![0]!.depth).toBe(1)
@@ -360,10 +367,11 @@ describe('树结构', () => {
     })
 
     it('应该支持自定义 childrenKey', () => {
-      const data = { id: 1, items: [{ id: 2 }, { id: 3 }] }
+      const data: ItemTreeData = { id: 1, items: [{ id: 2 }, { id: 3 }] }
 
-      const tree = new TreeManager(data, {
-        createNode: (d, index, depth, parent) => new TreeNode(d as DataItem, index, depth, parent),
+      const tree = new TreeManager<ItemTreeData, ItemTreeNode>(data, {
+        createNode: (d, index, depth, parent) =>
+          new TreeNode<ItemTreeData, any>(d, index, depth, parent as any) as ItemTreeNode,
         childrenKey: 'items'
       })
 
@@ -374,9 +382,7 @@ describe('树结构', () => {
       it('应该深度优先遍历', () => {
         const data: DataItem = { id: 1, children: [{ id: 2, children: [{ id: 4 }] }, { id: 3 }] }
 
-        const tree = new TreeManager(data, {
-          createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-        })
+        const tree = createTree(data)
 
         const visited: number[] = []
         tree.dfs((node) => {
@@ -391,9 +397,7 @@ describe('树结构', () => {
       it('应该广度优先遍历', () => {
         const data: DataItem = { id: 1, children: [{ id: 2, children: [{ id: 4 }] }, { id: 3 }] }
 
-        const tree = new TreeManager(data, {
-          createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-        })
+        const tree = createTree(data)
 
         const visited: number[] = []
         tree.bfs((node) => {
@@ -408,9 +412,7 @@ describe('树结构', () => {
       it('应该查找节点', () => {
         const data: DataItem = { id: 1, children: [{ id: 2 }, { id: 3, children: [{ id: 4 }] }] }
 
-        const tree = new TreeManager(data, {
-          createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-        })
+        const tree = createTree(data)
         const found = tree.find((node) => node.data.id === 4)
 
         expect(found).not.toBeNull()
@@ -419,9 +421,7 @@ describe('树结构', () => {
 
       it('应该返回 null 当未找到节点', () => {
         const data: DataItem = { id: 1, children: [{ id: 2 }] }
-        const tree = new TreeManager(data, {
-          createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-        })
+        const tree = createTree(data)
         const found = tree.find((node) => node.data.id === 999)
 
         expect(found).toBeNull()
@@ -440,9 +440,7 @@ describe('树结构', () => {
           ]
         }
 
-        const tree = new TreeManager(data, {
-          createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-        })
+        const tree = createTree(data)
         const files = tree.findAll((node) => node.data.type === 'file')
 
         expect(files).toHaveLength(2)
@@ -454,9 +452,7 @@ describe('树结构', () => {
       it('应该扁平化节点', () => {
         const data: DataItem = { id: 1, children: [{ id: 2 }, { id: 3, children: [{ id: 4 }] }] }
 
-        const tree = new TreeManager(data, {
-          createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-        })
+        const tree = createTree(data)
         const flattened = tree.flatten()
 
         expect(flattened).toHaveLength(4)
@@ -473,9 +469,7 @@ describe('树结构', () => {
           ]
         }
 
-        const tree = new TreeManager(data, {
-          createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-        })
+        const tree = createTree(data)
         const files = tree.flatten((node) => node.data.type === 'file')
 
         expect(files).toHaveLength(2)
@@ -490,9 +484,7 @@ describe('树结构', () => {
           children: [{ id: 2 }, { id: 3, children: [{ id: 4 }, { id: 5 }] }]
         }
 
-        const tree = new TreeManager(data, {
-          createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-        })
+        const tree = createTree(data)
         const leaves = tree.getLeaves()
 
         expect(leaves).toHaveLength(3)
@@ -510,9 +502,7 @@ describe('树结构', () => {
           ]
         }
 
-        const tree = new TreeManager(data, {
-          createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-        })
+        const tree = createTree(data)
 
         const depth0 = tree.getNodesAtDepth(0)
         const depth1 = tree.getNodesAtDepth(1)
@@ -531,9 +521,7 @@ describe('树结构', () => {
           children: [{ id: 2 }, { id: 3, children: [{ id: 4, children: [{ id: 5 }] }] }]
         }
 
-        const tree = new TreeManager(data, {
-          createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-        })
+        const tree = createTree(data)
 
         expect(tree.getMaxDepth()).toBe(3)
       })
@@ -541,23 +529,27 @@ describe('树结构', () => {
       it('单节点树的最大深度应为 0', () => {
         const data: DataItem = { id: 1 }
 
-        const tree = new TreeManager(data, {
-          createNode: (d, index, depth, parent) => new TreeNode(d, index, depth, parent)
-        })
+        const tree = createTree(data)
 
         expect(tree.getMaxDepth()).toBe(0)
       })
     })
 
     describe('增量更新方法（虚拟滚动优化）', () => {
-      interface ExpandableNode extends TreeNode<DataItem> {
+      interface ExpandableNode extends TreeNode<DataItem, ExpandableNode> {
+        [key: string]: unknown
         expanded: boolean
       }
 
       function createExpandableTree(data: DataItem) {
-        return new TreeManager(data, {
+        return new TreeManager<DataItem, ExpandableNode>(data, {
           createNode: (d, index, depth, parent): ExpandableNode => {
-            const node = new TreeNode(d, index, depth, parent) as ExpandableNode
+            const node = new TreeNode<DataItem, ExpandableNode>(
+              d,
+              index,
+              depth,
+              parent
+            ) as ExpandableNode
             node.expanded = false
             return node
           }

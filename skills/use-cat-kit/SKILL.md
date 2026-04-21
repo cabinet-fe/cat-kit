@@ -27,4 +27,4 @@ description: >
 - `bun run sync-cat-kit-skills-api` — 仅复制（需各包已有 `dist`）
 - `bun run sync-cat-kit-skills-api:build` — 先 tsdown / tsc 再复制
 
-脚本：`scripts/sync-cat-kit-skills-api.ts`。兼容别名：`sync-use-cat-kit-api` / `sync-use-cat-kit-api:build`。
+脚本：`scripts/sync-cat-kit-skills-api.ts`。

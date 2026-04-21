@@ -95,7 +95,7 @@ cat-kit/
 
 - Monorepo 任务编排：Turborepo
 - 版本管理：Changesets（`fixed` 组：core/http/fe/be 共版本；其它包独立版本）
-- 发布流程：本地仅 `bun run changeset`（录入） + `bun run release`（封装 `changeset version` + commit + push）；远端 Actions 由 `packages/*/CHANGELOG.md` 路径变更自动触发，执行测试/构建/`changeset publish`/打 tag/建 GitHub Release
+- 发布流程：本地仅 `bun run changeset`（录入） + `bun run release`（封装 `changeset version` + commit + push）；远端 Actions 由 `packages/*/CHANGELOG.md` 路径变更自动触发，执行测试/构建/`changeset publish`/打 tag，并创建 GitHub Release（独立包各 1 条，fixed 组聚合 1 条）
 - 发布范围：由本轮保留的 changeset 决定——只想发 fixed 组就只留 fixed 组相关 changeset，只想发独立包就只留该包 changeset
 - 构建工具：tsdown（基于 Rolldown）
 - 构建产物输出到各包 `dist/` 目录
@@ -105,7 +105,7 @@ cat-kit/
 
 `skills/use-cat-kit/SKILL.md` 为**路由**：按正在使用的 npm 包打开 `skills/cat-kit-<短名>/`（共 8 个子技能）。各子技能内 **`generated/`** 与 npm 发布物对齐（多数为 `dist` 下 `.d.ts`；`@cat-kit/tsconfig` 为 JSON 预设）。
 
-**刷新（仓库根）**：`bun run sync-cat-kit-skills-api` 或 `bun run sync-cat-kit-skills-api:build`（兼容别名 `sync-use-cat-kit-api` / `:build`）。脚本：`scripts/sync-cat-kit-skills-api.ts`。
+**刷新（仓库根）**：`bun run sync-cat-kit-skills-api` 或 `bun run sync-cat-kit-skills-api:build`。脚本：`scripts/sync-cat-kit-skills-api.ts`。
 
 - **路由**：`skills/use-cat-kit/SKILL.md`
 - **子技能**：`skills/cat-kit-core/`、`cat-kit-http/`、`cat-kit-fe/`、`cat-kit-be/`、`cat-kit-agent-context/`、`cat-kit-cli/`、`cat-kit-tsconfig/`、`cat-kit-vitepress-theme/`（各含 `SKILL.md`、`generated/`、`references/` 或等价索引、`examples.md`）
@@ -115,5 +115,5 @@ cat-kit/
 
 - `@cat-kit/core` **禁止添加任何外部依赖**
 - Node.js 内置模块使用 `node:` 协议导入
-- 子包需要基础工具函数时从 `@cat-kit/core` 导入，禁止重复实现
+- 子包需要基础工具函数时优先从 `@cat-kit/core` 导入，禁止重复实现
 - 任何 `packages/<pkg>` 的功能变更，都必须在同一轮修改中同步更新对应的 `docs/content/packages/<pkg>/` 文档，以及 `<root>/skills` 下该包对应的供真实项目使用的技能内容；不要只改代码不改文档和技能

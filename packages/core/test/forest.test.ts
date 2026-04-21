@@ -12,7 +12,7 @@ describe('森林结构', () => {
           new ForestNode(data, index, depth, forest, parent)
       })
 
-      const data = { id: 1, name: 'root' }
+      const data: DataItem = { id: 1, name: 'root' }
       const node = new ForestNode(data, 0, 0, forest)
 
       expect(node.data).toBe(data)

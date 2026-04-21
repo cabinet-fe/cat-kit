@@ -51,11 +51,22 @@ jobs:
       - name: 构建所有包
         run: bun run build:packages
 
-      - name: 发布到 npm 并创建 GitHub Release
+      - name: 发布到 npm 并准备 GitHub Release
+        id: changesets
         uses: changesets/action@v1
         with:
-          publish: bun run release:publish
+          publish: changeset publish
+          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: 创建聚合 GitHub Release
+        if: steps.changesets.outputs.published == 'true'
+        run: bun run scripts/create-github-releases.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          CHANGESETS_PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
