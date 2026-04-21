@@ -19,7 +19,7 @@ import {
   isNull,
   isUndef,
   isEmpty
-} from '@cat-kit/core/src'
+} from '@cat-kit/core'
 import { describe, it, expect } from 'vitest'
 
 describe('类型判断函数', () => {

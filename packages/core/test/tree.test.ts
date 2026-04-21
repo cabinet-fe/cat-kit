@@ -1,4 +1,4 @@
-import { dfs, bfs, TreeNode, TreeManager, type ITreeNode } from '@cat-kit/core/src'
+import { dfs, bfs, TreeNode, TreeManager, type ITreeNode } from '@cat-kit/core'
 import { describe, it, expect } from 'vitest'
 
 type DataItem = { id: number; name?: string; type?: string; children?: DataItem[] }

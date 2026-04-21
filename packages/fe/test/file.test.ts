@@ -1,4 +1,4 @@
-import { saveBlob, readChunks } from '@cat-kit/fe/src'
+import { saveBlob, readChunks } from '@cat-kit/fe'
 import { describe, it, expect, vi, afterAll } from 'vitest'
 
 const originalDocument = globalThis.document

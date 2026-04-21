@@ -1,4 +1,4 @@
-import { parallel } from '@cat-kit/core/src'
+import { parallel } from '@cat-kit/core'
 import { describe, it, expect } from 'vitest'
 
 describe('并行处理函数', () => {

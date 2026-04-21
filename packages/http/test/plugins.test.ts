@@ -3,8 +3,8 @@ import {
   HTTPMethodOverridePlugin as MethodOverridePlugin,
   RetryPlugin,
   HTTPTokenPlugin as TokenPlugin
-} from '@cat-kit/http/src'
-import type { RequestConfig } from '@cat-kit/http/src'
+} from '@cat-kit/http'
+import type { RequestConfig } from '@cat-kit/http'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
 const mockFetch = vi.fn()

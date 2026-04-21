@@ -1,4 +1,4 @@
-import { o } from '@cat-kit/core/src'
+import { o } from '@cat-kit/core'
 import { describe, it, expect, vi } from 'vitest'
 
 describe('对象工具函数', () => {

@@ -1,4 +1,4 @@
-import { Observable } from '@cat-kit/core/src'
+import { Observable } from '@cat-kit/core'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 interface TestState {

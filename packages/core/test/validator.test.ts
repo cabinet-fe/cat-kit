@@ -1,12 +1,4 @@
-import {
-  object,
-  optional,
-  vString,
-  vNumber,
-  vBoolean,
-  vDate,
-  ValidationError
-} from '@cat-kit/core/src'
+import { object, optional, vString, vNumber, vBoolean, vDate, ValidationError } from '@cat-kit/core'
 import { describe, it, expect } from 'vitest'
 
 describe('Validator', () => {

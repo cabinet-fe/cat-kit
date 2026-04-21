@@ -1,4 +1,4 @@
-import { safeRun } from '@cat-kit/core/src'
+import { safeRun } from '@cat-kit/core'
 import { describe, it, expect } from 'vitest'
 
 describe('安全执行函数', () => {

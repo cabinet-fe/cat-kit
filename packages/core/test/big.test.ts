@@ -1,4 +1,4 @@
-import { Big, createBigConstructor } from '@cat-kit/core/src'
+import { Big, createBigConstructor } from '@cat-kit/core'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 const DEFAULTS = { DP: Big.DP, RM: Big.RM, NE: Big.NE, PE: Big.PE }

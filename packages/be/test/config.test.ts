@@ -2,7 +2,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { loadConfig, loadEnv, mergeConfig, parseEnv } from '@cat-kit/be/src'
+import { loadConfig, loadEnv, mergeConfig, parseEnv } from '@cat-kit/be'
 
 describe('@cat-kit/be 配置工具', () => {
   let tempDir: string

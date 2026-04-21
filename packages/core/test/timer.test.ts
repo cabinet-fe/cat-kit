@@ -1,4 +1,4 @@
-import { debounce, throttle, sleep } from '@cat-kit/core/src'
+import { debounce, throttle, sleep } from '@cat-kit/core'
 import { describe, it, expect, vi } from 'vitest'
 
 describe('定时器工具函数', () => {

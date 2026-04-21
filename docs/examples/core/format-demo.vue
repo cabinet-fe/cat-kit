@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import { date } from '@cat-kit/core/src'
+import { date } from '@cat-kit/core'
 import { ref, computed } from 'vue'
 
 const dateInput = ref(new Date().toISOString().slice(0, 16))

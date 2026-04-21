@@ -9,17 +9,17 @@
     "dist"
   ],
   "type": "module",
+  "exports": {
+    "./*": {
+      "import": "./src/*.ts",
+      "types": "./src/*.ts"
+    }
+  },
   "scripts": {
     "build": "tsdown",
     "lint": "bunx oxlint .",
     "test": "bunx vitest run --globals",
     "typecheck": "bunx tsc -p tsconfig.json --noEmit"
-  },
-  "exports": {
-    "./src/*": {
-      "import": "./src/*.ts",
-      "types": "./src/*.ts"
-    }
   },
   "dependencies": {
     "commander": "^14.0.3"

@@ -28,8 +28,8 @@
 </template>
 
 <script lang="ts" setup>
-import { HTTPClient } from '@cat-kit/http/src'
-import type { ClientPlugin } from '@cat-kit/http/src'
+import { HTTPClient } from '@cat-kit/http'
+import type { ClientPlugin } from '@cat-kit/http'
 import { Dialog, Snackbar } from '@varlet/ui'
 import { ref } from 'vue'
 

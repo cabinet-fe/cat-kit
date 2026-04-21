@@ -127,7 +127,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Dater } from '@cat-kit/core/src'
+import { Dater } from '@cat-kit/core'
 import { ref, computed } from 'vue'
 
 const dateString = ref('2024-03-15 14:30:00')

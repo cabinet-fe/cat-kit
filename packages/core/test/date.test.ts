@@ -1,4 +1,4 @@
-import { date, Dater } from '@cat-kit/core/src'
+import { date, Dater } from '@cat-kit/core'
 import { describe, it, expect, beforeEach } from 'vitest'
 
 describe('Dater', () => {

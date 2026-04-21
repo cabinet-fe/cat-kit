@@ -1,9 +1,6 @@
-import { Tween, tweenEasings, type TweenScheduler } from '@cat-kit/fe/src'
+import { Tween, tweenEasings, type TweenScheduler } from '@cat-kit/fe'
 
-function createScheduler(): {
-  scheduler: TweenScheduler
-  step: (delta: number) => void
-} {
+function createScheduler(): { scheduler: TweenScheduler; step: (delta: number) => void } {
   let now = 0
   let handle = 0
   let frame: FrameRequestCallback | null = null
@@ -53,12 +50,7 @@ describe('Tween', () => {
 
   it('pause 与 resume 应该保留当前进度', () => {
     const { scheduler, step } = createScheduler()
-    const tween = new Tween({
-      from: 0,
-      to: 10,
-      duration: 100,
-      scheduler
-    })
+    const tween = new Tween({ from: 0, to: 10, duration: 100, scheduler })
 
     tween.play()
     step(40)

@@ -1,4 +1,4 @@
-import { clipboard } from '@cat-kit/fe/src'
+import { clipboard } from '@cat-kit/fe'
 import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest'
 
 class MockClipboardItem {

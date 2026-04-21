@@ -1,4 +1,4 @@
-import { HTTPClient, HTTPError } from '@cat-kit/http/src'
+import { HTTPClient, HTTPError } from '@cat-kit/http'
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 
 const mockFetch = vi.fn()

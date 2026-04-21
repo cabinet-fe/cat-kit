@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { storageKey, storage } from '@cat-kit/fe/src'
+import { storageKey, storage } from '@cat-kit/fe'
 
 // 类型安全
 const INFO_KEY = storageKey<{

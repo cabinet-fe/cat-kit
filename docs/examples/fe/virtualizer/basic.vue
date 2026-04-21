@@ -65,8 +65,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Virtualizer } from '@cat-kit/fe/src'
-import type { VirtualSnapshot } from '@cat-kit/fe/src'
+import { Virtualizer } from '@cat-kit/fe'
+import type { VirtualSnapshot } from '@cat-kit/fe'
 import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'
 
 interface DemoRow {
@@ -287,6 +287,10 @@ onUnmounted(() => {
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 10px 24px rgba(15, 118, 110, 0.08);
+}
+
+.row-card:not(:last-child) {
+  margin-bottom: 8px;
 }
 
 .row-card[data-tier='M'] {

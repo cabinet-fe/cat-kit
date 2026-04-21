@@ -8,23 +8,16 @@
     "style.css.d.ts"
   ],
   "type": "module",
-  "scripts": {
-    "build": "node ./scripts/build.mjs",
-    "lint": "bunx oxlint .",
-    "typecheck": "bunx vue-tsc -p tsconfig.json --noEmit"
-  },
   "exports": {
     ".": {
+      "development": "./src/index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./config": {
+      "development": "./src/config.ts",
       "import": "./dist/config.js",
       "types": "./dist/config.d.ts"
-    },
-    "./src": {
-      "import": "./src/index.ts",
-      "types": "./src/index.ts"
     },
     "./style.css": {
       "types": "./style.css.d.ts",
@@ -32,6 +25,11 @@
       "default": "./dist/styles/theme.css"
     },
     "./styles/theme.css": "./dist/styles/theme.css"
+  },
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "lint": "bunx oxlint .",
+    "typecheck": "bunx vue-tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@cat-kit/core": "workspace:^",

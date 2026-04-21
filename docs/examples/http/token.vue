@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { HTTPClient, TokenPlugin } from '@cat-kit/http/src'
+import { HTTPClient, TokenPlugin } from '@cat-kit/http'
 import { Snackbar } from '@varlet/ui'
 import { ref } from 'vue'
 

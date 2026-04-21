@@ -1,4 +1,4 @@
-import { getEnvironmentSummary, getRuntime, isInBrowser, isInNode } from '@cat-kit/core/src'
+import { getEnvironmentSummary, getRuntime, isInBrowser, isInNode } from '@cat-kit/core'
 import { describe, expect, it } from 'vitest'
 
 describe('env', () => {

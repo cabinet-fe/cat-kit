@@ -87,19 +87,9 @@ cat-kit/
 
 - 测试放在各包目录下的 `test/` 文件夹中
 - 测试文件命名：`<能力名>.test.ts`
-- 引入被测代码：`import { ... } from '@cat-kit/<pkg>/src'`
+- 引入被测代码：`import { ... } from '@cat-kit/<pkg>'`
 - 运行方式：优先使用 `bun --cwd packages/<pkg> run test`
 - 框架：Vitest，全局 API（`describe`/`it`/`expect` 无需 import）
-
-## 构建约定
-
-- Monorepo 任务编排：Turborepo
-- 版本管理：Changesets（`fixed` 组：core/http/fe/be 共版本；其它包独立版本）
-- 发布流程：本地仅 `bun run changeset`（录入） + `bun run release`（封装 `changeset version` + commit + push）；远端 Actions 由 `packages/*/CHANGELOG.md` 路径变更自动触发，执行测试/构建/`changeset publish`/打 tag，并创建 GitHub Release（独立包各 1 条，fixed 组聚合 1 条）
-- 发布范围：由本轮保留的 changeset 决定——只想发 fixed 组就只留 fixed 组相关 changeset，只想发独立包就只留该包 changeset
-- 构建工具：tsdown（基于 Rolldown）
-- 构建产物输出到各包 `dist/` 目录
-- 各包 `package.json` 的 `exports` 定义了产物和源码双入口
 
 ## AI 助手：cat-kit 技能（按包）
 

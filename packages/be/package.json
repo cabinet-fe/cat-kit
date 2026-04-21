@@ -7,18 +7,18 @@
     "src"
   ],
   "type": "module",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsdown",
     "lint": "bunx oxlint .",
     "test": "bunx vitest run --globals",
     "typecheck": "bunx tsc -p tsconfig.json --noEmit"
-  },
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./src": "./src/index.ts"
   },
   "dependencies": {
     "@cat-kit/core": "workspace:^",

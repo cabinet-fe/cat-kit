@@ -55,12 +55,14 @@ interface VirtualizerOptions {
   horizontal?: boolean
   paddingStart?: number
   paddingEnd?: number
+  gap?: number
   initialOffset?: number
   initialViewport?: number
   estimateSize?: (index: number) => number
-  onChange?: (snapshot: VirtualSnapshot) => void
 }
 ```
+
+`gap` 语义与 CSS `gap` 对齐：只在相邻两项之间插入间距，不作用于首尾；默认 `0`。若只需要列表首尾留白请使用 `paddingStart` / `paddingEnd`。
 
 ### 常用实例方法
 
@@ -95,6 +97,6 @@ interface VirtualSnapshot {
 ### Vue 封装建议
 
 - 在容器 `onMounted` 时调用 `mount`
-- 使用 `subscribe` 或 `onChange` 把快照同步到 `ref`
+- 使用 `subscribe` 把快照同步到 `ref`
 - 在每个 item 的 `ref` 回调里调用 `measureElement(index, el)`
 - 渲染时优先使用 `beforeSize + items + afterSize` 的块状布局

@@ -1,4 +1,4 @@
-import { storage, storageKey } from '@cat-kit/fe/src'
+import { storage, storageKey } from '@cat-kit/fe'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 class MemoryStorage implements Storage {

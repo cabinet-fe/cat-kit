@@ -55,8 +55,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Tween, tweenEasings } from '@cat-kit/fe/src'
-import type { TweenFrame, TweenState } from '@cat-kit/fe/src'
+import { Tween, tweenEasings } from '@cat-kit/fe'
+import type { TweenFrame, TweenState } from '@cat-kit/fe'
 import { onUnmounted, ref, watch } from 'vue'
 
 type EasingName = 'linear' | 'easeOutQuad' | 'easeInOutQuad'

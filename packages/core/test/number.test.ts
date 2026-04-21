@@ -1,4 +1,4 @@
-import { n, $n } from '@cat-kit/core/src'
+import { n, $n } from '@cat-kit/core'
 import { describe, it, expect } from 'vitest'
 
 describe('数字工具函数', () => {

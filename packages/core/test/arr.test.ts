@@ -1,4 +1,4 @@
-import { last, union, unionBy, eachRight, omitArr, arr } from '@cat-kit/core/src'
+import { last, union, unionBy, eachRight, omitArr, arr } from '@cat-kit/core'
 import { describe, it, expect } from 'vitest'
 
 describe('数组工具函数', () => {

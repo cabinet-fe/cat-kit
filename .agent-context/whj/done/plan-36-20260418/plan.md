@@ -93,12 +93,12 @@ engine?: HttpEngine
 - 构造函数末尾遍历 `config.plugins ?? []`，对每个元素依次调用 `this.registerPluginInternal(plugin)`。构造阶段若同一批次内或与已进入 `ownPlugins` 的插件 `name` 冲突 → 由 `registerPluginInternal` 抛 `HTTPError`（见 4.4）。
 - `this.config` 仍保留并赋值，但**后续不再通过 `this.config.plugins` 读取插件**；保留字段是为了 `group()` 传递 `origin` / `timeout` / `credentials` / `headers`。
 
-4.2 **新增 `private getEffectivePlugins(): HTTPClientPlugin[]`**
+  4.2 **新增 `private getEffectivePlugins(): HTTPClientPlugin[]`**
 
 - 实现：`return [...(this.parent?.getEffectivePlugins() ?? []), ...this.ownPlugins]`。
 - 语义：父链在前、子在后；与注册顺序一致。
 
-4.3 **`_executeRequest` 与 `runOnErrorPlugins` 改造（重点）**
+  4.3 **`_executeRequest` 与 `runOnErrorPlugins` 改造（重点）**
 
 - 在 `_executeRequest` 入口获取**一次**快照：`const effectivePlugins = this.getEffectivePlugins()`，在本次调用的全部阶段（beforeRequest / afterRespond / afterRespond-on-error-recovery / 调用 `runOnErrorPlugins`）统一使用这份快照。
 - 把 `runOnErrorPlugins(error, context)` 签名改为 `runOnErrorPlugins(error, context, plugins: HTTPClientPlugin[])`，由 `_executeRequest` 把快照传入；内部不再读取 `this.config.plugins`。
@@ -110,19 +110,19 @@ engine?: HttpEngine
   5. `_executeRequest` catch 内 `this.config.plugins?.length`（afterRespond 错误恢复段） → `effectivePlugins.length`
 - 相应的 `for (const plugin of this.config.plugins)` 循环也改为遍历 `effectivePlugins`。
 
-4.4 **新增 `public registerPlugin(plugin: HTTPClientPlugin): void`**
+  4.4 **新增 `public registerPlugin(plugin: HTTPClientPlugin): void`**
 
 - 参数校验：`plugin == null || typeof plugin !== 'object' || typeof plugin.name !== 'string' || plugin.name === ''` 时抛 `new HTTPError('插件必须提供非空 name 字段', { code: 'PLUGIN' })`。
 - 校验通过 → 调用 `this.registerPluginInternal(plugin)`。
 - 方法上写 JSDoc：说明用途、返回值、冲突时抛出 `HTTPError({ code: 'PLUGIN' })`、以及"跨父链重名同样会冲突"的语义。
 
-4.5 **新增 `private registerPluginInternal(plugin: HTTPClientPlugin): void`**
+  4.5 **新增 `private registerPluginInternal(plugin: HTTPClientPlugin): void`**
 
 - 计算 `const existingNames = new Set(this.getEffectivePlugins().map(p => p.name))`。
 - 若 `existingNames.has(plugin.name)` → 抛 `new HTTPError(`插件名称冲突: ${plugin.name}`, { code: 'PLUGIN' })`。
 - 通过后 `this.ownPlugins.push(plugin)`。
 
-4.6 **`group()` 改造**
+  4.6 **`group()` 改造**
 
 - 新实现：
   ```ts
@@ -154,7 +154,7 @@ engine?: HttpEngine
 
 文件：`packages/tests/http/client-register-plugin.test.ts`（**新建**）
 
-- 引入：`import { HTTPClient, HTTPError } from '@cat-kit/http/src'` 与 `vitest` 全局 API。
+- 引入：`import { HTTPClient, HTTPError } from '@cat-kit/http'` 与 `vitest` 全局 API。
 - Mock：沿用 `client.test.ts` 的 `global.fetch = vi.fn()` 模式，回 200 空 JSON。
 - 测试用例（**覆盖 6 个场景**）：
   1. `registerPlugin` 能成功注册并在请求时按注册顺序调用 `beforeRequest` / `afterRespond`。

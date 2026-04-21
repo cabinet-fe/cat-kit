@@ -10,7 +10,7 @@ import {
   writeJson,
   emptyDir,
   movePath
-} from '@cat-kit/be/src'
+} from '@cat-kit/be'
 
 describe('@cat-kit/be 文件系统工具', () => {
   let tempDir: string

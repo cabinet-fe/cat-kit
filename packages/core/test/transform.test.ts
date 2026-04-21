@@ -8,7 +8,7 @@ import {
   obj2query,
   query2obj,
   transform
-} from '@cat-kit/core/src'
+} from '@cat-kit/core'
 import { describe, it, expect } from 'vitest'
 
 describe('数据转换函数', () => {

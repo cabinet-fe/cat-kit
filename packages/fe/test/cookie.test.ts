@@ -1,4 +1,4 @@
-import { cookie } from '@cat-kit/fe/src'
+import { cookie } from '@cat-kit/fe'
 import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 
 const originalDocument = globalThis.document

@@ -5,6 +5,7 @@
     "incremental": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "customConditions": ["development"],
     "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo",
     "types": ["node"]
   },

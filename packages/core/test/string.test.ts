@@ -1,4 +1,4 @@
-import { str, $str } from '@cat-kit/core/src'
+import { str, $str } from '@cat-kit/core'
 import { describe, it, expect } from 'vitest'
 
 describe('CatString', () => {

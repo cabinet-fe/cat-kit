@@ -1,4 +1,4 @@
-import { HTTPClient, HTTPError, mergeRequestConfig } from '@cat-kit/http/src'
+import { HTTPClient, HTTPError, mergeRequestConfig } from '@cat-kit/http'
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 
 // Mock 全局 fetch
