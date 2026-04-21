@@ -6,7 +6,7 @@ import { defineConfig } from 'vitepress'
 import llmstxt, { copyOrDownloadAsMarkdownButtons } from 'vitepress-plugin-llms'
 
 import { EXAMPLES_DIR } from './shared'
-import { sidebar } from './sidebar'
+import { packageNavItems, sidebar } from './sidebar'
 
 const catKitThemeConfig = defineThemeConfig({ examplesDir: EXAMPLES_DIR })
 
@@ -41,16 +41,7 @@ export default defineConfig({
       { text: '指南', link: '/guide/getting-started' },
       {
         text: '包',
-        items: [
-          { text: '核心库', link: '/packages/core/' },
-          { text: 'HTTP请求', link: '/packages/http/' },
-          { text: '前端', link: '/packages/fe/' },
-          { text: 'Excel处理', link: '/packages/excel/' },
-          { text: '后端', link: '/packages/be/' },
-          { text: '维护工具', link: '/packages/maintenance/' },
-          { text: 'CLI工具', link: '/packages/cli/' },
-          { text: '代理上下文', link: '/packages/agent-context/' }
-        ]
+        items: packageNavItems
       }
     ],
 

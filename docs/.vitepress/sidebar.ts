@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, type Dirent } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, type Dirent } from 'node:fs'
 import { basename, extname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -28,19 +28,39 @@ interface SidebarItemInternal {
   order: number
 }
 
+interface PackageDocConfig {
+  name: string
+  sidebarText: string
+  navText: string
+  order: number
+}
+
 const DOCS_ROOT = fileURLToPath(new URL('../content', import.meta.url))
 const COLLATOR = new Intl.Collator('zh-CN')
 
-const PACKAGE_LABELS: Record<string, string> = {
-  core: '核心工具',
-  http: 'HTTP 请求',
-  fe: '前端工具',
-  be: '后端工具',
-  cli: 'CLI 工具',
-  'agent-context': 'Agent 上下文',
-  tsconfig: 'TSConfig 预设',
-  'vitepress-theme': 'VitePress 主题'
+const PACKAGE_DOCS: PackageDocConfig[] = [
+  { name: 'core', sidebarText: '核心工具', navText: '核心库', order: 10 },
+  { name: 'http', sidebarText: 'HTTP 请求', navText: 'HTTP请求', order: 20 },
+  { name: 'fe', sidebarText: '前端工具', navText: '前端', order: 30 },
+  { name: 'be', sidebarText: '后端工具', navText: '后端', order: 40 },
+  { name: 'cli', sidebarText: 'CLI 工具', navText: 'CLI工具', order: 50 },
+  { name: 'agent-context', sidebarText: 'Agent 上下文', navText: '代理上下文', order: 60 },
+  { name: 'tsconfig', sidebarText: 'TSConfig 预设', navText: 'TSConfig', order: 70 },
+  { name: 'vitepress-theme', sidebarText: 'VitePress 主题', navText: 'VitePress主题', order: 80 }
+]
+
+function hasPackageIndex(name: string): boolean {
+  return existsSync(join(DOCS_ROOT, 'packages', name, 'index.md'))
 }
+
+export const activePackageDocs = PACKAGE_DOCS.filter((pkg) => hasPackageIndex(pkg.name)).sort(
+  (a, b) => a.order - b.order
+)
+
+export const packageNavItems: DefaultTheme.NavItemWithLink[] = activePackageDocs.map((pkg) => ({
+  text: pkg.navText,
+  link: `/packages/${pkg.name}/`
+}))
 
 export const sidebar: DefaultTheme.Sidebar = generateSidebar({
   '/guide/': [{ dir: 'guide', text: '开始' }],
@@ -49,9 +69,9 @@ export const sidebar: DefaultTheme.Sidebar = generateSidebar({
 
 function createPackageSidebarSources(): SidebarSourceMap {
   return Object.fromEntries(
-    Object.entries(PACKAGE_LABELS).map(([name, text]) => [
+    activePackageDocs.map(({ name, sidebarText }) => [
       `/packages/${name}/`,
-      [{ dir: `packages/${name}`, text }]
+      [{ dir: `packages/${name}`, text: sidebarText }]
     ])
   )
 }
