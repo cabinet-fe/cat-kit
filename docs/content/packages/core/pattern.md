@@ -35,7 +35,7 @@ stop() // 取消观察
 ## 常用能力
 
 - 观察：`observe(keys, cb, options?)`，返回取消函数；`options` 支持 `immediate`、`sync`、`once`。
-- 状态：`state` 为可变代理；`getState()` 返回浅拷贝。
+- 状态：`state` 为可变代理；`getState()` 返回当前代理对象。
 - 更新：`setState(partial)` 批量更新；`trigger(key)` 手动触发。
 - 清理：`destroyAll()` 一次性移除全部观察者。
 

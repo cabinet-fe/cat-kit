@@ -38,6 +38,7 @@ const PACKAGE_LABELS: Record<string, string> = {
   be: '后端工具',
   cli: 'CLI 工具',
   'agent-context': 'Agent 上下文',
+  tsconfig: 'TSConfig 预设',
   'vitepress-theme': 'VitePress 主题'
 }
 

@@ -44,22 +44,26 @@ npm install @cat-kit/core
 | 包                       | 主要用途                                     | 适用环境                | 入口页                                           |
 | ------------------------ | -------------------------------------------- | ----------------------- | ------------------------------------------------ |
 | `@cat-kit/core`          | 数据处理、日期、环境检测、性能优化、设计模式 | Browser / Node.js / Bun | [Core 核心包](/packages/core/)            |
-| `@cat-kit/http`          | HTTP 客户端、插件扩展、请求类型系统          | Browser                 | [HTTP 请求包](/packages/http/)            |
+| `@cat-kit/http`          | HTTP 客户端、插件扩展、请求类型系统          | Browser / Node.js / Bun | [HTTP 请求包](/packages/http/)            |
 | `@cat-kit/fe`            | 浏览器存储、文件处理、Web API、虚拟化        | Browser                 | [FE 前端工具包](/packages/fe/)            |
 | `@cat-kit/be`            | 文件系统、配置、日志、缓存、网络、系统、调度 | Node.js / Bun           | [BE 后端工具包](/packages/be/)            |
 | `@cat-kit/cli`           | 提交信息规范校验等命令行能力                 | Node.js                 | [CLI 命令行工具包](/packages/cli/)        |
 | `@cat-kit/agent-context` | 为 AI 编程助手安装统一的协作工作流           | Node.js                 | [Agent Context](/packages/agent-context/) |
+| `@cat-kit/tsconfig`      | TypeScript 配置预设                          | 编译期 / 工程配置       | [TSConfig 预设](/packages/tsconfig/)      |
+| `@cat-kit/vitepress-theme` | CatKit 文档主题与 Markdown / Vite 辅助配置 | VitePress 2             | [VitePress 主题](/packages/vitepress-theme/) |
 
 ## 按场景找包
 
 | 你的任务                                     | 推荐包                   | 继续阅读                                                                                                                              |
 | -------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
 | 通用工具函数、日期处理、数据结构             | `@cat-kit/core`          | [数据处理](/packages/core/data) / [日期处理](/packages/core/date)                                                                     |
-| 浏览器里发请求、做鉴权或插件扩展             | `@cat-kit/http`          | [HTTP 客户端](/packages/http/client) / [插件系统](/packages/http/plugins)                                                             |
+| 浏览器或 Node/Bun 里发请求、做鉴权或插件扩展 | `@cat-kit/http`          | [HTTP 客户端](/packages/http/client) / [插件系统](/packages/http/plugins)                                                             |
 | 浏览器存储、下载上传、文件读取、剪贴板、权限 | `@cat-kit/fe`            | [存储](/packages/fe/storage) / [文件操作](/packages/fe/file) / [Web API](/packages/fe/web-api)                                        |
 | Node/Bun 侧文件、配置、日志、缓存、任务调度  | `@cat-kit/be`            | [文件系统](/packages/be/fs) / [配置管理](/packages/be/config) / [日志系统](/packages/be/logger)                                       |
 | 校验提交信息、接入 commit-msg Hook           | `@cat-kit/cli`           | [提交信息校验](/packages/cli/verify-commit)                                                                                           |
 | 让多个 AI 助手围绕同一份计划协作             | `@cat-kit/agent-context` | [协作协议](/packages/agent-context/protocols) / [CLI 命令](/packages/agent-context/cli)                                              |
+| 给项目统一 TypeScript 配置                    | `@cat-kit/tsconfig`      | [TSConfig 预设](/packages/tsconfig/) / [预设说明](/packages/tsconfig/presets)                                                         |
+| 搭建 CatKit 风格的 VitePress 站点             | `@cat-kit/vitepress-theme` | [VitePress 主题](/packages/vitepress-theme/) / [主题配置](/packages/vitepress-theme/config)                                         |
 
 ## AI 导航索引
 
@@ -68,11 +72,13 @@ npm install @cat-kit/core
 | 任务或关键词                                                                                                      | 推荐包                   | 入口页                                           | 继续阅读                                                                                                                                                                           | 检索关键词                                                                                                                          |
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | 数组、对象、字符串、日期、比较、格式化、环境检测                                                                  | `@cat-kit/core`          | [Core 核心包](/packages/core/)                   | [数据处理](/packages/core/data) / [日期处理](/packages/core/date) / [环境检测](/packages/core/env)                                                                                 | `core data date env pattern optimize`                                                                                               |
-| request、client、plugin、token、method override、types                                                            | `@cat-kit/http`          | [HTTP 请求包](/packages/http/)                   | [HTTP 客户端](/packages/http/client) / [插件系统](/packages/http/plugins) / [类型定义](/packages/http/types)                                                                       | `http client plugins token types`                                                                                                   |
+| request、client、plugin、token、retry、method override、engine、types                                             | `@cat-kit/http`          | [HTTP 请求包](/packages/http/)                   | [HTTP 客户端](/packages/http/client) / [插件系统](/packages/http/plugins) / [类型定义](/packages/http/types)                                                                       | `http client plugins token retry engine types`                                                                                      |
 | storage、localStorage、sessionStorage、cookie、file、save、read、clipboard、permission、virtualizer               | `@cat-kit/fe`            | [FE 前端工具包](/packages/fe/)                   | [存储](/packages/fe/storage) / [文件操作](/packages/fe/file) / [Web API](/packages/fe/web-api) / [虚拟化](/packages/fe/virtualizer)                                                | `fe storage file web api virtualizer`                                                                                               |
 | fs、config、logger、cache、net、system、scheduler                                                                 | `@cat-kit/be`            | [BE 后端工具包](/packages/be/)                   | [文件系统](/packages/be/fs) / [配置管理](/packages/be/config) / [日志系统](/packages/be/logger) / [任务调度](/packages/be/scheduler)                                               | `be fs config logger cache net system scheduler`                                                                                    |
 | commit、verify-commit、commit-msg、hook、conventional commit                                                      | `@cat-kit/cli`           | [CLI 命令行工具包](/packages/cli/)               | [提交信息校验](/packages/cli/verify-commit)                                                                                                                                        | `cli verify-commit commit-msg hook conventional commit`                                                                             |
 | agent、ac-workflow、init、plan、replan、implement、patch、rush、review、done、CLI、prompt-gen、生命周期、协议流转 | `@cat-kit/agent-context` | [Agent Context](/packages/agent-context/)        | [协作协议](/packages/agent-context/protocols) / [AI 协作场景](/packages/agent-context/collaboration) / [CLI 命令](/packages/agent-context/cli)                                    | `agent-context ac-workflow lifecycle protocol routing init plan replan implement patch rush review done cli scope index prompt-gen upgrade` |
+| tsconfig、extends、node、bun、web、vue                                                                             | `@cat-kit/tsconfig`      | [TSConfig 预设](/packages/tsconfig/)             | [预设说明](/packages/tsconfig/presets)                                                                                                                                               | `tsconfig presets node bun web vue`                                                                                                 |
+| vitepress、theme、demo-container、mermaid、import-examples                                                         | `@cat-kit/vitepress-theme` | [VitePress 主题](/packages/vitepress-theme/)   | [主题配置](/packages/vitepress-theme/config)                                                                                                                                         | `vitepress theme demo-container mermaid import-examples`                                                                            |
 
 ## LLM 检索约定
 
@@ -102,3 +108,5 @@ npm install @cat-kit/core
 - [BE 后端工具包](/packages/be/)
 - [CLI 命令行工具包](/packages/cli/)
 - [Agent Context](/packages/agent-context/)
+- [TSConfig 预设](/packages/tsconfig/)
+- [VitePress 主题](/packages/vitepress-theme/)

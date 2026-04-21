@@ -43,13 +43,26 @@ features:
 bun add @cat-kit/core
 ```
 
-[查看指南总览](/guide/getting-started)快速定位包与文档入口。
+[查看指南总览](/guide/getting-started) 快速定位包与文档入口。
 
 ## 使用
 
 ```ts
-import { $n } from '@cat-kit/core'
-$n.calc('1 + 3 * (2 + 1)')
+import { date, parallel } from '@cat-kit/core'
+
+const nextWeek = date('2026-04-21').addDays(7).format('YYYY-MM-DD')
+const result = await parallel([() => Promise.resolve('cat'), () => Promise.resolve('kit')])
+
+console.log(nextWeek, result)
 ```
 
-如果你使用 vite 做前端开发, 可以使用 [unplugin-auto-import](https://github.com/unplugin/unplugin-auto-import) 插件， 这样可以免写导入语句。
+## 包入口
+
+- 基础能力：[Core 核心包](/packages/core/)
+- 跨端请求：[HTTP 请求包](/packages/http/)
+- 浏览器工具：[FE 前端工具包](/packages/fe/)
+- Node.js / Bun 工具：[BE 后端工具包](/packages/be/)
+- CLI 能力：[CLI 命令行工具包](/packages/cli/)
+- AI 协作工作流：[Agent Context](/packages/agent-context/)
+- TypeScript 预设：[TSConfig 预设](/packages/tsconfig/)
+- 文档主题：[VitePress 主题](/packages/vitepress-theme/)

@@ -112,3 +112,4 @@ cat-kit/
 - `@cat-kit/core` **禁止添加任何外部依赖**
 - Node.js 内置模块使用 `node:` 协议导入
 - 子包需要基础工具函数时从 `@cat-kit/core` 导入，禁止重复实现
+- 任何 `packages/<pkg>` 的功能变更，都必须在同一轮修改中同步更新对应的 `docs/content/packages/<pkg>/` 文档，以及 `<root>/skills` 下该包对应的供真实项目使用的技能内容；不要只改代码不改文档和技能

@@ -12,7 +12,7 @@ outline: deep
 
 - 通过 `--message` 直接传入提交信息
 - 通过 `[file]` 读取提交信息文件
-- 不传参数时从 `stdin` 读取
+- 不传参数时默认读取 `.git/COMMIT_EDITMSG`
 
 校验失败会以退出码 `1` 结束，适合接入 Git Hook 或 CI。
 
@@ -25,8 +25,8 @@ cat-cli verify-commit --message "feat(cli): add verify command"
 # 方式 2：读取提交信息文件
 cat-cli verify-commit .git/COMMIT_EDITMSG
 
-# 方式 3：从标准输入读取
-echo "fix(core): handle edge case" | cat-cli verify-commit
+# 方式 3：不传路径，默认读 .git/COMMIT_EDITMSG
+cat-cli verify-commit
 ```
 
 可用于 `commit-msg` Hook：
@@ -53,7 +53,7 @@ cat-cli verify-commit [file] [options]
 提交信息需匹配以下格式（Conventional Commit）：
 
 ```txt
-^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?!?: .+
+^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|release)(\(.+\))?!?: .+
 ```
 
 示例：
@@ -61,6 +61,7 @@ cat-cli verify-commit [file] [options]
 - `feat(cli): add verify command`
 - `fix(core)!: drop legacy parser`
 - `docs: update README`
+- `release: publish 1.0.2`
 
 ### 内部实现（用于二次开发）
 

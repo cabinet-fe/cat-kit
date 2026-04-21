@@ -42,11 +42,13 @@ bun add @cat-kit/core @cat-kit/fe
 | 需求                      | 建议安装                 |
 | ------------------------- | ------------------------ |
 | 只需要通用工具            | `@cat-kit/core`          |
-| 浏览器请求客户端          | `@cat-kit/http`          |
+| 浏览器或 Node/Bun 请求客户端 | `@cat-kit/http`       |
 | 浏览器存储、文件、Web API | `@cat-kit/fe`            |
 | Node/Bun 后端工具         | `@cat-kit/be`            |
 | 命令行辅助工具            | `@cat-kit/cli`           |
 | AI 协作工作流             | `@cat-kit/agent-context` |
+| TypeScript 预设           | `@cat-kit/tsconfig`      |
+| VitePress 文档主题        | `@cat-kit/vitepress-theme` |
 
 如果一个项目会直接导入多个包，就把这些包一起安装。`@cat-kit/http`、`@cat-kit/fe`、`@cat-kit/be` 内部会依赖 `@cat-kit/core`，但如果你的代码也会直接导入 `@cat-kit/core`，仍然建议显式安装。
 
@@ -81,6 +83,18 @@ Node.js 项目通常需要在 `package.json` 中启用 ESM：
 
 ```ts
 import { HTTPClient, type HTTPResponse } from '@cat-kit/http'
+```
+
+如果你想直接复用仓库里的 TypeScript 预设，可以安装 `@cat-kit/tsconfig`：
+
+```bash
+bun add -d @cat-kit/tsconfig typescript
+```
+
+```json
+{
+  "extends": "@cat-kit/tsconfig/tsconfig.node.json"
+}
 ```
 
 ## 验证安装
@@ -120,3 +134,5 @@ const { date } = await import('@cat-kit/core')
 - [BE 后端工具包](/packages/be/)
 - [CLI 命令行工具包](/packages/cli/)
 - [Agent Context](/packages/agent-context/)
+- [TSConfig 预设](/packages/tsconfig/)
+- [VitePress 主题](/packages/vitepress-theme/)

@@ -28,6 +28,7 @@ agent-context init          # 首次使用，初始化 SCOPE
 agent-context install       # 安装 Skill 到 AI 工具目录
 agent-context validate      # 校验目录结构
 agent-context status        # 查看当前状态
+agent-context sync          # 同步项目里已安装的 Skill 内容
 agent-context done          # 归档已执行计划
 agent-context index         # 生成/更新计划索引
 agent-context prompt-gen    # 可选：写入本机全局提示词模板
@@ -92,14 +93,18 @@ Codex 会额外在技能目录下生成 `agents/openai.yaml` 元数据文件。
 
 ```bash
 agent-context sync
-agent-context sync --tools codex,cursor
 agent-context sync --check
 ```
 
-| 选项              | 说明                               |
-| ----------------- | ---------------------------------- |
-| `--tools <tools>` | 指定目标工具，逗号分隔             |
-| `--check`         | 只检查是否存在待同步内容，不写文件 |
+| 选项      | 说明                               |
+| --------- | ---------------------------------- |
+| `--check` | 只检查是否存在待同步内容，不写文件 |
+
+说明：
+
+- `sync` 不接受 `--tools`
+- 它会自动扫描当前项目里已经安装过的 Skill 目标，再对这些目标做同步
+- 如果当前项目尚未安装任何 Skill，会直接报错并提示先执行 `install`
 
 ### `agent-context validate`
 
@@ -211,11 +216,7 @@ agent-context upgrade
 
 | 选项              | 适用命令                                   | 作用                   |
 | ----------------- | ------------------------------------------ | ---------------------- |
-| `--tools <tools>` | `install` / `sync` / `prompt-gen`          | 指定工具列表，逗号分隔 |
+| `--tools <tools>` | `install` / `prompt-gen`                   | 指定工具列表，逗号分隔 |
 | `--check`         | `install` / `sync` / `prompt-gen`          | 只检查，不写入文件     |
 | `--yes`           | `install` / `init` / `done` / `prompt-gen` | 跳过或减少交互确认     |
 | `--scope <name>`  | `init`                                     | 手动指定 SCOPE 名称    |
-
-```
-
-```
