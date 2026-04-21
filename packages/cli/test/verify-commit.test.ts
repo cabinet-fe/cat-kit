@@ -1,4 +1,4 @@
-import { verifyCommitMessage, stripComments } from '@cat-kit/cli/src/commands/verify-commit'
+import { verifyCommitMessage, stripComments } from '@cat-kit/cli/commands/verify-commit'
 import { describe, it, expect } from 'vitest'
 
 describe('stripComments', () => {
