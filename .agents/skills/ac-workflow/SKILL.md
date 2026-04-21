@@ -2,7 +2,7 @@
 name: ac-workflow
 description: 基于协议的、简洁高效的代理上下文工作流。当提及初始化、计划、重构、重新计划、上下文工作流、规划、实现、优化、补丁、快速实现时使用。
 metadata:
-  version: 1.4.2
+  version: 2.0.0
 ---
 
 
@@ -26,7 +26,7 @@ metadata:
 **在执行任何协议或决策之前**，必须先在 shell 中运行以下脚本获取上下文快照：
 
 ```sh
-node <SKILL_DIR>/scripts/get-context-info.mjs
+node <SKILL_DIR>/scripts/get-context-info.js
 ```
 
 其中 `<SKILL_DIR>` 是本 SKILL.md 文件所在的目录路径。
