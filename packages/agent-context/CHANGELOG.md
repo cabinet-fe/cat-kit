@@ -1,5 +1,11 @@
 # @cat-kit/agent-context
 
+## 1.4.5
+
+### Patch Changes
+
+- 829f71b: 扩展变更
+
 ## 1.4.4
 
 ### Patch Changes

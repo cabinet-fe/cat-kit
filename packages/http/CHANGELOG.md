@@ -1,5 +1,11 @@
 # @cat-kit/http
 
+## 1.0.6
+
+### Patch Changes
+
+- @cat-kit/core@1.0.6
+
 ## 1.0.5
 
 ### Patch Changes

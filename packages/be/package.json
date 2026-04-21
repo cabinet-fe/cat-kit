@@ -1,6 +1,6 @@
 {
   "name": "@cat-kit/be",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "后端工具",
   "files": [
     "dist",
