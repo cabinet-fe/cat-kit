@@ -2,6 +2,12 @@ import { defineConfig } from 'tsdown'
 
 export default defineConfig({
   clean: true,
+  copy: [
+    {
+      from: 'src/skill/scripts/get-context-info.js',
+      to: 'dist/skill/scripts'
+    }
+  ],
   dts: true,
   unbundle: true,
   entry: { cli: 'src/cli.ts' },
