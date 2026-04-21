@@ -6,20 +6,20 @@
       "name": "cat-kit",
       "devDependencies": {
         "@cat-kit/tsconfig": "workspace:*",
-        "@changesets/cli": "latest",
-        "@tsdown/css": "latest",
-        "@types/bun": "latest",
-        "@types/node": "latest",
-        "@vitejs/plugin-vue": "latest",
-        "@vitest/coverage-v8": "latest",
-        "oxfmt": "latest",
-        "oxlint": "latest",
-        "tsdown": "latest",
-        "turbo": "latest",
-        "typescript": "latest",
-        "unplugin-vue": "latest",
-        "vitest": "latest",
-        "vue": "latest",
+        "@changesets/cli": "^2.31.0",
+        "@tsdown/css": "^0.21.9",
+        "@types/bun": "^1.3.12",
+        "@types/node": "^25.6.0",
+        "@vitejs/plugin-vue": "^6.0.6",
+        "@vitest/coverage-v8": "^4.1.5",
+        "oxfmt": "^0.46.0",
+        "oxlint": "^1.61.0",
+        "tsdown": "^0.21.9",
+        "turbo": "^2.9.6",
+        "typescript": "^6.0.3",
+        "unplugin-vue": "^7.1.1",
+        "vitest": "^4.1.5",
+        "vue": "^3.5.32",
       },
     },
     "docs": {
@@ -45,7 +45,7 @@
     },
     "packages/agent-context": {
       "name": "@cat-kit/agent-context",
-      "version": "1.4.3",
+      "version": "1.4.4",
       "bin": {
         "agent-context": "./dist/cli.js",
       },
@@ -60,7 +60,7 @@
     },
     "packages/be": {
       "name": "@cat-kit/be",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "dependencies": {
         "@cat-kit/core": "workspace:^",
         "chalk": "^5.6.2",
@@ -73,7 +73,7 @@
     },
     "packages/cli": {
       "name": "@cat-kit/cli",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "bin": {
         "cat-cli": "./dist/cli.js",
       },
@@ -87,7 +87,7 @@
     },
     "packages/core": {
       "name": "@cat-kit/core",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "devDependencies": {
         "@cat-kit/tsconfig": "workspace:*",
         "@types/big.js": "^6.2.2",
@@ -96,7 +96,7 @@
     },
     "packages/fe": {
       "name": "@cat-kit/fe",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "dependencies": {
         "@cat-kit/core": "workspace:^",
       },
@@ -106,7 +106,7 @@
     },
     "packages/http": {
       "name": "@cat-kit/http",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "dependencies": {
         "@cat-kit/core": "workspace:^",
       },

@@ -1,5 +1,13 @@
 # @cat-kit/fe
 
+## 1.0.5
+
+### Patch Changes
+
+- 407e248: 更新包构建
+- Updated dependencies [407e248]
+  - @cat-kit/core@1.0.5
+
 ## 1.0.4
 
 ### Patch Changes

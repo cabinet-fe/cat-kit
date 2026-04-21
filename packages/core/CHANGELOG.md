@@ -1,5 +1,11 @@
 # @cat-kit/core
 
+## 1.0.5
+
+### Patch Changes
+
+- 407e248: 更新包构建
+
 ## 1.0.4
 
 ### Patch Changes
