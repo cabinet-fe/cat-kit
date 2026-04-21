@@ -14,7 +14,7 @@ npm add -D @cat-kit/cli
 
 ## 查证 API
 
-[`generated/`](generated/) 下 **`.d.ts`** 与 npm `dist`（tsc 产物）一致；入口 [`generated/cli.d.ts`](generated/cli.d.ts)。
+[`generated/`](generated/) 下 **`.d.ts`** 与 npm `dist` 一致；CLI 发布入口为 `dist/cli.js`。
 
 **运行环境**：Node.js。
 

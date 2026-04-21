@@ -14,7 +14,7 @@ npm add @cat-kit/be
 
 ## 查证 API
 
-[`generated/`](generated/) 下 **`.d.ts`** 与 npm `dist` 一致；入口 [`generated/index.d.ts`](generated/index.d.ts)。
+[`generated/`](generated/) 下 **`.d.ts`** 与 npm `dist` 一致；发布物里的 ESM JavaScript 文件统一使用 `.js` 后缀。
 
 **运行环境**：仅 Node.js（使用 `node:` 内置模块等）。
 

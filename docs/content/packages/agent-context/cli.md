@@ -19,6 +19,8 @@ outline: deep
 
 对话里说"出计划""开始实现""补 patch"触发的是 Skill protocol，不是 CLI 子命令。
 
+当前发布产物中的 ESM JavaScript 文件统一使用 `.js` 后缀，例如 CLI 入口为 `dist/cli.js`，安装到项目里的辅助脚本名为 `get-context-info.js`。
+
 ## 快速使用
 
 最常用的命令：

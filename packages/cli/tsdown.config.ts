@@ -6,5 +6,6 @@ export default defineConfig({
   unbundle: true,
   entry: { cli: 'src/cli.ts' },
   format: ['esm'],
-  platform: 'node'
+  platform: 'node',
+  fixedExtension: false
 })

@@ -14,7 +14,7 @@ npm add @cat-kit/agent-context
 
 ## 查证 API
 
-[`generated/`](generated/) 下 **`.d.ts`** 与 npm `dist`（tsc 产物）一致。
+[`generated/`](generated/) 下 **`.d.ts`** 与 npm `dist` 一致；发布物里的 ESM JavaScript 文件统一使用 `.js` 后缀，安装到项目的上下文脚本名为 `get-context-info.js`。
 
 **运行环境**：Node.js（CLI / 工具链）。
 

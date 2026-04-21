@@ -8,6 +8,8 @@ outline: deep
 
 `@cat-kit/be` 提供后端常用工具能力，包括文件系统、配置、日志、缓存、网络、系统信息与任务调度，适用于 Node.js / Bun。
 
+发布构建产物为 ESM，JavaScript 文件统一输出到 `dist/` 且使用 `.js` 后缀。
+
 ## 页面导航
 
 - [文件系统](./fs)

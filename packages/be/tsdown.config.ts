@@ -6,5 +6,6 @@ export default defineConfig({
   unbundle: true,
   entry: ['src/index.ts'],
   format: ['esm'],
-  platform: 'node'
+  platform: 'node',
+  fixedExtension: false
 })
