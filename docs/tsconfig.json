@@ -11,6 +11,7 @@
     ".vitepress/**/*.ts",
     ".vitepress/**/*.vue",
     "examples/**/*.vue",
+    "examples/**/*.tsx",
     "examples/**/*.ts",
     "content/**/*.d.ts"
   ]

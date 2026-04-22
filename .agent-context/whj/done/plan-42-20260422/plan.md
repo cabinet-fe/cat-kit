@@ -98,6 +98,7 @@
 
 - 修改：`packages/fe/src/virtualizer/index.ts`
   - 新增 `GetItemKey` 类型与 `VirtualizerOptions.getItemKey` 选项；内部测量缓存从 `measured: Map<number, number>` 切换为 `measuredByKey: Map<number | string, number>`，所有读写改走 `keyOf(index)` 间接访问
+  - patch-4：为所有类型别名（`EstimateSize` / `VirtualAlign` / `VirtualizerSubscriber` / `GetItemKey`）、接口（`VirtualItem` / `VirtualRange` / `VirtualSnapshot` / `VirtualScrollOptions` / `VirtualMeasurement`）及 `Virtualizer` 类的 17 个公共方法补充标准 TSDoc（`@param` / `@returns` / `@throws` / `@remarks` / `@example`）
   - `pruneMeasured(count)` 在 keyed 模式下按新 key 集合剪裁；`reset()` 清空 `measuredByKey`；`applyOptions({ getItemKey })` 对 keyed↔non-keyed 互切清空缓存，对 keyed→keyed（函数身份切换）保留缓存
   - **applyOptions 重排**：`getItemKey` 分支先于 `count` 分支，修复 `setOptions({ count, getItemKey })` 同轮更新按**旧** key 空间裁剪导致测量丢失的 bug（patch-2）
   - 提取 `updateCount(next)` 私有方法，消除 `setCount` 与 `applyOptions({ count })` 的字段级代码重复（patch-2）
@@ -121,9 +122,11 @@
   - 构造参数接口补充 `getItemKey?: (index: number) => number | string`
   - 新增前插 / 乱序列表的代码片段示例
   - patch-2：补 keyed↔non-keyed 互切清空缓存、`setOptions({ count, getItemKey })` 同轮按新 key 空间剪裁两条语义说明
+  - patch-4：「API 参考」章节重写为按职责分组的逐 API 使用说明（构造与生命周期 / 选项与尺寸更新 / 测量 / 滚动 / 快照与订阅 5 组、17 个公共方法），构造参数新增字段默认值 + 说明表格，快照结构新增字段级行内注释与块状布局渲染建议
 - 修改：`skills/cat-kit-fe/references/virtualizer.md`
   - 追加 `getItemKey` 与 smooth reconciliation 的两条使用备注
   - patch-2：新增同轮 setOptions 推荐写法 + 批量测量 scroll 补偿合并两条备注
+  - patch-4：`## 使用备注` 之前新增 `## 公共 API 速查`，按职责分 5 组成表列出 17 个公共 API 的签名与关键行为
 - 同步（由 `bun run sync-cat-kit-skills-api:build` 自动生成）：
   - `skills/cat-kit-fe/generated/index.d.ts`
   - `skills/cat-kit-fe/generated/virtualizer/index.d.ts`
@@ -131,6 +134,7 @@
 - 新增：`.changeset/virtualizer-keyed-smooth.md`（`@cat-kit/fe: minor`）
 - 新增：`.changeset/virtualizer-review-fixes.md`（`@cat-kit/fe: patch`，patch-1；patch-3 修复 frontmatter 格式损坏）
 - 新增：`.changeset/virtualizer-setoptions-batch-refactor.md`（`@cat-kit/fe: patch`，patch-2；patch-3 修复 frontmatter 格式损坏）
+- 新增：`.changeset/virtualizer-public-api-docs.md`（`@cat-kit/fe: patch`，patch-4）
 
 ### 实施说明
 
@@ -144,3 +148,4 @@
 - patch-1: 修复代码审查发现的 P2/P3 问题
 - patch-2: 修复 setOptions 同轮 key 空间裁剪 + 批量 scroll 补偿 + 代码拆分
 - patch-3: 修复 review 发现的 changeset 格式与收尾问题
+- patch-4: 补齐公共 API TSDoc + 文档 / SKILL 逐 API 使用说明

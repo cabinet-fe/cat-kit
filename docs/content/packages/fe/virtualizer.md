@@ -98,9 +98,9 @@ function prepend(row: { id: string; title: string }) {
 ::: demo fe/virtualizer/table.vue
 :::
 
-## API参考
+## API 参考
 
-### 构造参数
+### 构造参数 `VirtualizerOptions`
 
 ```typescript
 interface VirtualizerOptions {
@@ -118,43 +118,195 @@ interface VirtualizerOptions {
 }
 ```
 
-`gap` 语义与 CSS `gap` 对齐：只在相邻两项之间插入间距，不作用于首尾；默认 `0`。若只需要列表首尾留白请使用 `paddingStart` / `paddingEnd`。
+| 字段 | 默认值 | 说明 |
+| --- | --- | --- |
+| `count` | `0` | 虚拟项总数。 |
+| `overscan` | `6` | 可视区外两侧额外预渲染的项数。数值越大滚动越不容易露白，但单帧渲染预算也越高。 |
+| `horizontal` | `false` | 水平滚动（默认垂直）。切换方向会重新按新轴向读写 `scrollLeft` / `scrollTop`。 |
+| `paddingStart` / `paddingEnd` | `0` | 列表首 / 末的固定内边距（px）。计入 `totalSize` 与 `beforeSize` / `afterSize`。 |
+| `gap` | `0` | 相邻两项间距（px），语义与 CSS `gap` 对齐，不作用于首尾。若只需首尾留白请用 `paddingStart` / `paddingEnd`。 |
+| `initialOffset` | `0` | **仅构造时生效**的初始滚动偏移，用于 SSR 水合前占位。`setOptions` 里传入会被忽略。 |
+| `initialViewport` | `0` | **仅构造时生效**的初始视口尺寸，用于 SSR 首屏。 |
+| `estimateSize` | `() => 36` | 未测项的尺寸估值函数。启用 `useMeasuredAverage` 后，只要有一个真实样本就会被「已测平均值」接管。 |
+| `useMeasuredAverage` | `true` | 未测项是否使用已测平均尺寸作为估值。开启时只在平均值发生整数级漂移时回刷未测段；关闭后完全受 `estimateSize` 控制。 |
+| `getItemKey` | `undefined` | 按数据项身份缓存测量值；见下文「[keyed items](#getitemkey-按数据项身份复用测量)」。 |
 
-`useMeasuredAverage`（默认 `true`）控制未测量项的估值来源：开启时使用已测项的平均尺寸作为估值，并且只在平均值发生明显整数级漂移时才回刷未测段，兼顾滚动条稳定性与滚动时 CPU 开销；关闭后退化为「完全受控于 `estimateSize`」，适合对估值精确性有自定义要求的场景。
+### 构造与生命周期
 
-### 常用实例方法
+#### `new Virtualizer(options?)`
 
-```typescript
-virtualizer.setCount(2000)
-virtualizer.setViewport(600)
-virtualizer.setOffset(320)
-virtualizer.measure(12, 88)
-virtualizer.measureMany([
-  { index: 12, size: 88 },
-  { index: 13, size: 76 }
-])
-virtualizer.measureElement(12, element)
-virtualizer.scrollToIndex(120, { align: 'center' })
-virtualizer.scrollToOffset(2400)
-virtualizer.mount(containerEl)
-virtualizer.unmount()
+创建一个实例。**不会**挂载 DOM，创建后仍处于「未 mount」状态。
+
+```ts
+const v = new Virtualizer({
+  count: 10_000,
+  overscan: 6,
+  estimateSize: () => 44,
+  getItemKey: (i) => rows[i].id
+})
 ```
 
-### 快照结构
+#### `virtualizer.mount(element): this`
+
+绑定滚动容器。
+
+- 传入相同元素：只触发一次内部同步（`syncFromElement`），不重建事件监听
+- 传入不同元素：先 `unmount` 旧容器再挂载新容器
+- 传入 `null`：等价于 `unmount()`
+
+mount 会订阅容器的 `scroll`（驱动 `offset` / `isScrolling`）、原生 `scrollend`（若支持）或 120ms 兜底计时器（驱动 `isScrolling = false`），以及 `ResizeObserver`（若可用，驱动 `viewportSize`）。
+
+```ts
+onMounted(() => v.mount(scrollRef.value))
+onBeforeUnmount(() => v.destroy())
+```
+
+#### `virtualizer.unmount(): this`
+
+解绑当前容器：取消 rAF 校准、卸下全部事件监听、清空 `mounted` 映射与 `ResizeTracker`。**不**清空测量缓存与订阅者，实例仍可再次 `mount` 到新容器。
+
+#### `virtualizer.destroy(): void`
+
+`unmount` + 释放 `ResizeTracker` + 清空订阅者。调用后不应再调用任何实例方法。组件卸载时必须调用。
+
+### 选项与尺寸更新
+
+#### `virtualizer.setOptions(options): this`
+
+批量更新选项，只传需要变更的字段。
+
+关键语义：
+
+- `initialOffset` / `initialViewport` 在此处传入**无效**
+- `getItemKey` 始终先于 `count` 应用 —— `setOptions({ count, getItemKey })` 同轮更新时 `count` 剪裁使用的是**新** key 空间
+- `getItemKey` 切换语义：
+  - `function → function`（keyed → keyed）：保留测量缓存，旧 key 仍被复用（前插 / 乱序场景）
+  - `undefined ↔ function`（key 空间切换）：清空 `measuredByKey` / `measuredSum` / `averageEstimate`
+
+```ts
+v.setOptions({ count: newRows.length, getItemKey: (i) => newRows[i].id })
+```
+
+#### `virtualizer.setCount(count): this`
+
+更新总数。
+
+- **收缩**：`[count, prevCount)` 范围的测量缓存与 `mounted` 元素会被剪裁 / `unobserve`
+- **扩张**：从 `prevCount` 起按 `estimateSize` / 已测平均值给出估值
+- 数值未变化时为 no-op
+
+#### `virtualizer.setViewport(size): this`
+
+设置视口尺寸。一般由 `mount` 后的 `ResizeObserver` 自动同步；仅在 SSR / 手动布局 / 测试环境下直接调用。`offset` 会按新视口重新 clamp。
+
+#### `virtualizer.setOffset(offset): this`
+
+只更新逻辑 offset，不写 DOM。用于 SSR 水合前恢复滚动位置。要让 DOM 真正跳转请用 `scrollToOffset`。
+
+### 测量
+
+#### `virtualizer.measure(index, size): this`
+
+单条真实测量。等价于 `measureMany([{ index, size }])`。越界 `index` 静默忽略。
+
+#### `virtualizer.measureMany(measurements): this`
+
+批量真实测量。同批次内多条「视口前方」项的尺寸变化会被合并成**一次** `scrollTop` DOM 写入。
+
+大数据量首屏优先路径：
+
+```ts
+v.measureMany(rows.map((r, i) => ({ index: i, size: r.height })))
+```
+
+一次 `measureMany` 后全部项都被精确测量，后续远距离 `scrollToIndex` 不会再遇到 `totalSize` 跳变。
+
+#### `virtualizer.measureElement(index, element): void`
+
+绑定 DOM 元素到 index，交给内部 `ResizeObserver` 异步测量。
+
+- 支持 `ResizeObserver` 的浏览器走异步路径，避免滚动中新挂载项触发同步布局读取
+- 不支持时回退到 `getBoundingClientRect()` 并立即调用 `measure`
+- `element: null` 表示卸载该 index（同步 `unobserve`）
+- keyed 模式下同一 element 迁移到新 index 时会自动清理旧 index 的 `mounted` 条目
+
+```html
+<div v-for="item in items" :ref="(el) => v.measureElement(item.index, el as Element)">
+  ...
+</div>
+```
+
+### 滚动
+
+#### `virtualizer.scrollToOffset(offset, options?): this`
+
+滚动到像素偏移。`options.align` 对本方法无效。
+
+- `behavior: 'auto'`（默认）：同步写 + 同步 `recompute()`，`snapshot.offset` 立即等于目标值
+- `behavior: 'smooth'`：浏览器原生平滑 + rAF 校准循环；见下文「[smooth 语义](#scrolltoindex--scrolltooffset-的-behavior-smooth)」
+
+#### `virtualizer.scrollToIndex(index, options?): this`
+
+滚动到某项。`options.align` 支持 `'auto' | 'start' | 'center' | 'end'`，默认 `'auto'`（仅当项在视口外才滚动，按最短路径）。`count === 0` 时为 no-op。
+
+```ts
+v.scrollToIndex(120, { align: 'center' })
+v.scrollToIndex(9999, { behavior: 'smooth' })
+```
+
+### 快照与订阅
+
+#### `virtualizer.getSnapshot(): VirtualSnapshot`
+
+读取当前快照。**重要**：同一对象引用在纯 `offset` 位移帧里会保留不变（仅就地改 `offset` / `isScrolling` 字段）。不要用 `===` 判断是否需要重渲染；请对比结构字段或直接走 `subscribe`。
+
+#### `virtualizer.subscribe(listener): () => void`
+
+注册结构化快照推送。注册时会**立即同步**调用一次 listener 便于初次渲染；之后仅在「结构性」变化时触发。「结构性」包含：`range` / `items` / `totalSize` / `viewportSize` / `horizontal` / `isScrolling` / `beforeSize` / `afterSize` 中任一字段变化。纯 `offset` 位移**不会**触发 listener。
+
+```ts
+const unsubscribe = v.subscribe((snap) => {
+  render(snap.items, snap.beforeSize, snap.afterSize)
+})
+onBeforeUnmount(unsubscribe)
+```
+
+#### `virtualizer.getItem(index): VirtualItem`
+
+读取某个 index 的 `{ start, end, size }`。越界会抛 `RangeError`。常用于业务侧计算「第 N 项是否可见」；滚动对齐由 `scrollToIndex` 自动处理，无需手动调用。
+
+### 数据源整体重置
+
+#### `virtualizer.reset(): this`
+
+清空全部测量缓存与位置缓存、取消 rAF 校准、把 `offset` 归零后重算快照。**不**解绑滚动容器，**不**清除订阅者。
+
+当数据仅部分变化且能提供稳定 key 时，优先用 `getItemKey` 保留历史测量；只有「数据源整体替换」才需要 `reset()`。
+
+### 快照结构 `VirtualSnapshot`
 
 ```typescript
 interface VirtualSnapshot {
-  items: VirtualItem[]
-  range: { startIndex: number; endIndex: number } | null
-  totalSize: number
-  beforeSize: number
-  afterSize: number
-  offset: number
-  viewportSize: number
-  horizontal: boolean
-  isScrolling: boolean
+  items: VirtualItem[]               // 当前应渲染的项（已含 overscan 扩张）
+  range: { startIndex: number; endIndex: number } | null // 不含 overscan 的原始命中范围
+  totalSize: number                  // 列表内容总尺寸（含 padding）
+  beforeSize: number                 // items[0] 前需预留的占位空间
+  afterSize: number                  // items 末项后需预留的占位空间
+  offset: number                     // 当前滚动偏移
+  viewportSize: number               // 视口尺寸
+  horizontal: boolean                // 是否水平滚动
+  isScrolling: boolean               // 是否处于滚动中
+}
+
+interface VirtualItem {
+  index: number
+  start: number  // 到列表内容起点的距离
+  end: number    // 等于 start + size
+  size: number
 }
 ```
+
+渲染层推荐使用 `beforeSize + items + afterSize` 的块状布局：前后两个 spacer 填充已滚过 / 未滚到的空间，中间只渲染 `items`。
 
 ### Vue 封装建议
 
