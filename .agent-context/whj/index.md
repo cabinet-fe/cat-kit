@@ -38,3 +38,4 @@
 - [x] [基于 Changesets 的按包选择式半自动发布流水线](./done/plan-38-20260421/plan.md)
 - [x] [收敛测试 tsconfig 配置](./done/plan-39-20260421/plan.md)
 - [x] [Virtualizer 增加 gap、精简 API、优化性能](./done/plan-40-20260421/plan.md)
+- [x] [优化 Virtualizer 表格示例性能](./done/plan-41-20260422/plan.md)

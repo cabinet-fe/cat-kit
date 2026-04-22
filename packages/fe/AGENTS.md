@@ -16,7 +16,9 @@ packages/fe/src/
 │   ├── unified.ts     # 统一存储 API
 │   └── index.ts
 ├── virtualizer/       # 虚拟滚动
-│   └── index.ts
+│   ├── index.ts           # Virtualizer 主类 + 公开类型
+│   ├── resize-tracker.ts  # ResizeObserver 生命周期与批量派发托管
+│   └── scroll-reconciler.ts # smooth 滚动 rAF 校准循环（自包含状态机）
 ├── web-api/           # Web API 封装
 │   ├── clipboard.ts   # 剪贴板 API
 │   ├── permission.ts  # 权限 API

@@ -1,13 +1,24 @@
 /**
- * Virtualizer —— Vue composable / 框架适配层的虚拟滚动核心。
+ * Virtualizer —— 单轴虚拟滚动核心。
  *
- * 定位：仅负责位置计算、测量派发与快照广播；不持有 DOM 渲染职责，
- * 具体的元素挂载/卸载由上层 composable 或组件完成。
+ * 设计要点：
+ * - 职责聚焦：位置计算、测量派发、快照广播；渲染交给上层。
+ * - 抖动消除：视口前方项测量变更时，同批次累积 scroll 补偿并在 recompute 统一 flush。
+ * - 通知去重：纯 offset 变化不 notify，仅 range / items / totalSize / viewport /
+ *   isScrolling 等结构性变化时推送快照。
+ * - 未测项估值：默认沿用「已测平均值」，降低远距离滚动时 totalSize 跳变幅度。
+ * - keyed items：可选 getItemKey 让测量缓存按稳定 key 存储，前插 / 乱序 / 中段删除
+ *   时未变动项仍可复用真实测量。
+ * - smooth 滚动校准：委托 {@link ScrollReconciler}，详见该文件。
  */
+
+import { ResizeTracker } from './resize-tracker'
+import { ScrollReconciler, readScrollOffset, writeScroll } from './scroll-reconciler'
 
 export type EstimateSize = (index: number) => number
 export type VirtualAlign = 'auto' | 'start' | 'center' | 'end'
 export type VirtualizerSubscriber = (snapshot: VirtualSnapshot) => void
+export type GetItemKey = (index: number) => number | string
 
 /** Virtualizer 初始化参数。字段均可选，缺省时使用安全默认值。 */
 export interface VirtualizerOptions {
@@ -21,7 +32,7 @@ export interface VirtualizerOptions {
   paddingStart?: number
   /** 列表末项后的固定内边距（px），默认 0 */
   paddingEnd?: number
-  /** 相邻两项之间的间距（px），不作用于首尾；语义与 CSS `gap` 对齐，默认 0 */
+  /** 相邻两项之间的间距（px），语义与 CSS `gap` 对齐，默认 0 */
   gap?: number
   /** 初始滚动偏移（px），默认 0 */
   initialOffset?: number
@@ -29,69 +40,64 @@ export interface VirtualizerOptions {
   initialViewport?: number
   /** 项预估尺寸函数，默认返回 36 */
   estimateSize?: EstimateSize
+  /**
+   * 未测项是否使用「已测项平均尺寸」作为估值，默认 true。
+   *
+   * 开启后首个样本产生即全面替换估值，配合 scrollAdjustments 可显著缓解
+   * estimateSize 与真实值偏差过大带来的滚动条抖动。
+   */
+  useMeasuredAverage?: boolean
+  /**
+   * 可选：基于 index 返回稳定 key，用于把测量缓存按数据项身份存储。
+   *
+   * 提供后列表前插 / 乱序 / 中段删除时，未变动项的真实测量值仍可被复用；
+   * 未提供时行为与旧版本一致（按 index 缓存）。
+   *
+   * 约束：函数必须在整个生命周期稳定，同一数据项的 key 在任何时刻都应一致；
+   * 不要基于 `Math.random()` 或当前时间生成 key。
+   */
+  getItemKey?: GetItemKey
 }
 
-/** 单个虚拟项在滚动轴上的位置描述。 */
 export interface VirtualItem {
-  /** 对应的绝对索引 */
   index: number
-  /** 在滚动轴上的起点（px，含 paddingStart） */
   start: number
-  /** 在滚动轴上的终点（px，= start + size） */
   end: number
-  /** 实际测量或预估的尺寸（px） */
   size: number
 }
 
-/** 当前可见范围（未挂载或 viewport 为空时为 null）。 */
 export interface VirtualRange {
-  /** 可视区内首个命中项的索引 */
   startIndex: number
-  /** 可视区内最后一个命中项的索引 */
   endIndex: number
 }
 
-/** 外部订阅所拿到的快照；同一 recompute 期间保证不可变。 */
 export interface VirtualSnapshot {
-  /** 需要渲染的虚拟项列表（已含 overscan） */
   items: VirtualItem[]
-  /** 纯可视区范围（不含 overscan），可能为 null */
   range: VirtualRange | null
-  /** 内容总尺寸（px，含 paddingStart、gap、paddingEnd） */
   totalSize: number
-  /** 首个渲染项前的占位尺寸（用于做块状 spacer） */
   beforeSize: number
-  /** 末个渲染项后的占位尺寸 */
   afterSize: number
-  /** 当前滚动偏移（px） */
   offset: number
-  /** 当前 viewport 尺寸（px） */
   viewportSize: number
-  /** 当前是否为水平模式 */
   horizontal: boolean
-  /** 当前是否处于滚动中（用于 UI 控制 hover、悬浮等） */
   isScrolling: boolean
 }
 
-/** 滚动到指定位置/索引时的选项。 */
 export interface VirtualScrollOptions {
-  /** 对齐方式：auto 仅在不可见时滚入、start/center/end 强制对齐 */
   align?: VirtualAlign
-  /** 原生 scrollTo 行为 */
   behavior?: ScrollBehavior
 }
 
-const DEFAULT_ESTIMATE_SIZE = () => 36
-const DEFAULT_SCROLL_END_DELAY = 120
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max)
+export interface VirtualMeasurement {
+  index: number
+  size: number
 }
 
-function getMeasuredSize(element: Element, horizontal: boolean): number {
-  const rect = element.getBoundingClientRect()
-  return Math.round(horizontal ? rect.width : rect.height)
-}
+const DEFAULT_ESTIMATE_SIZE: EstimateSize = () => 36
+const SCROLL_END_DELAY = 120
+const AVERAGE_INVALIDATION_THRESHOLD = 4
+
+const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v)
 
 export class Virtualizer {
   private count = 0
@@ -101,18 +107,713 @@ export class Virtualizer {
   private paddingEnd = 0
   private gap = 0
   private estimateSize: EstimateSize = DEFAULT_ESTIMATE_SIZE
+  private useMeasuredAverage = true
+  private getItemKey: GetItemKey | undefined
 
   private offset = 0
   private viewportSize = 0
   private isScrolling = false
 
-  private measuredSizes = new Map<number, number>()
+  /**
+   * 测量缓存的唯一真源。未启用 getItemKey 时 key 就是 index；启用时 key 为
+   * getItemKey(index) 的结果。内部所有读写一律通过 `keyOf(index)` 间接访问。
+   */
+  private measuredByKey = new Map<number | string, number>()
+  private measuredSum = 0
+  private averageEstimate: number | null = null
+  private firstUnmeasured = 0
   private starts: number[] = []
-  private ends: number[] = []
   private sizes: number[] = []
   private dirtyIndex = 0
 
-  private snapshot: VirtualSnapshot = {
+  private snapshot: VirtualSnapshot = emptySnapshot()
+  private subscribers = new Set<VirtualizerSubscriber>()
+
+  private scrollElement: HTMLElement | null = null
+  private containerObserver: ResizeObserver | null = null
+  private scrollEndTimer: ReturnType<typeof setTimeout> | null = null
+  private scrollEndNative = false
+  private mounted = new Map<number, Element>()
+  private tracker: ResizeTracker
+  private reconciler: ScrollReconciler
+
+  /** 视口前方项尺寸变化的累积 delta，recompute 开头统一 flush 一次 DOM 写入。 */
+  private pendingScrollAdjust = 0
+
+  constructor(options: VirtualizerOptions = {}) {
+    this.tracker = new ResizeTracker({
+      isHorizontal: () => this.horizontal,
+      onChange: (entries) => {
+        let touched = false
+        for (const e of entries) {
+          const idx = this.tracker.getIndex(e.target)
+          if (idx !== undefined && this.applyMeasurement(idx, e.size)) touched = true
+        }
+        if (touched) this.recompute()
+      }
+    })
+    this.reconciler = new ScrollReconciler({
+      getElement: () => this.scrollElement,
+      isHorizontal: () => this.horizontal,
+      targetForIndex: (index, align) => this.getOffsetForIndex(index, align),
+      clampOffset: (offset) => this.clampOffset(offset)
+    })
+
+    this.applyOptions(options, true)
+    this.recompute()
+  }
+
+  setOptions(options: VirtualizerOptions): this {
+    this.applyOptions(options, false)
+    this.recompute()
+    return this
+  }
+
+  setCount(count: number): this {
+    if (this.updateCount(Math.max(0, Math.trunc(count)))) this.recompute()
+    return this
+  }
+
+  setViewport(size: number): this {
+    const nextViewport = Math.max(0, Math.round(size))
+    const nextOffset = this.clampOffsetWithViewport(this.offset, nextViewport)
+    if (nextViewport === this.viewportSize && nextOffset === this.offset) return this
+    this.viewportSize = nextViewport
+    this.offset = nextOffset
+    this.recompute()
+    return this
+  }
+
+  setOffset(offset: number): this {
+    const nextOffset = this.clampOffset(offset)
+    if (nextOffset === this.offset) return this
+    this.offset = nextOffset
+    this.recompute()
+    return this
+  }
+
+  mount(element: HTMLElement | null): this {
+    if (!element) {
+      this.unmount()
+      return this
+    }
+    if (this.scrollElement === element) {
+      this.syncFromElement()
+      return this
+    }
+    this.unmount()
+    this.scrollElement = element
+    element.addEventListener('scroll', this.handleScroll, { passive: true })
+
+    if ('onscrollend' in element) {
+      element.addEventListener('scrollend', this.handleScrollEnd, { passive: true })
+      this.scrollEndNative = true
+    }
+
+    if (typeof ResizeObserver !== 'undefined') {
+      this.containerObserver = new ResizeObserver(() => this.syncFromElement())
+      this.containerObserver.observe(element)
+    }
+    this.syncFromElement()
+    return this
+  }
+
+  unmount(): this {
+    this.reconciler.cancel()
+    this.pendingScrollAdjust = 0
+    const el = this.scrollElement
+    if (el) {
+      el.removeEventListener('scroll', this.handleScroll)
+      if (this.scrollEndNative) {
+        el.removeEventListener('scrollend', this.handleScrollEnd)
+        this.scrollEndNative = false
+      }
+    }
+    this.scrollElement = null
+    this.containerObserver?.disconnect()
+    this.containerObserver = null
+    if (this.scrollEndTimer !== null) {
+      clearTimeout(this.scrollEndTimer)
+      this.scrollEndTimer = null
+    }
+    this.tracker.disconnect()
+    this.mounted.clear()
+    return this
+  }
+
+  destroy(): void {
+    this.unmount()
+    this.tracker.destroy()
+    this.subscribers.clear()
+  }
+
+  subscribe(listener: VirtualizerSubscriber): () => void {
+    this.subscribers.add(listener)
+    listener(this.snapshot)
+    return () => {
+      this.subscribers.delete(listener)
+    }
+  }
+
+  measure(index: number, size: number): this {
+    return this.measureMany([{ index, size }])
+  }
+
+  measureMany(measurements: Iterable<VirtualMeasurement>): this {
+    let changed = false
+    for (const measurement of measurements) {
+      if (this.applyMeasurement(measurement.index, measurement.size)) changed = true
+    }
+    if (changed) this.recompute()
+    return this
+  }
+
+  measureElement(index: number, element: Element | null): void {
+    const current = this.mounted.get(index)
+    if (current === element && element) return
+
+    if (element) {
+      // keyed 模式下同一 DOM 节点会在 index 间迁移（行复用）：清掉 mounted[oldIndex]
+      // 指向该 element 的陈旧条目，避免后续新元素进入 oldIndex 时误 unobserve 本节点。
+      const oldIndex = this.tracker.getIndex(element)
+      if (oldIndex !== undefined && oldIndex !== index) {
+        if (this.mounted.get(oldIndex) === element) this.mounted.delete(oldIndex)
+      }
+    }
+
+    if (current && current !== element) {
+      this.tracker.unobserve(current)
+      this.mounted.delete(index)
+    }
+    if (!element) return
+
+    this.mounted.set(index, element)
+    this.tracker.observe(index, element)
+
+    // 优先交给 ResizeObserver 异步测量，避免滚动中新挂载项触发同步布局读取。
+    if (typeof ResizeObserver !== 'undefined') return
+
+    const rect = element.getBoundingClientRect()
+    this.measure(index, Math.round(this.horizontal ? rect.width : rect.height))
+  }
+
+  scrollToOffset(offset: number, options: VirtualScrollOptions = {}): this {
+    return this.performScroll(null, 'start', offset, options)
+  }
+
+  scrollToIndex(index: number, options: VirtualScrollOptions = {}): this {
+    if (!this.count) return this
+    const targetIndex = clamp(Math.trunc(index), 0, this.count - 1)
+    const align = options.align ?? 'auto'
+    const next = this.getOffsetForIndex(targetIndex, align)
+    return this.performScroll(targetIndex, align, next, options)
+  }
+
+  reset(): this {
+    this.reconciler.cancel()
+    this.pendingScrollAdjust = 0
+    this.measuredByKey.clear()
+    this.measuredSum = 0
+    this.averageEstimate = null
+    this.firstUnmeasured = 0
+    this.sizes = []
+    this.starts = []
+    this.dirtyIndex = 0
+    this.offset = 0
+    this.recompute()
+    return this
+  }
+
+  getSnapshot(): VirtualSnapshot {
+    return this.snapshot
+  }
+
+  getItem(index: number): VirtualItem {
+    this.ensureMeasurements()
+    if (index < 0 || index >= this.count) {
+      throw new RangeError(`Virtual item index out of range: ${index}`)
+    }
+    const size = this.sizes[index]!
+    const start = this.starts[index]!
+    return { index, start, end: start + size, size }
+  }
+
+  private applyOptions(o: VirtualizerOptions, initial: boolean): void {
+    // getItemKey 必须先于 count：同轮 setOptions({ count, getItemKey }) 时 updateCount
+    // -> pruneMeasured 需按新 key 空间构造 alive 集合，用旧 getItemKey 会误删新映射
+    // 下仍存活的条目。切换语义：keyed↔non-keyed（key 类型变）须清空 measured 避免
+    // 跨空间污染；keyed→keyed（函数身份变）保留旧 key 可信（前插/乱序复用测量）。
+    // firstUnmeasured 按 index 维护已测前缀，任一 key 语义变化都须重置。
+    if (Object.prototype.hasOwnProperty.call(o, 'getItemKey')) {
+      if (this.getItemKey !== o.getItemKey) {
+        const prevKeyed = this.getItemKey !== undefined
+        const nextKeyed = o.getItemKey !== undefined
+        this.getItemKey = o.getItemKey
+        if (prevKeyed !== nextKeyed) {
+          this.measuredByKey.clear()
+          this.measuredSum = 0
+          this.averageEstimate = null
+        }
+        this.firstUnmeasured = 0
+        this.invalidate(0)
+      }
+    }
+    if (o.count !== undefined) this.updateCount(Math.max(0, Math.trunc(o.count)))
+    if (o.overscan !== undefined) this.overscan = Math.max(0, Math.trunc(o.overscan))
+    if (o.horizontal !== undefined) this.horizontal = o.horizontal
+    if (o.paddingStart !== undefined) {
+      this.paddingStart = Math.max(0, Math.round(o.paddingStart))
+      this.invalidate(0)
+    }
+    if (o.paddingEnd !== undefined) this.paddingEnd = Math.max(0, Math.round(o.paddingEnd))
+    if (o.gap !== undefined) {
+      this.gap = Math.max(0, Math.round(o.gap))
+      this.invalidate(0)
+    }
+    if (o.estimateSize !== undefined) {
+      this.estimateSize = o.estimateSize
+      this.invalidate(0)
+    }
+    if (o.useMeasuredAverage !== undefined) {
+      this.useMeasuredAverage = o.useMeasuredAverage
+      this.invalidate(0)
+    }
+    if (o.initialOffset !== undefined && initial) {
+      this.offset = Math.max(0, Math.round(o.initialOffset))
+    }
+    if (o.initialViewport !== undefined && initial) {
+      this.viewportSize = Math.max(0, Math.round(o.initialViewport))
+    }
+  }
+
+  /** 更新 count 并同步测量 / mounted 剪裁与 dirty 指针。返回是否发生变化。 */
+  private updateCount(next: number): boolean {
+    if (next === this.count) return false
+    const prev = this.count
+    this.count = next
+    this.pruneMeasured(next)
+    this.sizes.length = next
+    this.starts.length = next
+    if (next > prev) this.invalidate(prev)
+    else this.dirtyIndex = Math.min(this.dirtyIndex, next)
+    this.pruneMounted(next)
+    return true
+  }
+
+  private keyOf(index: number): number | string {
+    return this.getItemKey ? this.getItemKey(index) : index
+  }
+
+  /** 未测项估值：优先已测平均值（若启用），否则 estimateSize。 */
+  private estimate(index: number): number {
+    if (this.useMeasuredAverage && this.averageEstimate !== null) {
+      return this.averageEstimate
+    }
+    return Math.max(0, Math.round(this.estimateSize(index)))
+  }
+
+  private pruneMeasured(count: number): void {
+    if (this.measuredByKey.size === 0) return
+    // keyed 模式按新 key 空间构造 alive；non-keyed 直接按 index 数值剪裁。
+    const getKey = this.getItemKey
+    if (getKey) {
+      const alive = new Set<number | string>()
+      for (let i = 0; i < count; i++) alive.add(getKey(i))
+      for (const [key, size] of this.measuredByKey) {
+        if (!alive.has(key)) {
+          this.measuredByKey.delete(key)
+          this.measuredSum -= size
+        }
+      }
+    } else {
+      for (const [key, size] of this.measuredByKey) {
+        if (typeof key === 'number' && key >= count) {
+          this.measuredByKey.delete(key)
+          this.measuredSum -= size
+        }
+      }
+    }
+    this.syncAverageEstimate()
+    this.firstUnmeasured = Math.min(this.firstUnmeasured, count)
+  }
+
+  private pruneMounted(count: number): void {
+    for (const [i, el] of this.mounted) {
+      if (i >= count) {
+        this.tracker.unobserve(el)
+        this.mounted.delete(i)
+      }
+    }
+  }
+
+  private invalidate(fromIndex: number): void {
+    const v = Math.max(0, fromIndex)
+    if (v < this.dirtyIndex) this.dirtyIndex = v
+  }
+
+  /**
+   * 应用测量：更新缓存、触发 invalidate、并在必要时做 scrollAdjustments 抑制抖动。
+   * 返回 true 表示发生了有效变化，调用方需 recompute。
+   */
+  private applyMeasurement(index: number, rawSize: number): boolean {
+    if (index < 0 || index >= this.count) return false
+    const size = Math.max(0, Math.round(rawSize))
+    const key = this.keyOf(index)
+    const prev = this.measuredByKey.get(key)
+    if (prev === size) return false
+
+    const prevAverage = this.averageEstimate
+
+    // 抖动抑制：若该项已在当前 offset 前方（视口上方），尺寸变化会把
+    // 可视区内容"挤走"。此时用旧估值与新真实值的差做反向 scrollTop 补偿。
+    const prevSize = prev ?? this.estimate(index)
+    const delta = size - prevSize
+    const itemStart = this.starts[index]
+    const needAdjust =
+      delta !== 0 &&
+      itemStart !== undefined &&
+      itemStart + prevSize <= this.offset &&
+      this.scrollElement !== null
+
+    if (prev === undefined) this.measuredSum += size
+    else this.measuredSum += size - prev
+    this.measuredByKey.set(key, size)
+    if (index === this.firstUnmeasured) this.advanceFirstUnmeasured()
+    this.syncAverageEstimate()
+    const averageDirtyFrom = prevAverage === null ? 0 : this.findNextUnmeasured(index + 1)
+
+    this.invalidate(index)
+
+    // 抖动抑制：逻辑 offset 立即推进，DOM 写入累积到 recompute 统一 flush。
+    if (needAdjust) {
+      this.offset += delta
+      this.pendingScrollAdjust += delta
+    }
+
+    // 平均值仅在整数级漂移时回刷未测段：首次建立全量回刷（averageDirtyFrom=0），后续
+    // 只回刷当前测量点之后的未测区间，避免退化成从 0 重算整表。
+    if (
+      this.useMeasuredAverage &&
+      this.shouldInvalidateAverage(prevAverage, this.averageEstimate) &&
+      averageDirtyFrom < this.count
+    ) {
+      this.invalidate(averageDirtyFrom)
+    }
+
+    return true
+  }
+
+  private syncAverageEstimate(): void {
+    this.averageEstimate =
+      this.measuredByKey.size > 0 ? Math.round(this.measuredSum / this.measuredByKey.size) : null
+  }
+
+  private shouldInvalidateAverage(prev: number | null, next: number | null): boolean {
+    if (prev === next) return false
+    if (next === null) return false
+    if (prev === null) return true
+    return Math.abs(next - prev) >= AVERAGE_INVALIDATION_THRESHOLD
+  }
+
+  private advanceFirstUnmeasured(): void {
+    while (
+      this.firstUnmeasured < this.count &&
+      this.measuredByKey.has(this.keyOf(this.firstUnmeasured))
+    ) {
+      this.firstUnmeasured++
+    }
+  }
+
+  private findNextUnmeasured(fromIndex: number): number {
+    let index = clamp(fromIndex, 0, this.count)
+    while (index < this.count && this.measuredByKey.has(this.keyOf(index))) index++
+    return index
+  }
+
+  private ensureMeasurements(): void {
+    if (this.count === 0) {
+      this.starts = []
+      this.sizes = []
+      this.dirtyIndex = 0
+      return
+    }
+    const from = clamp(this.dirtyIndex, 0, this.count)
+    if (from >= this.count) return
+
+    let cursor =
+      from === 0 ? this.paddingStart : this.starts[from - 1]! + this.sizes[from - 1]! + this.gap
+
+    for (let i = from; i < this.count; i++) {
+      const size = this.measuredByKey.get(this.keyOf(i)) ?? this.estimate(i)
+      this.starts[i] = cursor
+      this.sizes[i] = size
+      cursor += size
+      if (i < this.count - 1) cursor += this.gap
+    }
+    this.dirtyIndex = this.count
+  }
+
+  private recompute(): void {
+    // 累积的滚动补偿在这里合并成一次 DOM 写入（所有 mutation 最终都走 recompute）。
+    if (this.pendingScrollAdjust !== 0) {
+      const el = this.scrollElement
+      if (el) {
+        if (this.horizontal) el.scrollLeft = this.offset
+        else el.scrollTop = this.offset
+      }
+      this.pendingScrollAdjust = 0
+    }
+    this.ensureMeasurements()
+    const totalSize = this.computeTotalSize()
+    const nextOffset = this.clampOffsetWithViewport(this.offset, this.viewportSize)
+    if (nextOffset !== this.offset) this.offset = nextOffset
+
+    const range = this.calculateRange(this.offset)
+    const itemStartIndex = range ? Math.max(0, range.startIndex - this.overscan) : -1
+    const itemEndIndex = range ? Math.min(this.count - 1, range.endIndex + this.overscan) : -1
+    const itemsLength = itemStartIndex === -1 ? 0 : itemEndIndex - itemStartIndex + 1
+    const beforeSize = itemsLength ? this.starts[itemStartIndex]! : this.paddingStart
+    const afterSize = itemsLength
+      ? Math.max(0, totalSize - (this.starts[itemEndIndex]! + this.sizes[itemEndIndex]!))
+      : totalSize
+
+    if (
+      this.isStructuralEqual(
+        this.snapshot,
+        totalSize,
+        range,
+        beforeSize,
+        afterSize,
+        itemStartIndex,
+        itemsLength
+      )
+    ) {
+      // 结构未变只是 offset 变化：不 notify、不分配新快照，就地更新 offset/isScrolling。
+      // 高刷下 scroll 每秒可触发上百次，spread 新对象会形成可观 GC 压力。
+      this.snapshot.offset = this.offset
+      this.snapshot.isScrolling = this.isScrolling
+      return
+    }
+
+    const items = itemsLength ? this.createItems(itemStartIndex, itemEndIndex) : []
+    const next: VirtualSnapshot = {
+      items,
+      range,
+      totalSize,
+      beforeSize,
+      afterSize,
+      offset: this.offset,
+      viewportSize: this.viewportSize,
+      horizontal: this.horizontal,
+      isScrolling: this.isScrolling
+    }
+
+    this.snapshot = next
+    for (const sub of this.subscribers) sub(next)
+  }
+
+  /** 只比较会影响视觉结构的字段；offset 变化不算"结构性差异"。 */
+  private isStructuralEqual(
+    prev: VirtualSnapshot,
+    totalSize: number,
+    range: VirtualRange | null,
+    beforeSize: number,
+    afterSize: number,
+    itemStartIndex: number,
+    itemsLength: number
+  ): boolean {
+    if (
+      prev.totalSize !== totalSize ||
+      prev.viewportSize !== this.viewportSize ||
+      prev.horizontal !== this.horizontal ||
+      prev.isScrolling !== this.isScrolling ||
+      prev.beforeSize !== beforeSize ||
+      prev.afterSize !== afterSize ||
+      prev.items.length !== itemsLength ||
+      prev.range?.startIndex !== range?.startIndex ||
+      prev.range?.endIndex !== range?.endIndex
+    ) {
+      return false
+    }
+    if (itemsLength === 0) return true
+
+    for (let i = 0; i < itemsLength; i++) {
+      const index = itemStartIndex + i
+      const item = prev.items[i]!
+      if (
+        item.index !== index ||
+        item.start !== this.starts[index] ||
+        item.size !== this.sizes[index]
+      ) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  private computeTotalSize(): number {
+    if (!this.count) return this.paddingStart + this.paddingEnd
+    const lastStart = this.starts[this.count - 1]!
+    const lastSize = this.sizes[this.count - 1]!
+    return lastStart + lastSize + this.paddingEnd
+  }
+
+  private calculateRange(offset: number): VirtualRange | null {
+    if (!this.count || this.viewportSize <= 0) return null
+
+    const startIndex = this.findStartIndex(offset)
+    return { startIndex, endIndex: this.findEndIndex(offset + this.viewportSize, startIndex) }
+  }
+
+  private createItems(from: number, to: number): VirtualItem[] {
+    const out: VirtualItem[] = []
+    out.length = to - from + 1
+    for (let i = from; i <= to; i++) {
+      const start = this.starts[i]!
+      const size = this.sizes[i]!
+      out[i - from] = { index: i, start, end: start + size, size }
+    }
+    return out
+  }
+
+  private findStartIndex(offset: number): number {
+    let lo = 0
+    let hi = this.count - 1
+    let result = 0
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1
+      const end = this.starts[mid]! + this.sizes[mid]!
+      if (end > offset) {
+        result = mid
+        hi = mid - 1
+      } else {
+        lo = mid + 1
+      }
+    }
+    return result
+  }
+
+  private findEndIndex(viewportEnd: number, startIndex: number): number {
+    let lo = startIndex
+    let hi = this.count - 1
+    let result = startIndex
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1
+      if (this.starts[mid]! < viewportEnd) {
+        result = mid
+        lo = mid + 1
+      } else {
+        hi = mid - 1
+      }
+    }
+    return result
+  }
+
+  private clampOffset(offset: number): number {
+    return this.clampOffsetWithViewport(offset, this.viewportSize)
+  }
+
+  private clampOffsetWithViewport(offset: number, viewportSize: number): number {
+    const max = Math.max(0, this.computeTotalSize() - viewportSize)
+    return clamp(Math.round(offset), 0, max)
+  }
+
+  /** align 换算：纯函数，不写 DOM；供 scrollToIndex 与 Reconciler 共用。 */
+  private getOffsetForIndex(index: number, align: VirtualAlign): number {
+    const item = this.getItem(index)
+    const viewportEnd = this.offset + this.viewportSize
+    if (align === 'start') return item.start
+    if (align === 'end') return item.end - this.viewportSize
+    if (align === 'center') return item.start - (this.viewportSize - item.size) / 2
+    if (item.start < this.offset) return item.start
+    if (item.end > viewportEnd) return item.end - this.viewportSize
+    return this.offset
+  }
+
+  /**
+   * scroll 入口：non-smooth 同步写 + recompute；smooth 委托 Reconciler 的 rAF 校准循环
+   * 并不预写 this.offset（由 scroll 事件驱动）。
+   */
+  private performScroll(
+    index: number | null,
+    align: VirtualAlign,
+    offset: number,
+    options: VirtualScrollOptions
+  ): this {
+    const target = this.clampOffset(offset)
+    const el = this.scrollElement
+    const behavior = options.behavior
+
+    // 新的 scrollTo* 先终止上一次 reconcile，避免历史状态泄漏到本次。
+    this.reconciler.cancel()
+
+    if (behavior === 'smooth' && el !== null) {
+      this.reconciler.start(index, align, target)
+      return this
+    }
+
+    const currentDom = el ? readScrollOffset(el, this.horizontal) : null
+    if (target === this.offset && (currentDom === null || currentDom === target)) return this
+    if (el) writeScroll(el, this.horizontal, target, behavior)
+    this.offset = target
+    this.recompute()
+    return this
+  }
+
+  private syncFromElement(): void {
+    const el = this.scrollElement
+    if (!el) return
+    const nextViewport = this.horizontal ? el.clientWidth : el.clientHeight
+    const nextOffset = this.clampOffsetWithViewport(
+      readScrollOffset(el, this.horizontal),
+      nextViewport
+    )
+    if (nextViewport === this.viewportSize && nextOffset === this.offset) return
+    this.viewportSize = nextViewport
+    this.offset = nextOffset
+    this.recompute()
+  }
+
+  private handleScroll = (): void => {
+    const el = this.scrollElement
+    if (!el) return
+    const nextOffset = this.clampOffset(readScrollOffset(el, this.horizontal))
+
+    // smooth 抢占检测委托 Reconciler（按「距离 target 单调递减」不变式识别并 cancel）。
+    this.reconciler.observeScroll(nextOffset)
+
+    if (this.isScrolling && nextOffset === this.offset) {
+      if (!this.scrollEndNative) this.kickScrollEndTimer()
+      return
+    }
+    this.isScrolling = true
+    this.offset = nextOffset
+    this.recompute()
+    if (!this.scrollEndNative) this.kickScrollEndTimer()
+  }
+
+  private handleScrollEnd = (): void => {
+    this.markScrollEnd()
+  }
+
+  private kickScrollEndTimer(): void {
+    if (this.scrollEndTimer !== null) clearTimeout(this.scrollEndTimer)
+    this.scrollEndTimer = setTimeout(() => {
+      this.scrollEndTimer = null
+      this.markScrollEnd()
+    }, SCROLL_END_DELAY)
+  }
+
+  private markScrollEnd(): void {
+    if (!this.isScrolling) return
+    this.isScrolling = false
+    this.recompute()
+  }
+}
+
+function emptySnapshot(): VirtualSnapshot {
+  return {
     items: [],
     range: null,
     totalSize: 0,
@@ -122,633 +823,5 @@ export class Virtualizer {
     viewportSize: 0,
     horizontal: false,
     isScrolling: false
-  }
-
-  private subscribers = new Set<VirtualizerSubscriber>()
-  private scrollElement: HTMLElement | null = null
-  private elementIndexes = new WeakMap<Element, number>()
-  private mountedItems = new Map<number, Element>()
-  private itemObserver: ResizeObserver | null = null
-  private containerObserver: ResizeObserver | null = null
-  private scrollEndTimer: ReturnType<typeof setTimeout> | null = null
-  private scrollEndListenerAttached = false
-
-  constructor(options: VirtualizerOptions = {}) {
-    this.applyOptions(options)
-    this.recompute()
-  }
-
-  /**
-   * 批量更新配置；仅提供的字段会生效，未提供者保持原值。
-   * 完成后总会触发一次重算，可能派发 notify。
-   */
-  setOptions(options: VirtualizerOptions): this {
-    this.applyOptions(options)
-    this.recompute()
-    return this
-  }
-
-  /**
-   * 设置总项数。增长时仅对新增尾部失效，收缩时复用现有缓存，避免 O(count) 全量重算。
-   */
-  setCount(count: number): this {
-    const nextCount = Math.max(0, Math.trunc(count))
-    const prev = this.count
-    if (nextCount === prev) {
-      return this
-    }
-
-    this.count = nextCount
-    this.pruneCaches()
-
-    if (nextCount > prev) {
-      this.invalidateFrom(prev)
-    } else {
-      this.dirtyIndex = Math.min(this.dirtyIndex, nextCount)
-    }
-
-    this.recompute()
-    return this
-  }
-
-  /** 设置 viewport 尺寸；常由外部观察器或 composable 调用。 */
-  setViewport(size: number): this {
-    this.viewportSize = Math.max(0, Math.round(size))
-    this.offset = this.clampOffset(this.offset)
-    this.recompute()
-    return this
-  }
-
-  /** 手动设置滚动偏移，不会驱动真实 DOM 滚动（对应方法为 scrollToOffset）。 */
-  setOffset(offset: number): this {
-    this.offset = this.clampOffset(offset)
-    this.recompute()
-    return this
-  }
-
-  /**
-   * 挂载到滚动容器：注册 scroll / scrollend 监听，并用容器 ResizeObserver 跟踪 viewport。
-   * 再次传入同一元素时仅做同步；传入 null 等同于 unmount。
-   */
-  mount(element: HTMLElement | null): this {
-    if (!element) {
-      this.unmount()
-      return this
-    }
-
-    if (this.scrollElement === element) {
-      this.syncFromElement()
-      return this
-    }
-
-    this.unmount()
-    this.scrollElement = element
-    element.addEventListener('scroll', this.handleScroll, { passive: true })
-
-    if ('onscrollend' in element) {
-      element.addEventListener('scrollend', this.handleScrollEnd, { passive: true })
-      this.scrollEndListenerAttached = true
-    }
-
-    this.observeContainer(element)
-    this.syncFromElement()
-    return this
-  }
-
-  /** 卸载当前容器：移除监听、断开容器观察器、清理滚动结束定时器。不清除订阅者。 */
-  unmount(): this {
-    if (this.scrollElement) {
-      this.scrollElement.removeEventListener('scroll', this.handleScroll)
-
-      if (this.scrollEndListenerAttached) {
-        this.scrollElement.removeEventListener('scrollend', this.handleScrollEnd)
-        this.scrollEndListenerAttached = false
-      }
-    }
-
-    this.scrollElement = null
-    this.containerObserver?.disconnect()
-    this.containerObserver = null
-    this.stopScrollTracking()
-    return this
-  }
-
-  /** 彻底销毁：unmount + 断开项观察器、清空 mounted 元素映射与订阅者。 */
-  destroy(): void {
-    this.unmount()
-    this.itemObserver?.disconnect()
-    this.itemObserver = null
-    this.mountedItems.clear()
-    this.subscribers.clear()
-  }
-
-  /**
-   * 订阅快照变化；订阅时会立即推送一次当前快照以便初始化渲染。
-   * 返回的函数用于取消订阅。
-   */
-  subscribe(listener: VirtualizerSubscriber): () => void {
-    this.subscribers.add(listener)
-    listener(this.snapshot)
-    return () => {
-      this.subscribers.delete(listener)
-    }
-  }
-
-  /**
-   * 外部提供真实尺寸进行单项测量；若尺寸发生变化会立即重算并可能 notify。
-   * 越界或未变化的测量为 no-op。
-   */
-  measure(index: number, size: number): this {
-    if (this.applyMeasurement(index, size)) {
-      this.recompute()
-    }
-    return this
-  }
-
-  /**
-   * 将 DOM 元素与索引绑定并交给 ResizeObserver 跟踪；元素变化时自动解绑旧元素。
-   * 传 null 等同于解绑。会立刻基于元素的当前尺寸做一次测量。
-   */
-  measureElement(index: number, element: Element | null): void {
-    const current = this.mountedItems.get(index)
-
-    if (current && current !== element) {
-      this.itemObserver?.unobserve(current)
-      this.mountedItems.delete(index)
-    }
-
-    if (!element) {
-      return
-    }
-
-    this.mountedItems.set(index, element)
-    this.elementIndexes.set(element, index)
-    this.ensureItemObserver()?.observe(element)
-    this.measure(index, getMeasuredSize(element, this.horizontal))
-  }
-
-  /**
-   * 驱动真实 DOM 滚动到指定偏移（若已 mount），并同步内部 offset。
-   */
-  scrollToOffset(offset: number, options: VirtualScrollOptions = {}): this {
-    const target = this.clampOffset(offset)
-
-    if (this.scrollElement) {
-      this.scrollElement.scrollTo({
-        [this.horizontal ? 'left' : 'top']: target,
-        behavior: options.behavior
-      })
-    }
-
-    this.offset = target
-    this.recompute()
-    return this
-  }
-
-  /**
-   * 滚动到指定索引；align 为 auto 时仅在该项不完全可见时滚入。
-   */
-  scrollToIndex(index: number, options: VirtualScrollOptions = {}): this {
-    if (!this.count) {
-      return this
-    }
-
-    const targetIndex = clamp(Math.trunc(index), 0, this.count - 1)
-    const item = this.getItem(targetIndex)
-    const { align = 'auto', behavior } = options
-    const viewportEnd = this.offset + this.viewportSize
-
-    let nextOffset = this.offset
-
-    if (align === 'start') {
-      nextOffset = item.start
-    } else if (align === 'end') {
-      nextOffset = item.end - this.viewportSize
-    } else if (align === 'center') {
-      nextOffset = item.start - (this.viewportSize - item.size) / 2
-    } else if (item.start < this.offset) {
-      nextOffset = item.start
-    } else if (item.end > viewportEnd) {
-      nextOffset = item.end - this.viewportSize
-    }
-
-    return this.scrollToOffset(nextOffset, { behavior })
-  }
-
-  /** 清空所有测量缓存并将 offset 归零；通常用于数据源整体替换的场景。 */
-  reset(): this {
-    this.measuredSizes.clear()
-    this.starts = []
-    this.ends = []
-    this.sizes = []
-    this.dirtyIndex = 0
-    this.offset = 0
-    this.recompute()
-    return this
-  }
-
-  /** 返回当前快照；同一 recompute 期内引用稳定，未变化时也不会重建对象。 */
-  getSnapshot(): VirtualSnapshot {
-    return this.snapshot
-  }
-
-  /**
-   * 按索引获取单项的最新位置；快照不提供此类随机访问，故保留为公共方法。
-   * 越界抛出 RangeError。
-   */
-  getItem(index: number): VirtualItem {
-    this.ensureMeasurements()
-
-    if (index < 0 || index >= this.count) {
-      throw new RangeError(`Virtual item index out of range: ${index}`)
-    }
-
-    return { index, start: this.starts[index]!, end: this.ends[index]!, size: this.sizes[index]! }
-  }
-
-  private applyOptions(options: VirtualizerOptions): void {
-    if (options.count !== undefined) {
-      this.count = Math.max(0, Math.trunc(options.count))
-      this.pruneCaches()
-    }
-
-    if (options.overscan !== undefined) {
-      this.overscan = Math.max(0, Math.trunc(options.overscan))
-    }
-
-    if (options.horizontal !== undefined) {
-      this.horizontal = options.horizontal
-    }
-
-    if (options.paddingStart !== undefined) {
-      this.paddingStart = Math.max(0, Math.round(options.paddingStart))
-      this.invalidateFrom(0)
-    }
-
-    if (options.paddingEnd !== undefined) {
-      this.paddingEnd = Math.max(0, Math.round(options.paddingEnd))
-    }
-
-    if (options.gap !== undefined) {
-      this.gap = Math.max(0, Math.round(options.gap))
-      this.invalidateFrom(0)
-    }
-
-    if (options.estimateSize !== undefined) {
-      this.estimateSize = options.estimateSize
-      this.invalidateFrom(0)
-    }
-
-    if (options.initialOffset !== undefined) {
-      this.offset = Math.max(0, Math.round(options.initialOffset))
-    }
-
-    if (options.initialViewport !== undefined) {
-      this.viewportSize = Math.max(0, Math.round(options.initialViewport))
-    }
-  }
-
-  private pruneCaches(): void {
-    for (const index of this.measuredSizes.keys()) {
-      if (index >= this.count) {
-        this.measuredSizes.delete(index)
-      }
-    }
-
-    for (const [index, element] of this.mountedItems) {
-      if (index >= this.count) {
-        this.itemObserver?.unobserve(element)
-        this.mountedItems.delete(index)
-      }
-    }
-
-    this.starts.length = this.count
-    this.ends.length = this.count
-    this.sizes.length = this.count
-  }
-
-  private invalidateFrom(index: number): void {
-    this.dirtyIndex = Math.min(this.dirtyIndex, Math.max(0, index))
-  }
-
-  /** 仅更新单项尺寸缓存并在发生变化时标记失效，不触发 recompute。 */
-  private applyMeasurement(index: number, size: number): boolean {
-    if (index < 0 || index >= this.count) {
-      return false
-    }
-
-    const normalized = Math.max(0, Math.round(size))
-    if (this.measuredSizes.get(index) === normalized) {
-      return false
-    }
-
-    this.measuredSizes.set(index, normalized)
-    this.invalidateFrom(index)
-    return true
-  }
-
-  private ensureMeasurements(): void {
-    if (this.count === 0) {
-      this.starts = []
-      this.ends = []
-      this.sizes = []
-      this.dirtyIndex = 0
-      return
-    }
-
-    const startIndex = clamp(this.dirtyIndex, 0, this.count)
-    if (startIndex >= this.count) {
-      return
-    }
-
-    for (let index = startIndex; index < this.count; index++) {
-      const size = this.measuredSizes.get(index) ?? this.estimateSize(index)
-      const start = index === 0 ? this.paddingStart : this.ends[index - 1]! + this.gap
-      const end = start + size
-
-      this.starts[index] = start
-      this.ends[index] = end
-      this.sizes[index] = size
-    }
-
-    this.dirtyIndex = this.count
-  }
-
-  private recompute(): void {
-    this.ensureMeasurements()
-
-    const totalSize = this.getTotalSize()
-    const range = this.calculateRange()
-    const items =
-      range === null
-        ? []
-        : this.createItems(
-            Math.max(0, range.startIndex - this.overscan),
-            Math.min(this.count - 1, range.endIndex + this.overscan)
-          )
-
-    this.offset = this.clampOffset(this.offset)
-
-    const next: VirtualSnapshot = {
-      items,
-      range,
-      totalSize,
-      beforeSize: items[0]?.start ?? this.paddingStart,
-      afterSize:
-        items.length === 0 ? totalSize : Math.max(0, totalSize - items[items.length - 1]!.end),
-      offset: this.offset,
-      viewportSize: this.viewportSize,
-      horizontal: this.horizontal,
-      isScrolling: this.isScrolling
-    }
-
-    if (this.isEquivalentSnapshot(this.snapshot, next)) {
-      return
-    }
-
-    this.snapshot = next
-    this.notify()
-  }
-
-  /**
-   * 仅比较对视觉产出有影响的关键字段以跳过冗余 notify；
-   * 出于性能考虑只对 items 的首尾做抽样比对，中间项尺寸变化通过 totalSize / 末项 end 的变动捕获。
-   */
-  private isEquivalentSnapshot(prev: VirtualSnapshot, next: VirtualSnapshot): boolean {
-    if (prev.items.length === 0 && prev.range === null) {
-      return false
-    }
-
-    if (
-      prev.totalSize !== next.totalSize ||
-      prev.offset !== next.offset ||
-      prev.viewportSize !== next.viewportSize ||
-      prev.isScrolling !== next.isScrolling ||
-      prev.horizontal !== next.horizontal ||
-      prev.beforeSize !== next.beforeSize ||
-      prev.afterSize !== next.afterSize ||
-      prev.items.length !== next.items.length
-    ) {
-      return false
-    }
-
-    const prevRange = prev.range
-    const nextRange = next.range
-    if (prevRange === null || nextRange === null) {
-      if (prevRange !== nextRange) {
-        return false
-      }
-    } else if (
-      prevRange.startIndex !== nextRange.startIndex ||
-      prevRange.endIndex !== nextRange.endIndex
-    ) {
-      return false
-    }
-
-    if (prev.items.length === 0) {
-      return true
-    }
-
-    const prevFirst = prev.items[0]!
-    const nextFirst = next.items[0]!
-    if (
-      prevFirst.index !== nextFirst.index ||
-      prevFirst.start !== nextFirst.start ||
-      prevFirst.size !== nextFirst.size
-    ) {
-      return false
-    }
-
-    const prevLast = prev.items[prev.items.length - 1]!
-    const nextLast = next.items[next.items.length - 1]!
-    if (
-      prevLast.index !== nextLast.index ||
-      prevLast.start !== nextLast.start ||
-      prevLast.size !== nextLast.size
-    ) {
-      return false
-    }
-
-    return true
-  }
-
-  /**
-   * 基于当前缓存计算总尺寸；用于 recompute 与 clampOffset，外部请通过 getSnapshot().totalSize 访问。
-   */
-  private getTotalSize(): number {
-    this.ensureMeasurements()
-    if (!this.count) {
-      return this.paddingStart + this.paddingEnd
-    }
-
-    return this.ends[this.count - 1]! + this.paddingEnd
-  }
-
-  private calculateRange(): VirtualRange | null {
-    if (!this.count || this.viewportSize <= 0) {
-      return null
-    }
-
-    const startIndex = this.findStartIndex(this.offset)
-    const viewportEnd = this.offset + this.viewportSize
-    let endIndex = startIndex
-
-    while (endIndex < this.count - 1 && this.starts[endIndex + 1]! < viewportEnd) {
-      endIndex++
-    }
-
-    return { startIndex, endIndex }
-  }
-
-  private createItems(startIndex: number, endIndex: number): VirtualItem[] {
-    const items: VirtualItem[] = []
-
-    for (let index = startIndex; index <= endIndex; index++) {
-      items.push({
-        index,
-        start: this.starts[index]!,
-        end: this.ends[index]!,
-        size: this.sizes[index]!
-      })
-    }
-
-    return items
-  }
-
-  private findStartIndex(offset: number): number {
-    let low = 0
-    let high = this.count - 1
-    let result = 0
-
-    while (low <= high) {
-      const mid = Math.floor((low + high) / 2)
-      const end = this.ends[mid]!
-
-      if (end > offset) {
-        result = mid
-        high = mid - 1
-      } else {
-        low = mid + 1
-      }
-    }
-
-    return result
-  }
-
-  private clampOffset(offset: number): number {
-    const maxOffset = Math.max(0, this.getTotalSize() - this.viewportSize)
-    return clamp(Math.round(offset), 0, maxOffset)
-  }
-
-  /** 容器尺寸变化时同步 viewport，不重新绑定项观察器。 */
-  private observeContainer(element: HTMLElement): void {
-    if (typeof ResizeObserver === 'undefined') {
-      return
-    }
-
-    this.containerObserver = new ResizeObserver(() => {
-      this.syncFromElement()
-    })
-
-    this.containerObserver.observe(element)
-  }
-
-  /**
-   * 懒创建项观察器。回调内对一整批 entries 先批量 applyMeasurement，
-   * 只有当存在实际尺寸变化时才触发一次 recompute，避免 N 项 resize 引发 N 次布局重算。
-   */
-  private ensureItemObserver(): ResizeObserver | null {
-    if (this.itemObserver || typeof ResizeObserver === 'undefined') {
-      return this.itemObserver
-    }
-
-    this.itemObserver = new ResizeObserver((entries) => {
-      let changed = false
-
-      for (const entry of entries) {
-        const index = this.elementIndexes.get(entry.target)
-        if (index === undefined) {
-          continue
-        }
-
-        const box = entry.borderBoxSize?.[0]
-        const size = box
-          ? Math.round(this.horizontal ? box.inlineSize : box.blockSize)
-          : getMeasuredSize(entry.target, this.horizontal)
-
-        if (this.applyMeasurement(index, size)) {
-          changed = true
-        }
-      }
-
-      if (changed) {
-        this.recompute()
-      }
-    })
-
-    return this.itemObserver
-  }
-
-  private syncFromElement(): void {
-    if (!this.scrollElement) {
-      return
-    }
-
-    this.viewportSize = this.horizontal
-      ? this.scrollElement.clientWidth
-      : this.scrollElement.clientHeight
-    this.offset = this.horizontal ? this.scrollElement.scrollLeft : this.scrollElement.scrollTop
-    this.offset = this.clampOffset(this.offset)
-    this.recompute()
-  }
-
-  /** 滚动事件：同步 offset 并标记滚动中；不支持 scrollend 时用 setTimeout 兜底判定结束。 */
-  private handleScroll = (): void => {
-    if (!this.scrollElement) {
-      return
-    }
-
-    this.isScrolling = true
-    this.offset = this.clampOffset(
-      this.horizontal ? this.scrollElement.scrollLeft : this.scrollElement.scrollTop
-    )
-    this.recompute()
-
-    if (this.scrollEndListenerAttached) {
-      return
-    }
-
-    this.stopScrollTracking()
-    this.scrollEndTimer = setTimeout(() => {
-      this.scrollEndTimer = null
-      this.markScrollEnd()
-    }, DEFAULT_SCROLL_END_DELAY)
-  }
-
-  private handleScrollEnd = (): void => {
-    this.markScrollEnd()
-  }
-
-  /** 统一的滚动结束收束：仅在仍处于 isScrolling 时关闭并触发一次重算。 */
-  private markScrollEnd(): void {
-    if (!this.isScrolling) {
-      return
-    }
-
-    this.isScrolling = false
-    this.recompute()
-  }
-
-  private stopScrollTracking(): void {
-    if (this.scrollEndTimer !== null) {
-      clearTimeout(this.scrollEndTimer)
-      this.scrollEndTimer = null
-    }
-  }
-
-  private notify(): void {
-    for (const subscriber of this.subscribers) {
-      subscriber(this.snapshot)
-    }
   }
 }
