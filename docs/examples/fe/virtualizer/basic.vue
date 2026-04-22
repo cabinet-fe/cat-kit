@@ -115,7 +115,6 @@ const targetIndex = ref(180)
 
 const virtualizer = new Virtualizer({
   count: rows.length,
-  overscan: 6,
   estimateSize: (index) => getRow(index).estimatedSize
 })
 

@@ -68,9 +68,9 @@ provide('measured', measured)
 const virtualizer = new Virtualizer({
   count: ROW_COUNT,
   estimateSize: () => 45,
-  overscan: 4,
   getItemKey: (index) => allList[index]!.id
 })
+
 provide('virtualizer', virtualizer)
 
 function writeSpacer(el: HTMLTableRowElement | null, height: number): void {
