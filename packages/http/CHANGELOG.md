@@ -1,5 +1,12 @@
 # @cat-kit/http
 
+## 1.1.3
+
+### Patch Changes
+
+- a54474e: http 包源码同时发布
+  - @cat-kit/core@1.1.3
+
 ## 1.1.2
 
 ### Patch Changes
