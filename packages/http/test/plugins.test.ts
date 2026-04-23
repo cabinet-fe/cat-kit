@@ -226,7 +226,7 @@ describe('TokenPlugin', () => {
       await expect(client.get('/api')).rejects.toMatchObject({
         name: 'HTTPError',
         message: '刷新令牌已过期',
-        code: 'UNKNOWN'
+        code: 'AUTH'
       })
       expect(onRefreshExpired).toHaveBeenCalledTimes(1)
       expect(mockFetch).not.toHaveBeenCalled()

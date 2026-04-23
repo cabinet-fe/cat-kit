@@ -45,18 +45,29 @@ interface ClientConfig {
   timeout?: number
   headers?: Record<string, string>
   credentials?: boolean
+  responseType?: 'json' | 'text' | 'blob' | 'arraybuffer'
+  signal?: AbortSignal
+  onUploadProgress?: (info: ProgressInfo) => void
+  onDownloadProgress?: (info: ProgressInfo) => void
   plugins?: HTTPClientPlugin[]
   engine?: HttpEngine
+  xsrfCookieName?: string
+  xsrfHeaderName?: string
 }
 
 interface RequestConfig {
   method?: RequestMethod
-  body?: BodyInit | Record<string, any>
+  body?: BodyInit | Record<string, any> | URLSearchParams | FormData
   query?: Record<string, any>
   headers?: Record<string, string>
   timeout?: number
   credentials?: boolean
   responseType?: 'json' | 'text' | 'blob' | 'arraybuffer'
+  signal?: AbortSignal
+  onUploadProgress?: (info: ProgressInfo) => void
+  onDownloadProgress?: (info: ProgressInfo) => void
+  xsrfCookieName?: string
+  xsrfHeaderName?: string
 }
 ```
 
@@ -171,12 +182,12 @@ user.abort() // 中止该分组引擎内请求
 
 从旧版本升级到当前版本时，插件相关 API 做了以下重命名（行为等价，仅名称变更；同时插件 `name` 字段从可选变为**必填且唯一**）：
 
-| 旧名 | 新名 |
-|------|------|
-| `ClientPlugin` | `HTTPClientPlugin` |
-| `TokenPlugin` | `HTTPTokenPlugin` |
-| `TokenPluginOptions` | `HTTPTokenPluginOptions` |
-| `MethodOverridePlugin` | `HTTPMethodOverridePlugin` |
+| 旧名                          | 新名                              |
+| ----------------------------- | --------------------------------- |
+| `ClientPlugin`                | `HTTPClientPlugin`                |
+| `TokenPlugin`                 | `HTTPTokenPlugin`                 |
+| `TokenPluginOptions`          | `HTTPTokenPluginOptions`          |
+| `MethodOverridePlugin`        | `HTTPMethodOverridePlugin`        |
 | `MethodOverridePluginOptions` | `HTTPMethodOverridePluginOptions` |
 
 `RetryPlugin` / `RetryPluginOptions` 命名保持不变。

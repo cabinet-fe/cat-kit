@@ -10,7 +10,7 @@ outline: deep
 
 ## 页面导航
 
-- [数据处理](./data)
+- [数据处理](./data/)
 - [数据结构](./data-structure)
 - [日期处理](./date)
 - [环境检测](./env)

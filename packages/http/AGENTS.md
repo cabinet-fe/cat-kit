@@ -39,6 +39,6 @@ packages/http/src/
 - 基础工具函数从 `@cat-kit/core` 导入，禁止重复实现
 - 插件返回新配置对象而非修改原配置（不可变原则）
 - 新增插件放 `src/plugins/`，新增引擎放 `src/engine/`
-- 客户端、类型与内置插件均由 `src/index.ts` 重导出；`package.json` 另提供 `@cat-kit/http/plugins` 子路径以便按需分包
+- 客户端、类型与内置插件均由 `src/index.ts` 重导出
 - 插件必须填写唯一的非空 name 字段；`HTTPClient` 构造时的 `config.plugins` 与运行时 `registerPlugin` 都会强制校验唯一性，冲突抛 `HTTPError({ code: 'PLUGIN' })`。
 - `HTTPClient.group()` 派生的子 client 通过父链继承插件（父影响子、子不影响父），同名校验跨父子层级生效。

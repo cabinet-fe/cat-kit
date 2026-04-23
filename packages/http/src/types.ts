@@ -28,8 +28,8 @@ export interface ClientConfig {
   headers?: Record<string, string>
 
   /**
-   * 控制`浏览器`是否发送凭证
-   * - 默认发送，即在同源请求时发送凭证。
+   * 控制`浏览器`是否发送凭证（Cookie / HTTP 认证 / TLS 客户端证书）
+   * - 默认发送，即跨域请求也会携带凭证。
    * - 如果设置为`false`，则在任何请求时都不会发送凭证。
    * @default true
    */
@@ -47,6 +47,38 @@ export interface ClientConfig {
    * - 可传入自定义 HttpEngine 子类实例以对接其他底层（如 undici、msw mock）
    */
   engine?: HttpEngine
+
+  /**
+   * 响应类型
+   * - 'json': 解析为 JSON
+   * - 'text': 解析为文本
+   * - 'blob': 解析为 Blob
+   * - 'arraybuffer': 解析为 ArrayBuffer
+   * - 未设置时根据响应 `Content-Type` 自动推断
+   */
+  responseType?: 'json' | 'text' | 'blob' | 'arraybuffer'
+
+  /** 默认终止信号（可被单次请求的 `signal` 覆盖） */
+  signal?: AbortSignal
+
+  /** 默认上传进度回调 */
+  onUploadProgress?: (info: ProgressInfo) => void
+
+  /** 默认下载进度回调 */
+  onDownloadProgress?: (info: ProgressInfo) => void
+
+  /**
+   * XSRF Cookie 名称
+   * - 默认 `'XSRF-TOKEN'`
+   * - 仅在浏览器环境且请求为同域时生效
+   */
+  xsrfCookieName?: string
+
+  /**
+   * XSRF Header 名称
+   * - 默认 `'X-XSRF-TOKEN'`
+   */
+  xsrfHeaderName?: string
 }
 
 export interface RequestConfig {
@@ -59,8 +91,10 @@ export interface RequestConfig {
    * 请求体
    * - ReadableStream数据在不支持fetch的环境下无效
    * - JS对象会被自动转换为JSON字符串，并且会自动设置`Content-Type`为`application/json`
+   * - `URLSearchParams` 会自动设置 `Content-Type: application/x-www-form-urlencoded`
+   * - `FormData` 会直接作为 body，不自动设置 `Content-Type`（由浏览器设置 multipart boundary）
    */
-  body?: BodyInit | Record<string, any>
+  body?: BodyInit | Record<string, any> | URLSearchParams | FormData
   /**
    * 查询参数
    * - 如果你在url中也指定了查询参数，那么它们会被合并。
@@ -78,11 +112,11 @@ export interface RequestConfig {
   credentials?: boolean
   /**
    * 响应类型
-   * - 'json': 解析为 JSON (默认)
+   * - 'json': 解析为 JSON
    * - 'text': 解析为文本
    * - 'blob': 解析为 Blob
    * - 'arraybuffer': 解析为 ArrayBuffer
-   * @default 'json'
+   * - 未设置时根据响应 `Content-Type` 自动推断
    */
   responseType?: 'json' | 'text' | 'blob' | 'arraybuffer'
 
@@ -94,6 +128,18 @@ export interface RequestConfig {
 
   /** 下载进度（需引擎支持流式读取） */
   onDownloadProgress?: (info: ProgressInfo) => void
+
+  /**
+   * XSRF Cookie 名称（覆盖 ClientConfig）
+   * - 默认 `'XSRF-TOKEN'`
+   */
+  xsrfCookieName?: string
+
+  /**
+   * XSRF Header 名称（覆盖 ClientConfig）
+   * - 默认 `'X-XSRF-TOKEN'`
+   */
+  xsrfHeaderName?: string
 
   /**
    * @internal 内置重试逻辑写入的重试次数，业务代码勿依赖
@@ -118,8 +164,8 @@ export interface HTTPResponse<T = any> {
   data: T
   /** HTTP状态码 */
   code: number
-  /** 响应标头 */
-  headers: Record<string, string>
+  /** 响应标头（同名多值以数组形式保留） */
+  headers: Record<string, string | string[]>
   /** 原始响应对象 */
   raw?: Response | any
 }
@@ -129,6 +175,7 @@ export type HttpErrorCode =
   | 'ABORTED'
   | 'NETWORK'
   | 'PARSE'
+  | 'AUTH'
   | 'UNKNOWN'
   | 'RETRY_LIMIT_EXCEEDED'
   | 'PLUGIN'

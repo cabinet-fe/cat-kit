@@ -1,7 +1,7 @@
 import type { HTTPResponse, ProgressInfo, RequestConfig } from '../types'
 import { HTTPError } from '../types'
 import { HttpEngine } from './engine'
-import { buildRequestBody } from './shared'
+import { buildRequestBody, inferResponseType } from './shared'
 
 function parseContentLength(response: Response): number {
   const raw = response.headers.get('content-length')
@@ -83,7 +83,7 @@ function mergeAbortSignals(
 export class FetchEngine extends HttpEngine {
   private controllers: Set<AbortController> = new Set()
 
-  async request<T = any>(url: string, config: RequestConfig): Promise<HTTPResponse<T>> {
+  async request<T = any>(url: string, config: RequestConfig = {}): Promise<HTTPResponse<T>> {
     const {
       method = 'GET',
       body,
@@ -135,18 +135,31 @@ export class FetchEngine extends HttpEngine {
         response.body &&
         typeof response.body.getReader === 'function'
 
+      const resolvedResponseType =
+        responseType || inferResponseType(response.headers.get('content-type'))
       const data = useProgress
         ? await this.parseResponseWithDownloadProgress<T>(
             response,
-            responseType,
+            resolvedResponseType,
             onDownloadProgress!
           )
-        : await this.parseResponseData<T>(response, responseType)
+        : await this.parseResponseData<T>(response, resolvedResponseType)
+
+      const responseHeaders: Record<string, string | string[]> = {}
+      response.headers.forEach((value, key) => {
+        responseHeaders[key] = value
+      })
+      const setCookie = (
+        response.headers as unknown as { getSetCookie?: () => string[] }
+      ).getSetCookie?.()
+      if (setCookie && setCookie.length) {
+        responseHeaders['set-cookie'] = setCookie
+      }
 
       const httpResponse: HTTPResponse<T> = {
         data,
         code: response.status,
-        headers: Object.fromEntries(response.headers.entries()),
+        headers: responseHeaders,
         raw: response
       }
 
@@ -213,29 +226,10 @@ export class FetchEngine extends HttpEngine {
     onDownloadProgress(buildProgressInfo(loaded, total))
 
     const merged = mergeUint8Chunks(chunks)
-    return this.decodeResponseBody<T>(merged, response, responseType)
+    return this.decodeBytes<T>(merged, response, responseType)
   }
 
-  private decodeResponseBody<T>(
-    bytes: Uint8Array,
-    response: Response,
-    responseType: RequestConfig['responseType']
-  ): T {
-    const resolvedType = responseType || 'json'
-
-    if (resolvedType === 'text') {
-      return new TextDecoder().decode(bytes) as T
-    }
-
-    if (resolvedType === 'blob') {
-      return new Blob([bytes as BlobPart]) as T
-    }
-
-    if (resolvedType === 'arraybuffer') {
-      return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as T
-    }
-
-    const text = new TextDecoder().decode(bytes)
+  private parseJSONBody<T>(text: string, response: Response): T {
     if (!text) {
       return null as T
     }
@@ -254,6 +248,29 @@ export class FetchEngine extends HttpEngine {
         cause: error
       })
     }
+  }
+
+  private decodeBytes<T>(
+    bytes: Uint8Array,
+    response: Response,
+    responseType: RequestConfig['responseType']
+  ): T {
+    const resolvedType = responseType || 'json'
+
+    if (resolvedType === 'arraybuffer') {
+      return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as T
+    }
+
+    if (resolvedType === 'blob') {
+      return new Blob([bytes as BlobPart]) as T
+    }
+
+    const text = new TextDecoder().decode(bytes)
+    if (resolvedType === 'text') {
+      return text as T
+    }
+
+    return this.parseJSONBody<T>(text, response)
   }
 
   private async parseResponseData<T>(
@@ -275,24 +292,7 @@ export class FetchEngine extends HttpEngine {
     }
 
     const text = await response.text()
-    if (!text) {
-      return null as T
-    }
-
-    try {
-      return JSON.parse(text) as T
-    } catch (error) {
-      throw new HTTPError('响应解析失败', {
-        code: 'PARSE',
-        response: {
-          data: text,
-          code: response.status,
-          headers: Object.fromEntries(response.headers.entries()),
-          raw: response
-        },
-        cause: error
-      })
-    }
+    return this.parseJSONBody<T>(text, response)
   }
 
   abort(): void {

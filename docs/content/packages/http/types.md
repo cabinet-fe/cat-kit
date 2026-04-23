@@ -34,13 +34,19 @@ interface ClientConfig {
   timeout?: number
   headers?: Record<string, string>
   credentials?: boolean
+  responseType?: 'json' | 'text' | 'blob' | 'arraybuffer'
+  signal?: AbortSignal
+  onUploadProgress?: (info: ProgressInfo) => void
+  onDownloadProgress?: (info: ProgressInfo) => void
   plugins?: HTTPClientPlugin[]
   engine?: HttpEngine
+  xsrfCookieName?: string
+  xsrfHeaderName?: string
 }
 
 interface RequestConfig {
   method?: RequestMethod
-  body?: BodyInit | Record<string, any>
+  body?: BodyInit | Record<string, any> | URLSearchParams | FormData
   query?: Record<string, any>
   headers?: Record<string, string>
   timeout?: number
@@ -49,6 +55,8 @@ interface RequestConfig {
   signal?: AbortSignal
   onUploadProgress?: (info: ProgressInfo) => void
   onDownloadProgress?: (info: ProgressInfo) => void
+  xsrfCookieName?: string
+  xsrfHeaderName?: string
 }
 
 type AliasRequestConfig = Omit<RequestConfig, 'method'>
@@ -60,7 +68,7 @@ type AliasRequestConfig = Omit<RequestConfig, 'method'>
 interface HTTPResponse<T = any> {
   data: T
   code: number
-  headers: Record<string, string>
+  headers: Record<string, string | string[]>
   raw?: Response | any
 }
 
@@ -84,17 +92,10 @@ type HttpErrorCode =
   | 'ABORTED'
   | 'NETWORK'
   | 'PARSE'
+  | 'AUTH'
   | 'UNKNOWN'
   | 'RETRY_LIMIT_EXCEEDED'
   | 'PLUGIN'
-
-class HTTPError<T = any> extends Error {
-  code: HttpErrorCode
-  url?: string
-  config?: RequestConfig
-  response?: HTTPResponse<T>
-  cause?: unknown
-}
 ```
 
 推荐按 `instanceof HTTPError` + `error.code` 分支处理，而不是直接依赖错误消息文本。

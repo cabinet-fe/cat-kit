@@ -1,4 +1,4 @@
-import { HTTPResponse, RequestConfig } from "../types.js";
+import { HTTPResponse, RequestConfig } from '../types.js'
 
 //#region src/engine/engine.d.ts
 declare abstract class HttpEngine {
@@ -7,11 +7,11 @@ declare abstract class HttpEngine {
    * @param url 请求 URL
    * @param config 请求配置
    */
-  abstract request<T = any>(url: string, config: RequestConfig): Promise<HTTPResponse<T>>;
+  abstract request<T = any>(url: string, config: RequestConfig): Promise<HTTPResponse<T>>
   /**
    * 中止 HTTP 请求
    */
-  abstract abort(): void;
+  abstract abort(): void
 }
 //#endregion
-export { HttpEngine };
+export { HttpEngine }

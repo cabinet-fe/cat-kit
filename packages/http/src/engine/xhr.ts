@@ -1,7 +1,7 @@
 import type { RequestConfig, HTTPResponse, ProgressInfo } from '../types'
 import { HTTPError } from '../types'
 import { HttpEngine } from './engine'
-import { buildRequestBody } from './shared'
+import { buildRequestBody, inferResponseType } from './shared'
 
 function buildXHRProgressInfo(
   loaded: number,
@@ -17,14 +17,14 @@ export class XHREngine extends HttpEngine {
   /** 请求中的实例 */
   private xhrSets = new Set<XMLHttpRequest>()
 
-  request<T = any>(url: string, config: RequestConfig): Promise<HTTPResponse<T>> {
+  request<T = any>(url: string, config: RequestConfig = {}): Promise<HTTPResponse<T>> {
     return new Promise<HTTPResponse<T>>((resolve, reject) => {
       if (config.signal?.aborted) {
         reject(new HTTPError('请求被中止', { code: 'ABORTED', url, config }))
         return
       }
 
-      const { method = 'GET', timeout = 0, responseType = 'json', credentials = true } = config
+      const { method = 'GET', timeout = 0, responseType, credentials = true } = config
 
       const xhr = new XMLHttpRequest()
       const headers = { ...config.headers }
@@ -41,7 +41,7 @@ export class XHREngine extends HttpEngine {
       }
 
       xhr.timeout = timeout
-      xhr.responseType = responseType as XMLHttpRequestResponseType
+      xhr.responseType = (responseType || 'arraybuffer') as XMLHttpRequestResponseType
       xhr.withCredentials = credentials
 
       if (config.onUploadProgress && xhr.upload) {
@@ -59,10 +59,37 @@ export class XHREngine extends HttpEngine {
       }
 
       xhr.onload = () => {
+        const parsedHeaders = this.parseHeaders(xhr.getAllResponseHeaders())
+        const contentType = Array.isArray(parsedHeaders['content-type'])
+          ? parsedHeaders['content-type'][0]
+          : parsedHeaders['content-type']
+        const inferredType = responseType || inferResponseType(contentType || null)
+
+        let data: T
+        if (!responseType) {
+          const buffer = xhr.response as ArrayBuffer
+          if (buffer instanceof ArrayBuffer) {
+            if (inferredType === 'json') {
+              const text = new TextDecoder().decode(buffer)
+              data = text ? (JSON.parse(text) as T) : (null as T)
+            } else if (inferredType === 'text') {
+              data = new TextDecoder().decode(buffer) as T
+            } else if (inferredType === 'blob') {
+              data = new Blob([buffer]) as T
+            } else {
+              data = buffer as T
+            }
+          } else {
+            data = xhr.response as T
+          }
+        } else {
+          data = xhr.response as T
+        }
+
         const response: HTTPResponse<T> = {
-          data: xhr.response as T,
+          data,
           code: xhr.status,
-          headers: this.parseHeaders(xhr.getAllResponseHeaders()),
+          headers: parsedHeaders,
           raw: xhr
         }
 
@@ -118,10 +145,10 @@ export class XHREngine extends HttpEngine {
   /**
    * 解析响应头
    * @param headerStr 响应头字符串
-   * @returns 解析后的响应头对象
+   * @returns 解析后的响应头对象（同名多值以数组保留）
    */
-  private parseHeaders(headerStr: string): Record<string, string> {
-    const headers: Record<string, string> = {}
+  private parseHeaders(headerStr: string): Record<string, string | string[]> {
+    const headers: Record<string, string | string[]> = {}
     if (!headerStr) {
       return headers
     }
@@ -130,17 +157,34 @@ export class XHREngine extends HttpEngine {
     for (const headerPair of headerPairs) {
       const index = headerPair.indexOf(': ')
       if (index > 0) {
-        const key = headerPair.substring(0, index)
+        const key = headerPair.substring(0, index).toLowerCase()
         const val = headerPair.substring(index + 2)
-        headers[key.toLowerCase()] = val
+        const existing = headers[key]
+        if (existing === undefined) {
+          headers[key] = val
+        } else if (key === 'set-cookie') {
+          // set-cookie 保留数组，与 FetchEngine 的 getSetCookie 行为一致
+          if (Array.isArray(existing)) {
+            existing.push(val)
+          } else {
+            headers[key] = [existing, val]
+          }
+        } else {
+          // 其他多值 header 用逗号+空格合并，与 Fetch API Headers 行为一致
+          headers[key] = `${existing}, ${val}`
+        }
       }
     }
     return headers
   }
 
-  sendHeaders(xhr: XMLHttpRequest, headers: Record<string, string>): void {
+  sendHeaders(xhr: XMLHttpRequest, headers: Record<string, string | string[]>): void {
     Object.entries(headers).forEach(([key, value]) => {
-      xhr.setRequestHeader(key, value)
+      if (Array.isArray(value)) {
+        value.forEach((v) => xhr.setRequestHeader(key, v))
+      } else {
+        xhr.setRequestHeader(key, value)
+      }
     })
   }
 

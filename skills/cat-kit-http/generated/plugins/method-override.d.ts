@@ -1,4 +1,4 @@
-import { HTTPClientPlugin, RequestMethod } from "../types.js";
+import { HTTPClientPlugin, RequestMethod } from '../types.js'
 
 //#region src/plugins/method-override.d.ts
 /**
@@ -9,19 +9,19 @@ interface HTTPMethodOverridePluginOptions {
    * 需要被重写的请求方法
    * - 默认为 ['DELETE', 'PUT', 'PATCH']
    */
-  methods?: RequestMethod[];
+  methods?: RequestMethod[]
   /**
    * 重写后的请求方法
    * - 默认为 'POST'
    */
-  overrideMethod?: RequestMethod;
+  overrideMethod?: RequestMethod
   /**
    * 方法覆盖请求头名称
    * - 默认为 'X-HTTP-Method-Override'
    */
-  headerName?: string;
+  headerName?: string
 }
-type MethodOverridePluginOptions = HTTPMethodOverridePluginOptions;
+type MethodOverridePluginOptions = HTTPMethodOverridePluginOptions
 /**
  * 方法重写插件
  *
@@ -37,7 +37,14 @@ type MethodOverridePluginOptions = HTTPMethodOverridePluginOptions;
  * })
  * ```
  */
-declare function HTTPMethodOverridePlugin(options?: HTTPMethodOverridePluginOptions): HTTPClientPlugin;
-declare const MethodOverridePlugin: typeof HTTPMethodOverridePlugin;
+declare function HTTPMethodOverridePlugin(
+  options?: HTTPMethodOverridePluginOptions
+): HTTPClientPlugin
+declare const MethodOverridePlugin: typeof HTTPMethodOverridePlugin
 //#endregion
-export { HTTPMethodOverridePlugin, HTTPMethodOverridePluginOptions, MethodOverridePlugin, MethodOverridePluginOptions };
+export {
+  HTTPMethodOverridePlugin,
+  HTTPMethodOverridePluginOptions,
+  MethodOverridePlugin,
+  MethodOverridePluginOptions
+}

@@ -51,14 +51,21 @@ interface ClientConfig {
   timeout?: number
   headers?: Record<string, string>
   credentials?: boolean
+  responseType?: 'json' | 'text' | 'blob' | 'arraybuffer'
+  signal?: AbortSignal
+  onUploadProgress?: (info: ProgressInfo) => void
+  onDownloadProgress?: (info: ProgressInfo) => void
   plugins?: HTTPClientPlugin[]
   engine?: HttpEngine
+  xsrfCookieName?: string
+  xsrfHeaderName?: string
 }
 ```
 
 - `prefix` 用于给当前 client 统一加路径前缀
 - `origin` 只会作用于相对 URL；如果传入完整 URL，会跳过 `origin`
 - `engine` 可替换底层发送实现，适合 mock、特殊运行时或自定义 transport
+- `xsrfCookieName` / `xsrfHeaderName` 控制同域请求的 XSRF token 自动注入（详见下方 XSRF 防护）
 
 ### 发送请求
 
@@ -78,7 +85,7 @@ options<T = any>(url: string, config?: Omit<RequestConfig, 'method'>): Promise<H
 ```ts
 interface RequestConfig {
   method?: RequestMethod
-  body?: BodyInit | Record<string, any>
+  body?: BodyInit | Record<string, any> | URLSearchParams | FormData
   query?: Record<string, any>
   headers?: Record<string, string>
   timeout?: number
@@ -87,13 +94,18 @@ interface RequestConfig {
   signal?: AbortSignal
   onUploadProgress?: (info: ProgressInfo) => void
   onDownloadProgress?: (info: ProgressInfo) => void
+  xsrfCookieName?: string
+  xsrfHeaderName?: string
 }
 ```
 
 几个关键行为：
 
 - 对象类型 `body` 会自动序列化成 JSON，并补 `Content-Type: application/json`
+- `URLSearchParams` 会补 `Content-Type: application/x-www-form-urlencoded`
+- `FormData` 直接作为 body，不自动设置 `Content-Type`（由浏览器设置 multipart boundary）
 - `query` 会附加到 URL 上；数组会展开成重复 key，对象会 `JSON.stringify`
+- `responseType` 未设置时，引擎会根据响应 `Content-Type` 自动推断（`application/json` → `json`，`text/*` → `text`，二进制类型 → `blob`，其他 → `text`）
 - `onDownloadProgress` 在 `FetchEngine` 流式读取时可用
 - `onUploadProgress` 只有 `XHREngine` 会真正回调，`FetchEngine` 下会被静默忽略
 
@@ -108,7 +120,7 @@ await users.get('/profile') // /api/users/profile
 
 `group()` 的语义：
 
-- 子 client 继承父 client 的 `origin`、`timeout`、`credentials`、`headers`
+- 子 client 继承父 client 的 `origin`、`timeout`、`credentials`、`headers`、`responseType`、`signal`、`onUploadProgress`、`onDownloadProgress`
 - 父子共享同一个 `engine`
 - 父插件会影响子插件链；子注册的插件不会反向影响父 client
 
@@ -146,6 +158,21 @@ http.abort()
 ```
 
 `abort()` 会调用当前 `engine.abort()`，因此在父子 `group()` 共享引擎时，任一侧调用 `abort()` 都会中止该引擎上的在途请求。
+
+### XSRF 防护
+
+默认情况下，如果请求为**同域**且浏览器 `document.cookie` 中存在名为 `XSRF-TOKEN` 的 cookie，客户端会自动在请求头中加上 `X-XSRF-TOKEN`。
+
+```ts
+const http = new HTTPClient('/api', {
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN'
+})
+```
+
+- 仅在浏览器环境且请求与当前页面同域时生效
+- 跨域请求不会自动携带 XSRF token
+- 可通过 `ClientConfig` 或单次 `RequestConfig` 覆盖名称
 
 ### 错误处理
 

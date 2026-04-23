@@ -130,7 +130,7 @@ export function HTTPTokenPlugin(options: HTTPTokenPluginOptions): HTTPClientPlug
     async beforeRequest(url: string, config: RequestConfig): Promise<PluginHookResult> {
       if (isRefreshExpired?.()) {
         onRefreshExpired?.()
-        throw new HTTPError('刷新令牌已过期', { code: 'UNKNOWN', url, config })
+        throw new HTTPError('刷新令牌已过期', { code: 'AUTH', url, config })
       }
 
       if (refreshPromise) {

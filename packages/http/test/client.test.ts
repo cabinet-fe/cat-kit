@@ -118,6 +118,34 @@ describe('HTTPClient', () => {
       )
     })
 
+    it('应该能发送 URLSearchParams 并自动设置 Content-Type', async () => {
+      const client = new HTTPClient()
+      const params = new URLSearchParams({ name: 'test', age: '25' })
+
+      await client.post('/search', params)
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/search',
+        expect.objectContaining({
+          method: 'POST',
+          body: params,
+          headers: expect.objectContaining({ 'Content-Type': 'application/x-www-form-urlencoded' })
+        })
+      )
+    })
+
+    it('FormData 不应自动设置 Content-Type', async () => {
+      const client = new HTTPClient()
+      const formData = new FormData()
+      formData.append('file', 'test')
+
+      await client.post('/upload', formData)
+
+      const [, init] = mockFetch.mock.calls[0] as [string, RequestInit]
+      const h = init.headers as Record<string, string>
+      expect(h['Content-Type']).toBeUndefined()
+    })
+
     it('应该能添加自定义头部', async () => {
       const client = new HTTPClient()
       await client.post('/users', { name: 'test' }, { headers: { 'X-Custom-Header': 'value' } })
@@ -268,6 +296,39 @@ describe('HTTPClient', () => {
       // 测试 text 类型
       const textResponse = await client.get('/data', { responseType: 'text' })
       expect(textResponse.data).toBeDefined()
+    })
+
+    it('未设置 responseType 时根据 Content-Type 自动推断为 text', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Map([['content-type', 'text/plain']]),
+        text: async () => 'hello world',
+        blob: async () => new Blob(),
+        arrayBuffer: async () => new ArrayBuffer(8)
+      })
+
+      const client = new HTTPClient()
+      const response = await client.get('/text')
+
+      expect(response.data).toBe('hello world')
+    })
+
+    it('未设置 responseType 时根据 Content-Type 自动推断为 blob', async () => {
+      const blobData = new Blob(['image'])
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Map([['content-type', 'image/png']]),
+        text: async () => 'invalid',
+        blob: async () => blobData,
+        arrayBuffer: async () => new ArrayBuffer(8)
+      })
+
+      const client = new HTTPClient()
+      const response = await client.get('/image')
+
+      expect(response.data).toBeInstanceOf(Blob)
     })
 
     it('应该保留原始响应对象', async () => {
@@ -496,6 +557,93 @@ describe('HTTPClient', () => {
     })
   })
 
+  describe('XSRF 防护', () => {
+    const origLocation = globalThis.location
+    const origDocument = globalThis.document
+
+    afterEach(() => {
+      // @ts-expect-error restore
+      globalThis.location = origLocation
+      // @ts-expect-error restore
+      globalThis.document = origDocument
+    })
+
+    it('同域请求自动从 cookie 读取 XSRF-TOKEN 并设置 X-XSRF-TOKEN', async () => {
+      // @ts-expect-error mock location
+      globalThis.location = {
+        protocol: 'https:',
+        host: 'example.com',
+        href: 'https://example.com/'
+      }
+      // @ts-expect-error mock document
+      globalThis.document = { cookie: 'XSRF-TOKEN=abc123; other=value' }
+
+      const client = new HTTPClient()
+      await client.post('/api', { name: 'test' })
+
+      const [, init] = mockFetch.mock.calls[0] as [string, RequestInit]
+      const h = init.headers as Record<string, string>
+      expect(h['X-XSRF-TOKEN']).toBe('abc123')
+    })
+
+    it('跨域请求不自动设置 XSRF token', async () => {
+      // @ts-expect-error mock location
+      globalThis.location = {
+        protocol: 'https:',
+        host: 'example.com',
+        href: 'https://example.com/'
+      }
+      // @ts-expect-error mock document
+      globalThis.document = { cookie: 'XSRF-TOKEN=abc123; other=value' }
+
+      const client = new HTTPClient()
+      await client.post('https://other.com/api', { name: 'test' })
+
+      const [, init] = mockFetch.mock.calls[0] as [string, RequestInit]
+      const h = init.headers as Record<string, string>
+      expect(h['X-XSRF-TOKEN']).toBeUndefined()
+    })
+
+    it('自定义 xsrfCookieName 和 xsrfHeaderName', async () => {
+      // @ts-expect-error mock location
+      globalThis.location = {
+        protocol: 'http:',
+        host: 'localhost:3000',
+        href: 'http://localhost:3000/'
+      }
+      // @ts-expect-error mock document
+      globalThis.document = { cookie: 'csrf-token=xyz; other=value' }
+
+      const client = new HTTPClient('', {
+        xsrfCookieName: 'csrf-token',
+        xsrfHeaderName: 'X-CSRF-Token'
+      })
+      await client.get('/api')
+
+      const [, init] = mockFetch.mock.calls[0] as [string, RequestInit]
+      const h = init.headers as Record<string, string>
+      expect(h['X-CSRF-Token']).toBe('xyz')
+    })
+
+    it('无对应 cookie 时不设置 header', async () => {
+      // @ts-expect-error mock location
+      globalThis.location = {
+        protocol: 'https:',
+        host: 'example.com',
+        href: 'https://example.com/'
+      }
+      // @ts-expect-error mock document
+      globalThis.document = { cookie: 'other=value' }
+
+      const client = new HTTPClient()
+      await client.get('/api')
+
+      const [, init] = mockFetch.mock.calls[0] as [string, RequestInit]
+      const h = init.headers as Record<string, string>
+      expect(h['X-XSRF-TOKEN']).toBeUndefined()
+    })
+  })
+
   describe('mergeRequestConfig', () => {
     it('headers/query 对象合并且 undefined 不清空已有字段', () => {
       const base: Parameters<typeof mergeRequestConfig>[0] = {
@@ -589,6 +737,63 @@ describe('HTTPClient', () => {
       const res = await client.get('/x')
       expect(res.data).toEqual({ which: 'first' })
       expect(side).toHaveBeenCalledTimes(1)
+    })
+
+    it('onError 抛异常时应直接抛出插件错误', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('boom'))
+      const pluginError = new Error('plugin error')
+
+      const client = new HTTPClient('', {
+        plugins: [
+          {
+            name: 'throw-on-error',
+            onError() {
+              throw pluginError
+            }
+          }
+        ]
+      })
+
+      await expect(client.get('/x')).rejects.toBe(pluginError)
+    })
+
+    it('ClientConfig 全局默认值会传递到单次请求', async () => {
+      const onDownloadProgress = vi.fn()
+      const controller = new AbortController()
+
+      const client = new HTTPClient('/api', {
+        timeout: 42,
+        credentials: false,
+        responseType: 'text',
+        signal: controller.signal,
+        onDownloadProgress
+      })
+
+      await client.get('/users')
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/users',
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      )
+    })
+
+    it('group 继承 ClientConfig 中的 responseType / signal / progress', async () => {
+      const onDownloadProgress = vi.fn()
+      const controller = new AbortController()
+
+      const parent = new HTTPClient('/api', {
+        responseType: 'text',
+        signal: controller.signal,
+        onDownloadProgress
+      })
+      const child = parent.group('/v1')
+
+      await child.get('/users')
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/v1/users',
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      )
     })
 
     it('afterRespond 无限 retry 最终 RETRY_LIMIT_EXCEEDED', async () => {

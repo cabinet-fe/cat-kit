@@ -41,3 +41,6 @@
 - [x] [优化 Virtualizer 表格示例性能](./done/plan-41-20260422/plan.md)
 - [x] [Virtualizer 追齐 keyed items 与 smooth-scroll reconciliation](./done/plan-42-20260422/plan.md)
 - [x] [virtualizer 测试/文档对齐源码 connect/disconnect/buffer API](./done/plan-43-20260423/plan.md)
+- [x] [优化 docs 数据处理文档](./done/plan-44-20260423/plan.md)
+- [x] [重构 @cat-kit/core number 模块](./done/plan-45-20260423/plan.md)
+- [x] [修复 @cat-kit/http 已知缺陷](./done/plan-46-20260423/plan.md)

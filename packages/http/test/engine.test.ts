@@ -71,6 +71,39 @@ describe('FetchEngine', () => {
     expect(res.data).toEqual({ a: 1 })
     expect(onUploadProgress).not.toHaveBeenCalled()
   })
+
+  it('未设置 responseType 时根据 Content-Type 自动推断为 text', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'text/plain' }),
+      text: async () => 'plain text',
+      blob: async () => new Blob(),
+      arrayBuffer: async () => new ArrayBuffer(8)
+    })
+
+    const engine = new FetchEngine()
+    const res = await engine.request('/text')
+
+    expect(res.data).toBe('plain text')
+  })
+
+  it('未设置 responseType 时根据 Content-Type 自动推断为 blob', async () => {
+    const blobData = new Blob(['binary'])
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'image/png' }),
+      text: async () => 'invalid',
+      blob: async () => blobData,
+      arrayBuffer: async () => new ArrayBuffer(8)
+    })
+
+    const engine = new FetchEngine()
+    const res = await engine.request('/img')
+
+    expect(res.data).toBeInstanceOf(Blob)
+  })
 })
 
 type XHREventHandler = (() => void) | null
@@ -182,6 +215,21 @@ describe('XHREngine', () => {
       expect(c[0].percent).toBeGreaterThanOrEqual(0)
       expect(c[0].percent).toBeLessThanOrEqual(100)
     }
+  })
+
+  it('parseHeaders 保留同名多值 header', async () => {
+    class MultiHeaderXHR extends MockXHR {
+      override getAllResponseHeaders(): string {
+        return 'set-cookie: a=1\r\nset-cookie: b=2\r\ncontent-type: application/json'
+      }
+    }
+    globalThis.XMLHttpRequest = MultiHeaderXHR as unknown as typeof XMLHttpRequest
+
+    const engine = new XHREngine()
+    const res = await engine.request('/z', { responseType: 'json' })
+
+    expect(res.headers['set-cookie']).toEqual(['a=1', 'b=2'])
+    expect(res.headers['content-type']).toBe('application/json')
   })
 })
 

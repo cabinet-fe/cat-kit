@@ -17,6 +17,24 @@ import { HTTPError } from './types'
 /** 插件触发的单次请求最多允许的重试次数（retryCount 0 为首次，共最多 11 次尝试） */
 export const MAX_PLUGIN_RETRIES = 10
 
+function isSameOrigin(url: string): boolean {
+  if (typeof location === 'undefined') return false
+  try {
+    const parsed = new URL(url, location.href)
+    return parsed.protocol === location.protocol && parsed.host === location.host
+  } catch {
+    return false
+  }
+}
+
+function readCookie(name: string): string | undefined {
+  if (typeof document === 'undefined') return undefined
+  const match = document.cookie.match(
+    new RegExp('(?:^|; )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)')
+  )
+  return match ? decodeURIComponent(match[1]!) : undefined
+}
+
 const MERGE_SCALAR_KEYS: (keyof RequestConfig)[] = [
   'method',
   'body',
@@ -25,7 +43,9 @@ const MERGE_SCALAR_KEYS: (keyof RequestConfig)[] = [
   'responseType',
   'signal',
   'onUploadProgress',
-  'onDownloadProgress'
+  'onDownloadProgress',
+  'xsrfCookieName',
+  'xsrfHeaderName'
 ]
 
 /**
@@ -161,6 +181,24 @@ export class HTTPClient {
     this.ownPlugins.push(plugin)
   }
 
+  private applyXsrfHeader(url: string, config: RequestConfig): RequestConfig {
+    const cookieName = config.xsrfCookieName ?? this.config.xsrfCookieName ?? 'XSRF-TOKEN'
+    const headerName = config.xsrfHeaderName ?? this.config.xsrfHeaderName ?? 'X-XSRF-TOKEN'
+
+    if (!isSameOrigin(url)) {
+      return config
+    }
+
+    const token = readCookie(cookieName)
+    if (!token) {
+      return config
+    }
+
+    const headers = { ...config.headers }
+    headers[headerName] = token
+    return { ...config, headers }
+  }
+
   private getRequestUrl(url: string, config: RequestConfig): string {
     // 如果已经是完整URL，直接返回
     if (this.isAbsoluteUrl(url)) {
@@ -232,9 +270,26 @@ export class HTTPClient {
    * @returns 合并后的请求配置
    */
   private getRequestConfig(config: RequestConfig): RequestConfig {
-    const { timeout, credentials, headers } = this.config
+    const {
+      timeout,
+      credentials,
+      headers,
+      responseType,
+      signal,
+      onUploadProgress,
+      onDownloadProgress
+    } = this.config
 
-    return { timeout, credentials, ...config, headers: { ...headers, ...config.headers } }
+    return {
+      timeout,
+      credentials,
+      responseType,
+      signal,
+      onUploadProgress,
+      onDownloadProgress,
+      ...config,
+      headers: { ...headers, ...config.headers }
+    }
   }
 
   private async runOnErrorPlugins(
@@ -253,13 +308,9 @@ export class HTTPClient {
         continue
       }
 
-      try {
-        const result = await plugin.onError(error, context)
-        if (recovered === undefined && isRecoveredHTTPResponse(result)) {
-          recovered = result
-        }
-      } catch {
-        // 忽略插件错误，保留原始错误语义
+      const result = await plugin.onError(error, context)
+      if (recovered === undefined && isRecoveredHTTPResponse(result)) {
+        recovered = result
       }
     }
 
@@ -305,6 +356,8 @@ export class HTTPClient {
           }
         }
       }
+
+      finalConfig = this.applyXsrfHeader(finalUrl, finalConfig)
 
       let response = await this.engine.request<T>(finalUrl, finalConfig)
 
@@ -490,7 +543,13 @@ export class HTTPClient {
       timeout: this.config.timeout,
       credentials: this.config.credentials,
       headers: this.config.headers,
-      engine: this.engine
+      engine: this.engine,
+      responseType: this.config.responseType,
+      signal: this.config.signal,
+      onUploadProgress: this.config.onUploadProgress,
+      onDownloadProgress: this.config.onDownloadProgress,
+      xsrfCookieName: this.config.xsrfCookieName,
+      xsrfHeaderName: this.config.xsrfHeaderName
     })
     child.parent = this
     return child

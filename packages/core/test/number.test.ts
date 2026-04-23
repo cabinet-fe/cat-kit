@@ -290,10 +290,60 @@ describe('数字工具函数', () => {
       })
 
       it('非法表达式时应抛出错误', () => {
-        expect(() => $n.calc('1 +')).toThrow()
-        expect(() => $n.calc('1 + * 2')).toThrow()
-        expect(() => $n.calc('(1+2')).toThrow()
+      expect(() => $n.calc('1 +')).toThrow()
+      expect(() => $n.calc('1 + * 2')).toThrow()
+      expect(() => $n.calc('(1+2')).toThrow()
+    })
+  })
+
+  describe('缺陷回归测试', () => {
+    describe('toFixed 负数进位', () => {
+      it('负数舍入进位时应向负无穷方向舍入', () => {
+        expect(n(-1.6).fixed(0)).toBe('-2')
+        expect(n(-1.5).fixed(0)).toBe('-2')
+        expect(n(-999.9).fixed(0)).toBe('-1000')
+      })
+
+      it('fixed 负数小数部分进位', () => {
+        expect(n(-1.99).fixed(1)).toBe('-2.0')
+      })
+    })
+
+    describe('CNY 负数进位', () => {
+      it('负数舍入进位时应正确处理千分位', () => {
+        expect(n(-999.9).currency('CNY', { precision: 0 })).toBe('-1,000')
+      })
+    })
+
+    describe('CNY_HAN 边界与零值', () => {
+      it('负超大数应返回空字符串', () => {
+        expect(n(-999999999999999.9999).currency('CNY_HAN')).toBe('')
+      })
+
+      it('纯小数应包含零元前缀', () => {
+        expect(n(0.01).currency('CNY_HAN')).toBe('零元壹分')
+        expect(n(0.1).currency('CNY_HAN')).toBe('零元壹角')
+      })
+    })
+
+    describe('calc 非法数字格式', () => {
+      it('包含多个小数点的数字应抛出错误', () => {
+        expect(() => $n.calc('1.2.3 + 1')).toThrow()
+      })
+    })
+
+    describe('$n 大数精度', () => {
+      it('当系数乘积超过安全整数范围时应保持精度', () => {
+        expect($n.plus('1234567890123456.1', '0.1')).toBe(1234567890123456.2)
+      })
+    })
+
+    describe('$n.div 除零符号', () => {
+      it('除数为 -0 时应返回正确符号的 Infinity', () => {
+        expect($n.div(1, -0)).toBe(-Infinity)
+        expect($n.div(-1, -0)).toBe(Infinity)
       })
     })
   })
+})
 })
