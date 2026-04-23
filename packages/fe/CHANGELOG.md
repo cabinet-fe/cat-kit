@@ -1,5 +1,12 @@
 # @cat-kit/fe
 
+## 1.1.1
+
+### Patch Changes
+
+- 11ac889: 虚拟化增强
+  - @cat-kit/core@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes
