@@ -6,13 +6,15 @@
     "cat-cli": "./dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "type": "module",
   "exports": {
     "./*": {
-      "import": "./src/*.ts",
-      "types": "./src/*.ts"
+      "development": "./src/*",
+      "import": "./dist/*",
+      "types": "./dist/*"
     }
   },
   "scripts": {
