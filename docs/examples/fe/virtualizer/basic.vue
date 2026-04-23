@@ -174,7 +174,7 @@ onMounted(() => {
   unsubscribe = virtualizer.subscribe((next) => {
     snapshot.value = next
   })
-  virtualizer.mount(viewportEl.value)
+  virtualizer.connect(viewportEl.value)
 })
 
 onUnmounted(() => {

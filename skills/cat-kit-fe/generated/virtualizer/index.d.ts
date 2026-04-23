@@ -1,21 +1,8 @@
 //#region src/virtualizer/index.d.ts
 /**
- * Virtualizer —— 单轴虚拟滚动核心。
- *
- * 设计要点：
- * - 职责聚焦：位置计算、测量派发、快照广播；渲染交给上层。
- * - 抖动消除：视口前方项测量变更时，同批次累积 scroll 补偿并在 recompute 统一 flush。
- * - 通知去重：纯 offset 变化不 notify，仅 range / items / totalSize / viewport /
- *   isScrolling 等结构性变化时推送快照。
- * - 未测项估值：默认沿用「已测平均值」，降低远距离滚动时 totalSize 跳变幅度。
- * - keyed items：可选 getItemKey 让测量缓存按稳定 key 存储，前插 / 乱序 / 中段删除
- *   时未变动项仍可复用真实测量。
- * - smooth 滚动校准：委托 {@link ScrollReconciler}，详见该文件。
- */
-/**
  * 未测项的尺寸估值函数。
  *
- * @param index - 项的索引，范围 `[0, count)`。
+ * @param index - 项的索引。
  * @returns 该项的预估像素尺寸（水平模式下为宽度，垂直模式下为高度）。负数会被 clamp 到 0。
  *
  * @remarks
@@ -56,8 +43,8 @@ type GetItemKey = (index: number) => number | string;
 interface VirtualizerOptions {
   /** 虚拟项总数，默认 0 */
   count?: number;
-  /** 可视区外额外保留的预渲染项数，默认 6 */
-  overscan?: number;
+  /** 可视区外额外保留的预渲染项数，默认 4 */
+  buffer?: number;
   /** 是否为水平滚动（否则为垂直），默认 false */
   horizontal?: boolean;
   /** 列表首项前的固定内边距（px），默认 0 */
@@ -68,25 +55,21 @@ interface VirtualizerOptions {
   gap?: number;
   /** 初始滚动偏移（px），默认 0 */
   initialOffset?: number;
-  /** 未 mount 前使用的初始 viewport 尺寸（px），默认 0 */
+  /** 未 connect 前使用的初始 viewport 尺寸（px），默认 0 */
   initialViewport?: number;
   /** 项预估尺寸函数，默认返回 36 */
   estimateSize?: EstimateSize;
   /**
-   * 未测项是否使用「已测项平均尺寸」作为估值，默认 true。
+   * 未测项是否使用「已测项平均尺寸」作为估值。开启后首个样本产生即全面替换估值，
+   * 配合 scrollAdjustments 可显著缓解 estimateSize 与真实值偏差过大带来的滚动条抖动。
    *
-   * 开启后首个样本产生即全面替换估值，配合 scrollAdjustments 可显著缓解
-   * estimateSize 与真实值偏差过大带来的滚动条抖动。
+   * @default true
    */
   useMeasuredAverage?: boolean;
   /**
-   * 可选：基于 index 返回稳定 key，用于把测量缓存按数据项身份存储。
-   *
+   * 基于 index 返回稳定 key，用于把测量缓存按数据项身份存储。
    * 提供后列表前插 / 乱序 / 中段删除时，未变动项的真实测量值仍可被复用；
    * 未提供时行为与旧版本一致（按 index 缓存）。
-   *
-   * 约束：函数必须在整个生命周期稳定，同一数据项的 key 在任何时刻都应一致；
-   * 不要基于 `Math.random()` 或当前时间生成 key。
    */
   getItemKey?: GetItemKey;
 }
@@ -94,14 +77,14 @@ interface VirtualizerOptions {
 interface VirtualItem {
   /** 项在数据源中的索引。 */
   index: number;
-  /** 项起点（顶部 / 左侧）到列表内容起点的距离。 */
+  /** 项起点到列表容器起点的距离。 */
   start: number;
-  /** 项终点（底部 / 右侧）到列表内容起点的距离，等于 `start + size`。 */
+  /** 项终点到列表容器起点的距离，等于 `start + size`。 */
   end: number;
   /** 项尺寸（高度 / 宽度）。 */
   size: number;
 }
-/** 可视区命中的原始索引范围（不含 `overscan`）。当 `count === 0` 或 `viewportSize <= 0` 时为 `null`。 */
+/** 可视区命中的原始索引范围（不含 `buffer`）。当 `count === 0` 或 `viewportSize <= 0` 时为 `null`。 */
 interface VirtualRange {
   /** 视口首次命中的项索引。 */
   startIndex: number;
@@ -109,17 +92,12 @@ interface VirtualRange {
   endIndex: number;
 }
 /**
- * 虚拟化快照：渲染层应依赖的唯一真源。
- *
- * 由 {@link Virtualizer.getSnapshot} 返回、通过 {@link Virtualizer.subscribe} 推送；
- * 纯 offset 位移不会产生新对象，只会**就地**更新现有对象的 `offset` / `isScrolling`。
- * 因此**不要**把快照当作不可变值做 `===` 对比判断是否需要重渲染；请对比结构字段
- * （`range` / `totalSize` 等）或直接订阅结构化推送。
+ * 虚拟列表快照，即真正渲染的列表内容
  */
 interface VirtualSnapshot {
-  /** 当前应渲染的项列表（已包含 `overscan` 扩张）。 */
+  /** 当前应渲染的项列表（已包含 `buffer` 扩张）。 */
   items: VirtualItem[];
-  /** 不含 `overscan` 的原始可视区命中范围。 */
+  /** 不含 `buffer` 的原始可视区命中范围。 */
   range: VirtualRange | null;
   /** 列表内容总尺寸（含 `paddingStart` / `paddingEnd`）。 */
   totalSize: number;
@@ -136,14 +114,12 @@ interface VirtualSnapshot {
   /** 是否处于滚动中（由 `scroll` / `scrollend` 事件与 120ms 兜底计时驱动）。 */
   isScrolling: boolean;
 }
-/** {@link Virtualizer.scrollToIndex} / {@link Virtualizer.scrollToOffset} 的可选参数。 */
 interface VirtualScrollOptions {
   /** 对齐方式，默认 `auto`。仅对 `scrollToIndex` 生效；`scrollToOffset` 始终按 `start` 语义。 */
   align?: VirtualAlign;
   /** 滚动行为，传 `'smooth'` 走浏览器原生平滑动画 + rAF 校准循环；默认 `'auto'`（同步跳转）。 */
   behavior?: ScrollBehavior;
 }
-/** {@link Virtualizer.measureMany} 的一条测量记录。 */
 interface VirtualMeasurement {
   /** 项的索引，范围 `[0, count)`；越界的测量会被静默忽略。 */
   index: number;
@@ -151,8 +127,9 @@ interface VirtualMeasurement {
   size: number;
 }
 declare class Virtualizer {
+  /** 虚拟项总数 */
   private count;
-  private overscan;
+  private buffer;
   private horizontal;
   private paddingStart;
   private paddingEnd;
@@ -164,8 +141,7 @@ declare class Virtualizer {
   private viewportSize;
   private isScrolling;
   /**
-   * 测量缓存的唯一真源。未启用 getItemKey 时 key 就是 index；启用时 key 为
-   * getItemKey(index) 的结果。内部所有读写一律通过 `keyOf(index)` 间接访问。
+   * 测量缓存，键为数据项的稳定 key，值为像素尺寸。
    */
   private measuredByKey;
   private measuredSum;
@@ -180,19 +156,16 @@ declare class Virtualizer {
   private containerObserver;
   private scrollEndTimer;
   private scrollEndNative;
+  /** 已测量的元素集合 */
   private mounted;
+  /** 尺寸测量器 */
   private tracker;
+  /** 滚动矫正器 */
   private reconciler;
   /** 视口前方项尺寸变化的累积 delta，recompute 开头统一 flush 一次 DOM 写入。 */
   private pendingScrollAdjust;
   /**
-   * 创建一个 Virtualizer 实例。所有选项都可延后通过 {@link Virtualizer.setOptions} / {@link Virtualizer.setCount} 等方法调整。
-   *
-   * @param options - 初始化参数，详见 {@link VirtualizerOptions}。
-   *
-   * @remarks
-   * 构造函数**不会**挂载 DOM：实例创建后仍处于「未 mount」状态，需调用 {@link Virtualizer.mount} 绑定滚动容器。
-   * 初始的 `offset` / `viewportSize` 可通过 `initialOffset` / `initialViewport` 提供，用于 SSR 首屏占位。
+   * 创建一个 Virtualizer 实例。
    *
    * @example
    * ```ts
@@ -200,7 +173,7 @@ declare class Virtualizer {
    *
    * const v = new Virtualizer({
    *   count: 10_000,
-   *   overscan: 6,
+   *   buffer: 6,
    *   estimateSize: () => 44,
    *   getItemKey: (i) => rows[i].id
    * })
@@ -210,8 +183,7 @@ declare class Virtualizer {
   /**
    * 批量更新选项。只传需要变更的字段，未传字段保持当前值。
    *
-   * @param options - 需要更新的字段集合，详见 {@link VirtualizerOptions}。
-   * @returns 自身，支持链式调用。
+   * @param options - 需要更新的字段集合。
    *
    * @remarks
    * - `initialOffset` / `initialViewport` 仅在构造时生效，这里传入会被忽略。
@@ -224,7 +196,7 @@ declare class Virtualizer {
    *
    * @example
    * ```ts
-   * v.setOptions({ count: 500, overscan: 8 })
+   * v.setOptions({ count: 500, buffer: 8 })
    * v.setOptions({ count: newRows.length, getItemKey: (i) => newRows[i].id })
    * ```
    */
@@ -243,7 +215,7 @@ declare class Virtualizer {
    */
   setCount(count: number): this;
   /**
-   * 设置可视区尺寸（px）。一般由 `mount` 后的 `ResizeObserver` 自动同步；
+   * 设置可视区尺寸（px）。一般由 `connect` 后的 `ResizeObserver` 自动同步；
    * 仅在手动布局（SSR、无 ResizeObserver 环境、测试）时直接调用。
    *
    * @param size - 新的视口尺寸，负数会被 clamp 到 0，小数会被四舍五入。
@@ -255,8 +227,7 @@ declare class Virtualizer {
   /**
    * 直接设置逻辑 offset（px），不会写 DOM。
    *
-   * @param offset - 目标偏移，会被 clamp 到 `[0, totalSize - viewportSize]`，小数会被四舍五入。
-   * @returns 自身，支持链式调用。
+   * @param offset - 目标偏移量，会被 clamp 到 `[0, totalSize - viewportSize]`，小数会被四舍五入。
    *
    * @remarks
    * 这是「只更新内部状态」的低阶入口，常用于 SSR 水合前恢复滚动位置；
@@ -265,59 +236,45 @@ declare class Virtualizer {
   setOffset(offset: number): this;
   /**
    * 绑定滚动容器。传入相同元素会触发一次 `syncFromElement` 但不重建事件监听；
-   * 传入不同元素会先 `unmount` 旧容器再挂载新容器；传入 `null` 等价于 `unmount()`。
+   * 传入不同元素会先 `disconnect` 旧容器再挂载新容器；传入 `null` 等价于 `disconnect()`。
    *
    * @param element - 滚动容器，需是可滚动元素（`overflow: auto/scroll`）。
    * @returns 自身，支持链式调用。
    *
    * @remarks
-   * mount 会：
+   * connect 会：
    * 1. 订阅容器的 `scroll` 事件（passive）驱动 `offset` / `isScrolling`；支持原生 `scrollend` 时优先使用，否则 120ms 计时器兜底；
    * 2. 订阅容器的 `ResizeObserver`（若可用）驱动 `viewportSize`；
    * 3. 同步首帧：读取当前 `scrollTop` / `clientHeight` 写回到 `offset` / `viewportSize`。
    *
    * @example
    * ```ts
-   * onMounted(() => virtualizer.mount(scrollRef.value))
+   * onMounted(() => virtualizer.connect(scrollRef.value))
    * onBeforeUnmount(() => virtualizer.destroy())
    * ```
    */
-  mount(element: HTMLElement | null): this;
+  connect(element: HTMLElement | null): this;
   /**
    * 解绑当前滚动容器：取消 rAF 校准循环、卸下 `scroll` / `scrollend` / `ResizeObserver`、
-   * 清空 `mounted` 映射与 `ResizeTracker`。实例仍可被复用（再次 `mount` 到新容器）。
+   * 清空 `mounted` 映射与 `ResizeTracker`。实例仍可被复用（再次 `connect` 到新容器）。
    *
    * @returns 自身，支持链式调用。
    *
-   * @remarks 不清空测量缓存与订阅者；如需重置请用 {@link Virtualizer.reset} 或 {@link Virtualizer.destroy}。
+   * @remarks 不清空测量缓存与订阅者。
    */
-  unmount(): this;
+  disconnect(): this;
   /**
-   * 彻底销毁实例：`unmount` + 释放 `ResizeTracker` 内部引用 + 清空订阅者。
+   * 彻底销毁实例：`disconnect` + 释放 `ResizeTracker` 内部引用 + 清空订阅者。
    * 销毁后不应再调用任何实例方法。
    *
    * @remarks 组件卸载时（Vue `onBeforeUnmount` / React `useEffect` cleanup）应调用此方法。
    */
   destroy(): void;
   /**
-   * 订阅结构化快照推送。注册时会**立即同步**调用一次 listener（传入当前快照），
-   * 便于初次渲染；之后仅在结构性变化时触发。
+   * 订阅虚拟化快照内容。
    *
-   * @param listener - 回调函数，入参为当前 {@link VirtualSnapshot}。
+   * @param listener - 回调函数，入参为当前虚拟化快照内容。
    * @returns 取消订阅函数；多次调用幂等。
-   *
-   * @remarks
-   * - 「结构性变化」定义：`range` / `items` / `totalSize` / `viewportSize` / `horizontal` / `isScrolling` / `beforeSize` / `afterSize` 中任一字段变化。
-   * - 纯 `offset` 位移**不会**触发 listener：业务若需要逐帧位移请直接读容器 `scrollTop` / `scrollLeft`。
-   *
-   * @example
-   * ```ts
-   * const unsubscribe = v.subscribe((snap) => {
-   *   render(snap.items, snap.beforeSize, snap.afterSize)
-   * })
-   * // 后续卸载时
-   * unsubscribe()
-   * ```
    */
   subscribe(listener: VirtualizerSubscriber): () => void;
   /**
@@ -348,7 +305,7 @@ declare class Virtualizer {
    */
   measureMany(measurements: Iterable<VirtualMeasurement>): this;
   /**
-   * 绑定某个 DOM 元素到指定 index，交由内部 `ResizeObserver` 异步测量。
+   * 测量元素尺寸
    *
    * @param index - 项的索引，范围 `[0, count)`。
    * @param element - 对应的 DOM 元素；传 `null` 表示卸载该 index（同步 `unobserve`）。
@@ -356,8 +313,6 @@ declare class Virtualizer {
    * @remarks
    * - 支持 `ResizeObserver` 的浏览器走异步路径，避免滚动中新挂载项触发同步布局读取；
    *   不支持时回退到 `getBoundingClientRect()` 并立即调用 `measure`。
-   * - **keyed 模式下的 DOM 行复用**：同一 element 迁移到新 index 时，旧 index 的 `mounted` 条目会被自动清理，
-   *   避免后续新元素进入旧 index 时误 `unobserve` 本节点（见 plan-42 修复）。
    * - 幂等：`measureElement(i, sameEl)` 不会重复 observe。
    *
    * @example
@@ -378,7 +333,7 @@ declare class Virtualizer {
    * @remarks
    * - `behavior: 'auto'`（默认）：同步写 `scrollTop` + 同步 `recompute()`，`snapshot.offset` 立即等于目标值。
    * - `behavior: 'smooth'`：浏览器原生平滑滚动 + rAF 校准；`snapshot.offset` 由 scroll 事件逐帧驱动，**不**预写为目标值。
-   *   用户在动画中手动滚动 / 再次调用 `scrollTo*` / `unmount` 会立即终止校准，另有 5 秒硬性安全阀兜底。
+   *   用户在动画中手动滚动 / 再次调用 `scrollTo*` / `disconnect` 会立即终止校准，另有 5 秒硬性安全阀兜底。
    * - 未绑定滚动容器时仍会更新逻辑 offset（`behavior: 'auto'`），但无 DOM 侧副作用。
    */
   scrollToOffset(offset: number, options?: VirtualScrollOptions): this;
@@ -391,15 +346,9 @@ declare class Virtualizer {
    *
    * @remarks
    * - `count === 0` 时为 no-op。
-   * - `behavior: 'smooth'` 走浏览器原生平滑滚动 + rAF 校准循环：动画中若测量更新导致目标漂移（例如 `overscan` 外的未测项在滚入视口时才拿到真实尺寸），
+   * - `behavior: 'smooth'` 走浏览器原生平滑滚动 + rAF 校准循环：动画中若测量更新导致目标漂移（例如 `buffer` 外的未测项在滚入视口时才拿到真实尺寸），
    *   自动以 `behavior: 'auto'` 跳到修正后的目标位置。
-   * - smooth 期间**不要**在调用后立即同步读 `snapshot.offset`，该值由 scroll 事件驱动；如需精确的中间状态，请订阅 {@link Virtualizer.subscribe} 或直接读容器 `scrollTop` / `scrollLeft`。
-   *
-   * @example
-   * ```ts
-   * v.scrollToIndex(120, { align: 'center' })
-   * v.scrollToIndex(9999, { behavior: 'smooth' })
-   * ```
+   * - smooth 期间**不要**在调用后立即同步读 `snapshot.offset`，该值由 scroll 事件驱动。
    */
   scrollToIndex(index: number, options?: VirtualScrollOptions): this;
   /**
@@ -438,6 +387,7 @@ declare class Virtualizer {
   private estimate;
   private pruneMeasured;
   private pruneMounted;
+  /** 标记从指定索引开始的测量缓存已失效 */
   private invalidate;
   /**
    * 应用测量：更新缓存、触发 invalidate、并在必要时做 scrollAdjustments 抑制抖动。
@@ -455,6 +405,7 @@ declare class Virtualizer {
   private computeTotalSize;
   private calculateRange;
   private createItems;
+  /** 查找在指定偏移量下，第一个包含在可视区内的项的索引 */
   private findStartIndex;
   private findEndIndex;
   private clampOffset;

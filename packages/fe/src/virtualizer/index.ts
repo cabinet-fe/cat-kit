@@ -61,7 +61,7 @@ export interface VirtualizerOptions {
   gap?: number
   /** 初始滚动偏移（px），默认 0 */
   initialOffset?: number
-  /** 未 mount 前使用的初始 viewport 尺寸（px），默认 0 */
+  /** 未 connect 前使用的初始 viewport 尺寸（px），默认 0 */
   initialViewport?: number
   /** 项预估尺寸函数，默认返回 36 */
   estimateSize?: EstimateSize
@@ -273,7 +273,7 @@ export class Virtualizer {
   }
 
   /**
-   * 设置可视区尺寸（px）。一般由 `mount` 后的 `ResizeObserver` 自动同步；
+   * 设置可视区尺寸（px）。一般由 `connect` 后的 `ResizeObserver` 自动同步；
    * 仅在手动布局（SSR、无 ResizeObserver 环境、测试）时直接调用。
    *
    * @param size - 新的视口尺寸，负数会被 clamp 到 0，小数会被四舍五入。
@@ -310,20 +310,20 @@ export class Virtualizer {
 
   /**
    * 绑定滚动容器。传入相同元素会触发一次 `syncFromElement` 但不重建事件监听；
-   * 传入不同元素会先 `unmount` 旧容器再挂载新容器；传入 `null` 等价于 `unmount()`。
+   * 传入不同元素会先 `disconnect` 旧容器再挂载新容器；传入 `null` 等价于 `disconnect()`。
    *
    * @param element - 滚动容器，需是可滚动元素（`overflow: auto/scroll`）。
    * @returns 自身，支持链式调用。
    *
    * @remarks
-   * mount 会：
+   * connect 会：
    * 1. 订阅容器的 `scroll` 事件（passive）驱动 `offset` / `isScrolling`；支持原生 `scrollend` 时优先使用，否则 120ms 计时器兜底；
    * 2. 订阅容器的 `ResizeObserver`（若可用）驱动 `viewportSize`；
    * 3. 同步首帧：读取当前 `scrollTop` / `clientHeight` 写回到 `offset` / `viewportSize`。
    *
    * @example
    * ```ts
-   * onMounted(() => virtualizer.mount(scrollRef.value))
+   * onMounted(() => virtualizer.connect(scrollRef.value))
    * onBeforeUnmount(() => virtualizer.destroy())
    * ```
    */

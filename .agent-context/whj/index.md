@@ -40,3 +40,4 @@
 - [x] [Virtualizer 增加 gap、精简 API、优化性能](./done/plan-40-20260421/plan.md)
 - [x] [优化 Virtualizer 表格示例性能](./done/plan-41-20260422/plan.md)
 - [x] [Virtualizer 追齐 keyed items 与 smooth-scroll reconciliation](./done/plan-42-20260422/plan.md)
+- [x] [virtualizer 测试/文档对齐源码 connect/disconnect/buffer API](./done/plan-43-20260423/plan.md)

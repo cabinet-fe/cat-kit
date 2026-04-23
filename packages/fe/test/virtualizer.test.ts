@@ -86,8 +86,8 @@ function createScrollElement() {
 const mock = createScrollElement()
 
 describe('Virtualizer', () => {
-  it('应该根据 viewport 与 offset 计算虚拟项并应用 overscan', () => {
-    const virtualizer = new Virtualizer({ count: 20, overscan: 2, estimateSize: () => 10 })
+  it('应该根据 viewport 与 offset 计算虚拟项并应用 buffer', () => {
+    const virtualizer = new Virtualizer({ count: 20, buffer: 2, estimateSize: () => 10 })
 
     virtualizer.setViewport(50)
     virtualizer.setOffset(80)
@@ -102,7 +102,7 @@ describe('Virtualizer', () => {
   it('应该在测量真实尺寸后重算位置与总尺寸', () => {
     const virtualizer = new Virtualizer({
       count: 5,
-      overscan: 1,
+      buffer: 1,
       estimateSize: (index) => (index + 1) * 10,
       useMeasuredAverage: false
     })
@@ -130,10 +130,10 @@ describe('Virtualizer', () => {
     expect(virtualizer.getSnapshot().offset).toBe(165)
   })
 
-  it('应该支持 mount 到容器并驱动滚动同步', () => {
-    const virtualizer = new Virtualizer({ count: 10, estimateSize: () => 30, overscan: 1 })
+  it('应该支持 connect 到容器并驱动滚动同步', () => {
+    const virtualizer = new Virtualizer({ count: 10, estimateSize: () => 30, buffer: 1 })
 
-    virtualizer.mount(mock as unknown as HTMLElement)
+    virtualizer.connect(mock as unknown as HTMLElement)
     mock.scrollTop = 90
     mock.emitScroll()
 
@@ -146,9 +146,9 @@ describe('Virtualizer', () => {
 
   it('scrollToOffset 在目标偏移不变时不应重复触发 DOM scrollTo', () => {
     const element = createScrollElement()
-    const virtualizer = new Virtualizer({ count: 10, estimateSize: () => 30, overscan: 1 })
+    const virtualizer = new Virtualizer({ count: 10, estimateSize: () => 30, buffer: 1 })
 
-    virtualizer.mount(element as unknown as HTMLElement)
+    virtualizer.connect(element as unknown as HTMLElement)
     virtualizer.scrollToOffset(0)
     virtualizer.scrollToOffset(60)
     virtualizer.scrollToOffset(60)
@@ -230,7 +230,7 @@ describe('Virtualizer', () => {
       count: 100,
       estimateSize: () => 20,
       initialViewport: 200,
-      overscan: 2
+      buffer: 2
     })
 
     virtualizer.setOffset(41)
@@ -271,7 +271,7 @@ describe('Virtualizer', () => {
       estimateSize: () => 30,
       initialViewport: 120,
       initialOffset: 9_999,
-      overscan: 0
+      buffer: 0
     })
 
     expect(virtualizer.getSnapshot().offset).toBe(180)
@@ -284,7 +284,7 @@ describe('Virtualizer', () => {
       count: 10,
       estimateSize: () => 30,
       initialViewport: 120,
-      overscan: 0
+      buffer: 0
     })
 
     virtualizer.setOffset(180)
@@ -300,7 +300,7 @@ describe('Virtualizer', () => {
       count: 4,
       estimateSize: (index) => [10, 20, 20, 10][index]!,
       initialViewport: 100,
-      overscan: 0,
+      buffer: 0,
       useMeasuredAverage: false
     })
 
@@ -343,13 +343,13 @@ describe('Virtualizer', () => {
       count: 10,
       estimateSize: () => 30,
       initialViewport: 120,
-      overscan: 0
+      buffer: 0
     })
     const b = new Virtualizer({
       count: 10,
       estimateSize: () => 30,
       initialViewport: 120,
-      overscan: 0
+      buffer: 0
     })
 
     a.setOffset(180)
@@ -577,11 +577,11 @@ describe('Virtualizer', () => {
       const virtualizer = new Virtualizer({
         count: 100,
         estimateSize: () => 10,
-        overscan: 0,
+        buffer: 0,
         useMeasuredAverage: false,
         ...overrides
       })
-      virtualizer.mount(el as unknown as HTMLElement)
+      virtualizer.connect(el as unknown as HTMLElement)
       return { el, virtualizer }
     }
 
@@ -682,10 +682,10 @@ describe('Virtualizer', () => {
       const virtualizer = new Virtualizer({
         count: 100,
         estimateSize: () => 10,
-        overscan: 0,
+        buffer: 0,
         useMeasuredAverage: false
       })
-      virtualizer.mount(el as unknown as HTMLElement)
+      virtualizer.connect(el as unknown as HTMLElement)
 
       // 滚到 offset=500，视口 [500, 620)；前方有 50 项（index 0..49）。
       el.scrollTop = 500

@@ -78,7 +78,7 @@ function writeSpacer(el: HTMLTableRowElement | null, height: number): void {
 }
 
 watch(scrollerRef, (el) => {
-  if (el) virtualizer.mount(el)
+  if (el) virtualizer.connect(el)
 })
 
 const unsubscribe = virtualizer.subscribe((snapshot) => {

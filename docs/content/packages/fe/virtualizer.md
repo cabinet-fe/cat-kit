@@ -12,7 +12,7 @@ sidebarOrder: 4
 
 - 计算可视范围与总尺寸
 - 接收真实测量结果并增量修正布局
-- 提供 `mount`、`measureElement`、`scrollToIndex`、`subscribe` 等适合 Vue composable 包装的薄 API
+- 提供 `connect`、`measureElement`、`scrollToIndex`、`subscribe` 等适合 Vue composable 包装的薄 API
 
 它支持 vertical 与 horizontal 两种单轴模式，但不内置 grid/masonry。
 
@@ -23,7 +23,7 @@ sidebarOrder: 4
 ```typescript
 import { Virtualizer } from '@cat-kit/fe'
 
-const virtualizer = new Virtualizer({ count: 10_000, overscan: 6, estimateSize: () => 44 })
+const virtualizer = new Virtualizer({ count: 10_000, buffer: 6, estimateSize: () => 44 })
 
 virtualizer.setViewport(480)
 virtualizer.setOffset(120)
@@ -35,7 +35,7 @@ console.log(snapshot.items, snapshot.totalSize)
 如果已经拿到容器元素，也可以直接挂载：
 
 ```typescript
-virtualizer.mount(containerEl)
+virtualizer.connect(containerEl)
 virtualizer.measureElement(index, itemEl)
 ```
 
@@ -74,7 +74,7 @@ function prepend(row: { id: string; title: string }) {
 ### `scrollToIndex` / `scrollToOffset` 的 `behavior: 'smooth'`
 
 - 走浏览器原生平滑滚动（`el.scrollTo({ behavior: 'smooth' })`），并开启 rAF 校准循环：动画过程中若测量使目标 offset 漂移，自动以 `behavior: 'auto'` 跳到修正后的目标位置。
-- **终止条件**：用户在动画期间滚动（包括滚轮 / 触摸 / 键盘 / 编程写 `scrollTop`）、再次调用 `scrollToIndex` / `scrollToOffset`、`unmount()` / `destroy()` —— 都会立即终止校准循环。另有 5 秒硬性安全阀兜底。
+- **终止条件**：用户在动画期间滚动（包括滚轮 / 触摸 / 键盘 / 编程写 `scrollTop`）、再次调用 `scrollToIndex` / `scrollToOffset`、`disconnect()` / `destroy()` —— 都会立即终止校准循环。另有 5 秒硬性安全阀兜底。
 - **`snapshot.offset` 语义**：smooth 动画期间不再由 `scrollTo*` 调用预写为目标值，而是由浏览器滚动事件逐帧驱动。业务代码**不要**在 `scrollTo*` 调用后立即假设 `snapshot.offset` 已经等于目标值，需要同步获取时请直接读容器 `scrollTop` / `scrollLeft` 或监听 `subscribe`。
 
 ## 交互示例
@@ -105,7 +105,7 @@ function prepend(row: { id: string; title: string }) {
 ```typescript
 interface VirtualizerOptions {
   count?: number
-  overscan?: number
+  buffer?: number
   horizontal?: boolean
   paddingStart?: number
   paddingEnd?: number
@@ -121,7 +121,7 @@ interface VirtualizerOptions {
 | 字段 | 默认值 | 说明 |
 | --- | --- | --- |
 | `count` | `0` | 虚拟项总数。 |
-| `overscan` | `6` | 可视区外两侧额外预渲染的项数。数值越大滚动越不容易露白，但单帧渲染预算也越高。 |
+| `buffer` | `6` | 可视区外两侧额外预渲染的项数。数值越大滚动越不容易露白，但单帧渲染预算也越高。 |
 | `horizontal` | `false` | 水平滚动（默认垂直）。切换方向会重新按新轴向读写 `scrollLeft` / `scrollTop`。 |
 | `paddingStart` / `paddingEnd` | `0` | 列表首 / 末的固定内边距（px）。计入 `totalSize` 与 `beforeSize` / `afterSize`。 |
 | `gap` | `0` | 相邻两项间距（px），语义与 CSS `gap` 对齐，不作用于首尾。若只需首尾留白请用 `paddingStart` / `paddingEnd`。 |
@@ -135,39 +135,39 @@ interface VirtualizerOptions {
 
 #### `new Virtualizer(options?)`
 
-创建一个实例。**不会**挂载 DOM，创建后仍处于「未 mount」状态。
+创建一个实例。**不会**挂载 DOM，创建后仍处于「未 connect」状态。
 
 ```ts
 const v = new Virtualizer({
   count: 10_000,
-  overscan: 6,
+  buffer: 6,
   estimateSize: () => 44,
   getItemKey: (i) => rows[i].id
 })
 ```
 
-#### `virtualizer.mount(element): this`
+#### `virtualizer.connect(element): this`
 
 绑定滚动容器。
 
 - 传入相同元素：只触发一次内部同步（`syncFromElement`），不重建事件监听
-- 传入不同元素：先 `unmount` 旧容器再挂载新容器
-- 传入 `null`：等价于 `unmount()`
+- 传入不同元素：先 `disconnect` 旧容器再挂载新容器
+- 传入 `null`：等价于 `disconnect()`
 
-mount 会订阅容器的 `scroll`（驱动 `offset` / `isScrolling`）、原生 `scrollend`（若支持）或 120ms 兜底计时器（驱动 `isScrolling = false`），以及 `ResizeObserver`（若可用，驱动 `viewportSize`）。
+connect 会订阅容器的 `scroll`（驱动 `offset` / `isScrolling`）、原生 `scrollend`（若支持）或 120ms 兜底计时器（驱动 `isScrolling = false`），以及 `ResizeObserver`（若可用，驱动 `viewportSize`）。
 
 ```ts
-onMounted(() => v.mount(scrollRef.value))
+onMounted(() => v.connect(scrollRef.value))
 onBeforeUnmount(() => v.destroy())
 ```
 
-#### `virtualizer.unmount(): this`
+#### `virtualizer.disconnect(): this`
 
-解绑当前容器：取消 rAF 校准、卸下全部事件监听、清空 `mounted` 映射与 `ResizeTracker`。**不**清空测量缓存与订阅者，实例仍可再次 `mount` 到新容器。
+解绑当前容器：取消 rAF 校准、卸下全部事件监听、清空 `mounted` 映射与 `ResizeTracker`。**不**清空测量缓存与订阅者，实例仍可再次 `connect` 到新容器。
 
 #### `virtualizer.destroy(): void`
 
-`unmount` + 释放 `ResizeTracker` + 清空订阅者。调用后不应再调用任何实例方法。组件卸载时必须调用。
+`disconnect` + 释放 `ResizeTracker` + 清空订阅者。调用后不应再调用任何实例方法。组件卸载时必须调用。
 
 ### 选项与尺寸更新
 
@@ -197,7 +197,7 @@ v.setOptions({ count: newRows.length, getItemKey: (i) => newRows[i].id })
 
 #### `virtualizer.setViewport(size): this`
 
-设置视口尺寸。一般由 `mount` 后的 `ResizeObserver` 自动同步；仅在 SSR / 手动布局 / 测试环境下直接调用。`offset` 会按新视口重新 clamp。
+设置视口尺寸。一般由 `connect` 后的 `ResizeObserver` 自动同步；仅在 SSR / 手动布局 / 测试环境下直接调用。`offset` 会按新视口重新 clamp。
 
 #### `virtualizer.setOffset(offset): this`
 
@@ -287,8 +287,8 @@ onBeforeUnmount(unsubscribe)
 
 ```typescript
 interface VirtualSnapshot {
-  items: VirtualItem[]               // 当前应渲染的项（已含 overscan 扩张）
-  range: { startIndex: number; endIndex: number } | null // 不含 overscan 的原始命中范围
+  items: VirtualItem[]               // 当前应渲染的项（已含 buffer 扩张）
+  range: { startIndex: number; endIndex: number } | null // 不含 buffer 的原始命中范围
   totalSize: number                  // 列表内容总尺寸（含 padding）
   beforeSize: number                 // items[0] 前需预留的占位空间
   afterSize: number                  // items 末项后需预留的占位空间
@@ -310,7 +310,7 @@ interface VirtualItem {
 
 ### Vue 封装建议
 
-- 在容器 `onMounted` 时调用 `mount`
+- 在容器 `onMounted` 时调用 `connect`
 - 使用 `subscribe` 把快照同步到 `ref`
 - 如果业务确实需要每次滚动位移，优先直接读容器 `scrollTop` / `scrollLeft`，不要把 `subscribe` 当作逐帧 offset 事件流
 - 在每个 item 的 `ref` 回调里调用 `measureElement(index, el)`

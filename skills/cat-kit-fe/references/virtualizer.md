@@ -9,9 +9,9 @@
 | API | 签名 | 关键行为 |
 | --- | --- | --- |
 | `new Virtualizer(options?)` | `(options?: VirtualizerOptions) => Virtualizer` | 不挂载 DOM；`initialOffset` / `initialViewport` 仅构造时生效，供 SSR 占位 |
-| `.mount(element)` | `(el: HTMLElement \| null) => this` | 绑定滚动容器；传相同元素只 `syncFromElement`、传不同元素先 `unmount`、传 `null` 等价 `unmount`。订阅 `scroll`（驱动 `offset`/`isScrolling`）、原生 `scrollend` 或 120ms 兜底计时器、`ResizeObserver`（驱动 `viewportSize`） |
-| `.unmount()` | `() => this` | 取消 rAF 校准、卸下事件与 RO、清空 `mounted`；**不**清测量缓存与订阅者，实例可复用 |
-| `.destroy()` | `() => void` | `unmount` + 释放 `ResizeTracker` + 清订阅者。Vue `onBeforeUnmount` / React cleanup 必须调用 |
+| `.connect(element)` | `(el: HTMLElement \| null) => this` | 绑定滚动容器；传相同元素只 `syncFromElement`、传不同元素先 `disconnect`、传 `null` 等价 `disconnect`。订阅 `scroll`（驱动 `offset`/`isScrolling`）、原生 `scrollend` 或 120ms 兜底计时器、`ResizeObserver`（驱动 `viewportSize`） |
+| `.disconnect()` | `() => this` | 取消 rAF 校准、卸下事件与 RO、清空 `mounted`；**不**清测量缓存与订阅者，实例可复用 |
+| `.destroy()` | `() => void` | `disconnect` + 释放 `ResizeTracker` + 清订阅者。Vue `onBeforeUnmount` / React cleanup 必须调用 |
 
 ### 选项与尺寸更新
 
