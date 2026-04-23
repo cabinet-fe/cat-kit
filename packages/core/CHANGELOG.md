@@ -1,5 +1,11 @@
 # @cat-kit/core
 
+## 1.1.2
+
+### Patch Changes
+
+- 5a18a14: 增强 number 工具
+
 ## 1.1.1
 
 ## 1.1.0

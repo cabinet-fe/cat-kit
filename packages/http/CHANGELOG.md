@@ -1,5 +1,13 @@
 # @cat-kit/http
 
+## 1.1.2
+
+### Patch Changes
+
+- 5a18a14: http 工具增强
+- Updated dependencies [5a18a14]
+  - @cat-kit/core@1.1.2
+
 ## 1.1.1
 
 ### Patch Changes
