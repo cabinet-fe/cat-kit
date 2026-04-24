@@ -1,7 +1,9 @@
 ---
 name: ac-workflow
 description: >
-  Use this skill when the user explicitly wants the ac-workflow or .agent-context protocol: initialize agent context, create or revise a plan file, execute/patch/review/archive the current .agent-context plan, run rush, sync installed ac-workflow skills, or inspect .agent-context state. Do not use for general coding, implementation, code review, planning, AGENTS.md edits, or docs work unless an ac-workflow/.agent-context plan or protocol is involved.
+  代理上下文工作流。用于管理 .agent-context 计划与协作流程。
+metadata:
+  version: 2.0.0
 ---
 
 # ac-workflow

@@ -14,8 +14,7 @@ import { PROTOCOL_NAMES, PROTOCOL_RENDERERS } from './protocols/index'
 import { readAgentContextPackageVersion } from './version'
 
 /** 供 frontmatter / 工具匹配的短描述：用用户意图触发，而不是解释内部实现 */
-const SKILL_DESCRIPTION =
-  'Use this skill when the user explicitly wants the ac-workflow or .agent-context protocol: initialize agent context, create or revise a plan file, execute/patch/review/archive the current .agent-context plan, run rush, sync installed ac-workflow skills, or inspect .agent-context state. Do not use for general coding, implementation, code review, planning, AGENTS.md edits, or docs work unless an ac-workflow/.agent-context plan or protocol is involved.'
+const SKILL_DESCRIPTION = '代理上下文工作流。用于管理 .agent-context 计划与协作流程。'
 
 export function renderSkillArtifacts(): SkillArtifacts {
   const files: SkillArtifacts['files'] = [
@@ -43,8 +42,7 @@ export function renderSkillArtifacts(): SkillArtifacts {
 function renderNavigator(): string {
   const protocolFile = `${PROTOCOL_DIR}/<protocol>.md`
   const scriptPath = `${SCRIPTS_DIR}/${CONTEXT_SCRIPT_NAME}`
-  return `${renderFrontmatter()}
-# ac-workflow
+  return `${renderFrontmatter()}# ac-workflow
 
 这是协议路由入口。不要预先读取所有协议文件；只在确定动作后读取需要的 \`${PROTOCOL_DIR}/*.md\`。
 
@@ -99,7 +97,8 @@ function renderFrontmatter(): string {
   const lines = [
     '---',
     `name: ${SKILL_NAME}`,
-    `description: ${SKILL_DESCRIPTION}`,
+    'description: >',
+    `  ${SKILL_DESCRIPTION}`,
     'metadata:',
     `  version: ${pkgVersion}`
   ]
@@ -118,7 +117,7 @@ function readScript(fileName: string): string {
 // ── AskUserQuestion reference（渐进式披露：详情在本文件，SKILL 仅指针）─
 
 function renderAskUserQuestionReference(): string {
-  return `# 提问规范
+  return `# 用户提问规范
 
 当协议需要澄清时，优先使用当前运行环境提供的交互式提问工具。常见名称包括 \`AskUserQuestion\`、\`request_user_input\`、\`RequestUserInput\`、\`Question\`、\`askQuestions\`、\`question\`。如果当前环境没有交互式提问工具，直接用一条简短文本问题询问用户并暂停，不要伪造工具调用。
 

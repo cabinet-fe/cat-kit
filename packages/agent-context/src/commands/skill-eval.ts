@@ -67,11 +67,20 @@ function readDescription(): string {
   const skillMd = renderSkillArtifacts().files.find(
     (file) => file.relativePath === 'SKILL.md'
   )?.body
-  const match = skillMd?.match(/^description:\s*(.+)$/m)
-  if (!match?.[1]) {
+  const blockMatch = skillMd?.match(/^description:\s*>\n((?:  .+\n?)+)/m)
+  if (blockMatch?.[1]) {
+    return blockMatch[1]
+      .split('\n')
+      .map((line) => line.replace(/^  /, ''))
+      .join(' ')
+      .trim()
+  }
+
+  const inlineMatch = skillMd?.match(/^description:\s*(.+)$/m)
+  if (!inlineMatch?.[1]) {
     throw new Error('未找到 Skill description。')
   }
-  return match[1]
+  return inlineMatch[1]
 }
 
 function readTriggerPrompts(): TriggerPrompts {
@@ -98,10 +107,10 @@ function evaluateShouldNotTrigger(prompt: string, description: string): PromptCo
   const lowerPrompt = prompt.toLowerCase()
   const lowerDescription = description.toLowerCase()
   const boundaries = [
-    { prompt: /implement|coding|login/, description: /general coding|implementation/ },
+    { prompt: /implement|coding|login/, description: /普通编码|实现/ },
     { prompt: /review|typescript function/, description: /code review/ },
     { prompt: /agents\.md/, description: /agents\.md/ },
-    { prompt: /计划|planning|plan/, description: /planning/ }
+    { prompt: /计划|planning|plan/, description: /planning|常规/ }
   ]
 
   const matched = boundaries.find((item) => item.prompt.test(lowerPrompt))

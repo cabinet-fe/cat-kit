@@ -12,12 +12,21 @@ function readSkillMd() {
 }
 
 function readDescription(skillMd: string) {
-  const match = skillMd.match(/^description:\s*(.+)$/m)
-  if (!match?.[1]) {
+  const blockMatch = skillMd.match(/^description:\s*>\n((?:  .+\n?)+)/m)
+  if (blockMatch?.[1]) {
+    return blockMatch[1]
+      .split('\n')
+      .map((line) => line.replace(/^  /, ''))
+      .join(' ')
+      .trim()
+  }
+
+  const inlineMatch = skillMd.match(/^description:\s*(.+)$/m)
+  if (!inlineMatch?.[1]) {
     throw new Error('description not found')
   }
 
-  return match[1]
+  return inlineMatch[1]
 }
 
 describe('renderSkillArtifacts', () => {
@@ -36,7 +45,7 @@ describe('renderSkillArtifacts', () => {
     expect(description.length).toBeLessThanOrEqual(500)
     expect(description).toContain('ac-workflow')
     expect(description).toContain('.agent-context')
-    expect(description).toContain('Do not use for general coding')
+    expect(description).toContain('不要用于普通编码')
     expect(description).not.toContain('Keywords include')
     expect(description).not.toMatch(/Keywords.*\b(implement|review|AGENTS\.md)\b/)
   })
@@ -82,13 +91,7 @@ describe('renderSkillArtifacts', () => {
       expect(prompt).not.toMatch(/ac-workflow|agent-context|\.agent-context/)
     }
 
-    for (const phrase of [
-      'general coding',
-      'implementation',
-      'code review',
-      'planning',
-      'AGENTS.md'
-    ]) {
+    for (const phrase of ['普通编码', '实现', 'code review', 'planning', 'AGENTS.md']) {
       expect(description).toContain(phrase)
     }
   })
