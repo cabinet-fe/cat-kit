@@ -8,6 +8,9 @@ import { parseCommaSeparatedIds } from '../skill/targets'
 import type { PromptToolId } from '../types'
 
 const PROMPT_TOOL_ORDER: PromptToolId[] = ['claude', 'codex', 'gemini', 'antigravity']
+const PROMPT_PROFILE_ORDER = ['default', 'whj'] as const
+
+type PromptProfileId = (typeof PROMPT_PROFILE_ORDER)[number]
 
 interface PromptToolConfig {
   id: PromptToolId
@@ -40,7 +43,16 @@ const PROMPT_TOOL_MAP: Record<PromptToolId, PromptToolConfig> = {
   }
 }
 
-const PROMPT_CONTENT = `## 语言与沟通风格
+const PROMPT_PROFILES: Record<PromptProfileId, string> = {
+  default: `## 工作方式
+
+- 优先遵守当前项目中的 AGENTS.md、CLAUDE.md 或等价指导文件。
+- 回答前先阅读必要上下文，不确定时说明假设或提出简短澄清问题。
+- 涉及时效性、版本、价格、法规或外部系统状态的信息，先确认最新事实。
+- 修改代码时保持变更范围清晰，并运行与变更风险匹配的验证命令。
+- 不要伪造工具调用、文件内容、测试结果或外部事实。
+`,
+  whj: `## 语言与沟通风格
 
 - 默认用中文沟通，技术术语保留英文原文（不要翻译 TypeScript、hook、render此类的）
 
@@ -59,9 +71,11 @@ const PROMPT_CONTENT = `## 语言与沟通风格
 ## 自适应纠错机制
 - 我是一个人类，我提的问题很可能会存在逻辑漏洞，不要盲目执行我可能错误的思路， 要用于纠正我的错误。
 `
+}
 
 export interface PromptGenCommandOptions {
   tools?: string
+  profile?: string
   yes?: boolean
   check?: boolean
 }
@@ -69,11 +83,12 @@ export interface PromptGenCommandOptions {
 export async function promptGenCommand(options: PromptGenCommandOptions = {}): Promise<void> {
   const check = options.check ?? false
   const yes = options.yes ?? false
+  const profile = resolvePromptProfile(options.profile)
 
   const tools = await resolvePromptToolIds(options.tools, yes || check)
 
   if (check) {
-    runCheckMode(tools)
+    runCheckMode(tools, profile)
     return
   }
 
@@ -91,7 +106,7 @@ export async function promptGenCommand(options: PromptGenCommandOptions = {}): P
     const config = PROMPT_TOOL_MAP[id]
     const isNew = !existsSync(config.globalFile)
     mkdirSync(dirname(config.globalFile), { recursive: true })
-    writeFileSync(config.globalFile, PROMPT_CONTENT, 'utf8')
+    writeFileSync(config.globalFile, renderPromptContent(profile, config), 'utf8')
     if (isNew) {
       created.push(config.globalFile)
     } else {
@@ -131,8 +146,30 @@ function isPromptToolId(value: string): value is PromptToolId {
   return Object.hasOwn(PROMPT_TOOL_MAP, value)
 }
 
-function runCheckMode(tools: PromptToolId[]): void {
-  console.log('\n将写入以下文件：\n') // eslint-disable-line no-console
+function resolvePromptProfile(raw: string | undefined): PromptProfileId {
+  if (!raw || raw.trim().length === 0) {
+    return 'default'
+  }
+
+  const profile = raw.trim().toLowerCase()
+  if (isPromptProfileId(profile)) {
+    return profile
+  }
+
+  throw new Error(`不支持的 profile: ${raw}。可选值: ${PROMPT_PROFILE_ORDER.join(', ')}`)
+}
+
+function isPromptProfileId(value: string): value is PromptProfileId {
+  return PROMPT_PROFILE_ORDER.includes(value as PromptProfileId)
+}
+
+function renderPromptContent(profile: PromptProfileId, config: PromptToolConfig): string {
+  const extra = config.extraContent ? `\n${config.extraContent.trim()}\n` : ''
+  return `${PROMPT_PROFILES[profile].trimEnd()}${extra}\n`
+}
+
+function runCheckMode(tools: PromptToolId[], profile: PromptProfileId): void {
+  console.log(`\n将使用 ${profile} profile 写入以下文件：\n`) // eslint-disable-line no-console
   for (const id of tools) {
     const config = PROMPT_TOOL_MAP[id]
     const status = existsSync(config.globalFile) ? '覆盖' : '新建'

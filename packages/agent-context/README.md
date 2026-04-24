@@ -55,22 +55,26 @@ npm install -g @cat-kit/agent-context
 agent-context install
 ```
 
-也可以指定工具：
+默认只写入 Agent Skills 开放标准目录：
+
+- Canonical source: `.agents/skills/ac-workflow/`
+
+也可以指定兼容入口：
 
 ```bash
 agent-context install --tools claude,codex,cursor
 ```
 
-安装完成后，CLI 会在对应目录生成 Skill 文件（技能目录名为 `ac-workflow`），例如：
+兼容入口会优先创建指向 canonical source 的 symlink / junction；如果环境不支持 symlink，才退回复制目录。安装完成后的目录示例：
 
+- Agent Skills（开放标准）: `.agents/skills/ac-workflow/`
 - Codex: `.codex/skills/ac-workflow/`
 - Claude: `.claude/skills/ac-workflow/`
 - Cursor: `.cursor/skills/ac-workflow/`
 - Antigravity: `.agent/skills/ac-workflow/`
-- Agent Skills（开放标准，如 Gemini CLI 等工具的 `.agents` 别名）: `.agents/skills/ac-workflow/`
 - Gemini CLI: `.gemini/skills/ac-workflow/`
 
-生成的 `SKILL.md` 是轻量导航入口：frontmatter `description` 负责触发，正文只做上下文脚本、`agent-context validate` 和协议路由。完整规则保存在 `references/*.md`，确定 `init / plan / replan / implement / patch / rush / review` 后再按需读取对应文件。
+生成的 `SKILL.md` 是轻量导航入口：frontmatter `description` 负责触发，正文只做上下文脚本、validate fallback 和协议路由。完整规则保存在 `references/*.md`，确定 `init / plan / replan / implement / patch / rush / review` 后再按需读取对应文件。协议需要澄清时统一称为“交互式提问工具”，具体工具名由当前 host/runtime 提供。
 
 ## 快速开始
 
@@ -282,7 +286,7 @@ agent-context init --yes
 
 ### `agent-context install`
 
-安装 Skill 文件。
+安装 Skill 文件。默认只渲染 canonical source：`.agents/skills/ac-workflow/`。
 
 ```bash
 agent-context install
@@ -291,9 +295,11 @@ agent-context install --check --tools copilot
 agent-context install --yes
 ```
 
+`--tools` 是兼容入口开关。指定后会先刷新 `.agents/skills/ac-workflow/`，再为目标工具创建 symlink / junction 指向 canonical source；已有普通目录会作为 copy fallback 同步。
+
 ### `agent-context sync`
 
-当你升级了 `@cat-kit/agent-context` 版本后，用它把项目中**所有已安装路径**下的 ac-workflow Skill（整目录）同步到最新协议。同步后会按当前清单重写应存在的文件，并**删除目录内不在清单中的遗留路径**（例如旧版 `actions/`）。
+当你升级了 `@cat-kit/agent-context` 版本后，用它把 canonical source 同步到最新协议，并刷新项目中已存在的兼容入口。同步后会按当前清单重写应存在的文件，并**删除 copy fallback 目录内不在清单中的遗留路径**（例如旧版 `actions/`）。
 
 ```bash
 agent-context sync
@@ -339,14 +345,34 @@ agent-context done --yes
 agent-context index
 ```
 
+### `agent-context skill-eval`
+
+评估当前生成的 Skill description 与触发样例覆盖。
+
+```bash
+agent-context skill-eval
+```
+
+输出当前 `description`、长度，以及 `test/fixtures/trigger-prompts.json` 中 `should-trigger` / `should-not-trigger` 样例的覆盖情况。
+
+### `agent-context prompt-gen`
+
+在用户主目录下写入各 AI 工具的全局提示词模板。默认模板是通用模板，不包含作者个人环境假设；个人模板可显式选择 profile。
+
+```bash
+agent-context prompt-gen --check
+agent-context prompt-gen --profile whj --tools codex
+```
+
 ## 通用选项
 
-| 选项              | 适用命令                    | 说明                                         |
-| ----------------- | --------------------------- | -------------------------------------------- |
-| `--tools <tools>` | `install` / `sync`          | 指定目标工具，逗号分隔                       |
-| `--check`         | `install` / `sync`          | 只检查是否有变更，不写文件                   |
-| `--yes`           | `install` / `init` / `done` | 跳过交互确认；`install` 会优先复用已安装工具 |
-| `--scope <name>`  | `init`                      | 手动指定 SCOPE 名称，不使用 git user.name    |
+| 选项                  | 适用命令                                   | 说明                                                  |
+| --------------------- | ------------------------------------------ | ----------------------------------------------------- |
+| `--tools <tools>`     | `install` / `prompt-gen`                   | 指定工具，`install` 中表示兼容入口                    |
+| `--check`             | `install` / `sync` / `prompt-gen`          | 只检查是否有变更，不写文件                            |
+| `--yes`               | `install` / `init` / `done` / `prompt-gen` | 跳过交互确认；`install` 默认仍只安装 canonical source |
+| `--profile <profile>` | `prompt-gen`                               | 指定提示词模板 profile：`default`、`whj`              |
+| `--scope <name>`      | `init`                                     | 手动指定 SCOPE 名称，不使用 git user.name             |
 
 ## 支持的工具
 
@@ -360,7 +386,7 @@ agent-context index
 | Gemini CLI               | `.gemini/skills/ac-workflow/` |
 | GitHub Copilot           | `.github/skills/ac-workflow/` |
 
-其中 Codex 会额外生成 `agents/openai.yaml` 元数据文件，其余工具只生成 Skill 内容本身。
+`.agents/skills/ac-workflow/` 是唯一 canonical source；其他目录是可选兼容入口，不再维护不同工具的分叉 Skill 内容。
 
 ## License
 

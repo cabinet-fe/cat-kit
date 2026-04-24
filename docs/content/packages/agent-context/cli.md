@@ -1,6 +1,6 @@
 ---
 title: CLI 命令
-description: 'agent-context CLI 的初始化、安装、同步、校验、状态、归档、索引、prompt-gen 与 upgrade'
+description: 'agent-context CLI 的初始化、安装、同步、校验、状态、归档、索引、skill-eval、prompt-gen 与 upgrade'
 outline: deep
 ---
 
@@ -14,12 +14,13 @@ outline: deep
 - 校验 `.agent-context/` 结构
 - 查看状态与归档当前计划
 - 生成或更新计划索引
+- 评估 Skill description 触发样例覆盖（`skill-eval`）
 - 在用户主目录生成各工具的全局提示词文件（`prompt-gen`）
 - 升级 CLI 自身到最新版本（`upgrade`）
 
 对话里说"出计划""开始实现""补 patch"触发的是 Skill protocol，不是 CLI 子命令。
 
-当前发布产物中的 ESM JavaScript 文件统一使用 `.js` 后缀，例如 CLI 入口为 `dist/cli.js`；Skill 安装时依赖的上下文脚本也会随构建一并发布到 `dist/skill/scripts/get-context-info.js`。
+当前发布产物中的 ESM JavaScript 文件统一使用 `.js` 后缀，例如 CLI 入口为 `dist/cli.js`；Skill 安装时依赖的脚本也会随构建一并发布到 `dist/skill/scripts/`。
 
 ## 快速使用
 
@@ -27,12 +28,13 @@ outline: deep
 
 ```bash
 agent-context init          # 首次使用，初始化 SCOPE
-agent-context install       # 安装 Skill 到 AI 工具目录
+agent-context install       # 安装 canonical Skill 到 .agents
 agent-context validate      # 校验目录结构
 agent-context status        # 查看当前状态
-agent-context sync          # 同步项目里已安装的 Skill 内容
+agent-context sync          # 同步 canonical Skill 并刷新兼容入口
 agent-context done          # 归档已执行计划
 agent-context index         # 生成/更新计划索引
+agent-context skill-eval    # 检查 Skill description 触发样例覆盖
 agent-context prompt-gen    # 可选：写入本机全局提示词模板
 agent-context upgrade       # 升级到最新版本
 ```
@@ -60,7 +62,7 @@ agent-context init --yes
 
 ### `agent-context install`
 
-安装 `ac-workflow` Skill 到 AI 工具的约定目录。
+安装 `ac-workflow` Skill。默认只写入 Agent Skills 开放标准目录 `.agents/skills/ac-workflow/`，作为 canonical source。
 
 ```bash
 agent-context install
@@ -69,13 +71,13 @@ agent-context install --check --tools copilot
 agent-context install --yes
 ```
 
-| 选项              | 说明                                             |
-| ----------------- | ------------------------------------------------ |
-| `--tools <tools>` | 指定目标工具，逗号分隔                           |
-| `--check`         | 只检查是否会产生变更，不写文件                   |
-| `--yes`           | 非交互模式：优先复用已安装工具，否则安装全部工具 |
+| 选项              | 说明                                                   |
+| ----------------- | ------------------------------------------------------ |
+| `--tools <tools>` | 指定要创建的兼容入口工具，逗号分隔                     |
+| `--check`         | 只检查是否会产生变更，不写文件                         |
+| `--yes`           | 非交互模式；未传 `--tools` 时仍只安装 canonical source |
 
-支持的工具（技能目录名均为 `ac-workflow`）：
+支持的工具（技能目录名均为 `ac-workflow`）。`.agents` 是 canonical source；其他目录是可选兼容入口，优先 symlink / junction 指向 `.agents/skills/ac-workflow/`，不支持 symlink 或已有普通目录时按 copy fallback 同步：
 
 | 工具                      | Skill 目录                    |
 | ------------------------- | ----------------------------- |
@@ -87,14 +89,13 @@ agent-context install --yes
 | Gemini CLI                | `.gemini/skills/ac-workflow/` |
 | GitHub Copilot            | `.github/skills/ac-workflow/` |
 
-Codex 会额外在技能目录下生成 `agents/openai.yaml` 元数据文件。
-
 安装产物采用轻量入口 + 按需引用：
 
 - `SKILL.md`：包含触发描述、启动检查、状态路由和硬约束，不内联完整协议正文
 - `references/init.md`、`plan.md`、`replan.md`、`implement.md`、`patch.md`、`rush.md`、`review.md`：协议细节，确定动作后读取对应文件
-- `references/ask-user-question.md`：只有准备调用提问工具时读取
+- `references/ask-user-question.md`：只有准备调用交互式提问工具时读取；工具名由 host/runtime 提供
 - `scripts/get-context-info.js`：从项目根目录运行，输出路由所需的结构化上下文
+- `scripts/validate-context.js`：当全局 `agent-context validate` 与 `npx @cat-kit/agent-context validate` 都不可用时，作为 bundled validate fallback
 
 触发边界：`description` 只匹配 `ac-workflow` / `.agent-context` 相关意图；普通代码实现、普通 code review、普通计划讨论或单纯修改 `AGENTS.md` 不应触发该 Skill。
 
@@ -114,7 +115,7 @@ agent-context sync --check
 说明：
 
 - `sync` 不接受 `--tools`
-- 它会自动扫描当前项目里已经安装过的 Skill 目标，再对这些目标做同步
+- 它会从源码重新渲染 `.agents/skills/ac-workflow/`，再刷新已存在的兼容入口链接或 copy fallback
 - 如果当前项目尚未安装任何 Skill，会直接报错并提示先执行 `install`
 
 ### `agent-context validate`
@@ -185,22 +186,38 @@ agent-context index
 
 归档计划时（`done`）会自动更新索引，也可手动运行。
 
+### `agent-context skill-eval`
+
+评估当前生成的 `ac-workflow` Skill description 与触发样例 fixture。它会读取 `test/fixtures/trigger-prompts.json`（发布包中找不到 fixture 时使用内置等价样例），输出：
+
+- 当前 `description` 文本与长度
+- `should-trigger` 样例覆盖数
+- `should-not-trigger` 近似负例覆盖数
+
+```bash
+agent-context skill-eval
+```
+
+该命令目前是静态触发评估，用来避免 description 变宽或漏掉近似负例；后续可接入真实 agent 日志判断 Skill 是否实际加载。
+
 ### `agent-context prompt-gen`
 
-在用户主目录下写入各 AI 工具的全局提示词模板（与项目内 `.agent-context/` 无关）。
+在用户主目录下写入各 AI 工具的全局提示词模板（与项目内 `.agent-context/` 无关）。默认使用通用模板，不包含作者个人环境假设。
 
 ```bash
 agent-context prompt-gen
 agent-context prompt-gen --tools claude,codex
+agent-context prompt-gen --profile whj --tools codex
 agent-context prompt-gen --yes
 agent-context prompt-gen --check
 ```
 
-| 选项              | 说明                                                               |
-| ----------------- | ------------------------------------------------------------------ |
-| `--tools <tools>` | 指定目标工具，逗号分隔：`claude`、`codex`、`gemini`、`antigravity` |
-| `--yes`           | 非交互：已选工具一律覆盖写入                                       |
-| `--check`         | 只列出将要创建或覆盖的文件路径，不写入                             |
+| 选项                  | 说明                                                               |
+| --------------------- | ------------------------------------------------------------------ |
+| `--tools <tools>`     | 指定目标工具，逗号分隔：`claude`、`codex`、`gemini`、`antigravity` |
+| `--profile <profile>` | 指定模板 profile：`default`、`whj`                                 |
+| `--yes`               | 非交互：已选工具一律覆盖写入                                       |
+| `--check`             | 只列出将要创建或覆盖的文件路径，不写入                             |
 
 各工具对应文件：
 
@@ -225,9 +242,10 @@ agent-context upgrade
 
 ## 通用选项汇总
 
-| 选项              | 适用命令                                   | 作用                   |
-| ----------------- | ------------------------------------------ | ---------------------- |
-| `--tools <tools>` | `install` / `prompt-gen`                   | 指定工具列表，逗号分隔 |
-| `--check`         | `install` / `sync` / `prompt-gen`          | 只检查，不写入文件     |
-| `--yes`           | `install` / `init` / `done` / `prompt-gen` | 跳过或减少交互确认     |
-| `--scope <name>`  | `init`                                     | 手动指定 SCOPE 名称    |
+| 选项                  | 适用命令                                   | 作用                   |
+| --------------------- | ------------------------------------------ | ---------------------- |
+| `--tools <tools>`     | `install` / `prompt-gen`                   | 指定工具列表，逗号分隔 |
+| `--check`             | `install` / `sync` / `prompt-gen`          | 只检查，不写入文件     |
+| `--yes`               | `install` / `init` / `done` / `prompt-gen` | 跳过或减少交互确认     |
+| `--profile <profile>` | `prompt-gen`                               | 指定提示词模板 profile |
+| `--scope <name>`      | `init`                                     | 手动指定 SCOPE 名称    |

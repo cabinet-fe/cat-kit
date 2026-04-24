@@ -21,4 +21,17 @@ agent-context sync --check
 agent-context sync
 ```
 
-安装产物中，先读 `SKILL.md` 做路由；协议细节在 `references/` 下按需读取。
+安装产物中，`.agents/skills/ac-workflow/` 是 canonical source；`--tools claude,codex` 等只创建兼容入口。先读 `SKILL.md` 做路由；协议细节在 `references/` 下按需读取。
+
+评估 description 触发样例：
+
+```bash
+agent-context skill-eval
+```
+
+生成本机全局提示词模板：
+
+```bash
+agent-context prompt-gen --check
+agent-context prompt-gen --profile whj --tools codex
+```

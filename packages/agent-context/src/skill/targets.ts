@@ -7,70 +7,16 @@ import type { ToolId, ToolTarget } from '../types'
 const SKILL_FILE_NAME = 'SKILL.md'
 
 const TOOL_TARGET_MAP: Record<ToolId, ToolTarget> = {
-  agents: {
-    id: 'agents',
-    name: 'Agent Skills（开放标准）',
-    skillRootDir: '.agents/skills',
-    frontmatterProfile: 'standard',
-    metadataFiles: [],
-    guideFileName: 'AGENTS.md',
-    askToolName: 'AskUserQuestion'
-  },
-  claude: {
-    id: 'claude',
-    name: 'Claude Code',
-    skillRootDir: '.claude/skills',
-    frontmatterProfile: 'claude',
-    metadataFiles: [],
-    guideFileName: 'CLAUDE.md',
-    askToolName: 'AskUserQuestion'
-  },
-  codex: {
-    id: 'codex',
-    name: 'Codex',
-    skillRootDir: '.codex/skills',
-    frontmatterProfile: 'standard',
-    metadataFiles: ['openai'],
-    guideFileName: 'AGENTS.md',
-    askToolName: 'request_user_input'
-  },
-  cursor: {
-    id: 'cursor',
-    name: 'Cursor',
-    skillRootDir: '.cursor/skills',
-    frontmatterProfile: 'standard',
-    metadataFiles: [],
-    guideFileName: 'AGENTS.md',
-    askToolName: 'AskUserQuestion'
-  },
-  antigravity: {
-    id: 'antigravity',
-    name: 'Antigravity',
-    skillRootDir: '.agent/skills',
-    frontmatterProfile: 'standard',
-    metadataFiles: [],
-    guideFileName: 'AGENTS.md',
-    askToolName: 'AskUserQuestion'
-  },
-  gemini: {
-    id: 'gemini',
-    name: 'Gemini CLI',
-    skillRootDir: '.gemini/skills',
-    frontmatterProfile: 'standard',
-    metadataFiles: [],
-    guideFileName: 'AGENTS.md',
-    askToolName: 'AskUserQuestion'
-  },
-  copilot: {
-    id: 'copilot',
-    name: 'GitHub Copilot',
-    skillRootDir: '.github/skills',
-    frontmatterProfile: 'copilot',
-    metadataFiles: [],
-    guideFileName: 'AGENTS.md',
-    askToolName: 'askQuestions'
-  }
+  agents: { id: 'agents', name: 'Agent Skills（开放标准）', skillRootDir: '.agents/skills' },
+  claude: { id: 'claude', name: 'Claude Code', skillRootDir: '.claude/skills' },
+  codex: { id: 'codex', name: 'Codex', skillRootDir: '.codex/skills' },
+  cursor: { id: 'cursor', name: 'Cursor', skillRootDir: '.cursor/skills' },
+  antigravity: { id: 'antigravity', name: 'Antigravity', skillRootDir: '.agent/skills' },
+  gemini: { id: 'gemini', name: 'Gemini CLI', skillRootDir: '.gemini/skills' },
+  copilot: { id: 'copilot', name: 'GitHub Copilot', skillRootDir: '.github/skills' }
 }
+
+export const CANONICAL_TOOL_ID: ToolId = 'agents'
 
 export const DEFAULT_TOOL_ORDER: ToolId[] = [
   'agents',
@@ -81,6 +27,10 @@ export const DEFAULT_TOOL_ORDER: ToolId[] = [
   'gemini',
   'copilot'
 ]
+
+export const COMPATIBILITY_TOOL_ORDER: ToolId[] = DEFAULT_TOOL_ORDER.filter(
+  (id) => id !== CANONICAL_TOOL_ID
+)
 
 export interface ToolChoice {
   id: ToolId
@@ -115,17 +65,24 @@ export function parseCommaSeparatedIds<T extends string>(
 
 export function parseToolIds(toolsText: string): ToolId[] {
   const result = parseCommaSeparatedIds(toolsText, isToolId, DEFAULT_TOOL_ORDER)
-  return result.length === 0 ? [...DEFAULT_TOOL_ORDER] : result
+  return result
 }
 
 export function resolveToolTargets(tools?: ToolId[]): ToolTarget[] {
-  const selected = tools && tools.length > 0 ? tools : DEFAULT_TOOL_ORDER
+  const selected = tools && tools.length > 0 ? tools : [CANONICAL_TOOL_ID]
   return selected.map((id) => ({ ...TOOL_TARGET_MAP[id] }))
 }
 
-/** sync：项目中每一处已检测到 SKILL.md 的 ac-workflow 安装路径（整目录产物同步） */
-export function resolveSyncToolTargets(cwd: string): ToolTarget[] {
-  return detectConfiguredToolIds(cwd).map((id) => resolveToolTargetById(id))
+export function resolveCompatibilityToolTargets(tools?: ToolId[]): ToolTarget[] {
+  if (!tools || tools.length === 0) return []
+  return tools.filter((id) => id !== CANONICAL_TOOL_ID).map((id) => ({ ...TOOL_TARGET_MAP[id] }))
+}
+
+/** sync：项目中已检测到的兼容入口，canonical source 永远来自 .agents。 */
+export function resolveSyncCompatibilityToolTargets(cwd: string): ToolTarget[] {
+  return detectConfiguredToolIds(cwd)
+    .filter((id) => id !== CANONICAL_TOOL_ID)
+    .map((id) => resolveToolTargetById(id))
 }
 
 export function resolveToolTargetById(id: ToolId): ToolTarget {
@@ -144,16 +101,11 @@ export function detectConfiguredToolIds(cwd: string): ToolId[] {
 export interface SkillPaths {
   skillDir: string
   skillFile: string
-  openaiMetadataFile: string
 }
 
 export function resolveSkillPaths(target: ToolTarget, cwd: string): SkillPaths {
   const skillDir = resolve(cwd, target.skillRootDir, SKILL_NAME)
-  return {
-    skillDir,
-    skillFile: resolve(skillDir, SKILL_FILE_NAME),
-    openaiMetadataFile: resolve(skillDir, 'agents/openai.yaml')
-  }
+  return { skillDir, skillFile: resolve(skillDir, SKILL_FILE_NAME) }
 }
 
 function isToolId(value: string): value is ToolId {

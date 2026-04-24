@@ -9,6 +9,7 @@ import { indexCommand } from './commands/index'
 import { initCommand } from './commands/init'
 import { installCommand } from './commands/install'
 import { promptGenCommand } from './commands/prompt-gen'
+import { skillEvalCommand } from './commands/skill-eval'
 import { statusCommand } from './commands/status'
 import { syncCommand } from './commands/sync'
 import { upgradeCommand } from './commands/upgrade'
@@ -28,15 +29,15 @@ program
   .description('安装 ac-workflow Skill')
   .option(
     '--tools <tools>',
-    '指定目标工具，逗号分隔：claude,codex,cursor,antigravity,agents,gemini,copilot'
+    '指定兼容入口工具，逗号分隔：claude,codex,cursor,antigravity,agents,gemini,copilot'
   )
-  .option('--yes', '非交互模式：优先复用已安装工具，否则安装全部工具')
+  .option('--yes', '非交互模式；未传 --tools 时仍只安装 canonical source')
   .option('--check', '仅检查是否存在待更新内容，不写入文件')
   .action(installCommand)
 
 program
   .command('sync')
-  .description('同步项目中所有已安装路径下的 ac-workflow Skill（整目录）')
+  .description('同步 canonical ac-workflow Skill，并刷新已安装的兼容入口')
   .option('--check', '仅检查是否存在待更新内容，不写入文件')
   .action(syncCommand)
 
@@ -60,9 +61,15 @@ program
 program.command('index').description('生成或更新计划索引文件').action(indexCommand)
 
 program
+  .command('skill-eval')
+  .description('评估 ac-workflow Skill description 的触发样例覆盖')
+  .action(skillEvalCommand)
+
+program
   .command('prompt-gen')
   .description('在用户主目录下生成各 AI 工具的全局提示词文件')
   .option('--tools <tools>', '指定目标工具，逗号分隔：claude,codex,gemini,antigravity')
+  .option('--profile <profile>', '指定提示词模板 profile：default,whj')
   .option('--yes', '文件已存在时直接覆盖，不询问')
   .option('--check', '仅检查将要写入的内容，不实际写入')
   .action(promptGenCommand)

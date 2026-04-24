@@ -1,7 +1,6 @@
 import { AC_ROOT_DIR, CONTEXT_SCRIPT_NAME, SCRIPTS_DIR } from '../../constants'
-import type { ToolTarget } from '../../types'
 
-export function renderReplan(target: ToolTarget): string {
+export function renderReplan(): string {
   const scriptPath = `${SCRIPTS_DIR}/${CONTEXT_SCRIPT_NAME}`
   return `# replan
 
@@ -14,7 +13,7 @@ export function renderReplan(target: ToolTarget): string {
 ## 前置检查
 
 - 描述为空 → 向用户获取重规划描述后继续执行。
-- \`currentPlanStatus\` 为 \`null\` 且 preparing 队列为空 → 通过 ${target.askToolName} 提供选项：1) 创建新计划 2) 终止操作，按用户选择执行。
+- \`currentPlanStatus\` 为 \`null\` 且 preparing 队列为空 → 通过交互式提问工具提供选项：1) 创建新计划 2) 终止操作，按用户选择执行。
 
 ## 作用域
 
@@ -24,8 +23,8 @@ export function renderReplan(target: ToolTarget): string {
 
 ## 执行步骤
 
-1. 结合描述确定重规划方向。若重规划方向仍不明确（拆分方式、优先级调整、范围增减等），通过 ${target.askToolName} 提问澄清后再继续。
-2. **反向面试**：分析原计划需要调整的根本原因，评估新方向是否真正解决了问题。关注：重规划的核心驱动因素（技术障碍 / 需求变更 / 设计缺陷 / 优先级调整）、新方案是否引入原计划不存在的风险或约束。通过 ${target.askToolName} 提出关键探测问题。若分析后无显著问题可跳过。
+1. 结合描述确定重规划方向。若重规划方向仍不明确（拆分方式、优先级调整、范围增减等），通过交互式提问工具提问澄清后再继续。
+2. **反向面试**：分析原计划需要调整的根本原因，评估新方向是否真正解决了问题。关注：重规划的核心驱动因素（技术障碍 / 需求变更 / 设计缺陷 / 优先级调整）、新方案是否引入原计划不存在的风险或约束。通过交互式提问工具提出关键探测问题。若分析后无显著问题可跳过。
 3. 读取上述作用域内**所有**未执行计划的 \`plan.md\`，理解现有意图。
 4. 生成新的拆分方案，保持「单当前计划 + 若干 preparing 计划」结构。
 5. 移除旧的未执行计划目录和文件，重新在 shell 中执行\`node <SKILL_DIR>/${scriptPath}\`脚本获取上下文快照。

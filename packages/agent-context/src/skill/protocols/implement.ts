@@ -1,6 +1,4 @@
-import type { ToolTarget } from '../../types'
-
-export function renderImplement(target: ToolTarget): string {
+export function renderImplement(): string {
   return `# implement
 
 作为一个**资深开发工程师**执行当前计划中的全部步骤。
@@ -19,7 +17,7 @@ export function renderImplement(target: ToolTarget): string {
 ## 前置检查
 
 - \`currentPlanStatus\` 为 \`null\` 或 \`"已执行"\` → 终止执行。
-- \`## 目标\` 或 \`## 内容\` 为空 → 通过 ${target.askToolName} 向用户获取缺失内容后更新 plan.md 并继续执行。
+- \`## 目标\` 或 \`## 内容\` 为空 → 通过交互式提问工具向用户获取缺失内容后更新 plan.md 并继续执行。
 - 仅操作当前计划，不直接操作 \`preparing/\` 中的计划。
 - 遇到阻塞问题应向用户报告，不可静默跳过。
 
@@ -29,6 +27,6 @@ export function renderImplement(target: ToolTarget): string {
 2. **实施内容**：依据 \`## 内容\` 的步骤逐项实施。
 3. **更新状态**：将 \`plan.md\` 的状态行修改为 \`> 状态: 已执行\`。
 4. **记录范围**：更新 \`## 影响范围\`，详细记录本次变动的具体文件路径。\`.agent-context/\` 目录下的文件不计入影响范围。
-5. 追问：通过 ${target.askToolName} 询问用户是否继续对刚实施完成的计划执行 review 协议。
+5. 追问：通过交互式提问工具询问用户是否继续对刚实施完成的计划执行 review 协议。
 `
 }

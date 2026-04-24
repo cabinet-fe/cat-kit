@@ -2,17 +2,10 @@ export type ToolId = 'claude' | 'codex' | 'cursor' | 'antigravity' | 'agents' | 
 
 export type PromptToolId = 'claude' | 'codex' | 'gemini' | 'antigravity'
 
-export type SkillFrontmatterProfile = 'standard' | 'claude' | 'copilot'
-export type SkillMetadataFile = 'openai'
-
 export interface ToolTarget {
   id: ToolId
   name: string
   skillRootDir: string
-  frontmatterProfile: SkillFrontmatterProfile
-  metadataFiles: SkillMetadataFile[]
-  guideFileName: string
-  askToolName: string
 }
 
 export interface SkillArtifacts {

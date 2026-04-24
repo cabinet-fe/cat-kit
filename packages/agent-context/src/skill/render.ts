@@ -9,7 +9,7 @@ import {
   SCRIPTS_DIR,
   SKILL_NAME
 } from '../constants'
-import type { SkillArtifacts, ToolTarget } from '../types'
+import type { SkillArtifacts } from '../types'
 import { PROTOCOL_NAMES, PROTOCOL_RENDERERS } from './protocols/index'
 import { readAgentContextPackageVersion } from './version'
 
@@ -17,33 +17,33 @@ import { readAgentContextPackageVersion } from './version'
 const SKILL_DESCRIPTION =
   'Use this skill when the user explicitly wants the ac-workflow or .agent-context protocol: initialize agent context, create or revise a plan file, execute/patch/review/archive the current .agent-context plan, run rush, sync installed ac-workflow skills, or inspect .agent-context state. Do not use for general coding, implementation, code review, planning, AGENTS.md edits, or docs work unless an ac-workflow/.agent-context plan or protocol is involved.'
 
-export function renderSkillArtifacts(target: ToolTarget): SkillArtifacts {
+export function renderSkillArtifacts(): SkillArtifacts {
   const files: SkillArtifacts['files'] = [
-    { relativePath: 'SKILL.md', body: renderNavigator(target) },
+    { relativePath: 'SKILL.md', body: renderNavigator() },
     ...PROTOCOL_NAMES.map((name) => ({
       relativePath: `${PROTOCOL_DIR}/${name}.md`,
-      body: PROTOCOL_RENDERERS[name](target)
+      body: PROTOCOL_RENDERERS[name]()
     })),
     {
       relativePath: `${PROTOCOL_DIR}/ask-user-question.md`,
-      body: renderAskUserQuestionReference(target)
+      body: renderAskUserQuestionReference()
     },
-    { relativePath: `${SCRIPTS_DIR}/${CONTEXT_SCRIPT_NAME}`, body: readContextScript() }
+    {
+      relativePath: `${SCRIPTS_DIR}/${CONTEXT_SCRIPT_NAME}`,
+      body: readScript(CONTEXT_SCRIPT_NAME)
+    },
+    { relativePath: `${SCRIPTS_DIR}/validate-context.js`, body: readScript('validate-context.js') }
   ]
-
-  if (target.metadataFiles.includes('openai')) {
-    files.push({ relativePath: 'agents/openai.yaml', body: renderOpenAIMetadata() })
-  }
 
   return { files }
 }
 
 // ── Navigator ────────────────────────────────────────
 
-function renderNavigator(target: ToolTarget): string {
+function renderNavigator(): string {
   const protocolFile = `${PROTOCOL_DIR}/<protocol>.md`
   const scriptPath = `${SCRIPTS_DIR}/${CONTEXT_SCRIPT_NAME}`
-  return `${renderFrontmatter(target)}
+  return `${renderFrontmatter()}
 # ac-workflow
 
 这是协议路由入口。不要预先读取所有协议文件；只在确定动作后读取需要的 \`${PROTOCOL_DIR}/*.md\`。
@@ -59,7 +59,7 @@ agent-context validate
 
 其中 \`<SKILL_DIR>\` 是本 \`SKILL.md\` 所在目录；若运行时提供技能目录变量，先替换为实际路径。
 
-若不在项目根目录，脚本追加 \`--cwd <project-root>\`。脚本失败或 \`validate\` 不通过时，先按错误修正，再重跑到通过。
+若不在项目根目录，脚本追加 \`--cwd <project-root>\`。若 \`agent-context validate\` 命令不存在，改用 \`npx @cat-kit/agent-context validate\`；CLI 不可用时再运行 \`node <SKILL_DIR>/scripts/validate-context.js\`。任一校验报告错误时，先按错误修正，再重跑到通过。
 
 只使用脚本返回的 \`scope\`、\`currentPlanStatus\`、\`currentPlanNumber\`、\`currentPlanDir\`、\`currentPlanFile\`、\`nextPlanNumber\`、\`nextPatchNumber\`；不要自行扫描目录推断状态或编号。
 
@@ -69,7 +69,7 @@ agent-context validate
 
 | 状态 | 用户意图 | 动作 |
 | --- | --- | --- |
-| \`null\` | 初始化上下文、补全 ${target.guideFileName} | 读 \`${PROTOCOL_DIR}/init.md\` |
+| \`null\` | 初始化上下文、补全项目指导文件 | 读 \`${PROTOCOL_DIR}/init.md\` |
 | \`null\` | 创建计划、拆分需求 | 读 \`${PROTOCOL_DIR}/plan.md\` |
 | \`null\` | 明确任务直接计划并实施 | 读 \`${PROTOCOL_DIR}/rush.md\` |
 | \`"未执行"\` | 开始执行当前计划 | 读 \`${PROTOCOL_DIR}/implement.md\` |
@@ -79,7 +79,7 @@ agent-context validate
 | \`"已执行"\` | 审查实现 | 读 \`${PROTOCOL_DIR}/review.md\` |
 | \`"已执行"\` | 完成并归档 | 运行 \`agent-context done --yes\` |
 
-用户明确点名 \`init\`、\`plan\`、\`replan\`、\`implement\`、\`patch\`、\`rush\`、\`review\` 时，仍必须先完成启动步骤，再读取 \`${protocolFile}\`。无关新需求与当前计划冲突时，先用 ${target.askToolName} 让用户选择处理当前计划还是终止；使用提问工具前先读 \`${PROTOCOL_DIR}/ask-user-question.md\`。
+用户明确点名 \`init\`、\`plan\`、\`replan\`、\`implement\`、\`patch\`、\`rush\`、\`review\` 时，仍必须先完成启动步骤，再读取 \`${protocolFile}\`。当协议需要澄清或选择时，优先使用当前运行环境提供的交互式提问工具；使用前先读 \`${PROTOCOL_DIR}/ask-user-question.md\`。如果当前环境没有交互式提问工具，直接用一条简短文本问题询问用户并暂停，不要伪造工具调用。
 
 ## 硬约束
 
@@ -94,7 +94,7 @@ agent-context validate
 
 // ── Frontmatter & Metadata ──────────────────────────
 
-function renderFrontmatter(target: ToolTarget): string {
+function renderFrontmatter(): string {
   const pkgVersion = readAgentContextPackageVersion()
   const lines = [
     '---',
@@ -104,46 +104,33 @@ function renderFrontmatter(target: ToolTarget): string {
     `  version: ${pkgVersion}`
   ]
 
-  if (target.frontmatterProfile === 'copilot') {
-    lines.push('license: MIT')
-  }
-
   lines.push('---', '')
   return `${lines.join('\n')}\n`
 }
 
-function renderOpenAIMetadata(): string {
-  return `interface:
-  display_name: "代理上下文工作流"
-  short_description: "${SKILL_DESCRIPTION}"
-  default_prompt: "Use ac-workflow for .agent-context stateful work: run scripts/get-context-info.js and agent-context validate, choose one action from currentPlanStatus, then read only the matching references/*.md before executing."
-
-policy:
-  allow_implicit_invocation: true
-`
-}
-
 // ── Context Script ──────────────────────────────────
 
-function readContextScript(): string {
+function readScript(fileName: string): string {
   const scriptDir = join(dirname(fileURLToPath(import.meta.url)), 'scripts')
-  return readFileSync(join(scriptDir, CONTEXT_SCRIPT_NAME), 'utf-8')
+  return readFileSync(join(scriptDir, fileName), 'utf-8')
 }
 
 // ── AskUserQuestion reference（渐进式披露：详情在本文件，SKILL 仅指针）─
 
-function renderAskUserQuestionReference(target: ToolTarget): string {
-  return `# ${target.askToolName} 规范
+function renderAskUserQuestionReference(): string {
+  return `# 提问规范
 
-**任何情况下使用 ${target.askToolName} 工具时必须遵守本规范**：
+当协议需要澄清时，优先使用当前运行环境提供的交互式提问工具。常见名称包括 \`AskUserQuestion\`、\`request_user_input\`、\`RequestUserInput\`、\`Question\`、\`askQuestions\`、\`question\`。如果当前环境没有交互式提问工具，直接用一条简短文本问题询问用户并暂停，不要伪造工具调用。
 
-### 基础规范
+**任何情况下使用交互式提问工具时必须遵守本规范**：
+
+## 基础规范
 
 - 提问要通俗易懂，不要废话，禁止拽花哨、华而不实的文风，给出的选项同理。
 - 单选提问**必须**在问题末尾标注推荐项并说明理由
 - 一次提问聚焦一个主题，不在单个问题中混杂多个无关决策
 
-### 反向面试
+## 反向追问
 
 信息收集和需求澄清环节，不能只被动接收用户说法——必须主动审视用户的陈述，挖掘未被意识到的盲区。
 

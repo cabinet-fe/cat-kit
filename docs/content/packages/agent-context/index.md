@@ -13,6 +13,8 @@ outline: deep
 - **CLI**：安装 Skill、同步协议、校验目录结构、管理计划生命周期（归档、索引）、升级自身
 - **Skill**：用 frontmatter `description` 触发 `init、plan、replan、implement、patch、rush、review、done` 协议意图；`SKILL.md` 只保留启动检查与路由，完整协议按需读取 `references/*.md`
 
+安装模型采用“canonical open standard + 可选兼容入口”：默认只渲染 `.agents/skills/ac-workflow/`，作为唯一 canonical source；`--tools claude,codex,...` 只创建兼容入口，优先 symlink / junction 指向 canonical source，不支持 symlink 或已有普通目录时退回复制同步。
+
 目录结构：
 
 ```text
@@ -36,7 +38,9 @@ outline: deep
 
 - `SKILL.md`：短导航入口，负责运行上下文脚本、执行 `agent-context validate`、根据 `currentPlanStatus` 选择协议
 - `references/*.md`：完整协议正文，只有确定动作后才读取对应文件；`rush` 这类组合协议会在需要时再读取被引用协议
+- `references/ask-user-question.md`：交互式提问规范，不写死具体工具名；host/runtime 可提供 `AskUserQuestion`、`request_user_input`、`question` 等不同名称
 - `scripts/get-context-info.js`：输出 `scope`、当前计划、下一个计划编号和下一个补丁编号，Skill 不应自行扫描目录推断这些值
+- `scripts/validate-context.js`：当全局 CLI 与 `npx @cat-kit/agent-context validate` 都不可用时，提供 bundled validate fallback
 - `description`：只面向 `ac-workflow` / `.agent-context` 意图触发；普通 coding、code review、planning、`AGENTS.md` 文档修改不应触发
 
 ### 动作依赖图（主路径与 review）
@@ -106,9 +110,11 @@ flowchart LR
 
 ## 常见问题
 
-### Codex 中交互式引导不起作用
+### 交互式提问工具不可用
 
-你需要在 codex 配置中（用户目录：`～/.codex/config.toml` 或 项目根目录：`.codex/config.toml`）启用以下功能标识：
+Skill 协议只要求“优先使用当前运行环境提供的交互式提问工具”，不会假设固定工具名。不同 host 可能叫 `AskUserQuestion`、`request_user_input`、`question` 或其他名称；如果当前环境没有交互式提问工具，应直接用简短文本问题询问用户并暂停。
+
+Codex 中如需启用 `request_user_input`，可在配置中（用户目录：`~/.codex/config.toml` 或项目根目录：`.codex/config.toml`）启用以下功能标识：
 
 ```toml
 [features]

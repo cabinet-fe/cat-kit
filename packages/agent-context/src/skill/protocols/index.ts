@@ -1,4 +1,3 @@
-import type { ToolTarget } from '../../types'
 import { renderImplement } from './implement'
 import { renderInit } from './init'
 import { renderPatch } from './patch'
@@ -18,7 +17,7 @@ export const PROTOCOL_NAMES = [
 ] as const
 type ProtocolName = (typeof PROTOCOL_NAMES)[number]
 
-export const PROTOCOL_RENDERERS: Record<ProtocolName, (target: ToolTarget) => string> = {
+export const PROTOCOL_RENDERERS: Record<ProtocolName, () => string> = {
   init: renderInit,
   plan: renderPlan,
   replan: renderReplan,

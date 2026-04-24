@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { resolve, dirname } from 'node:path'
+import { lstat, mkdir, readFile, readlink, rm, symlink, writeFile } from 'node:fs/promises'
+import { dirname, relative, resolve } from 'node:path'
 
 import type {
   ApplyMutationResult,
@@ -10,18 +10,16 @@ import type {
   ToolId,
   ToolTarget
 } from '../types'
-import { parseSkillMdMetadataVersion, replaceVersionInSkillDirectory } from './metadata'
 import { pruneSkillDirectory } from './prune'
 import { renderSkillArtifacts } from './render'
 import {
-  detectConfiguredToolIds,
+  CANONICAL_TOOL_ID,
+  resolveCompatibilityToolTargets,
   resolveSkillPaths,
-  resolveSyncToolTargets,
-  resolveToolTargetById,
-  resolveToolTargets
+  resolveSyncCompatibilityToolTargets,
+  resolveToolTargetById
 } from './targets'
 import type { SkillPaths } from './targets'
-import { readAgentContextPackageVersion } from './version'
 
 export async function runInstall(options: RunOptions = {}): Promise<RunResult> {
   return run('install', options)
@@ -36,44 +34,41 @@ export async function runSync(options: RunOptions = {}): Promise<RunResult> {
 async function run(mode: 'install' | 'sync', options: RunOptions): Promise<RunResult> {
   const cwd = options.cwd ?? process.cwd()
   const tools = dedup(options.tools)
-  const targets = mode === 'sync' ? resolveSyncToolTargets(cwd) : resolveToolTargets(tools)
+  const canonicalTarget = resolveToolTargetById(CANONICAL_TOOL_ID)
+  const compatibilityTargets =
+    mode === 'sync'
+      ? resolveSyncCompatibilityToolTargets(cwd)
+      : resolveCompatibilityToolTargets(tools)
 
-  // sync：metadata 版本与 CLI 包版本不一致时，对项目中每一处已安装的 ac-workflow 目录做全文替换
-  if (mode === 'sync' && !options.check) {
-    const pkgVersion = readAgentContextPackageVersion()
-    const everyInstalledId = detectConfiguredToolIds(cwd)
-    await Promise.all(
-      everyInstalledId.map(async (id) => {
-        const target = resolveToolTargetById(id)
-        const paths = resolveSkillPaths(target, cwd)
-        if (!existsSync(paths.skillFile)) return
-        const skillMd = await readFile(paths.skillFile, 'utf-8')
-        const embedded = parseSkillMdMetadataVersion(skillMd)
-        if (embedded !== undefined && embedded !== pkgVersion) {
-          await replaceVersionInSkillDirectory(paths.skillDir, embedded, pkgVersion)
-        }
-      })
-    )
-  }
-
-  const mutations: FileMutation[] = targets.flatMap((target) => buildMutations(target, cwd))
+  const mutations = buildMutations(canonicalTarget, cwd)
 
   const check = options.check ?? false
   const base = await applyMutations(mutations, check)
   const removed: string[] = [...base.removed]
   const changed = [...base.changed]
 
-  for (const target of targets) {
-    const paths = resolveSkillPaths(target, cwd)
-    if (!existsSync(paths.skillDir)) continue
-    const allowed = new Set(renderSkillArtifacts(target).files.map((f) => f.relativePath))
-    const pr = await pruneSkillDirectory(paths.skillDir, allowed, check)
+  const canonicalPaths = resolveSkillPaths(canonicalTarget, cwd)
+  if (existsSync(canonicalPaths.skillDir)) {
+    const allowed = new Set(renderSkillArtifacts().files.map((f) => f.relativePath))
+    const pr = await pruneSkillDirectory(canonicalPaths.skillDir, allowed, check)
     removed.push(...pr.removed)
     if (check) {
-      for (const p of pr.checkDirty) {
-        if (!changed.includes(p)) changed.push(p)
-      }
+      pushUnique(changed, pr.checkDirty)
     }
+  }
+
+  const compatibilityResults = await Promise.all(
+    compatibilityTargets.map((target) =>
+      applyCompatibilityEntry(target, cwd, canonicalPaths, check)
+    )
+  )
+
+  for (const result of compatibilityResults) {
+    pushUnique(base.created, result.created)
+    pushUnique(base.updated, result.updated)
+    pushUnique(base.unchanged, result.unchanged)
+    pushUnique(changed, result.changed)
+    pushUnique(removed, result.removed)
   }
 
   return { ...base, changed, removed, mode, check }
@@ -82,13 +77,89 @@ async function run(mode: 'install' | 'sync', options: RunOptions): Promise<RunRe
 // ── Mutation building ───────────────────────────────
 
 function buildMutations(target: ToolTarget, cwd: string): FileMutation[] {
-  const artifacts = renderSkillArtifacts(target)
+  const artifacts = renderSkillArtifacts()
   const paths = resolveSkillPaths(target, cwd)
 
   return artifacts.files.map((file) => ({
     path: resolveArtifactPath(paths, file.relativePath),
     body: file.body
   }))
+}
+
+async function applyCompatibilityEntry(
+  target: ToolTarget,
+  cwd: string,
+  canonicalPaths: SkillPaths,
+  check: boolean
+): Promise<ApplyMutationResult> {
+  const paths = resolveSkillPaths(target, cwd)
+  const existing = await tryLstat(paths.skillDir)
+  const desiredTarget = relative(dirname(paths.skillDir), canonicalPaths.skillDir)
+  const symlinkTarget = desiredTarget.length === 0 ? canonicalPaths.skillDir : desiredTarget
+
+  if (!existing) {
+    if (check) {
+      return singlePathChange(paths.skillDir, 'created')
+    }
+
+    try {
+      await mkdir(dirname(paths.skillDir), { recursive: true })
+      await symlink(
+        symlinkTarget,
+        paths.skillDir,
+        process.platform === 'win32' ? 'junction' : 'dir'
+      )
+      return singlePathChange(paths.skillDir, 'created')
+    } catch {
+      return applyCompatibilityCopy(target, cwd, check)
+    }
+  }
+
+  if (existing.isSymbolicLink()) {
+    const current = await readlink(paths.skillDir)
+    if (resolve(dirname(paths.skillDir), current) === canonicalPaths.skillDir) {
+      const result = emptyMutationResult()
+      result.unchanged.push(paths.skillDir)
+      return result
+    }
+
+    if (check) {
+      return singlePathChange(paths.skillDir, 'updated')
+    }
+
+    await rm(paths.skillDir, { force: true, recursive: true })
+    await mkdir(dirname(paths.skillDir), { recursive: true })
+    await symlink(symlinkTarget, paths.skillDir, process.platform === 'win32' ? 'junction' : 'dir')
+    return singlePathChange(paths.skillDir, 'updated')
+  }
+
+  if (existing.isDirectory()) {
+    return applyCompatibilityCopy(target, cwd, check)
+  }
+
+  throw new Error(`兼容入口路径不是目录或 symlink: ${paths.skillDir}`)
+}
+
+async function applyCompatibilityCopy(
+  target: ToolTarget,
+  cwd: string,
+  check: boolean
+): Promise<ApplyMutationResult> {
+  const paths = resolveSkillPaths(target, cwd)
+  const result = await applyMutations(buildMutations(target, cwd), check)
+
+  if (!existsSync(paths.skillDir)) {
+    return result
+  }
+
+  const allowed = new Set(renderSkillArtifacts().files.map((f) => f.relativePath))
+  const pr = await pruneSkillDirectory(paths.skillDir, allowed, check)
+  result.removed.push(...pr.removed)
+  if (check) {
+    pushUnique(result.changed, pr.checkDirty)
+  }
+
+  return result
 }
 
 function resolveArtifactPath(paths: SkillPaths, relativePath: string): string {
@@ -160,4 +231,32 @@ function normalizeTrailingNewline(content: string): string {
 function dedup(tools?: ToolId[]): ToolId[] | undefined {
   if (!tools || tools.length === 0) return undefined
   return [...new Set(tools)]
+}
+
+async function tryLstat(path: string) {
+  try {
+    return await lstat(path)
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+      return null
+    }
+    throw error
+  }
+}
+
+function emptyMutationResult(): ApplyMutationResult {
+  return { created: [], updated: [], unchanged: [], changed: [], removed: [] }
+}
+
+function singlePathChange(path: string, kind: 'created' | 'updated'): ApplyMutationResult {
+  const result = emptyMutationResult()
+  result[kind].push(path)
+  result.changed.push(path)
+  return result
+}
+
+function pushUnique(target: string[], items: string[]): void {
+  for (const item of items) {
+    if (!target.includes(item)) target.push(item)
+  }
 }

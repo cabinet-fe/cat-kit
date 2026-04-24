@@ -1,11 +1,8 @@
 import { renderSkillArtifacts } from '../src/skill/render'
-import { resolveToolTargetById } from '../src/skill/targets'
 import triggerPrompts from './fixtures/trigger-prompts.json'
 
 function readSkillMd() {
-  const artifact = renderSkillArtifacts(resolveToolTargetById('agents')).files.find(
-    (file) => file.relativePath === 'SKILL.md'
-  )
+  const artifact = renderSkillArtifacts().files.find((file) => file.relativePath === 'SKILL.md')
 
   if (!artifact) {
     throw new Error('SKILL.md artifact not found')
@@ -48,7 +45,23 @@ describe('renderSkillArtifacts', () => {
     const skillMd = readSkillMd()
 
     expect(skillMd).toContain('node <SKILL_DIR>/scripts/get-context-info.js')
+    expect(skillMd).toContain('node <SKILL_DIR>/scripts/validate-context.js')
     expect(skillMd).toContain('<SKILL_DIR>` 是本 `SKILL.md` 所在目录')
+  })
+
+  it('提问工具保持 host capability 抽象', () => {
+    const artifacts = renderSkillArtifacts()
+    const skillMd = readSkillMd()
+    const askReference = artifacts.files.find(
+      (file) => file.relativePath === 'references/ask-user-question.md'
+    )?.body
+
+    expect(skillMd).toContain('交互式提问工具')
+    expect(skillMd).not.toContain('request_user_input')
+    expect(skillMd).not.toContain('AskUserQuestion')
+    expect(askReference).toContain('# 用户提问规范')
+    expect(askReference).toContain('request_user_input')
+    expect(askReference).toContain('question')
   })
 
   it('维护触发回归样例', () => {

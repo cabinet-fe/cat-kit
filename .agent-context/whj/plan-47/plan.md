@@ -17,19 +17,48 @@
 
 ## 影响范围
 
+- `.agents/skills/ac-workflow/SKILL.md`
+- `.agents/skills/ac-workflow/references/ask-user-question.md`
+- `.agents/skills/ac-workflow/references/implement.md`
+- `.agents/skills/ac-workflow/references/init.md`
+- `.agents/skills/ac-workflow/references/patch.md`
+- `.agents/skills/ac-workflow/references/plan.md`
+- `.agents/skills/ac-workflow/references/replan.md`
+- `.agents/skills/ac-workflow/references/review.md`
+- `.agents/skills/ac-workflow/references/rush.md`
+- `.agents/skills/ac-workflow/scripts/validate-context.js`
 - `packages/agent-context/src/skill/render.ts`
+- `packages/agent-context/src/skill/installer.ts`
+- `packages/agent-context/src/skill/targets.ts`
+- `packages/agent-context/src/skill/scripts/validate-context.js`
+- `packages/agent-context/src/skill/protocols/index.ts`
+- `packages/agent-context/src/skill/protocols/init.ts`
+- `packages/agent-context/src/skill/protocols/plan.ts`
+- `packages/agent-context/src/skill/protocols/replan.ts`
+- `packages/agent-context/src/skill/protocols/implement.ts`
+- `packages/agent-context/src/skill/protocols/patch.ts`
+- `packages/agent-context/src/skill/protocols/rush.ts`
+- `packages/agent-context/src/skill/protocols/review.ts`
+- `packages/agent-context/src/commands/install.ts`
+- `packages/agent-context/src/commands/prompt-gen.ts`
+- `packages/agent-context/src/commands/skill-eval.ts`
+- `packages/agent-context/src/cli.ts`
+- `packages/agent-context/src/types.ts`
+- `packages/agent-context/tsdown.config.ts`
 - `packages/agent-context/README.md`
 - `docs/content/packages/agent-context/index.md`
 - `docs/content/packages/agent-context/cli.md`
 - `docs/content/packages/agent-context/protocols.md`
+- `docs/content/packages/agent-context/collaboration.md`
 - `skills/cat-kit-agent-context/SKILL.md`
 - `skills/cat-kit-agent-context/examples.md`
 - `skills/cat-kit-agent-context/references/workspace.md`
 - `.changeset/light-agent-context-skill.md`
-- `packages/agent-context/package.json`
 - `packages/agent-context/test/render-skill.test.ts`
+- `packages/agent-context/test/installer.test.ts`
 - `packages/agent-context/test/fixtures/trigger-prompts.json`
 
 ## 历史补丁
 
 - patch-1: 修复 Skill 触发边界与回归测试
+- patch-2: 抽象提问工具并改为 canonical Skill 安装模型
