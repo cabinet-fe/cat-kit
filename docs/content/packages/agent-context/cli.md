@@ -89,6 +89,15 @@ agent-context install --yes
 
 Codex 会额外在技能目录下生成 `agents/openai.yaml` 元数据文件。
 
+安装产物采用轻量入口 + 按需引用：
+
+- `SKILL.md`：包含触发描述、启动检查、状态路由和硬约束，不内联完整协议正文
+- `references/init.md`、`plan.md`、`replan.md`、`implement.md`、`patch.md`、`rush.md`、`review.md`：协议细节，确定动作后读取对应文件
+- `references/ask-user-question.md`：只有准备调用提问工具时读取
+- `scripts/get-context-info.js`：从项目根目录运行，输出路由所需的结构化上下文
+
+触发边界：`description` 只匹配 `ac-workflow` / `.agent-context` 相关意图；普通代码实现、普通 code review、普通计划讨论或单纯修改 `AGENTS.md` 不应触发该 Skill。
+
 ### `agent-context sync`
 
 同步项目中已安装的 Skill 内容，适合升级包版本后刷新协议文件。

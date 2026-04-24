@@ -13,7 +13,7 @@ plan + implement 的连续快速执行协议，适合范围明确、无需多轮
 
 - 描述为空 → 通过 ${target.askToolName} 向用户获取描述后继续执行。
 - 描述仍存在范围边界、技术路径或验收标准歧义 → 通过 ${target.askToolName} 向用户提供合适的引导，按用户选择执行。
-- \`currentPlanStatus\` 为 \`"已执行"\` → 通过 ${target.askToolName} 询问用户是否执行 \`agent-context done\` 归档后继续 rush。
+- \`currentPlanStatus\` 为 \`"已执行"\` → 通过 ${target.askToolName} 询问用户是否执行 \`agent-context done --yes\` 归档后继续 rush。
 - \`currentPlanStatus\` 为 \`"未执行"\` → 通过 ${target.askToolName} 询问用户是否直接执行当前计划。
 
 ## 执行步骤

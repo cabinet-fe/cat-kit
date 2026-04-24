@@ -70,6 +70,8 @@ agent-context install --tools claude,codex,cursor
 - Agent Skills（开放标准，如 Gemini CLI 等工具的 `.agents` 别名）: `.agents/skills/ac-workflow/`
 - Gemini CLI: `.gemini/skills/ac-workflow/`
 
+生成的 `SKILL.md` 是轻量导航入口：frontmatter `description` 负责触发，正文只做上下文脚本、`agent-context validate` 和协议路由。完整规则保存在 `references/*.md`，确定 `init / plan / replan / implement / patch / rush / review` 后再按需读取对应文件。
+
 ## 快速开始
 
 最常见的用法只有三步：
@@ -348,15 +350,15 @@ agent-context index
 
 ## 支持的工具
 
-| 工具           | Skill 目录                     |
-| -------------- | ------------------------------ |
-| Claude         | `.claude/skills/ac-workflow/`  |
-| Codex          | `.codex/skills/ac-workflow/`   |
-| Cursor         | `.cursor/skills/ac-workflow/`  |
-| Antigravity    | `.agent/skills/ac-workflow/`   |
+| 工具                     | Skill 目录                    |
+| ------------------------ | ----------------------------- |
+| Claude                   | `.claude/skills/ac-workflow/` |
+| Codex                    | `.codex/skills/ac-workflow/`  |
+| Cursor                   | `.cursor/skills/ac-workflow/` |
+| Antigravity              | `.agent/skills/ac-workflow/`  |
 | Agent Skills（开放标准） | `.agents/skills/ac-workflow/` |
-| Gemini CLI     | `.gemini/skills/ac-workflow/`  |
-| GitHub Copilot | `.github/skills/ac-workflow/`  |
+| Gemini CLI               | `.gemini/skills/ac-workflow/` |
+| GitHub Copilot           | `.github/skills/ac-workflow/` |
 
 其中 Codex 会额外生成 `agents/openai.yaml` 元数据文件，其余工具只生成 Skill 内容本身。
 

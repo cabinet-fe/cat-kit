@@ -25,7 +25,7 @@ export function renderPlan(target: ToolTarget): string {
 ## 前置检查
 
 - 描述为空 → 向用户获取描述后继续执行。
-- \`currentPlanStatus\` 为 \`"已执行"\` → 通过 ${target.askToolName} 提供选项：1) 运行 \`agent-context done\` 归档后继续创建计划（推荐） 2) 终止操作，按用户选择执行。
+- \`currentPlanStatus\` 为 \`"已执行"\` → 通过 ${target.askToolName} 提供选项：1) 运行 \`agent-context done --yes\` 归档后继续创建计划（推荐） 2) 终止操作，按用户选择执行。
 - \`currentPlanStatus\` 为 \`"未执行"\` → 通过 ${target.askToolName} 提供选项：1) 通过 replan 调整现有计划（推荐，若新需求与现有计划相关） 2) 归档现有计划后创建新计划 3) 终止操作，按用户选择执行。
 
 ## 执行步骤

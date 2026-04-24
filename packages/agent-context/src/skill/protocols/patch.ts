@@ -17,7 +17,7 @@ export function renderPatch(target: ToolTarget): string {
 - \`currentPlanStatus\` 为 \`null\` → 通过 ${target.askToolName} 提供选项：1) 创建新计划（推荐） 2) 终止操作，按用户选择执行。
 - \`currentPlanStatus\` 为 \`"未执行"\` → 通过 ${target.askToolName} 提供选项：1) 先执行 implement 再创建补丁（推荐） 2) 终止操作，按用户选择执行。
 - 补丁需求与当前计划的关联性不确定 → 通过 ${target.askToolName} 提供选项：1) 与当前计划相关，继续创建补丁（推荐） 2) 与当前计划无关，需先归档，按用户选择执行。
-- 补丁需求与当前计划完全无关 → 通过 ${target.askToolName} 提供选项：1) 运行 \`agent-context done\` 归档后继续新建计划（推荐） 2) 终止操作，按用户选择执行。
+- 补丁需求与当前计划完全无关 → 通过 ${target.askToolName} 提供选项：1) 运行 \`agent-context done --yes\` 归档后继续新建计划（推荐） 2) 终止操作，按用户选择执行。
 - 补丁不改变计划状态，完成后保持 \`已执行\`。
 
 ## 执行步骤

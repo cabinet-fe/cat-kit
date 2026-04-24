@@ -11,7 +11,7 @@ outline: deep
 它由两部分组成：
 
 - **CLI**：安装 Skill、同步协议、校验目录结构、管理计划生命周期（归档、索引）、升级自身
-- **Skill**：在对话中识别 `init、plan、replan、implement、patch、rush、review、done` 协议意图（与 `renderSkillArtifacts` 生成的 `SKILL.md` 一致），按协议推进任务
+- **Skill**：用 frontmatter `description` 触发 `init、plan、replan、implement、patch、rush、review、done` 协议意图；`SKILL.md` 只保留启动检查与路由，完整协议按需读取 `references/*.md`
 
 目录结构：
 
@@ -29,6 +29,15 @@ outline: deep
     └── done/          # 已归档计划
         └── plan-{N}-{YYYYMMDD}/
 ```
+
+### Skill 渐进式披露
+
+安装后的 `ac-workflow` 对齐 Agent Skills 的渐进式披露模型：
+
+- `SKILL.md`：短导航入口，负责运行上下文脚本、执行 `agent-context validate`、根据 `currentPlanStatus` 选择协议
+- `references/*.md`：完整协议正文，只有确定动作后才读取对应文件；`rush` 这类组合协议会在需要时再读取被引用协议
+- `scripts/get-context-info.js`：输出 `scope`、当前计划、下一个计划编号和下一个补丁编号，Skill 不应自行扫描目录推断这些值
+- `description`：只面向 `ac-workflow` / `.agent-context` 意图触发；普通 coding、code review、planning、`AGENTS.md` 文档修改不应触发
 
 ### 动作依赖图（主路径与 review）
 
@@ -81,7 +90,7 @@ flowchart LR
     S_C -->|"agent-context done"| S_A
 ```
 
-各状态下 Skill 路由（与安装后的 `SKILL.md` 相同）：
+各状态下 Skill 路由（安装后的 `SKILL.md` 只保留这类紧凑导航，协议细节在 `references/` 中）：
 
 | 状态 | 可选动作                                                      |
 | ---- | ------------------------------------------------------------- |

@@ -1,0 +1,14 @@
+{
+  "shouldTrigger": [
+    "Use ac-workflow to plan this .agent-context task",
+    "根据当前 .agent-context 计划执行 patch",
+    "agent-context 当前计划已经完成，归档它",
+    "sync installed ac-workflow skills after upgrading @cat-kit/agent-context"
+  ],
+  "shouldNotTrigger": [
+    "implement the login form",
+    "review this TypeScript function",
+    "更新 AGENTS.md 里的代码风格说明",
+    "给新功能做一个普通开发计划"
+  ]
+}

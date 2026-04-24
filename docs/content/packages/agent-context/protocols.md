@@ -10,6 +10,8 @@ outline: deep
 
 `ac-workflow` 的 protocol 不是 CLI 子命令，而是安装 Skill 后你在对话里对 AI 触发的动作协议。AI 会根据当前 `.agent-context/` 的状态决定该创建计划、执行计划还是做增量修补。
 
+安装后的 `SKILL.md` 只承担触发、上下文检查和路由职责；每个 protocol 的完整规则保存在 `references/<protocol>.md`，确定动作后再按需读取。
+
 核心规则：
 
 - 任意时刻每个 SCOPE 最多一个当前计划
@@ -92,7 +94,7 @@ review
 - 创建 `plan.md`，包含目标、内容、影响范围和历史补丁四个部分（模板见同步的 `protocols/plan.md`）
 - 复杂任务可拆成「一个当前计划 + 多个 `preparing/` 计划」；多计划时最小编号为当前计划，其余入队
 - 自检通过前须消除 `## 内容` 中的模糊指令；完成后可按协议询问用户是否对新建计划执行 `review`
-- 计划编号在当前 SCOPE 内扫描全部 `plan-N` 目录取 `max(N)+1`
+- 计划编号使用启动脚本返回的 `nextPlanNumber`，不要让 AI 自行扫描目录推断
 
 ### `replan`
 

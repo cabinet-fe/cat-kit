@@ -13,9 +13,9 @@ import type { SkillArtifacts, ToolTarget } from '../types'
 import { PROTOCOL_NAMES, PROTOCOL_RENDERERS } from './protocols/index'
 import { readAgentContextPackageVersion } from './version'
 
-/** 供 frontmatter / 工具匹配的短描述：品牌名 + 核心能力与关键词 */
+/** 供 frontmatter / 工具匹配的短描述：用用户意图触发，而不是解释内部实现 */
 const SKILL_DESCRIPTION =
-  '基于协议的、简洁高效的代理上下文工作流。当提及初始化、计划、重构、重新计划、上下文工作流、规划、实现、优化、补丁、快速实现时使用。'
+  'Use this skill when the user explicitly wants the ac-workflow or .agent-context protocol: initialize agent context, create or revise a plan file, execute/patch/review/archive the current .agent-context plan, run rush, sync installed ac-workflow skills, or inspect .agent-context state. Do not use for general coding, implementation, code review, planning, AGENTS.md edits, or docs work unless an ac-workflow/.agent-context plan or protocol is involved.'
 
 export function renderSkillArtifacts(target: ToolTarget): SkillArtifacts {
   const files: SkillArtifacts['files'] = [
@@ -44,115 +44,51 @@ function renderNavigator(target: ToolTarget): string {
   const protocolFile = `${PROTOCOL_DIR}/<protocol>.md`
   const scriptPath = `${SCRIPTS_DIR}/${CONTEXT_SCRIPT_NAME}`
   return `${renderFrontmatter(target)}
-# 代理上下文工作流（ac-workflow）
+# ac-workflow
 
-严格基于\`${PROTOCOL_DIR}\`中的文件作为开发工作流协议：
+这是协议路由入口。不要预先读取所有协议文件；只在确定动作后读取需要的 \`${PROTOCOL_DIR}/*.md\`。
 
-- **init**: 初始化项目上下文，根据新项目或旧项目有不同的处理流程。
-- **plan**：给需求出计划、拆分任务。
-- **replan**：重做计划、调整方案。
-- **implement**：按计划开始做、实现当前计划。
-- **rush**：快速出计划并实施， 等于 \`plan\` + \`implement\` 的连续执行。
-- **patch**：实施后不满意、追加需求、修补问题。
-- **review**：审查实施结果。
-- **done**：任务彻底完成、归档当前计划。
+## 启动步骤
 
-## 最高守则
-
-### 第一步：获取上下文（强制，不可跳过）
-
-**在执行任何协议或决策之前**，必须先在 shell 中运行以下脚本获取上下文快照：
+在执行任何协议或决策前，先从项目根目录运行：
 
 \`\`\`sh
 node <SKILL_DIR>/${scriptPath}
+agent-context validate
 \`\`\`
 
-其中 \`<SKILL_DIR>\` 是本 SKILL.md 文件所在的目录路径。
+其中 \`<SKILL_DIR>\` 是本 \`SKILL.md\` 所在目录；若运行时提供技能目录变量，先替换为实际路径。
 
-脚本输出 JSON，包含以下关键字段（后续协议步骤直接引用这些值，禁止自行探索文件系统来获取）：
+若不在项目根目录，脚本追加 \`--cwd <project-root>\`。脚本失败或 \`validate\` 不通过时，先按错误修正，再重跑到通过。
 
-| 字段 | 含义 |
-|------|------|
-| \`scope\` | 当前作用域名称 |
-| \`currentPlanStatus\` | 当前计划状态：\`"未执行"\` / \`"已执行"\` / \`null\`（无计划） |
-| \`currentPlanNumber\` | 当前计划编号（无计划时为 \`null\`） |
-| \`currentPlanDir\` | 当前计划目录路径（无计划时为 \`null\`） |
-| \`currentPlanFile\` | 当前计划文件路径（无计划时为 \`null\`） |
-| \`nextPlanNumber\` | 下一个可用的计划编号 |
-| \`nextPatchNumber\` | 下一个可用的补丁编号（无计划时为 \`null\`） |
+只使用脚本返回的 \`scope\`、\`currentPlanStatus\`、\`currentPlanNumber\`、\`currentPlanDir\`、\`currentPlanFile\`、\`nextPlanNumber\`、\`nextPatchNumber\`；不要自行扫描目录推断状态或编号。
 
-> **此步骤是一切操作的前提。** 不执行脚本 → 不进入任何协议。脚本报错 → 根据错误信息修正后重新执行，直到成功。
+## 路由
 
-### 第二步：全局校验
+确定一个动作后，完整读取对应协议文件并按顺序执行。若协议引用其他协议，再读取被引用文件；不要凭记忆执行。
 
-在 shell 中运行 \`agent-context validate\`，若不通过则根据错误信息修正对应内容（如修复状态行格式、补全缺失文件等），修正后重新运行验证，重复直至通过。
+| 状态 | 用户意图 | 动作 |
+| --- | --- | --- |
+| \`null\` | 初始化上下文、补全 ${target.guideFileName} | 读 \`${PROTOCOL_DIR}/init.md\` |
+| \`null\` | 创建计划、拆分需求 | 读 \`${PROTOCOL_DIR}/plan.md\` |
+| \`null\` | 明确任务直接计划并实施 | 读 \`${PROTOCOL_DIR}/rush.md\` |
+| \`"未执行"\` | 开始执行当前计划 | 读 \`${PROTOCOL_DIR}/implement.md\` |
+| \`"未执行"\` | 调整、重做、替换当前计划 | 读 \`${PROTOCOL_DIR}/replan.md\` |
+| \`"未执行"\` | 审查计划 | 读 \`${PROTOCOL_DIR}/review.md\` |
+| \`"已执行"\` | 修补、补遗漏、追加相关增量 | 读 \`${PROTOCOL_DIR}/patch.md\` |
+| \`"已执行"\` | 审查实现 | 读 \`${PROTOCOL_DIR}/review.md\` |
+| \`"已执行"\` | 完成并归档 | 运行 \`agent-context done --yes\` |
 
-### 强制规则
+用户明确点名 \`init\`、\`plan\`、\`replan\`、\`implement\`、\`patch\`、\`rush\`、\`review\` 时，仍必须先完成启动步骤，再读取 \`${protocolFile}\`。无关新需求与当前计划冲突时，先用 ${target.askToolName} 让用户选择处理当前计划还是终止；使用提问工具前先读 \`${PROTOCOL_DIR}/ask-user-question.md\`。
 
-- **协议先行**：选定协议后，**完整**读取 \`${protocolFile}\` 再逐步执行；禁止凭记忆、摘要或猜测跳过协议步骤
-- **禁止直接改动**：在 **plan** / **rush** 创建计划之前，不得修改业务代码；代码变更仅在 **implement** 或 **patch** 协议中进行
-- **顺序执行**：协议内步骤按编号顺序执行，不跳步、不合并、不并行
-- **提问引导规范**：使用 ${target.askToolName} 时须遵守 \`${PROTOCOL_DIR}/ask-user-question.md\`
+## 硬约束
 
-## 协议选择决策
-
-如果用户明确指定要执行某个协议，退出协议选择决策，直接执行该协议。
-
-> **必须基于脚本输出的 \`currentPlanStatus\` 确定当前状态，再按下表选择协议。禁止跳过状态判断直接匹配动作。**
-
-### 状态 A：\`currentPlanStatus\` 为 \`null\`（无当前计划）
-
-| 用户意图 | 动作 | 协议文件 |
-|----------|------|----------|
-| 初始化项目上下文、补全 ${target.guideFileName} | init | \`${PROTOCOL_DIR}/init.md\` |
-| 给需求出计划、拆分任务 | plan | \`${PROTOCOL_DIR}/plan.md\` |
-| 快速出计划并实施 | rush | \`${PROTOCOL_DIR}/rush.md\` |
-
-### 状态 B：\`currentPlanStatus\` 为 \`"未执行"\`
-
-| 用户意图 | 动作 | 协议文件 |
-|----------|------|----------|
-| 按计划开始做、实现当前计划 | implement | \`${PROTOCOL_DIR}/implement.md\` |
-| 重做计划、调整方案 | replan | \`${PROTOCOL_DIR}/replan.md\` |
-| 审查当前计划 | review | \`${PROTOCOL_DIR}/review.md\` |
-| 用户提出新需求且与当前计划**相关** | replan | \`${PROTOCOL_DIR}/replan.md\` |
-| 用户提出新需求且与当前计划**无关** | → ${target.askToolName} | 选项：1) 归档当前计划后创建新计划（推荐） 2) 终止操作 |
-
-### 状态 C：\`currentPlanStatus\` 为 \`"已执行"\`
-
-| 用户意图 | 动作 | 协议文件 |
-|----------|------|----------|
-| 实施后不满意、追加需求、修补问题 | patch | \`${PROTOCOL_DIR}/patch.md\` |
-| 审查实施结果 | review | \`${PROTOCOL_DIR}/review.md\` |
-| 任务彻底完成、归档当前计划 | done | 运行 \`agent-context done\` |
-| 用户提出新需求且与当前计划**相关** | patch | \`${PROTOCOL_DIR}/patch.md\` |
-| 用户提出新需求且与当前计划**无关** | → ${target.askToolName} | 选项：1) 归档后创建新计划（推荐） 2) 终止操作 |
-
-> **关联性判断**：当用户提出变更需求时，对照当前 \`plan.md\` 的 \`## 目标\` 判断关联性。若无法确定 → 通过 ${target.askToolName} 让用户确认。
-
-## 全局约束
-
-- 计划状态两态：\`未执行\`、\`已执行\`。
+- 计划状态只允许 \`未执行\` 或 \`已执行\`。
 - 任意时刻最多一个当前计划：\`${AC_ROOT_DIR}/{scope}/plan-{number}\`。
-- 计划编号从 1 开始全局递增，不复用。补丁编号在单计划目录内从 1 开始递增，不复用。
-- 影响范围（\`## 影响范围\`）不得包含 \`${AC_ROOT_DIR}/\` 目录下的文件。
-- 脚本输出中的 \`nextPlanNumber\` 和 \`nextPatchNumber\` 是已预计算的值，协议中需要编号时**直接使用**，不得自行扫描目录计算。
-
-## 上下文目录结构
-
-\`\`\`text
-${AC_ROOT_DIR}/
-├── .env               # SCOPE 配置（SCOPE=<name>）
-├── .gitignore
-└── {scope}/           # 作用域目录（按协作者隔离）
-    ├── plan-{N}/      # 当前计划（最多一个）
-    │   ├── plan.md
-    │   └── patch-{N}.md
-    ├── preparing/     # 待执行计划队列
-    │   └── plan-{N}/
-    └── done/          # 已归档计划
-        └── plan-{N}-{YYYYMMDD}/
-\`\`\`
+- 创建计划使用 \`nextPlanNumber\`；创建补丁使用 \`nextPatchNumber\`。
+- 在 \`plan\` 或 \`rush\` 创建计划前，不改业务代码。
+- 代码变更只发生在 \`implement\` 或 \`patch\` 协议中。
+- \`## 影响范围\` 不记录 \`${AC_ROOT_DIR}/\` 内文件。
 `
 }
 
@@ -180,7 +116,7 @@ function renderOpenAIMetadata(): string {
   return `interface:
   display_name: "代理上下文工作流"
   short_description: "${SKILL_DESCRIPTION}"
-  default_prompt: "Use ac-workflow: check .agent-context state, then read the matching file under references/ (init, plan, replan, implement, patch, rush, review) or run agent-context done."
+  default_prompt: "Use ac-workflow for .agent-context stateful work: run scripts/get-context-info.js and agent-context validate, choose one action from currentPlanStatus, then read only the matching references/*.md before executing."
 
 policy:
   allow_implicit_invocation: true
