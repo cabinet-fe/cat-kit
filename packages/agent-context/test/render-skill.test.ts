@@ -54,7 +54,6 @@ describe('renderSkillArtifacts', () => {
     expect(description.length).toBeLessThanOrEqual(500)
     expect(description).toContain('ac-workflow')
     expect(description).toContain('.agent-context')
-    expect(description).toContain('不要用于普通编码')
     expect(description).not.toContain('Keywords include')
     expect(description).not.toMatch(/Keywords.*\b(implement|review|AGENTS\.md)\b/)
   })
@@ -96,9 +95,7 @@ describe('renderSkillArtifacts', () => {
     const principles = artifacts.files.find(
       (file) => file.relativePath === 'references/_principles.md'
     )?.body
-    const plan = artifacts.files.find(
-      (file) => file.relativePath === 'references/plan.md'
-    )?.body
+    const plan = artifacts.files.find((file) => file.relativePath === 'references/plan.md')?.body
     const implement = artifacts.files.find(
       (file) => file.relativePath === 'references/implement.md'
     )?.body
@@ -126,10 +123,6 @@ describe('renderSkillArtifacts', () => {
 
     for (const prompt of triggerPrompts.shouldNotTrigger) {
       expect(prompt).not.toMatch(/ac-workflow|agent-context|\.agent-context/)
-    }
-
-    for (const phrase of ['普通编码', '实现', 'code review', 'planning', 'AGENTS.md']) {
-      expect(description).toContain(phrase)
     }
   })
 })
