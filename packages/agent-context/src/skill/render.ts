@@ -14,7 +14,7 @@ import { PROTOCOL_NAMES, PROTOCOL_RENDERERS } from './protocols/index'
 import { readAgentContextPackageVersion } from './version'
 
 /** 供 frontmatter / 工具匹配的短描述：用用户意图触发，而不是解释内部实现 */
-const SKILL_DESCRIPTION = '代理上下文工作流。用于管理 .agent-context 计划与协作流程。'
+const SKILL_DESCRIPTION = '代理上下文工作流。在 `.agent-context` 目录下管理计划与协作流程。'
 
 export function renderSkillArtifacts(): SkillArtifacts {
   const files: SkillArtifacts['files'] = [
