@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 
 import { Command } from 'commander'
 
+import { contextCommand } from './commands/context'
 import { doneCommand } from './commands/done'
 import { indexCommand } from './commands/index'
 import { initCommand } from './commands/init'
@@ -49,6 +50,11 @@ program
   .action(initCommand)
 
 program.command('validate').description('校验 .agent-context 目录结构').action(validateCommand)
+
+program
+  .command('context')
+  .description('输出当前 agent-context 状态快照 JSON（含校验；校验不通过时以非 0 退出）')
+  .action(contextCommand)
 
 program.command('status').description('查看当前 agent-context 状态').action(statusCommand)
 

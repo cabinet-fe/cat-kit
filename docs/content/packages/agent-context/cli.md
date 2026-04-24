@@ -1,6 +1,6 @@
 ---
 title: CLI 命令
-description: 'agent-context CLI 的初始化、安装、同步、校验、状态、归档、索引、skill-eval、prompt-gen 与 upgrade'
+description: 'agent-context CLI 的初始化、安装、同步、校验、状态、context、归档、索引、skill-eval、prompt-gen 与 upgrade'
 outline: deep
 ---
 
@@ -12,6 +12,7 @@ outline: deep
 
 - 初始化 SCOPE 与安装/同步 Skill 文件
 - 校验 `.agent-context/` 结构
+- 一次输出状态快照 + 校验结果（`context`，Skill 启动步骤使用的结构化接口）
 - 查看状态与归档当前计划
 - 生成或更新计划索引
 - 评估 Skill description 触发样例覆盖（`skill-eval`）
@@ -30,6 +31,7 @@ outline: deep
 agent-context init          # 首次使用，初始化 SCOPE
 agent-context install       # 安装 canonical Skill 到 .agents
 agent-context validate      # 校验目录结构
+agent-context context       # 输出状态快照 JSON（含校验；Skill 启动步骤等价物）
 agent-context status        # 查看当前状态
 agent-context sync          # 同步 canonical Skill 并刷新兼容入口
 agent-context done          # 归档已执行计划
@@ -91,11 +93,12 @@ agent-context install --yes
 
 安装产物采用轻量入口 + 按需引用：
 
-- `SKILL.md`：包含触发描述、启动检查、状态路由和硬约束，不内联完整协议正文
+- `SKILL.md`：包含触发描述、单条启动命令、状态路由和硬约束，不内联完整协议正文
 - `references/init.md`、`plan.md`、`replan.md`、`implement.md`、`patch.md`、`rush.md`、`review.md`：协议细节，确定动作后读取对应文件
-- `references/ask-user-question.md`：只有准备调用交互式提问工具时读取；工具名由 host/runtime 提供
-- `scripts/get-context-info.js`：从项目根目录运行，输出路由所需的结构化上下文
-- `scripts/validate-context.js`：当全局 `agent-context validate` 与 `npx @cat-kit/agent-context validate` 都不可用时，作为 bundled validate fallback
+- `references/ask-user-question.md`：只有准备调用交互式提问工具时读取；工具名由 host/runtime 提供；**含"何时禁止提问"红线**，避免代理为走流程而反复确认
+- `references/_principles.md`：规划、实施、审查三类角色的共享专业素养；协议内不再重复，仅在文件开头引用这份基线
+- `scripts/get-context-info.js`：从项目根目录运行，**同时输出路由所需的结构化上下文 JSON 与内置格式校验**；发现问题时以非 0 退出码打印错误，修复后重跑
+- `scripts/validate-context.js`：仅在上面的主脚本无法启动时（例如 Node 权限问题）作为独立校验 fallback
 
 触发边界：`description` 只匹配 `ac-workflow` / `.agent-context` 相关意图；普通代码实现、普通 code review、普通计划讨论或单纯修改 `AGENTS.md` 不应触发该 Skill。
 
@@ -133,6 +136,25 @@ agent-context validate
 - `plan.md` 是否存在
 - 计划状态是否有效（`未执行` 或 `已执行`）
 - 目录结构是否符合协议
+
+### `agent-context context`
+
+一次输出当前 `.agent-context` 状态快照 JSON，**并内置目录结构校验**；校验不通过时把错误列表打到 stderr 并以非 0 退出码返回，供代理直接判断"是否要先修复再继续"。
+
+```bash
+agent-context context
+```
+
+输出字段（校验通过时）：
+
+- `cwd`、`acRoot`、`scope`、`scopeDir`、`preparingDir`、`doneDir`
+- `currentPlan`、`currentPlanStatus`、`currentPlanNumber`、`currentPlanDir`、`currentPlanFile`
+- `nextPlanNumber`、`nextPatchNumber`
+
+与 bundled `scripts/get-context-info.js` 的字段含义一致——后者是 Skill 在**没有全局 CLI 或 `npx` 不可用**时的降级入口，二者都可作为 `SKILL.md` "启动步骤"的数据来源。两者在边界行为上有两点差异：
+
+- **项目未初始化（`.agent-context` 目录不存在）**：CLI 命令输出 `{ cwd, acRoot, initialized: false }` 并以退出码 0 返回，用于上层编排可判断；bundled 脚本则以非 0 退出并打印 `未找到 .agent-context 目录` 错误，Skill 接此错误时按 `SKILL.md` 的"特例"规则直接进入 `references/init.md`。
+- **额外字段**：bundled 脚本会额外输出 `runner`（来自 `.agent-context/.env`），CLI 命令不输出——Skill 内部脚本需要它来决定子命令使用 `node` 还是 `bun`；CLI 使用方若依赖运行时偏好，应直接读取 `.agent-context/.env`。
 
 ### `agent-context status`
 

@@ -18,6 +18,7 @@
 ## 影响范围
 
 - `.agents/skills/ac-workflow/SKILL.md`
+- `.agents/skills/ac-workflow/references/_principles.md`
 - `.agents/skills/ac-workflow/references/ask-user-question.md`
 - `.agents/skills/ac-workflow/references/implement.md`
 - `.agents/skills/ac-workflow/references/init.md`
@@ -26,7 +27,11 @@
 - `.agents/skills/ac-workflow/references/replan.md`
 - `.agents/skills/ac-workflow/references/review.md`
 - `.agents/skills/ac-workflow/references/rush.md`
+- `.agents/skills/ac-workflow/scripts/get-context-info.js`
 - `.agents/skills/ac-workflow/scripts/validate-context.js`
+- `packages/agent-context/src/commands/context.ts`
+- `packages/agent-context/src/skill/references/_principles.md`
+- `packages/agent-context/src/skill/references/ask-user-question.md`
 - `packages/agent-context/src/skill/render.ts`
 - `packages/agent-context/src/skill/installer.ts`
 - `packages/agent-context/src/skill/targets.ts`
@@ -42,6 +47,7 @@
 - `packages/agent-context/src/commands/install.ts`
 - `packages/agent-context/src/commands/prompt-gen.ts`
 - `packages/agent-context/src/commands/skill-eval.ts`
+- `packages/agent-context/AGENTS.md`
 - `packages/agent-context/src/cli.ts`
 - `packages/agent-context/src/types.ts`
 - `packages/agent-context/tsdown.config.ts`
@@ -62,3 +68,5 @@
 
 - patch-1: 修复 Skill 触发边界与回归测试
 - patch-2: 抽象提问工具并改为 canonical Skill 安装模型
+- patch-3: 精简 Skill 上下文并收紧提问/路由
+- patch-4: 同步 canonical skill、补齐导航与 AGENTS.md

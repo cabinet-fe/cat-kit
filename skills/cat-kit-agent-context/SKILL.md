@@ -24,14 +24,16 @@ npm add @cat-kit/agent-context
 
 - 默认只渲染 `.agents/skills/ac-workflow/` 作为 canonical source；`--tools` 只创建可选兼容入口
 - 兼容入口优先 symlink / junction 到 canonical source，不支持 symlink 或已有普通目录时按 copy fallback 同步
-- `SKILL.md` 是短导航入口，负责触发、上下文脚本、`agent-context validate` 和状态路由
+- `SKILL.md` 是短导航入口：**一条**启动命令（`node <SKILL_DIR>/scripts/get-context-info.js`，同时完成格式校验）、按状态 + 用户意图查路由表、再读取协议
 - 完整协议正文位于 `references/*.md`，确定动作后只读取对应文件
-- 准备调用交互式提问工具时再读取 `references/ask-user-question.md`，协议不写死 host 工具名
-- 上下文状态与编号来自 `scripts/get-context-info.js` 输出，不让代理自行扫描目录推断
-- `scripts/validate-context.js` 是全局 CLI / `npx` 都不可用时的 bundled validate fallback
+- `references/ask-user-question.md` 含"何时禁止提问"红线与反向追问方法，协议不写死 host 工具名
+- `references/_principles.md` 是规划 / 实施 / 审查角色的共享专业素养基线，协议内只引用不重复
+- 上下文状态与编号来自 `scripts/get-context-info.js` 输出（JSON + 退出码），代理**禁止自行扫描目录推断**
+- `scripts/validate-context.js` 仅在主脚本启动失败时作为独立校验 fallback
 - `description` 需要避免普通 coding、code review、planning 或单纯 `AGENTS.md` 修改误触发
-- `agent-context skill-eval` 会读取触发 fixture 并输出 description 长度与 should-trigger / should-not-trigger 覆盖
-- `prompt-gen` 默认生成通用模板；个人偏好走 `--profile whj`
+- 协议末尾的 `review` 追问使用复杂度阈值触发（影响范围、对外 API、数据库、安全敏感等），不再每次询问
+- `rush` 场景下禁止触发强制反向追问；任务若需要反向追问，转走 `plan`
+- `agent-context context` / `skill-eval` 提供 CLI 等价接入点；`prompt-gen` 默认生成通用模板，个人偏好走 `--profile whj`
 
 ## 更多
 

@@ -36,11 +36,12 @@ outline: deep
 
 安装后的 `ac-workflow` 对齐 Agent Skills 的渐进式披露模型：
 
-- `SKILL.md`：短导航入口，负责运行上下文脚本、执行 `agent-context validate`、根据 `currentPlanStatus` 选择协议
+- `SKILL.md`：短导航入口，执行**一条**命令拿状态快照（同时完成格式校验）、按 `currentPlanStatus` + 用户意图查路由表、再读取对应协议
 - `references/*.md`：完整协议正文，只有确定动作后才读取对应文件；`rush` 这类组合协议会在需要时再读取被引用协议
-- `references/ask-user-question.md`：交互式提问规范，不写死具体工具名；host/runtime 可提供 `AskUserQuestion`、`request_user_input`、`question` 等不同名称
-- `scripts/get-context-info.js`：输出 `scope`、当前计划、下一个计划编号和下一个补丁编号，Skill 不应自行扫描目录推断这些值
-- `scripts/validate-context.js`：当全局 CLI 与 `npx @cat-kit/agent-context validate` 都不可用时，提供 bundled validate fallback
+- `references/ask-user-question.md`：交互式提问规范，不写死具体工具名；host/runtime 可提供 `AskUserQuestion`、`request_user_input`、`question` 等不同名称；含"何时禁止提问"红线
+- `references/_principles.md`：规划 / 实施 / 审查角色的共享专业素养，协议文件内不再重复
+- `scripts/get-context-info.js`：输出 `scope`、当前计划、下一个计划编号和下一个补丁编号的 JSON，**同时内置目录结构校验**；发现问题时以非 0 退出码打印错误，Skill 不应自行扫描目录推断这些值
+- `scripts/validate-context.js`：仅在主脚本无法启动时作为独立校验 fallback
 - `description`：只面向 `ac-workflow` / `.agent-context` 意图触发；普通 coding、code review、planning、`AGENTS.md` 文档修改不应触发
 
 ### 动作依赖图（主路径与 review）
@@ -75,7 +76,7 @@ flowchart TD
     patch --> done
 ```
 
-说明：`plan` / `implement` / `rush` 在协议末尾均可按 Skill 约定询问用户是否立刻 `review`。`review` 不接受额外描述；审查后常见后续为 `replan`（仍 `未执行`）或 `patch`（已 `已执行`）。
+说明：`plan` / `implement` / `patch` / `rush` 在协议末尾**仅当命中复杂度阈值**时才通过交互式提问工具询问用户是否立刻 `review`（例如计划步骤多、跨多个 package、涉及对外 API / 数据库 / 安全敏感逻辑）。小改动不会弹确认。`review` 不接受额外描述；审查后常见后续为 `replan`（仍 `未执行`）或 `patch`（已 `已执行`）。
 
 ### 状态机与路由
 

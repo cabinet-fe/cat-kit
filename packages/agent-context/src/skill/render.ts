@@ -13,8 +13,13 @@ import type { SkillArtifacts } from '../types'
 import { PROTOCOL_NAMES, PROTOCOL_RENDERERS } from './protocols/index'
 import { readAgentContextPackageVersion } from './version'
 
-/** 供 frontmatter / 工具匹配的短描述：用用户意图触发，而不是解释内部实现 */
-const SKILL_DESCRIPTION = '代理上下文工作流。在 `.agent-context` 目录下管理计划与协作流程。'
+/**
+ * 供 frontmatter / 工具匹配的 description：
+ * - 以"在 .agent-context 管理任务计划"为用户意图主线
+ * - 列出协议名作为意图关键词（init/plan/rush/implement/patch/replan/review/done）
+ */
+const SKILL_DESCRIPTION =
+  '在 `.agent-context` 目录管理任务计划的 ac-workflow 协议：规划(plan/rush)、实施(implement)、修补(patch)、重规划(replan)、审查(review)、归档(done)、初始化(init)。当你需要创建/实施/修补/审查/归档一个 agent-context 计划时使用。'
 
 export function renderSkillArtifacts(): SkillArtifacts {
   const files: SkillArtifacts['files'] = [
@@ -25,8 +30,9 @@ export function renderSkillArtifacts(): SkillArtifacts {
     })),
     {
       relativePath: `${PROTOCOL_DIR}/ask-user-question.md`,
-      body: renderAskUserQuestionReference()
+      body: readReference('ask-user-question.md')
     },
+    { relativePath: `${PROTOCOL_DIR}/_principles.md`, body: readReference('_principles.md') },
     {
       relativePath: `${SCRIPTS_DIR}/${CONTEXT_SCRIPT_NAME}`,
       body: readScript(CONTEXT_SCRIPT_NAME)
@@ -40,52 +46,49 @@ export function renderSkillArtifacts(): SkillArtifacts {
 // ── Navigator ────────────────────────────────────────
 
 function renderNavigator(): string {
-  const protocolFile = `${PROTOCOL_DIR}/<protocol>.md`
   const scriptPath = `${SCRIPTS_DIR}/${CONTEXT_SCRIPT_NAME}`
+  const fallbackScript = `${SCRIPTS_DIR}/validate-context.js`
+
   return `${renderFrontmatter()}# ac-workflow
 
-这是协议路由入口。不要预先读取所有协议文件；只在确定动作后读取需要的 \`${PROTOCOL_DIR}/*.md\`。
+不要预先读取所有协议文件；只在确定动作后读取 \`${PROTOCOL_DIR}/<protocol>.md\`。
 
 ## 启动步骤
 
-在执行任何协议或决策前，先从项目根目录运行：
+执行任何协议前，从项目根目录运行**一条**命令：
 
 \`\`\`sh
 node <SKILL_DIR>/${scriptPath}
-agent-context validate
 \`\`\`
 
-其中 \`<SKILL_DIR>\` 是本 \`SKILL.md\` 所在目录；若运行时提供技能目录变量，先替换为实际路径。
+\`<SKILL_DIR>\` 是本 \`SKILL.md\` 所在目录（不是字面占位符）。脚本输出包含 \`scope\`、\`currentPlanStatus\`、\`currentPlanNumber\`、\`currentPlanDir\`、\`currentPlanFile\`、\`nextPlanNumber\`、\`nextPatchNumber\` 的 JSON；**内置格式校验**，发现问题时以非 0 退出码打印错误——先按错误修正再重跑到通过。若不在项目根目录，追加 \`--cwd <project-root>\`。
 
-若不在项目根目录，脚本追加 \`--cwd <project-root>\`。若 \`agent-context validate\` 命令不存在，改用 \`npx @cat-kit/agent-context validate\`；CLI 不可用时再运行 \`node <SKILL_DIR>/scripts/validate-context.js\`。任一校验报告错误时，先按错误修正，再重跑到通过。
-
-只使用脚本返回的 \`scope\`、\`currentPlanStatus\`、\`currentPlanNumber\`、\`currentPlanDir\`、\`currentPlanFile\`、\`nextPlanNumber\`、\`nextPatchNumber\`；不要自行扫描目录推断状态或编号。
+脚本拉起失败（例如 Node 权限问题）时才回退到 \`node <SKILL_DIR>/${fallbackScript}\` 做独立校验。直接使用脚本输出的字段，不要自行扫描目录推断状态或编号。**特例**：脚本报错 \`未找到 ${AC_ROOT_DIR} 目录\` 说明项目尚未初始化——直接读取 \`${PROTOCOL_DIR}/init.md\` 进入初始化协议，不再执行其它路由。
 
 ## 路由
 
-确定一个动作后，完整读取对应协议文件并按顺序执行。若协议引用其他协议，再读取被引用文件；不要凭记忆执行。
+确定一个动作后，**完整读取**对应协议文件并按顺序执行。若协议引用其他协议，继续读取被引用文件，不要凭记忆执行。
 
 | 状态 | 用户意图 | 动作 |
 | --- | --- | --- |
 | \`null\` | 初始化上下文、补全项目指导文件 | 读 \`${PROTOCOL_DIR}/init.md\` |
 | \`null\` | 创建计划、拆分需求 | 读 \`${PROTOCOL_DIR}/plan.md\` |
-| \`null\` | 明确任务直接计划并实施 | 读 \`${PROTOCOL_DIR}/rush.md\` |
-| \`"未执行"\` | 开始执行当前计划 | 读 \`${PROTOCOL_DIR}/implement.md\` |
-| \`"未执行"\` | 调整、重做、替换当前计划 | 读 \`${PROTOCOL_DIR}/replan.md\` |
-| \`"未执行"\` | 审查计划 | 读 \`${PROTOCOL_DIR}/review.md\` |
-| \`"已执行"\` | 修补、补遗漏、追加相关增量 | 读 \`${PROTOCOL_DIR}/patch.md\` |
-| \`"已执行"\` | 审查实现 | 读 \`${PROTOCOL_DIR}/review.md\` |
-| \`"已执行"\` | 完成并归档 | 运行 \`agent-context done --yes\` |
+| 任意 | 用户**明确点名 rush**，或任务单一、范围明确、可一气呵成 | 读 \`${PROTOCOL_DIR}/rush.md\` |
+| \`未执行\` | 开始执行当前计划 | 读 \`${PROTOCOL_DIR}/implement.md\` |
+| \`未执行\` | 调整、重做、替换当前计划 | 读 \`${PROTOCOL_DIR}/replan.md\` |
+| \`未执行\` | 审查计划 | 读 \`${PROTOCOL_DIR}/review.md\` |
+| \`已执行\` | 修补、补遗漏、追加相关增量 | 读 \`${PROTOCOL_DIR}/patch.md\` |
+| \`已执行\` | 审查实现 | 读 \`${PROTOCOL_DIR}/review.md\` |
+| \`已执行\` | 完成并归档 | 运行 \`agent-context done --yes\` |
 
-用户明确点名 \`init\`、\`plan\`、\`replan\`、\`implement\`、\`patch\`、\`rush\`、\`review\` 时，仍必须先完成启动步骤，再读取 \`${protocolFile}\`。当协议需要澄清或选择时，优先使用当前运行环境提供的交互式提问工具；使用前先读 \`${PROTOCOL_DIR}/ask-user-question.md\`。如果当前环境没有交互式提问工具，直接用一条简短文本问题询问用户并暂停，不要伪造工具调用。
+用户明确点名 \`init\`/\`plan\`/\`replan\`/\`implement\`/\`patch\`/\`rush\`/\`review\` 时，同样先完成启动步骤再读对应协议。需要澄清或选择时优先使用当前运行环境的交互式提问工具，**使用前先读** \`${PROTOCOL_DIR}/ask-user-question.md\`（含"何时禁止提问"红线）；环境无该工具则用一条简短文本询问后暂停，不要伪造工具调用。涉及写业务代码或出方案时，先读 \`${PROTOCOL_DIR}/_principles.md\` 作为共享专业素养基线。
 
 ## 硬约束
 
 - 计划状态只允许 \`未执行\` 或 \`已执行\`。
 - 任意时刻最多一个当前计划：\`${AC_ROOT_DIR}/{scope}/plan-{number}\`。
 - 创建计划使用 \`nextPlanNumber\`；创建补丁使用 \`nextPatchNumber\`。
-- 在 \`plan\` 或 \`rush\` 创建计划前，不改业务代码。
-- 代码变更只发生在 \`implement\` 或 \`patch\` 协议中。
+- 在 \`plan\` 或 \`rush\` 创建计划前不改业务代码；代码变更只发生在 \`implement\` 或 \`patch\`。
 - \`## 影响范围\` 不记录 \`${AC_ROOT_DIR}/\` 内文件。
 `
 }
@@ -98,54 +101,26 @@ function renderFrontmatter(): string {
     '---',
     `name: ${SKILL_NAME}`,
     'description: >',
-    `  ${SKILL_DESCRIPTION}`,
+    ...SKILL_DESCRIPTION.split('\n').map((line) => `  ${line}`),
     'metadata:',
-    `  version: ${pkgVersion}`
+    `  version: ${pkgVersion}`,
+    '---',
+    ''
   ]
 
-  lines.push('---', '')
   return `${lines.join('\n')}\n`
 }
 
-// ── Context Script ──────────────────────────────────
+// ── Embedded assets ─────────────────────────────────
 
 function readScript(fileName: string): string {
-  const scriptDir = join(dirname(fileURLToPath(import.meta.url)), 'scripts')
-  return readFileSync(join(scriptDir, fileName), 'utf-8')
+  return readFileSync(assetPath('scripts', fileName), 'utf-8')
 }
 
-// ── AskUserQuestion reference（渐进式披露：详情在本文件，SKILL 仅指针）─
+function readReference(fileName: string): string {
+  return readFileSync(assetPath('references', fileName), 'utf-8')
+}
 
-function renderAskUserQuestionReference(): string {
-  return `# 用户提问规范
-
-当协议需要澄清时，优先使用当前运行环境提供的交互式提问工具。常见名称包括 \`AskUserQuestion\`、\`request_user_input\`、\`RequestUserInput\`、\`Question\`、\`askQuestions\`、\`question\`。如果当前环境没有交互式提问工具，直接用一条简短文本问题询问用户并暂停，不要伪造工具调用。
-
-**任何情况下使用交互式提问工具时必须遵守本规范**：
-
-## 基础规范
-
-- 提问要通俗易懂，不要废话，禁止拽花哨、华而不实的文风，给出的选项同理。
-- 单选提问**必须**在问题末尾标注推荐项并说明理由
-- 一次提问聚焦一个主题，不在单个问题中混杂多个无关决策
-
-## 反向追问
-
-信息收集和需求澄清环节，不能只被动接收用户说法——必须主动审视用户的陈述，挖掘未被意识到的盲区。
-
-**探测方向**：
-
-- **假设挑战**：用户描述中哪些隐含假设可能不成立
-- **边界探测**：哪些边界/异常场景未被覆盖
-- **遗漏发现**：落地所需的关键决策中哪些还没做
-- **矛盾检测**：需求之间或需求与现有系统之间是否冲突
-- **风险预警**：技术可行性、性能瓶颈、维护成本等隐患
-
-**执行要求**：
-
-- 每轮聚焦 2-3 个最有价值的问题，不一次倾泻所有疑问
-- 每个问题附带简短理由——说明为什么这个问题值得关注
-- 连续一轮追问未发现新的显著盲区 → 结束
-- 最多追问 2 轮，除非用户主动要求继续
-`
+function assetPath(kind: 'scripts' | 'references', fileName: string): string {
+  return join(dirname(fileURLToPath(import.meta.url)), kind, fileName)
 }
