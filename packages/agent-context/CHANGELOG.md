@@ -1,5 +1,11 @@
 # @cat-kit/agent-context
 
+## 2.0.3
+
+### Patch Changes
+
+- 7c71f5a: 限制上下文工作流目录命名
+
 ## 2.0.2
 
 ### Patch Changes
