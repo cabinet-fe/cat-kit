@@ -3,7 +3,7 @@ name: ac-workflow
 description: >
   在 `.agent-context` 目录管理任务计划的 ac-workflow 协议：规划(plan/rush)、实施(implement)、修补(patch)、重规划(replan)、审查(review)、归档(done)、初始化(init)。当你需要创建/实施/修补/审查/归档一个 agent-context 计划时使用。
 metadata:
-  version: 2.0.2
+  version: 2.0.3
 ---
 
 # ac-workflow
@@ -21,6 +21,15 @@ node <SKILL_DIR>/scripts/get-context-info.js
 `<SKILL_DIR>` 是本 `SKILL.md` 所在目录（不是字面占位符）。脚本输出包含 `scope`、`currentPlanStatus`、`currentPlanNumber`、`currentPlanDir`、`currentPlanFile`、`nextPlanNumber`、`nextPatchNumber` 的 JSON；**内置格式校验**，发现问题时以非 0 退出码打印错误——先按错误修正再重跑到通过。若不在项目根目录，追加 `--cwd <project-root>`。
 
 脚本拉起失败（例如 Node 权限问题）时才回退到 `node <SKILL_DIR>/scripts/validate-context.js` 做独立校验。直接使用脚本输出的字段，不要自行扫描目录推断状态或编号。**特例**：脚本报错 `未找到 .agent-context 目录` 说明项目尚未初始化——直接读取 `references/init.md` 进入初始化协议，不再执行其它路由。
+
+## 目录结构
+
+工作区真实布局，命名严格遵守：
+
+- 当前计划：`.agent-context/{scope}/plan-{number}/`，目录名**只能**是 `plan-{nextPlanNumber}`，禁止追加日期或任何后缀。
+- 待执行队列：`.agent-context/{scope}/preparing/plan-{number}/`，命名规则同上。
+- 已归档：`.agent-context/{scope}/done/plan-{number}-YYYYMMDD/`，由 `agent-context done` 自动加日期，**禁止手动按此形态创建**。
+- 元数据：`.agent-context/{scope}/index.md`、`.agent-context/.env`。
 
 ## 路由
 
@@ -43,7 +52,7 @@ node <SKILL_DIR>/scripts/get-context-info.js
 ## 硬约束
 
 - 计划状态只允许 `未执行` 或 `已执行`。
-- 任意时刻最多一个当前计划：`.agent-context/{scope}/plan-{number}`。
+- 任意时刻最多一个当前计划，目录名严格 `plan-{nextPlanNumber}`（不带日期/后缀）；`done/plan-{number}-YYYYMMDD` 仅由 `agent-context done` 生成。
 - 创建计划使用 `nextPlanNumber`；创建补丁使用 `nextPatchNumber`。
 - 在 `plan` 或 `rush` 创建计划前不改业务代码；代码变更只发生在 `implement` 或 `patch`。
 - `## 影响范围` 不记录 `.agent-context/` 内文件。
