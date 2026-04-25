@@ -38,7 +38,7 @@ outline: deep
 
 - `SKILL.md`：短导航入口，执行**一条**命令拿状态快照（同时完成格式校验）、按 `currentPlanStatus` + 用户意图查路由表、再读取对应协议
 - `references/*.md`：完整协议正文，只有确定动作后才读取对应文件；`rush` 这类组合协议会在需要时再读取被引用协议
-- `references/ask-user-question.md`：交互式提问规范，不写死具体工具名；host/runtime 可提供 `AskUserQuestion`、`request_user_input`、`question` 等不同名称；含"何时禁止提问"红线
+- `references/ask-user-question.md`：交互式提问规范，含**按语义识别宿主提问工具**的步骤（在自己的工具清单中匹配 ask / question / choice / select / prompt / input / followup 等关键字，命中必须调用），避免代理因工具名不在硬编码列表而误判为"无提问工具"；同时含"何时禁止提问"红线与已知工具名示例（Cursor `AskQuestion`、Claude Code `AskUserQuestion`、Codex `request_user_input`、Cline/Roo `ask_followup_question` 等）
 - `references/_principles.md`：规划 / 实施 / 审查角色的共享专业素养，协议文件内不再重复
 - `scripts/get-context-info.js`：输出 `scope`、当前计划、下一个计划编号和下一个补丁编号的 JSON，**同时内置目录结构校验**；发现问题时以非 0 退出码打印错误，Skill 不应自行扫描目录推断这些值
 - `scripts/validate-context.js`：仅在主脚本无法启动时作为独立校验 fallback
@@ -111,9 +111,19 @@ flowchart LR
 
 ## 常见问题
 
-### 交互式提问工具不可用
+### 交互式提问工具识别
 
-Skill 协议只要求“优先使用当前运行环境提供的交互式提问工具”，不会假设固定工具名。不同 host 可能叫 `AskUserQuestion`、`request_user_input`、`question` 或其他名称；如果当前环境没有交互式提问工具，应直接用简短文本问题询问用户并暂停。
+Skill 不绑死具体工具名。`references/ask-user-question.md` 规定的规则是：首次提问前，**扫描自己当前会话中可调用的工具清单**，按**语义**（工具名或描述含 `ask` / `question` / `choice` / `select` / `prompt` / `input` / `followup` / `clarify` 等关键字）匹配宿主提供的提问工具。**命中任一必须调用**，不得以"优先"或"名字不在列表"为由回退；不确定是否命中时倾向调用。
+
+已知示例（不穷举）：
+
+| 宿主 | 工具名 |
+| --- | --- |
+| Cursor | `AskQuestion` |
+| Claude Code | `AskUserQuestion` |
+| Codex CLI | `request_user_input` / `RequestUserInput` |
+| Cline / Roo | `ask_followup_question` |
+| 通用 | `Question` / `askQuestions` / `question` / `prompt_user` |
 
 Codex 中如需启用 `request_user_input`，可在配置中（用户目录：`~/.codex/config.toml` 或项目根目录：`.codex/config.toml`）启用以下功能标识：
 
@@ -121,3 +131,5 @@ Codex 中如需启用 `request_user_input`，可在配置中（用户目录：`~
 [features]
 default_mode_request_user_input = true
 ```
+
+真正完全没有任何语义匹配工具时，才用一条简短文本问题直接询问用户并暂停，不要伪造工具调用。

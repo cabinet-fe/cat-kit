@@ -90,6 +90,31 @@ describe('renderSkillArtifacts', () => {
     expect(askReference).toContain('何时禁止提问')
   })
 
+  it('SKILL.md 路由段用强制措辞引导语义识别', () => {
+    const skillMd = readSkillMd()
+
+    expect(skillMd).toContain('必须调用')
+    expect(skillMd).toContain('工具识别')
+    expect(skillMd).toContain('followup')
+    expect(skillMd).toContain('禁止伪造工具调用')
+    expect(skillMd).not.toMatch(/优先使用当前运行环境(的|提供的)交互式提问工具/)
+  })
+
+  it('ask-user-question.md 覆盖语义识别规则与主流 host 示例', () => {
+    const artifacts = renderSkillArtifacts()
+    const askReference = artifacts.files.find(
+      (file) => file.relativePath === 'references/ask-user-question.md'
+    )?.body
+
+    expect(askReference).toContain('## 工具识别')
+    expect(askReference).toContain('AskQuestion')
+    expect(askReference).toContain('ask_followup_question')
+    expect(askReference).toContain('必须调用该工具')
+    expect(askReference).toContain('不确定是否命中时倾向调用')
+    expect(askReference).toContain('followup')
+    expect(askReference).toContain('clarify')
+  })
+
   it('导出 _principles.md 作为共享专业素养基线', () => {
     const artifacts = renderSkillArtifacts()
     const principles = artifacts.files.find(

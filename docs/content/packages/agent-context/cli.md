@@ -95,7 +95,7 @@ agent-context install --yes
 
 - `SKILL.md`：包含触发描述、单条启动命令、状态路由和硬约束，不内联完整协议正文
 - `references/init.md`、`plan.md`、`replan.md`、`implement.md`、`patch.md`、`rush.md`、`review.md`：协议细节，确定动作后读取对应文件
-- `references/ask-user-question.md`：只有准备调用交互式提问工具时读取；工具名由 host/runtime 提供；**含"何时禁止提问"红线**，避免代理为走流程而反复确认
+- `references/ask-user-question.md`：只有准备调用交互式提问工具时读取；**按语义在自己的工具清单中识别宿主提问工具**（ask / question / choice / select / prompt / input / followup 等），命中必须调用，不绑死具体工具名；含"何时禁止提问"红线避免走流程式反复确认
 - `references/_principles.md`：规划、实施、审查三类角色的共享专业素养；协议内不再重复，仅在文件开头引用这份基线
 - `scripts/get-context-info.js`：从项目根目录运行，**同时输出路由所需的结构化上下文 JSON 与内置格式校验**；发现问题时以非 0 退出码打印错误，修复后重跑
 - `scripts/validate-context.js`：仅在上面的主脚本无法启动时（例如 Node 权限问题）作为独立校验 fallback

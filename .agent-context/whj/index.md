@@ -44,3 +44,4 @@
 - [x] [优化 docs 数据处理文档](./done/plan-44-20260423/plan.md)
 - [x] [重构 @cat-kit/core number 模块](./done/plan-45-20260423/plan.md)
 - [x] [修复 @cat-kit/http 已知缺陷](./done/plan-46-20260423/plan.md)
+- [x] [优化 agent-context Skill 上下文](./done/plan-47-20260425/plan.md)

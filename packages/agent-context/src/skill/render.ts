@@ -81,7 +81,7 @@ node <SKILL_DIR>/${scriptPath}
 | \`已执行\` | 审查实现 | 读 \`${PROTOCOL_DIR}/review.md\` |
 | \`已执行\` | 完成并归档 | 运行 \`agent-context done --yes\` |
 
-用户明确点名 \`init\`/\`plan\`/\`replan\`/\`implement\`/\`patch\`/\`rush\`/\`review\` 时，同样先完成启动步骤再读对应协议。需要澄清或选择时优先使用当前运行环境的交互式提问工具，**使用前先读** \`${PROTOCOL_DIR}/ask-user-question.md\`（含"何时禁止提问"红线）；环境无该工具则用一条简短文本询问后暂停，不要伪造工具调用。涉及写业务代码或出方案时，先读 \`${PROTOCOL_DIR}/_principles.md\` 作为共享专业素养基线。
+用户明确点名 \`init\`/\`plan\`/\`replan\`/\`implement\`/\`patch\`/\`rush\`/\`review\` 时，同样先完成启动步骤再读对应协议。协议里出现"「交互式提问工具」"时一律按 \`${PROTOCOL_DIR}/ask-user-question.md\` 执行：**首次提问前先读该文件**，按其"工具识别"步骤**按语义**（工具名或描述含 ask / question / choice / select / prompt / input / followup / clarify 等关键字）在本次会话**自己可调用**的工具清单中定位宿主提问工具；命中任一 → **必须调用**，不得以"优先"、"不方便"为由跳过或改用普通文本回复；真正完全无匹配才回退到一条简短文本问题并暂停，**禁止伪造工具调用**。涉及写业务代码或出方案时，先读 \`${PROTOCOL_DIR}/_principles.md\` 作为共享专业素养基线。
 
 ## 硬约束
 

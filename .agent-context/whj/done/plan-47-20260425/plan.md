@@ -60,6 +60,7 @@
 - `skills/cat-kit-agent-context/examples.md`
 - `skills/cat-kit-agent-context/references/workspace.md`
 - `.changeset/light-agent-context-skill.md`
+- `.changeset/firm-trigger-ask-tool.md`
 - `packages/agent-context/test/render-skill.test.ts`
 - `packages/agent-context/test/installer.test.ts`
 - `packages/agent-context/test/fixtures/trigger-prompts.json`
@@ -70,3 +71,4 @@
 - patch-2: 抽象提问工具并改为 canonical Skill 安装模型
 - patch-3: 精简 Skill 上下文并收紧提问/路由
 - patch-4: 同步 canonical skill、补齐导航与 AGENTS.md
+- patch-5: 修复交互式提问工具在多代理下的触发率
