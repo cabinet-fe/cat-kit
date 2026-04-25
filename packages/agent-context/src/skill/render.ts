@@ -65,6 +65,15 @@ node <SKILL_DIR>/${scriptPath}
 
 脚本拉起失败（例如 Node 权限问题）时才回退到 \`node <SKILL_DIR>/${fallbackScript}\` 做独立校验。直接使用脚本输出的字段，不要自行扫描目录推断状态或编号。**特例**：脚本报错 \`未找到 ${AC_ROOT_DIR} 目录\` 说明项目尚未初始化——直接读取 \`${PROTOCOL_DIR}/init.md\` 进入初始化协议，不再执行其它路由。
 
+## 目录结构
+
+工作区真实布局，命名严格遵守：
+
+- 当前计划：\`${AC_ROOT_DIR}/{scope}/plan-{number}/\`，目录名**只能**是 \`plan-{nextPlanNumber}\`，禁止追加日期或任何后缀。
+- 待执行队列：\`${AC_ROOT_DIR}/{scope}/preparing/plan-{number}/\`，命名规则同上。
+- 已归档：\`${AC_ROOT_DIR}/{scope}/done/plan-{number}-YYYYMMDD/\`，由 \`agent-context done\` 自动加日期，**禁止手动按此形态创建**。
+- 元数据：\`${AC_ROOT_DIR}/{scope}/index.md\`、\`${AC_ROOT_DIR}/.env\`。
+
 ## 路由
 
 确定一个动作后，**完整读取**对应协议文件并按顺序执行。若协议引用其他协议，继续读取被引用文件，不要凭记忆执行。
@@ -86,7 +95,7 @@ node <SKILL_DIR>/${scriptPath}
 ## 硬约束
 
 - 计划状态只允许 \`未执行\` 或 \`已执行\`。
-- 任意时刻最多一个当前计划：\`${AC_ROOT_DIR}/{scope}/plan-{number}\`。
+- 任意时刻最多一个当前计划，目录名严格 \`plan-{nextPlanNumber}\`（不带日期/后缀）；\`done/plan-{number}-YYYYMMDD\` 仅由 \`agent-context done\` 生成。
 - 创建计划使用 \`nextPlanNumber\`；创建补丁使用 \`nextPatchNumber\`。
 - 在 \`plan\` 或 \`rush\` 创建计划前不改业务代码；代码变更只发生在 \`implement\` 或 \`patch\`。
 - \`## 影响范围\` 不记录 \`${AC_ROOT_DIR}/\` 内文件。

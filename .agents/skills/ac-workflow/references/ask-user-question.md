@@ -1,6 +1,6 @@
 # 用户提问规范
 
-本文件规定在协议执行中如何向用户发起结构化的交互式提问。**协议里每一处"通过交互式提问工具..."的指令都按本文件执行**，不要凭名字直觉判断工具是否可用。
+本文件规定在协议执行中如何向用户发起结构化的交互式提问。**协议里每一处"通过「交互式提问工具」..."的指令都按本文件执行**，不要凭名字直觉判断工具是否可用。
 
 ## 工具识别（首次提问前必做）
 
@@ -17,12 +17,12 @@
 
 **已知工具名示例（不穷举，仅辅助识别）**：
 
-| 宿主 / 来源 | 工具名 |
-| --- | --- |
-| Cursor | `AskQuestion` |
-| Claude Code | `AskUserQuestion` |
-| Codex CLI | `request_user_input` / `RequestUserInput` |
-| Cline / Roo | `ask_followup_question` |
+| 宿主 / 来源 | 工具名                                                   |
+| ----------- | -------------------------------------------------------- |
+| Cursor      | `AskQuestion`                                            |
+| Claude Code | `AskUserQuestion`                                        |
+| Codex CLI   | `request_user_input` / `RequestUserInput`                |
+| Cline / Roo | `ask_followup_question`                                  |
 | 通用 / 其他 | `Question` / `askQuestions` / `question` / `prompt_user` |
 
 遇到上表未覆盖的新 host，仍按第 1–4 步的**语义规则**判断，不要因"名字没见过"就回退到纯文本。

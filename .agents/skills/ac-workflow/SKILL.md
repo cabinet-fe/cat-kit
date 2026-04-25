@@ -3,7 +3,7 @@ name: ac-workflow
 description: >
   在 `.agent-context` 目录管理任务计划的 ac-workflow 协议：规划(plan/rush)、实施(implement)、修补(patch)、重规划(replan)、审查(review)、归档(done)、初始化(init)。当你需要创建/实施/修补/审查/归档一个 agent-context 计划时使用。
 metadata:
-  version: 2.0.1
+  version: 2.0.2
 ---
 
 # ac-workflow
@@ -38,7 +38,7 @@ node <SKILL_DIR>/scripts/get-context-info.js
 | `已执行` | 审查实现 | 读 `references/review.md` |
 | `已执行` | 完成并归档 | 运行 `agent-context done --yes` |
 
-用户明确点名 `init`/`plan`/`replan`/`implement`/`patch`/`rush`/`review` 时，同样先完成启动步骤再读对应协议。协议里出现"通过交互式提问工具..."时一律按 `references/ask-user-question.md` 执行：**首次提问前先读该文件**，按其"工具识别"步骤**按语义**（工具名或描述含 ask / question / choice / select / prompt / input / followup / clarify 等关键字）在本次会话**自己可调用**的工具清单中定位宿主提问工具；命中任一 → **必须调用**，不得以"优先"、"不方便"为由跳过或改用普通文本回复；真正完全无匹配才回退到一条简短文本问题并暂停，**禁止伪造工具调用**。涉及写业务代码或出方案时，先读 `references/_principles.md` 作为共享专业素养基线。
+用户明确点名 `init`/`plan`/`replan`/`implement`/`patch`/`rush`/`review` 时，同样先完成启动步骤再读对应协议。协议里出现"「交互式提问工具」"时一律按 `references/ask-user-question.md` 执行：**首次提问前先读该文件**，按其"工具识别"步骤**按语义**（工具名或描述含 ask / question / choice / select / prompt / input / followup / clarify 等关键字）在本次会话**自己可调用**的工具清单中定位宿主提问工具；命中任一 → **必须调用**，不得以"优先"、"不方便"为由跳过或改用普通文本回复；真正完全无匹配才回退到一条简短文本问题并暂停，**禁止伪造工具调用**。涉及写业务代码或出方案时，先读 `references/_principles.md` 作为共享专业素养基线。
 
 ## 硬约束
 

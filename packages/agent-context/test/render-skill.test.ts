@@ -66,6 +66,23 @@ describe('renderSkillArtifacts', () => {
     expect(skillMd).toContain('<SKILL_DIR>` 是本 `SKILL.md` 所在目录')
   })
 
+  it('SKILL.md 暴露 .agent-context 真实目录结构并区分归档形态', () => {
+    const skillMd = readSkillMd()
+    const structureSection = skillMd.slice(
+      skillMd.indexOf('## 目录结构'),
+      skillMd.indexOf('## 路由')
+    )
+
+    expect(structureSection).toContain('## 目录结构')
+    expect(structureSection).toContain('plan-{number}')
+    expect(structureSection).toContain('plan-{number}-YYYYMMDD')
+    expect(structureSection).toContain('preparing')
+    expect(structureSection).toContain('done')
+    expect(structureSection).toContain('agent-context done')
+    expect(structureSection).toMatch(/禁止追加日期|不带日期/)
+    expect(structureSection).toMatch(/禁止手动|自动追加日期/)
+  })
+
   it('路由表覆盖 rush 在任意状态下的入口', () => {
     const skillMd = readSkillMd()
     const routeTable = skillMd.slice(skillMd.indexOf('## 路由'), skillMd.indexOf('## 硬约束'))
