@@ -150,8 +150,6 @@ describe('renderSkillArtifacts', () => {
   })
 
   it('维护触发回归样例', () => {
-    const description = readDescription(readSkillMd())
-
     expect(triggerPrompts.shouldTrigger).toEqual(
       expect.arrayContaining([expect.stringContaining('.agent-context')])
     )
