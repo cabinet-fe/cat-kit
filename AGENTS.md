@@ -91,14 +91,15 @@ cat-kit/
 - 运行方式：优先使用 `bun --cwd packages/<pkg> run test`
 - 框架：Vitest，全局 API（`describe`/`it`/`expect` 无需 import）
 
-## AI 助手：cat-kit 技能（按包）
+## AI 助手：cat-kit 技能
 
-`skills/use-cat-kit/SKILL.md` 为**路由**：按正在使用的 npm 包打开 `skills/cat-kit-<短名>/`（共 8 个子技能）。各子技能内 **`generated/`** 与 npm 发布物对齐（多数为 `dist` 下 `.d.ts`；`@cat-kit/tsconfig` 为 JSON 预设）。
+`skills/cat-kit/SKILL.md` 为**唯一入口**，覆盖所有 `@cat-kit/*` 包的 API 文档。渐进式阅读：入口 → 包索引 → 具体文档。`generated/` 目录由脚本自动生成类型声明，仅供类型查证。
 
-**刷新（仓库根）**：`bun run sync-cat-kit-skills-api` 或 `bun run sync-cat-kit-skills-api:build`。脚本：`scripts/sync-cat-kit-skills-api.ts`。
+**刷新类型（仓库根）**：`bun run sync-cat-kit-skills-api` 或 `bun run sync-cat-kit-skills-api:build`。脚本：`scripts/sync-cat-kit-skills-api.ts`。
 
-- **路由**：`skills/use-cat-kit/SKILL.md`
-- **子技能**：`skills/cat-kit-core/`、`cat-kit-http/`、`cat-kit-fe/`、`cat-kit-be/`、`cat-kit-agent-context/`、`cat-kit-cli/`、`cat-kit-tsconfig/`、`cat-kit-vitepress-theme/`（各含 `SKILL.md`、`generated/`、`references/` 或等价索引、`examples.md`）
+- **入口**：`skills/cat-kit/SKILL.md`
+- **包文档**：`skills/cat-kit/packages/<pkg>/`（含 `index.md`、`<topic>.md`、`examples.md`）
+- **类型参考**：`skills/cat-kit/generated/<pkg>/`
 - **何时用**：编写或讲解 cat-kit API、核对签名时；长文与示例以 `docs/` 为准
 
 ## 约束
@@ -106,4 +107,4 @@ cat-kit/
 - `@cat-kit/core` **禁止添加任何外部依赖**
 - Node.js 内置模块使用 `node:` 协议导入
 - 子包需要基础工具函数时优先从 `@cat-kit/core` 导入，禁止重复实现
-- 任何 `packages/<pkg>` 的功能变更，都必须在同一轮修改中同步更新对应的 `docs/content/packages/<pkg>/` 文档，以及 `<root>/skills` 下该包对应的供真实项目使用的技能内容；不要只改代码不改文档和技能
+- 任何 `packages/<pkg>` 的功能变更，都必须在同一轮修改中同步更新对应的 `docs/content/packages/<pkg>/` 文档，以及 `skills/cat-kit/packages/<pkg>/` 下该包对应的供真实项目使用的技能内容；不要只改代码不改文档和技能

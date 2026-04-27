@@ -45,3 +45,8 @@
 - [x] [重构 @cat-kit/core number 模块](./done/plan-45-20260423/plan.md)
 - [x] [修复 @cat-kit/http 已知缺陷](./done/plan-46-20260423/plan.md)
 - [x] [优化 agent-context Skill 上下文](./done/plan-47-20260425/plan.md)
+- [x] [在 SKILL.md 渲染中暴露 .agent-context 真实目录结构](./done/plan-48-20260427/plan.md)
+- [x] [cat-kit 统一技能 — 架构设计与入口点](./done/plan-49-20260427/plan.md)
+- [x] [cat-kit 统一技能 — 填充 core + http 详细 API 文档](./done/plan-50-20260427/plan.md)
+- [x] [cat-kit 统一技能 — 填充 fe + be 详细 API 文档](./done/plan-51-20260427/plan.md)
+- [x] [cat-kit 统一技能 — 剩余包 + 清理旧技能](./done/plan-52-20260427/plan.md)

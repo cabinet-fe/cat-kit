@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
- * 将各 @cat-kit/* 发布物 typings（或 tsconfig JSON 预设）镜像到 skills/cat-kit-<pkg>/generated/，
- * 供按包拆分的技能离线查阅；与 npm 包内 dist / files 对齐。
+ * 将各 @cat-kit/* 发布物 typings（或 tsconfig JSON 预设）镜像到 skills/cat-kit/generated/<pkg>/，
+ * 供统一 cat-kit 技能离线查阅；与 npm 包内 dist / files 对齐。
  *
  * 用法（仓库根目录）：
  *   bun run sync-cat-kit-skills-api              # 仅复制（需已构建 dist）
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
-const SKILL_PREFIX = 'cat-kit-'
+const SKILL_ROOT = 'cat-kit'
 
 const BUILD_PACKAGES = [
   'core',
@@ -33,7 +33,7 @@ const TSCONFIG_PKG = 'tsconfig' as const
 type DistPkg = (typeof DIST_PACKAGES)[number]
 
 function skillGeneratedRoot(pkg: string): string {
-  return join(REPO_ROOT, 'skills', `${SKILL_PREFIX}${pkg}`, 'generated')
+  return join(REPO_ROOT, 'skills', SKILL_ROOT, 'generated', pkg)
 }
 
 async function runPackageBuild(pkg: string): Promise<void> {
