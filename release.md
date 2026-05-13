@@ -70,6 +70,7 @@ bun run release --help
 
 - `@cat-kit/cli`
 - `@cat-kit/agent-context`
+- `@cat-kit/crypto`
 - `@cat-kit/vitepress-theme`
 - `@cat-kit/tsconfig`
 
