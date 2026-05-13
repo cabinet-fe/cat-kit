@@ -43,6 +43,7 @@ bun add @cat-kit/core @cat-kit/fe
 | ------------------------- | ------------------------ |
 | 只需要通用工具            | `@cat-kit/core`          |
 | 浏览器或 Node/Bun 请求客户端 | `@cat-kit/http`       |
+| 随机 ID、安全摘要、加密工具 | `@cat-kit/crypto`      |
 | 浏览器存储、文件、Web API | `@cat-kit/fe`            |
 | Node/Bun 后端工具         | `@cat-kit/be`            |
 | 命令行辅助工具            | `@cat-kit/cli`           |
@@ -130,6 +131,7 @@ const { date } = await import('@cat-kit/core')
 - [指南总览](/guide/getting-started)
 - [Core 核心包](/packages/core/)
 - [HTTP 请求包](/packages/http/)
+- [Crypto 安全工具包](/packages/crypto/)
 - [FE 前端工具包](/packages/fe/)
 - [BE 后端工具包](/packages/be/)
 - [CLI 命令行工具包](/packages/cli/)

@@ -7,6 +7,7 @@
     { "path": "./packages/be/tsconfig.json" },
     { "path": "./packages/cli/tsconfig.json" },
     { "path": "./packages/core/tsconfig.json" },
+    { "path": "./packages/crypto/tsconfig.json" },
     { "path": "./packages/fe/tsconfig.json" },
     { "path": "./packages/http/tsconfig.json" },
     { "path": "./tsconfig.test.json" },

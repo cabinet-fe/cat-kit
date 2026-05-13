@@ -45,6 +45,7 @@ npm install @cat-kit/core
 | ------------------------ | -------------------------------------------- | ----------------------- | ------------------------------------------------ |
 | `@cat-kit/core`          | 数据处理、日期、环境检测、性能优化、设计模式 | Browser / Node.js / Bun | [Core 核心包](/packages/core/)            |
 | `@cat-kit/http`          | HTTP 客户端、插件扩展、请求类型系统          | Browser / Node.js / Bun | [HTTP 请求包](/packages/http/)            |
+| `@cat-kit/crypto`        | 随机 ID、安全摘要、加密工具                  | Browser / Node.js / Bun | [Crypto 安全工具包](/packages/crypto/)    |
 | `@cat-kit/fe`            | 浏览器存储、文件处理、Web API、虚拟化        | Browser                 | [FE 前端工具包](/packages/fe/)            |
 | `@cat-kit/be`            | 文件系统、配置、日志、缓存、网络、系统、调度 | Node.js / Bun           | [BE 后端工具包](/packages/be/)            |
 | `@cat-kit/cli`           | 提交信息规范校验等命令行能力                 | Node.js                 | [CLI 命令行工具包](/packages/cli/)        |
@@ -58,6 +59,7 @@ npm install @cat-kit/core
 | -------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
 | 通用工具函数、日期处理、数据结构             | `@cat-kit/core`          | [数据处理](/packages/core/data) / [日期处理](/packages/core/date)                                                                     |
 | 浏览器或 Node/Bun 里发请求、做鉴权或插件扩展 | `@cat-kit/http`          | [HTTP 客户端](/packages/http/client) / [插件系统](/packages/http/plugins)                                                             |
+| 生成 URL 安全随机 ID、后续接入摘要或加密      | `@cat-kit/crypto`        | [随机 ID](/packages/crypto/nanoid)                                                                                                    |
 | 浏览器存储、下载上传、文件读取、剪贴板、权限 | `@cat-kit/fe`            | [存储](/packages/fe/storage) / [文件操作](/packages/fe/file) / [Web API](/packages/fe/web-api)                                        |
 | Node/Bun 侧文件、配置、日志、缓存、任务调度  | `@cat-kit/be`            | [文件系统](/packages/be/fs) / [配置管理](/packages/be/config) / [日志系统](/packages/be/logger)                                       |
 | 校验提交信息、接入 commit-msg Hook           | `@cat-kit/cli`           | [提交信息校验](/packages/cli/verify-commit)                                                                                           |
@@ -73,6 +75,7 @@ npm install @cat-kit/core
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | 数组、对象、字符串、日期、比较、格式化、环境检测                                                                  | `@cat-kit/core`          | [Core 核心包](/packages/core/)                   | [数据处理](/packages/core/data) / [日期处理](/packages/core/date) / [环境检测](/packages/core/env)                                                                                 | `core data date env pattern optimize`                                                                                               |
 | request、client、plugin、token、retry、method override、engine、types                                             | `@cat-kit/http`          | [HTTP 请求包](/packages/http/)                   | [HTTP 客户端](/packages/http/client) / [插件系统](/packages/http/plugins) / [类型定义](/packages/http/types)                                                                       | `http client plugins token retry engine types`                                                                                      |
+| crypto、nanoid、random id、secure id、hash、digest、encrypt、decrypt                                               | `@cat-kit/crypto`        | [Crypto 安全工具包](/packages/crypto/)           | [随机 ID](/packages/crypto/nanoid)                                                                                                                                                  | `crypto nanoid random id secure hash digest encrypt decrypt`                                                                        |
 | storage、localStorage、sessionStorage、cookie、file、save、read、clipboard、permission、virtualizer               | `@cat-kit/fe`            | [FE 前端工具包](/packages/fe/)                   | [存储](/packages/fe/storage) / [文件操作](/packages/fe/file) / [Web API](/packages/fe/web-api) / [虚拟化](/packages/fe/virtualizer)                                                | `fe storage file web api virtualizer`                                                                                               |
 | fs、config、logger、cache、net、system、scheduler                                                                 | `@cat-kit/be`            | [BE 后端工具包](/packages/be/)                   | [文件系统](/packages/be/fs) / [配置管理](/packages/be/config) / [日志系统](/packages/be/logger) / [任务调度](/packages/be/scheduler)                                               | `be fs config logger cache net system scheduler`                                                                                    |
 | commit、verify-commit、commit-msg、hook、conventional commit                                                      | `@cat-kit/cli`           | [CLI 命令行工具包](/packages/cli/)               | [提交信息校验](/packages/cli/verify-commit)                                                                                                                                        | `cli verify-commit commit-msg hook conventional commit`                                                                             |
@@ -104,6 +107,7 @@ npm install @cat-kit/core
 - [安装](/guide/installation)
 - [Core 核心包](/packages/core/)
 - [HTTP 请求包](/packages/http/)
+- [Crypto 安全工具包](/packages/crypto/)
 - [FE 前端工具包](/packages/fe/)
 - [BE 后端工具包](/packages/be/)
 - [CLI 命令行工具包](/packages/cli/)

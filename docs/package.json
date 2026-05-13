@@ -12,6 +12,7 @@
   "devDependencies": {
     "@cat-kit/be": "workspace:*",
     "@cat-kit/core": "workspace:*",
+    "@cat-kit/crypto": "workspace:*",
     "@cat-kit/fe": "workspace:*",
     "@cat-kit/http": "workspace:*",
     "@cat-kit/tsconfig": "workspace:*",

@@ -20,6 +20,7 @@ const SKILL_ROOT = 'cat-kit'
 const BUILD_PACKAGES = [
   'core',
   'http',
+  'crypto',
   'fe',
   'be',
   'agent-context',

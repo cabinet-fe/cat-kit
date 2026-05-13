@@ -1,12 +1,12 @@
 {
-  "extends": "@cat-kit/tsconfig/tsconfig.json",
+  "extends": "@cat-kit/tsconfig/tsconfig.web.json",
   "compilerOptions": {
     "composite": true,
     "incremental": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo",
-    "types": ["node"]
+    "customConditions": ["development"],
+    "tsBuildInfoFile": "./node_modules/.cache/.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["tests", "**/*.test.ts", "**/*.spec.ts"]

@@ -14,6 +14,7 @@ description: >
 ```bash
 bun add @cat-kit/core          # 核心工具（零依赖，通用）
 bun add @cat-kit/http          # HTTP 客户端（插件架构）
+bun add @cat-kit/crypto        # 安全工具（随机 ID、摘要、加密等）
 bun add @cat-kit/fe            # 浏览器专用工具
 bun add @cat-kit/be            # Node.js 专用工具
 bun add @cat-kit/cli           # 命令行工具
@@ -28,6 +29,7 @@ bun add @cat-kit/vitepress-theme # 文档主题
 |--------|----------|----------|
 | `@cat-kit/core` | 通用 | [packages/core/index.md](packages/core/index.md) |
 | `@cat-kit/http` | 通用 | [packages/http/index.md](packages/http/index.md) |
+| `@cat-kit/crypto` | 通用 | [packages/crypto/index.md](packages/crypto/index.md) |
 | `@cat-kit/fe` | 浏览器 | [packages/fe/index.md](packages/fe/index.md) |
 | `@cat-kit/be` | Node.js | [packages/be/index.md](packages/be/index.md) |
 | `@cat-kit/cli` | Node.js | [packages/cli/index.md](packages/cli/index.md) |

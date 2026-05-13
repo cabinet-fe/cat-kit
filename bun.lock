@@ -28,6 +28,7 @@
       "devDependencies": {
         "@cat-kit/be": "workspace:*",
         "@cat-kit/core": "workspace:*",
+        "@cat-kit/crypto": "workspace:*",
         "@cat-kit/fe": "workspace:*",
         "@cat-kit/http": "workspace:*",
         "@cat-kit/tsconfig": "workspace:*",
@@ -92,6 +93,13 @@
         "@cat-kit/tsconfig": "workspace:*",
         "@types/big.js": "^6.2.2",
         "@types/node": "^24.12.0",
+      },
+    },
+    "packages/crypto": {
+      "name": "@cat-kit/crypto",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@cat-kit/tsconfig": "workspace:*",
       },
     },
     "packages/fe": {
@@ -176,6 +184,8 @@
     "@cat-kit/cli": ["@cat-kit/cli@workspace:packages/cli"],
 
     "@cat-kit/core": ["@cat-kit/core@workspace:packages/core"],
+
+    "@cat-kit/crypto": ["@cat-kit/crypto@workspace:packages/crypto"],
 
     "@cat-kit/docs": ["@cat-kit/docs@workspace:docs"],
 

@@ -41,12 +41,13 @@ const COLLATOR = new Intl.Collator('zh-CN')
 const PACKAGE_DOCS: PackageDocConfig[] = [
   { name: 'core', sidebarText: '核心工具', navText: '核心库', order: 10 },
   { name: 'http', sidebarText: 'HTTP 请求', navText: 'HTTP请求', order: 20 },
-  { name: 'fe', sidebarText: '前端工具', navText: '前端', order: 30 },
-  { name: 'be', sidebarText: '后端工具', navText: '后端', order: 40 },
-  { name: 'cli', sidebarText: 'CLI 工具', navText: 'CLI工具', order: 50 },
-  { name: 'agent-context', sidebarText: 'Agent 上下文', navText: '代理上下文', order: 60 },
-  { name: 'tsconfig', sidebarText: 'TSConfig 预设', navText: 'TSConfig', order: 70 },
-  { name: 'vitepress-theme', sidebarText: 'VitePress 主题', navText: 'VitePress主题', order: 80 }
+  { name: 'crypto', sidebarText: '安全工具', navText: '安全', order: 30 },
+  { name: 'fe', sidebarText: '前端工具', navText: '前端', order: 40 },
+  { name: 'be', sidebarText: '后端工具', navText: '后端', order: 50 },
+  { name: 'cli', sidebarText: 'CLI 工具', navText: 'CLI工具', order: 60 },
+  { name: 'agent-context', sidebarText: 'Agent 上下文', navText: '代理上下文', order: 70 },
+  { name: 'tsconfig', sidebarText: 'TSConfig 预设', navText: 'TSConfig', order: 80 },
+  { name: 'vitepress-theme', sidebarText: 'VitePress 主题', navText: 'VitePress主题', order: 90 }
 ]
 
 function hasPackageIndex(name: string): boolean {

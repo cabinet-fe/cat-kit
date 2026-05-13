@@ -60,6 +60,7 @@ console.log(nextWeek, result)
 
 - 基础能力：[Core 核心包](/packages/core/)
 - 跨端请求：[HTTP 请求包](/packages/http/)
+- 安全工具：[Crypto 安全工具包](/packages/crypto/)
 - 浏览器工具：[FE 前端工具包](/packages/fe/)
 - Node.js / Bun 工具：[BE 后端工具包](/packages/be/)
 - CLI 能力：[CLI 命令行工具包](/packages/cli/)

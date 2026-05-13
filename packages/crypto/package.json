@@ -1,0 +1,27 @@
+{
+  "name": "@cat-kit/crypto",
+  "version": "0.1.0",
+  "description": "安全相关工具",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "lint": "bunx oxlint .",
+    "test": "bunx vitest run --globals",
+    "typecheck": "bunx tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@cat-kit/tsconfig": "workspace:*"
+  }
+}
