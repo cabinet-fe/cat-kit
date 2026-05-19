@@ -1,5 +1,11 @@
 # @cat-kit/core
 
+## 1.1.4
+
+### Patch Changes
+
+- 6f26bd7: fix(data): merge 方法不再跳过源对象的空值，确保 null/undefined/空字符串等从源对象覆盖到目标对象
+
 ## 1.1.3
 
 ## 1.1.2

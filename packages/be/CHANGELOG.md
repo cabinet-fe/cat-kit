@@ -1,5 +1,12 @@
 # @cat-kit/be
 
+## 1.1.4
+
+### Patch Changes
+
+- Updated dependencies [6f26bd7]
+  - @cat-kit/core@1.1.4
+
 ## 1.1.3
 
 ### Patch Changes
