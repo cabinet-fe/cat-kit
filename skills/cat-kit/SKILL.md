@@ -5,11 +5,11 @@ description: >
   Use when working with any @cat-kit/* npm package and need precise API usage guidance.
 metadata:
   versions:
-    - core: 1.1.3
-    - http: 1.1.3
+    - core: 1.1.4
+    - http: 1.1.4
     - crypto: 1.0.0
-    - fe: 1.1.3
-    - be: 1.1.3
+    - fe: 1.1.4
+    - be: 1.1.4
     - cli: 1.0.6
     - agent-context: 2.0.3
     - tsconfig: 2.0.1
