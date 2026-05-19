@@ -221,13 +221,13 @@ describe('对象工具函数', () => {
         expect(obj).toEqual({ a: 1, b: 2, c: 3 })
       })
 
-      it('应该跳过空值', () => {
+      it('源值为空时应该覆盖目标值', () => {
         const obj = { a: 1, b: 2 }
-        const source = { a: null, c: 3 }
+        const source = { a: null, b: undefined, c: 3 }
 
         o(obj).merge(source)
 
-        expect(obj).toEqual({ a: 1, b: 2, c: 3 })
+        expect(obj).toEqual({ a: null, b: undefined, c: 3 })
       })
 
       it('应该覆盖类型不一致的值', () => {

@@ -151,9 +151,6 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
     Object.keys(source).forEach((key) => {
       const sourceVal = source[key]
 
-      // 如果源值为空，则跳过
-      if (isEmpty(sourceVal)) return
-
       // 如果当前对象中不存在该属性，或者当前属性为空，直接赋值
       if (!(key in target) || isEmpty(target[key])) {
         target[key] = sourceVal

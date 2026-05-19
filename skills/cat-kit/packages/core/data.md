@@ -95,7 +95,7 @@ function o<O extends Record<string, any>>(object: O): CatObject<O>
 | `.extend(source)` | 浅合并源对象 |
 | `.deepExtend(source)` | 深层合并源对象 |
 | `.copy()` | 浅拷贝 |
-| `.merge(source)` | 合并后返回新 `CatObject`（不修改原对象） |
+| `.merge(source)` | 深层合并源对象到当前对象（修改原对象），返回原始对象；支持传入对象数组 |
 | `.get(prop)` | 获取属性值 |
 | `.set(prop, value)` | 设置属性值 |
 
