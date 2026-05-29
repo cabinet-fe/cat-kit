@@ -18,7 +18,6 @@
 
 - 76a074d: 增加实用性
 - 33d14d0: Make the generated `ac-workflow` Skill more context-friendly and less noisy:
-
   - Rewrite `SKILL.md` description with user-intent phrasing (protocol names + negative triggers) and keep it under 500 chars.
   - Collapse startup steps to a single command: `node <SKILL_DIR>/scripts/get-context-info.js` now emits the JSON context **and** performs structure validation inline, exiting non-zero on errors.
   - Add `agent-context context` CLI subcommand as the CLI-side equivalent of the bundled script.

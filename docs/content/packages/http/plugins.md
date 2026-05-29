@@ -13,18 +13,11 @@
 ## 快速使用
 
 ```ts
-import {
-  HTTPClient,
-  TokenPlugin,
-  RetryPlugin,
-  MethodOverridePlugin
-} from '@cat-kit/http'
+import { HTTPClient, TokenPlugin, RetryPlugin, MethodOverridePlugin } from '@cat-kit/http'
 
 const http = new HTTPClient('/api', {
   plugins: [
-    TokenPlugin({
-      getter: () => localStorage.getItem('token')
-    }),
+    TokenPlugin({ getter: () => localStorage.getItem('token') }),
     RetryPlugin({ maxRetries: 2 }),
     MethodOverridePlugin({ methods: ['DELETE'] })
   ]
@@ -104,10 +97,7 @@ interface TokenPluginOptions {
 常见用法：
 
 ```ts
-TokenPlugin({
-  getter: () => localStorage.getItem('access_token'),
-  authType: 'Bearer'
-})
+TokenPlugin({ getter: () => localStorage.getItem('access_token'), authType: 'Bearer' })
 ```
 
 带刷新逻辑：
@@ -153,10 +143,7 @@ interface RetryPluginOptions {
 示例：
 
 ```ts
-RetryPlugin({
-  maxRetries: 5,
-  delay: (attempt) => 300 * 2 ** attempt
-})
+RetryPlugin({ maxRetries: 5, delay: (attempt) => 300 * 2 ** attempt })
 ```
 
 ### MethodOverridePlugin
@@ -176,10 +163,7 @@ interface MethodOverridePluginOptions {
 默认会把 `DELETE` / `PUT` / `PATCH` 改写成 `POST`，并加上 `X-HTTP-Method-Override`。
 
 ```ts
-MethodOverridePlugin({
-  methods: ['DELETE', 'PATCH'],
-  overrideMethod: 'POST'
-})
+MethodOverridePlugin({ methods: ['DELETE', 'PATCH'], overrideMethod: 'POST' })
 ```
 
 ### 自定义插件
@@ -190,13 +174,7 @@ const tracePlugin = {
   beforeRequest(url, config) {
     return {
       url,
-      config: {
-        ...config,
-        headers: {
-          ...config.headers,
-          'X-Trace-Id': crypto.randomUUID()
-        }
-      }
+      config: { ...config, headers: { ...config.headers, 'X-Trace-Id': crypto.randomUUID() } }
     }
   }
 }

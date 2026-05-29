@@ -9,6 +9,7 @@
 **背景**：原实现为通过「keyed — 前插 / 乱序保留测量」两条测试，故意不清空缓存。但当用户从 keyed 回切到 non-keyed（`getItemKey: fn` → `undefined`）时，`measuredByKey` 中会残留字符串 key（如 `'k0'`、`'k1'`），而 `keyOf(i)` 在 non-keyed 下返回 number `i`，这些字符串 key 既命不中 `has(index)` 查询、又继续贡献 `measuredSum` / `averageEstimate`，把未测项估值污染到上百像素级别。
 
 **修复**：在 `applyOptions` 中拆分两种切换语义：
+
 - `function → function`（keyed → keyed）：保留 `measuredByKey`（符合 TanStack 惯例、满足前插 / 乱序测试）
 - `undefined ↔ function`（key 空间切换）：清空 `measuredByKey` / `measuredSum` / `averageEstimate`，避免跨 key 空间污染
 
@@ -25,6 +26,7 @@
 ### 4. P3：`measureElement` 重排测试增强
 
 原测试只间接断言「`measure(5, 42)` 落在 k5」，等价于 `measure` 本身的正确性，对 bug 真实触发点（后续新 element 进入旧 index 时误 unobserve）覆盖不足。新增 3 条用例：
+
 - **A 迁移后新元素 B 进入 A 旧 index**：验证 A 仍绑在 index=5（能被 `measure(5,42)` 命中）、B 已挂在 index=2（能被 `measure(2,99)` 命中）、`setCount(2)` 清理路径不抛错。
 - **getItemKey 切换语义 —— keyed → non-keyed 回切**：通过 `totalSize` 直接观察缓存清空效果（若未清空会残留污染的 averageEstimate）。
 - **getItemKey 切换语义 —— non-keyed → keyed 首次启用**：同上方向相反。

@@ -86,8 +86,8 @@ export class Decimal {
 
   add(other: Decimal): Decimal {
     const maxScale = Math.max(this.scale, other.scale)
-    const a = this.n * (10n ** BigInt(maxScale - this.scale))
-    const b = other.n * (10n ** BigInt(maxScale - other.scale))
+    const a = this.n * 10n ** BigInt(maxScale - this.scale)
+    const b = other.n * 10n ** BigInt(maxScale - other.scale)
     const res = Object.create(Decimal.prototype) as Decimal
     res.n = a + b
     res.scale = maxScale
@@ -97,8 +97,8 @@ export class Decimal {
 
   sub(other: Decimal): Decimal {
     const maxScale = Math.max(this.scale, other.scale)
-    const a = this.n * (10n ** BigInt(maxScale - this.scale))
-    const b = other.n * (10n ** BigInt(maxScale - other.scale))
+    const a = this.n * 10n ** BigInt(maxScale - this.scale)
+    const b = other.n * 10n ** BigInt(maxScale - other.scale)
     const res = Object.create(Decimal.prototype) as Decimal
     res.n = a - b
     res.scale = maxScale
@@ -116,7 +116,7 @@ export class Decimal {
 
   div(other: Decimal, precision = 20): Decimal {
     const scaleUp = precision + other.scale
-    const n = this.n * (10n ** BigInt(scaleUp))
+    const n = this.n * 10n ** BigInt(scaleUp)
     const res = Object.create(Decimal.prototype) as Decimal
     res.n = n / other.n
     res.scale = precision + this.scale

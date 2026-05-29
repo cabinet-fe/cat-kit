@@ -263,6 +263,35 @@ describe('对象工具函数', () => {
 
         warnSpy.mockRestore()
       })
+
+      it('应该支持字符串数组形式获取简单属性', () => {
+        const obj = { a: 1, b: 2 }
+
+        expect(o(obj).get(['a'])).toBe(1)
+        expect(o(obj).get(['b'])).toBe(2)
+      })
+
+      it('应该支持字符串数组形式的链式属性访问', () => {
+        const obj = { a: { b: { c: 'value' } } }
+
+        expect(o(obj).get(['a', 'b', 'c'])).toBe('value')
+      })
+
+      it('使用字符串数组形式且缺少路径时应该返回 undefined 而不是抛错', () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const obj = { a: {} }
+
+        expect(o(obj).get(['a', 'missing', 'prop'])).toBeUndefined()
+        expect(warnSpy).toHaveBeenCalledWith('a,missing,prop访问中断')
+
+        warnSpy.mockRestore()
+      })
+
+      it('使用空数组形式时应该返回原始对象值本身', () => {
+        const obj = { a: 1, b: 2 }
+
+        expect(o(obj).get([])).toBe(obj)
+      })
     })
 
     describe('set', () => {

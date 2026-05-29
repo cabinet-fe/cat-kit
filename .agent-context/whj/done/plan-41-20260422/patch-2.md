@@ -12,6 +12,7 @@
 6. **保留 patch-1 的 rAF 合帧与 perf 面板 DOM 直写**：订阅回调仍按 `requestAnimationFrame` 合帧为单次 `applySnapshot`；FPS/minFPS/帧耗时/notify 等指标依旧走 `writePerf` 低频直写，不经由 Vue reactive。
 
 同步更新文档与技能说明：
+
 - `docs/content/packages/fe/virtualizer.md`：重写 demo 说明，记录实测性能（压测期间 CPU ≤5%、FPS 稳定 120、剖面无 Vue patch 热路径），并在 Vue 封装建议里新增「极致性能场景让框架只渲染一次静态骨架」条目。
 - `skills/cat-kit-fe/references/virtualizer.md`：补充两条最佳实践 —— 宿主框架只渲染一次静态骨架 + 原生 DOM 增量维护节点池；以及一次性 `measureMany` 的前提条件。
 

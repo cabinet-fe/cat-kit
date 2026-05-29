@@ -71,7 +71,7 @@
 
 - 在 “快速使用” 附近新增一个 **API 扩展** 小节，以列表形式补充：
   - `getItemKey` 的作用、类型 `(index: number) => number | string`、必须保持对同一数据项稳定的约束、“count 收缩时不再被 `[0, count)` 引用的 key 会被自动清理”的生命周期声明。
-  - `scrollToIndex/scrollToOffset` 的 `behavior: 'smooth'` 语义：浏览器原生平滑滚动 + rAF 校准；给出 “当用户在动画中滚动或再次调用 scrollTo* 时校准循环会被终止” 以及 5 秒安全阀。
+  - `scrollToIndex/scrollToOffset` 的 `behavior: 'smooth'` 语义：浏览器原生平滑滚动 + rAF 校准；给出 “当用户在动画中滚动或再次调用 scrollTo\* 时校准循环会被终止” 以及 5 秒安全阀。
   - smooth 下 `snapshot.offset` 由 scroll 事件驱动，业务不应假设 `scrollTo*` 调用后立刻等于目标值。
 - 新增一个 **前插/乱序列表** 的代码片段（`ts` 代码块，~15 行），演示 `getItemKey` + `setCount` + 数据顺序切换时测量缓存复用的典型用法；不新增 demo `.vue` 文件以控制 scope。
 
@@ -85,7 +85,7 @@
 ### 7. 生成物与 changeset
 
 - 跑 `bun run sync-cat-kit-skills-api`，同步 `skills/cat-kit-fe/generated/index.d.ts`、`skills/cat-kit-fe/generated/virtualizer/index.d.ts`、`skills/cat-kit-fe/generated/manifest.json`。
-- 新增一个 changeset：`.changeset/virtualizer-keyed-smooth.md`，`@cat-kit/fe: minor`，一句话总结「Virtualizer: 新增 getItemKey 支持按 key 复用测量；scrollTo* 的 behavior: 'smooth' 支持 rAF 校准」。
+- 新增一个 changeset：`.changeset/virtualizer-keyed-smooth.md`，`@cat-kit/fe: minor`，一句话总结「Virtualizer: 新增 getItemKey 支持按 key 复用测量；scrollTo\* 的 behavior: 'smooth' 支持 rAF 校准」。
 
 ### 8. 验证
 

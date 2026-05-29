@@ -16,7 +16,7 @@
    - `string.md`：字符串操作
    - `number.md`：数字操作（增加 demo 引用）
    - `convert.md`：数据转换
-   保持原有内容完整，为每个子文件补充 `sidebarOrder` frontmatter 以控制排序。
+     保持原有内容完整，为每个子文件补充 `sidebarOrder` frontmatter 以控制排序。
 
 2. **数字操作 Web 示例**：创建两个 Vue demo 文件：
    - `docs/examples/core/number-calc-demo.vue`：表达式计算器，支持输入数学表达式实时计算（如 `0.1 + 0.2`、`1 + 2 * (3 + 4)`），展示 `$n.calc()` 能力，同时提供浮点数精度问题对比（JS 原生 vs `$n.calc`）。

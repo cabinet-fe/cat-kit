@@ -71,6 +71,7 @@
 - `/Users/whj/Codes/cat-kit/.gemini/skills/ac-workflow/actions/rush.md`
 
 ## 历史补丁
+
 - patch-1: 回填 agent-context Skill 模板源并补回归验证
 - patch-2: 安装目标对齐 .agents 标准并增加 Gemini CLI
 - patch-3: 纠正安装目标：Antigravity 保留 .agent，.agents 独立为开放标准选项

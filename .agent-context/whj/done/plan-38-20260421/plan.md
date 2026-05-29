@@ -31,10 +31,10 @@
 
 实施和文档全程采用以下分组：
 
-| 组别 | 语义 | 成员 |
-|------|------|------|
-| **fixed 组** | 版本号绑定、必须同批发布 | `@cat-kit/core`、`@cat-kit/http`、`@cat-kit/fe`、`@cat-kit/be` |
-| **独立包** | 各自独立版本号、可单独发布 | `@cat-kit/cli`、`@cat-kit/agent-context`、`@cat-kit/vitepress-theme`、`@cat-kit/tsconfig` |
+| 组别         | 语义                       | 成员                                                                                      |
+| ------------ | -------------------------- | ----------------------------------------------------------------------------------------- |
+| **fixed 组** | 版本号绑定、必须同批发布   | `@cat-kit/core`、`@cat-kit/http`、`@cat-kit/fe`、`@cat-kit/be`                            |
+| **独立包**   | 各自独立版本号、可单独发布 | `@cat-kit/cli`、`@cat-kit/agent-context`、`@cat-kit/vitepress-theme`、`@cat-kit/tsconfig` |
 
 > 发布时「选择粒度」= 1 个 fixed 组（整体）+ 4 个独立包 = 5 个可选项。用户可任意组合（至少选 1 项）。
 
@@ -54,7 +54,7 @@
   ```
 - 其它字段保持：`commit: false`、`access: "public"`、`baseBranch: "main"`、`updateInternalDependencies: "patch"`、`linked: []`、`ignore: []`。
 
-1.2 在根 `package.json` `devDependencies` 中添加 `@changesets/changelog-github`：
+  1.2 在根 `package.json` `devDependencies` 中添加 `@changesets/changelog-github`：
 
 ```sh
 bun add -D -w @changesets/changelog-github
@@ -71,13 +71,13 @@ bun add -D -w @changesets/changelog-github
 
 2.1 修改清单（基于当前仓库快照，实施时以实际文件为准）：
 
-| 文件 | 依赖字段 | 包名 | 当前值 | 目标值 |
-|------|-----------|------|--------|--------|
-| `packages/be/package.json` | dependencies | `@cat-kit/core` | `^1.0.2` | `workspace:^` |
-| `packages/fe/package.json` | dependencies | `@cat-kit/core` | `^1.0.2` | `workspace:^` |
-| `packages/http/package.json` | dependencies | `@cat-kit/core` | `^1.0.2` | `workspace:^` |
+| 文件                                    | 依赖字段     | 包名            | 当前值   | 目标值        |
+| --------------------------------------- | ------------ | --------------- | -------- | ------------- |
+| `packages/be/package.json`              | dependencies | `@cat-kit/core` | `^1.0.2` | `workspace:^` |
+| `packages/fe/package.json`              | dependencies | `@cat-kit/core` | `^1.0.2` | `workspace:^` |
+| `packages/http/package.json`            | dependencies | `@cat-kit/core` | `^1.0.2` | `workspace:^` |
 | `packages/vitepress-theme/package.json` | dependencies | `@cat-kit/core` | `^1.0.2` | `workspace:^` |
-| `packages/vitepress-theme/package.json` | dependencies | `@cat-kit/fe` | `^1.0.2` | `workspace:^` |
+| `packages/vitepress-theme/package.json` | dependencies | `@cat-kit/fe`   | `^1.0.2` | `workspace:^` |
 
 已是 `workspace:*` 的 `@cat-kit/tsconfig`（devDependencies）保持不变。
 
@@ -109,7 +109,7 @@ bun add -D -w @changesets/changelog-github
 - 交互式选择使用 `@inquirer/prompts`（仓库内已由 `@cat-kit/agent-context` 引入，脚本通过 `bun add -D -w @inquirer/prompts` 将其升级为仓库 root 的开发依赖以避免走 workspace hoisting 的不确定性）。
 - 所有子进程调用通过 `Bun.$` 模板或 `node:child_process` 的 `spawnSync`，stdin/stdout/stderr 透传。
 
-3.2 脚本内部常量定义（需与实际代码一致）：
+  3.2 脚本内部常量定义（需与实际代码一致）：
 
 ```ts
 const FIXED_GROUP = ['@cat-kit/core', '@cat-kit/http', '@cat-kit/fe', '@cat-kit/be'] as const
@@ -123,7 +123,11 @@ const SELECTABLE_UNITS = [
   { id: 'fixed', label: 'core / http / fe / be（fixed 组）', packages: FIXED_GROUP },
   { id: 'cli', label: '@cat-kit/cli', packages: ['@cat-kit/cli'] },
   { id: 'agent-context', label: '@cat-kit/agent-context', packages: ['@cat-kit/agent-context'] },
-  { id: 'vitepress-theme', label: '@cat-kit/vitepress-theme', packages: ['@cat-kit/vitepress-theme'] },
+  {
+    id: 'vitepress-theme',
+    label: '@cat-kit/vitepress-theme',
+    packages: ['@cat-kit/vitepress-theme']
+  },
   { id: 'tsconfig', label: '@cat-kit/tsconfig', packages: ['@cat-kit/tsconfig'] }
 ]
 ```
@@ -311,12 +315,12 @@ jobs:
 - `publish: bun run release:publish` 展开为 `bun run changeset publish`。`changeset publish` 内部调用 `npm publish`，通过 `actions/setup-node@v5` 的 `registry-url` 生成的临时 `.npmrc` 与 `NODE_AUTH_TOKEN` 完成 registry 认证。
 - `NPM_TOKEN` 与 `NODE_AUTH_TOKEN` 同时保留，兜底 changesets/action 与 bun 内部 publish 检测逻辑对 token 命名的不同预期。
 
-5.2 兼容性验证要点（在 5.3 实施验证中明确执行）：
+  5.2 兼容性验证要点（在 5.3 实施验证中明确执行）：
 
 - 手工在 Actions 页面以 `packages=@cat-kit/cli` 为参数触发一次 workflow run；在 `.changeset/` 无未消费 changeset 时预期 `changesets/action` 打印 `No unreleased changesets found, creating nothing` 并以成功结束。
 - 若报「no package manager detected」，降级方案：把 publish 步骤替换为手写版（`run: bun run release:publish` 直接跑；并另加一个 step 自行解析 `changeset publish` 的输出创建 per-pkg tag 与 `gh release create`）。此降级方案仅在 primary 方案确认失败时启用，不在主实施路径执行。
 
-5.3 部署后清理：删除 5.2 中可能产生的任何临时 tag 或 release 条目（若 primary 方案下 changesets/action 因「无变更」跳过，则无需清理）。
+  5.3 部署后清理：删除 5.2 中可能产生的任何临时 tag 或 release 条目（若 primary 方案下 changesets/action 因「无变更」跳过，则无需清理）。
 
 完成标准：
 
@@ -329,12 +333,15 @@ jobs:
 6.1 同步更新根 `CLAUDE.md` 与 `AGENTS.md`（两份文件内容保持完全一致，都需修改）：
 
 - 「常用命令」章节中将：
+
   ```
   # 版本与发布
   bun run changeset
   bun run version
   ```
+
   替换为：
+
   ```
   # 录入变更（开发者每次完成功能后执行）
   bun run changeset
@@ -347,7 +354,7 @@ jobs:
   - 版本管理：Changesets（`fixed` 组：core/http/fe/be 共版本；其它包独立版本）。
   - 发布流程：本地 `bun run release`（选包 + `changeset version` + push）→ `gh workflow run` 触发远端 Actions 执行构建与 publish。
 
-6.2 新增文档页面 `docs/content/guide/publishing.md`（VitePress 自动扫描 sidebar，无需改动 `docs/.vitepress/config.ts` 或 `sidebar.ts`）。页面结构包含以下 4 个 H2 小节：
+    6.2 新增文档页面 `docs/content/guide/publishing.md`（VitePress 自动扫描 sidebar，无需改动 `docs/.vitepress/config.ts` 或 `sidebar.ts`）。页面结构包含以下 4 个 H2 小节：
 
 1. **## 录入变更** — 开发者完成功能后执行 `bun run changeset` 的规范：patch/minor/major 选择原则；摘要格式要求；fixed 组的自动传染行为；**重要纪律：每次 `changeset` 只为本轮要发的包录入**（便于发布时一致性校验通过）。
 2. **## 发布流程** — 按 `scripts/release.ts` 实际行为分 8 个阶段逐步说明（前置检查 → 解析 changeset → 选择范围 → 一致性校验 → version → commit → push → 触发 workflow），附最终 GitHub Actions 执行链路图（用 mermaid 或文字描述均可）。
@@ -389,7 +396,7 @@ title: 发布流程
 - [ ] 验证 fixed 组行为：录入一条针对 `@cat-kit/core` 的 patch 级 changeset，`bun run release --select fixed` 走完发布，确认 `core / http / fe / be` 四个包同步升 patch、版本号一致，四条 GitHub Release 均已生成。
 - [ ] 验证错配校验：同时录入 `@cat-kit/cli`（patch）和 `@cat-kit/core`（patch）两条 changeset，运行 `bun run release --select cli` **应当报错退出**（fixed 组有 changeset 但未被选中）；改为 `--select cli,fixed` 后应正常走完。
 
-7.2 全部通过后执行 `agent-context done` 归档本计划。任一步失败走 patch 协议修补。
+  7.2 全部通过后执行 `agent-context done` 归档本计划。任一步失败走 patch 协议修补。
 
 ## 影响范围
 

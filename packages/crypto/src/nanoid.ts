@@ -4,8 +4,7 @@
  * Source files: index.js, index.browser.js, url-alphabet/index.js
  */
 
-export const urlAlphabet =
-  'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict'
+export const urlAlphabet = 'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict'
 
 const POOL_SIZE_MULTIPLIER = 128
 

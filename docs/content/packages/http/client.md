@@ -28,9 +28,7 @@ const http = new HTTPClient('/api', {
   headers: { 'X-App': 'cat-kit' }
 })
 
-const users = await http.get<{ id: number; name: string }[]>('/users', {
-  query: { page: 1 }
-})
+const users = await http.get<{ id: number; name: string }[]>('/users', { query: { page: 1 } })
 
 await http.post('/users', { name: 'Mimi' })
 ```
@@ -134,10 +132,7 @@ http.registerPlugin({
   beforeRequest(url, config) {
     return {
       url,
-      config: {
-        ...config,
-        headers: { ...config.headers, 'X-Trace-Id': crypto.randomUUID() }
-      }
+      config: { ...config, headers: { ...config.headers, 'X-Trace-Id': crypto.randomUUID() } }
     }
   }
 })
@@ -208,11 +203,7 @@ import type { HTTPResponse, RequestConfig } from '@cat-kit/http'
 
 class MockEngine extends HttpEngine {
   async request<T = any>(_url: string, _config: RequestConfig): Promise<HTTPResponse<T>> {
-    return {
-      data: { ok: true } as T,
-      code: 200,
-      headers: {}
-    }
+    return { data: { ok: true } as T, code: 200, headers: {} }
   }
 
   abort(): void {}

@@ -23,9 +23,7 @@ outline: deep
 ```json
 {
   "extends": "@cat-kit/tsconfig/tsconfig.node.json",
-  "compilerOptions": {
-    "outDir": "./dist"
-  },
+  "compilerOptions": { "outDir": "./dist" },
   "include": ["src/**/*.ts"]
 }
 ```
@@ -35,9 +33,7 @@ outline: deep
 ### 基础预设
 
 ```json
-{
-  "extends": "@cat-kit/tsconfig/tsconfig.json"
-}
+{ "extends": "@cat-kit/tsconfig/tsconfig.json" }
 ```
 
 适合：
@@ -48,9 +44,7 @@ outline: deep
 ### Node.js 预设
 
 ```json
-{
-  "extends": "@cat-kit/tsconfig/tsconfig.node.json"
-}
+{ "extends": "@cat-kit/tsconfig/tsconfig.node.json" }
 ```
 
 特点：
@@ -62,9 +56,7 @@ outline: deep
 ### Bun 预设
 
 ```json
-{
-  "extends": "@cat-kit/tsconfig/tsconfig.bun.json"
-}
+{ "extends": "@cat-kit/tsconfig/tsconfig.bun.json" }
 ```
 
 特点：
@@ -76,9 +68,7 @@ outline: deep
 ### Web 预设
 
 ```json
-{
-  "extends": "@cat-kit/tsconfig/tsconfig.web.json"
-}
+{ "extends": "@cat-kit/tsconfig/tsconfig.web.json" }
 ```
 
 特点：

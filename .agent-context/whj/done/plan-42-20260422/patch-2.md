@@ -26,6 +26,7 @@ expect(v.getItem(2).size).toBe(50)
 **背景**：旧 `applyMeasurement` 中「视口前方项尺寸变化 → 反向补偿 scrollTop 抑制抖动」的路径每条测量都直接 `el.scrollTop = this.offset`。同一批 `measureMany()` / `ResizeObserver` 回调里若有多条视口前方项同时变化（例如首屏多张图片一起解码完），会产生多次 `scrollTop` 写入。虚拟滚动同类库（如 virtua）通过 jump 合并把这一点压到每帧一次。
 
 **修复**：
+
 - 新增字段 `pendingScrollAdjust: number`，在 `applyMeasurement` 里只做「逻辑 offset 推进 + 累积器加法」，不再直接写 DOM。
 - 在 `recompute()` 入口统一 flush：若 `pendingScrollAdjust !== 0` 且 `scrollElement` 仍在，就按当前轴向写一次 `scrollLeft` / `scrollTop`。
 - 所有公共 mutation（`measure` / `measureMany` / `setCount` / `setOptions` / ResizeObserver 回调）最终都走 `recompute()`，天然确保每批只写一次；`reset()` 与 `unmount()` 在其它分支就会清空状态，不需要额外 flush。
@@ -57,6 +58,7 @@ expect(v.getItem(2).size).toBe(50)
 - 压缩 Virtualizer 主 header、applyOptions / pruneMeasured / measureElement / recompute 结构等分散的多行注释，同步移除与 scroll-reconciler.ts 重复的「smooth 校准设计说明」段。
 
 **体积**：
+
 - 旧：`packages/fe/src/virtualizer/{index.ts,resize-tracker.ts}` = 970 + 80 = **1050 行**。
 - 新：`index.ts` + `resize-tracker.ts` + `scroll-reconciler.ts` = 826 + 80 + 144 = **1050 行**。
 - 净增长 **0 行**；主文件从 970 降到 826，smooth 校准相关 170+ 行的状态机逻辑被集中到 144 行的新模块里。

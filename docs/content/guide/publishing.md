@@ -29,11 +29,11 @@ bun run changeset
 
 选择规则：
 
-| 变更级别 | 适用场景 |
-|---------|---------|
-| `patch` | 修复 bug、内部重构、不影响公开 API |
-| `minor` | 新增功能、新增公开 API、不破坏既有兼容性 |
-| `major` | 破坏性变更（删除/重命名公开 API、行为不兼容） |
+| 变更级别 | 适用场景                                      |
+| -------- | --------------------------------------------- |
+| `patch`  | 修复 bug、内部重构、不影响公开 API            |
+| `minor`  | 新增功能、新增公开 API、不破坏既有兼容性      |
+| `major`  | 破坏性变更（删除/重命名公开 API、行为不兼容） |
 
 摘要（summary）需包含足够背景以便在 CHANGELOG 中被用户读懂：**改了什么 + 为什么 + 对调用方的影响**。摘要会被 `changeset version` 合并进各包 `CHANGELOG.md`，远端 release 脚本会直接读取对应版本小节来生成 GitHub Release 正文。
 
@@ -77,10 +77,10 @@ push: branches: [main], paths: ['packages/*/CHANGELOG.md']
 
 ## 版本策略
 
-| 组别 | 成员 | 语义 |
-|------|------|------|
-| **fixed 组** | `@cat-kit/core`、`@cat-kit/http`、`@cat-kit/fe`、`@cat-kit/be` | 版本号必须一致，单包 changeset 会整组升级 |
-| **独立包** | `@cat-kit/cli`、`@cat-kit/agent-context`、`@cat-kit/vitepress-theme`、`@cat-kit/tsconfig` | 各自独立版本号 |
+| 组别         | 成员                                                                                      | 语义                                      |
+| ------------ | ----------------------------------------------------------------------------------------- | ----------------------------------------- |
+| **fixed 组** | `@cat-kit/core`、`@cat-kit/http`、`@cat-kit/fe`、`@cat-kit/be`                            | 版本号必须一致，单包 changeset 会整组升级 |
+| **独立包**   | `@cat-kit/cli`、`@cat-kit/agent-context`、`@cat-kit/vitepress-theme`、`@cat-kit/tsconfig` | 各自独立版本号                            |
 
 ### GitHub Release 规则
 

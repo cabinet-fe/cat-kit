@@ -21,17 +21,20 @@ export type PromptToolId = 'claude' | 'codex' | 'gemini' | 'antigravity'
 新建 `packages/agent-context/src/commands/prompt-gen.ts`，实现以下逻辑：
 
 **工具配置映射**（每个工具的目标文件路径，均为用户主目录的绝对路径）：
+
 - `claude` → `~/.claude/CLAUDE.md`
 - `codex` → `~/.codex/AGENTS.md`
 - `gemini` → `~/.gemini/GEMINI.md`
 - `antigravity` → `~/.gemini/AGENTS.md`
 
 **命令选项**：
+
 - `--tools <tools>`：逗号分隔的工具列表（默认全部4个）
 - `--yes`：非交互模式，文件已存在时直接覆盖
 - `--check`：仅打印将要写入的文件路径和内容，不实际写入
 
 **写入行为**：
+
 - 若目标文件不存在：直接创建（同时创建父目录）
 - 若目标文件已存在且未传 `--yes`：通过 checkbox prompt 让用户确认哪些工具要覆盖，未选中的跳过
 - 若目标文件已存在且传了 `--yes`：直接覆盖
@@ -44,6 +47,7 @@ export type PromptToolId = 'claude' | 'codex' | 'gemini' | 'antigravity'
 - 默认用中文沟通，技术术语保留英文原文（不要翻译 TypeScript、hook、render此类的）
 
 ## 本地环境
+
 - 硬件：MacBook Air M5，arm64 架构
 - Terminal：Ghostty
 
@@ -52,14 +56,17 @@ export type PromptToolId = 'claude' | 'codex' | 'gemini' | 'antigravity'
 - 今天日期：每次对话开始时你应该知道当前日期，请基于此判断信息的时效性
 
 ## 不要做的事情
+
 - 不要在代码末尾加「你可以进一步扩展...」这类废话
 - 不要重复我刚说过的话（「你提到了...」）
 
 ## 自适应纠错机制
+
 - 我是一个人类，我提的问题很可能会存在逻辑漏洞，不要盲目执行我可能错误的思路， 要用于纠正我的错误。
 ```
 
 **输出格式**（仿照 install 的 printRunSummary 风格）：
+
 - `--check` 模式：逐行打印 `会写入: <工具名>  →  <绝对路径>`
 - 实际写入模式：完成后打印摘要，区分「新建」和「覆盖」，跳过的工具标注「已跳过」
 

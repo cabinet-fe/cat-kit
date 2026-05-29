@@ -4,10 +4,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-type PublishedPackage = {
-  name: string
-  version: string
-}
+type PublishedPackage = { name: string; version: string }
 
 type ReleaseSpec = {
   tagName: string
@@ -17,10 +14,7 @@ type ReleaseSpec = {
   targetCommitish: string
 }
 
-type ReleaseRecord = {
-  id: number
-  html_url?: string
-}
+type ReleaseRecord = { id: number; html_url?: string }
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -98,7 +92,9 @@ async function readChangelogBody(pkgName: string, version: string): Promise<stri
   const match = content.match(pattern)
 
   if (!match) {
-    console.warn(`warning: 未在 ${changelogPath} 找到版本 ${version} 的 changelog 小节，release 正文将退回默认文案`)
+    console.warn(
+      `warning: 未在 ${changelogPath} 找到版本 ${version} 的 changelog 小节，release 正文将退回默认文案`
+    )
     return ''
   }
 
@@ -113,7 +109,10 @@ function renderIndependentBody(pkg: PublishedPackage, changelogBody: string): st
   return `Released \`${pkg.name}@${pkg.version}\`.\n\n- 无独立 changelog 条目（仅版本同步或依赖同步）`
 }
 
-function renderFixedBody(version: string, sections: Array<{ pkgName: string; body: string }>): string {
+function renderFixedBody(
+  version: string,
+  sections: Array<{ pkgName: string; body: string }>
+): string {
   const lines = [
     `Released fixed group \`${version}\`.`,
     '',

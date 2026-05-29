@@ -8,10 +8,10 @@
 
 ## API 分类
 
-| 分类 | 文档 | 说明 |
-|------|------|------|
-| 随机 ID | [nanoid.md](nanoid.md) | nanoid、customAlphabet、customRandom、random、urlAlphabet |
-| 示例 | [examples.md](examples.md) | 常见随机 ID 用法 |
+| 分类    | 文档                       | 说明                                                      |
+| ------- | -------------------------- | --------------------------------------------------------- |
+| 随机 ID | [nanoid.md](nanoid.md)     | nanoid、customAlphabet、customRandom、random、urlAlphabet |
+| 示例    | [examples.md](examples.md) | 常见随机 ID 用法                                          |
 
 ## 类型签名
 

@@ -241,10 +241,7 @@ input?.addEventListener('change', async (e) => {
 ```typescript
 function readChunks(
   file: Blob | File,
-  options?: {
-    chunkSize?: number
-    offset?: number
-  }
+  options?: { chunkSize?: number; offset?: number }
 ): AsyncGenerator<Uint8Array>
 ```
 

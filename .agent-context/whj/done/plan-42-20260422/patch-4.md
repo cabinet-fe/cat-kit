@@ -27,25 +27,25 @@ plan-42（keyed items + smooth-scroll reconciliation）落地后，对 Virtualiz
 
 全部 17 个公共方法补齐 TSDoc：
 
-| 方法 | 重点补充 |
-| --- | --- |
-| `constructor` | 不挂载 DOM、`initialOffset` / `initialViewport` 语义、示例 |
-| `setOptions` | 同轮更新顺序（`getItemKey` 先于 `count`）、keyed↔non-keyed / keyed→keyed 的缓存清空语义 |
-| `setCount` | 收缩 / 扩张 / 无变化三分支行为 |
-| `setViewport` | 何时由 RO 自动同步、何时手动调用、offset clamp |
-| `setOffset` | 「只更新逻辑 offset 不写 DOM」与 `scrollToOffset` 的区别 |
-| `mount` | 传相同 / 不同 / `null` 元素的三种语义、订阅的三类事件源 |
-| `unmount` | 不清测量缓存与订阅者、实例可复用 |
-| `destroy` | 组件卸载必须调用、销毁后不得再用 |
-| `subscribe` | 注册时立即同步调用一次、结构性变化判据、返回取消函数 |
-| `measure` | 单条语义、越界静默忽略、与 `measureElement` 的选型 |
-| `measureMany` | 批量补偿合并为一次 DOM 写入、首屏优先路径示例 |
-| `measureElement` | RO / fallback、`null` 卸载、keyed 模式下 element 迁移 index 的行为 |
-| `scrollToOffset` | `align` 无效、`behavior: 'smooth'` rAF 校准、未 mount 行为 |
-| `scrollToIndex` | `align` 默认值、`count=0` no-op、smooth 漂移修正、**不要**同步读 `snapshot.offset` |
-| `reset` | 不解绑容器、不清订阅者、优先 `getItemKey` 保留测量 |
-| `getSnapshot` | 同一对象引用在纯 offset 帧保留不变、禁止 `===` 判重渲染 |
-| `getItem` | `RangeError` 抛错条件、业务侧典型使用场景 |
+| 方法             | 重点补充                                                                                |
+| ---------------- | --------------------------------------------------------------------------------------- |
+| `constructor`    | 不挂载 DOM、`initialOffset` / `initialViewport` 语义、示例                              |
+| `setOptions`     | 同轮更新顺序（`getItemKey` 先于 `count`）、keyed↔non-keyed / keyed→keyed 的缓存清空语义 |
+| `setCount`       | 收缩 / 扩张 / 无变化三分支行为                                                          |
+| `setViewport`    | 何时由 RO 自动同步、何时手动调用、offset clamp                                          |
+| `setOffset`      | 「只更新逻辑 offset 不写 DOM」与 `scrollToOffset` 的区别                                |
+| `mount`          | 传相同 / 不同 / `null` 元素的三种语义、订阅的三类事件源                                 |
+| `unmount`        | 不清测量缓存与订阅者、实例可复用                                                        |
+| `destroy`        | 组件卸载必须调用、销毁后不得再用                                                        |
+| `subscribe`      | 注册时立即同步调用一次、结构性变化判据、返回取消函数                                    |
+| `measure`        | 单条语义、越界静默忽略、与 `measureElement` 的选型                                      |
+| `measureMany`    | 批量补偿合并为一次 DOM 写入、首屏优先路径示例                                           |
+| `measureElement` | RO / fallback、`null` 卸载、keyed 模式下 element 迁移 index 的行为                      |
+| `scrollToOffset` | `align` 无效、`behavior: 'smooth'` rAF 校准、未 mount 行为                              |
+| `scrollToIndex`  | `align` 默认值、`count=0` no-op、smooth 漂移修正、**不要**同步读 `snapshot.offset`      |
+| `reset`          | 不解绑容器、不清订阅者、优先 `getItemKey` 保留测量                                      |
+| `getSnapshot`    | 同一对象引用在纯 offset 帧保留不变、禁止 `===` 判重渲染                                 |
+| `getItem`        | `RangeError` 抛错条件、业务侧典型使用场景                                               |
 
 ### 2. 文档：`docs/content/packages/fe/virtualizer.md` 改写「API 参考」
 

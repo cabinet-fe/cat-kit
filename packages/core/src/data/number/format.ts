@@ -90,7 +90,10 @@ function resolveDecimalPart(raw: string, config: CurrencyConfig): DecimalResult 
  * @param v 数字
  * @param precision 精度配置
  */
-export function toFixed(v: number, precision: number | { maxPrecision?: number; minPrecision?: number }) {
+export function toFixed(
+  v: number,
+  precision: number | { maxPrecision?: number; minPrecision?: number }
+) {
   const isNegative = v < 0
   let [int, decimal = ''] = String(Math.abs(v)).split('.') as [string, string | undefined]
 

@@ -39,17 +39,17 @@ bun add @cat-kit/core @cat-kit/fe
 
 ## 按需安装
 
-| 需求                      | 建议安装                 |
-| ------------------------- | ------------------------ |
-| 只需要通用工具            | `@cat-kit/core`          |
-| 浏览器或 Node/Bun 请求客户端 | `@cat-kit/http`       |
-| 随机 ID、安全摘要、加密工具 | `@cat-kit/crypto`      |
-| 浏览器存储、文件、Web API | `@cat-kit/fe`            |
-| Node/Bun 后端工具         | `@cat-kit/be`            |
-| 命令行辅助工具            | `@cat-kit/cli`           |
-| AI 协作工作流             | `@cat-kit/agent-context` |
-| TypeScript 预设           | `@cat-kit/tsconfig`      |
-| VitePress 文档主题        | `@cat-kit/vitepress-theme` |
+| 需求                         | 建议安装                   |
+| ---------------------------- | -------------------------- |
+| 只需要通用工具               | `@cat-kit/core`            |
+| 浏览器或 Node/Bun 请求客户端 | `@cat-kit/http`            |
+| 随机 ID、安全摘要、加密工具  | `@cat-kit/crypto`          |
+| 浏览器存储、文件、Web API    | `@cat-kit/fe`              |
+| Node/Bun 后端工具            | `@cat-kit/be`              |
+| 命令行辅助工具               | `@cat-kit/cli`             |
+| AI 协作工作流                | `@cat-kit/agent-context`   |
+| TypeScript 预设              | `@cat-kit/tsconfig`        |
+| VitePress 文档主题           | `@cat-kit/vitepress-theme` |
 
 如果一个项目会直接导入多个包，就把这些包一起安装。`@cat-kit/http`、`@cat-kit/fe`、`@cat-kit/be` 内部会依赖 `@cat-kit/core`，但如果你的代码也会直接导入 `@cat-kit/core`，仍然建议显式安装。
 
@@ -93,9 +93,7 @@ bun add -d @cat-kit/tsconfig typescript
 ```
 
 ```json
-{
-  "extends": "@cat-kit/tsconfig/tsconfig.node.json"
-}
+{ "extends": "@cat-kit/tsconfig/tsconfig.node.json" }
 ```
 
 ## 验证安装

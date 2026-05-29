@@ -71,6 +71,7 @@ skills/cat-kit/
 ```
 
 **设计原则**：
+
 - SKILL.md 作为唯一入口，最多 60 行，提供包索引表 + 渐进式阅读路径说明
 - `packages/<pkg>/index.md` 作为二级入口，列出该包的所有导出分类和文档链接
 - `packages/<pkg>/<topic>.md` 为具体 API 文档，格式见步骤 3
@@ -80,6 +81,7 @@ skills/cat-kit/
 ### 2. 编写 `skills/cat-kit/SKILL.md` 入口点
 
 内容要求：
+
 - YAML 元数据：`name: cat-kit`，`description: CatKit 工具包全集——渐进式 API 文档，覆盖所有 @cat-kit/* 包`
 - H1 标题：`# cat-kit`
 - 简短说明（1 句）：面向已安装 `@cat-kit/*` npm 包的真实项目
@@ -100,6 +102,7 @@ skills/cat-kit/
 为 `packages/<pkg>/<topic>.md` 统一内容格式：
 
 **index.md 格式**：
+
 ```markdown
 # @cat-kit/<pkg>
 
@@ -111,10 +114,10 @@ skills/cat-kit/
 
 ## API 分类
 
-| 分类 | 文档 | 说明 |
-|------|------|------|
+| 分类     | 文档               | 说明                   |
+| -------- | ------------------ | ---------------------- |
 | 数据操作 | [data.md](data.md) | 数组并集、交集、去重等 |
-| ... | ... | ... |
+| ...      | ...                | ...                    |
 
 ## 全部导出
 
@@ -122,7 +125,8 @@ skills/cat-kit/
 ```
 
 **topic.md 格式**：
-```markdown
+
+````markdown
 # <pkg> — <topic>
 
 [该分类的概览，1-2 句]
@@ -136,6 +140,7 @@ skills/cat-kit/
 ```ts
 function functionName(param: Type): ReturnType
 ```
+````
 
 [1-2 句功能说明]
 
@@ -148,6 +153,7 @@ function functionName(param: Type): ReturnType
 ## 类型签名
 
 > 详见 [`generated/<pkg>/<path>.d.ts`](../../generated/<pkg>/<path>.d.ts)
+
 ```
 
 **examples.md 格式**：
@@ -182,3 +188,4 @@ function functionName(param: Type): ReturnType
 - 旧技能目录 `skills/cat-kit-*/`、`skills/use-cat-kit/` 未删除（待后续计划统一清理）
 
 ## 历史补丁
+```

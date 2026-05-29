@@ -200,25 +200,25 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
   /**
    * 获取对象的值
    *
-   * @param prop 需要获取的属性, 可以是链式的属性
+   * @param prop 需要获取的属性, 可以是链式的属性或字符串数组
    *
    * @returns 值
    */
-  get<T extends any = any>(prop: string): T | undefined {
+  get<T extends any = any>(prop: string | string[]): T | undefined {
     let ret: Record<string, any> | undefined = this.raw
 
-    const propPath = prop.split('.')
-    const lastProp = propPath.pop()!
+    const propPath = Array.isArray(prop) ? prop : prop.split('.')
+    if (propPath.length === 0) return ret as unknown as T
 
-    for (const p of propPath) {
-      ret = ret?.[p]
+    for (let i = 0; i < propPath.length - 1; i++) {
+      ret = ret?.[propPath[i]]
       if (isEmpty(ret)) {
         console.warn(`${prop}访问中断`)
         return undefined
       }
     }
 
-    return ret?.[lastProp] as T | undefined
+    return ret?.[propPath[propPath.length - 1]] as T | undefined
   }
 
   /**

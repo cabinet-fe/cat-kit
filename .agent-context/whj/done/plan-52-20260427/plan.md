@@ -27,6 +27,7 @@
 ### 5. 删除旧技能目录
 
 删除以下目录及其全部内容：
+
 - `skills/use-cat-kit/`
 - `skills/cat-kit-core/`
 - `skills/cat-kit-http/`

@@ -9,8 +9,12 @@
 `docs/examples/fe/virtualizer/table.vue` 原 CSS：
 
 ```css
-.grid :deep(tbody tr:not(.spacer)) { background: var(--vp-c-bg); }
-.grid :deep(tbody tr:not(.spacer):nth-of-type(even)) { background: var(--vp-c-bg-soft); }
+.grid :deep(tbody tr:not(.spacer)) {
+  background: var(--vp-c-bg);
+}
+.grid :deep(tbody tr:not(.spacer):nth-of-type(even)) {
+  background: var(--vp-c-bg-soft);
+}
 ```
 
 `:nth-of-type(even)` 按 DOM **兄弟位序**判定，而非数据索引。tbody 结构是 `[beforeSpacer, row_a, row_b, ..., afterSpacer]`；每次滚动触发 `removeChild` / `insertBefore` 都让剩余数据行的兄弟位序整体 ±1，`:nth-of-type(even)` 命中集合整体翻转，浏览器被迫对所有可见行**重算样式并重绘所有子 td**。

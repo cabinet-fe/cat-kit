@@ -30,9 +30,7 @@ import { defineConfig } from 'vitepress'
 import { defineThemeConfig } from '@cat-kit/vitepress-theme/config'
 
 export default defineConfig({
-  ...defineThemeConfig({
-    examplesDir: '/absolute/path/to/docs/examples'
-  })
+  ...defineThemeConfig({ examplesDir: '/absolute/path/to/docs/examples' })
 })
 ```
 

@@ -18,13 +18,13 @@
 
 仅提取**确实在多处重复定义或使用**的常量：
 
-| 常量名 | 值 | 重复位置 |
-|--------|-----|----------|
-| `SKILL_NAME` | `'ac-workflow'` | `tools.ts` + `content/index.ts` 各定义一次 |
-| `AC_ROOT_DIR` | `'.agent-context'` | `reader.ts` + `commands/init.ts` |
-| `PLAN_FILE_NAME` | `'plan.md'` | `reader.ts`(2 次) + `validator.ts`(1 次) + `indexer.ts`(1 次) |
-| `DONE_DIR` | `'done'` | `archiver.ts` + `reader.ts` |
-| `ENV_FILE_NAME` | `'.env'` | `scope.ts`(2 次) + `commands/init.ts`(1 次) |
+| 常量名           | 值                 | 重复位置                                                      |
+| ---------------- | ------------------ | ------------------------------------------------------------- |
+| `SKILL_NAME`     | `'ac-workflow'`    | `tools.ts` + `content/index.ts` 各定义一次                    |
+| `AC_ROOT_DIR`    | `'.agent-context'` | `reader.ts` + `commands/init.ts`                              |
+| `PLAN_FILE_NAME` | `'plan.md'`        | `reader.ts`(2 次) + `validator.ts`(1 次) + `indexer.ts`(1 次) |
+| `DONE_DIR`       | `'done'`           | `archiver.ts` + `reader.ts`                                   |
+| `ENV_FILE_NAME`  | `'.env'`           | `scope.ts`(2 次) + `commands/init.ts`(1 次)                   |
 
 不提取仅单处使用的常量（`SKILL_FILE_NAME`、`PREPARING_DIR`、`INDEX_FILE_NAME`）。
 
@@ -84,7 +84,10 @@ export function parseCommaSeparatedIds<T extends string>(
   isValid: (value: string) => value is T,
   validOptions: readonly T[]
 ): T[] {
-  const parsed = raw.split(',').map((item) => item.trim().toLowerCase()).filter(Boolean)
+  const parsed = raw
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean)
   const result: T[] = []
   for (const value of parsed) {
     if (!isValid(value)) {

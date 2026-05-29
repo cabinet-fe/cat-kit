@@ -13,6 +13,7 @@
 同时修复主题客户端入口导出边界：`packages/vitepress-theme/src/index.ts` 不再导出 Node-only 的 markdown/vite 插件模块，避免客户端包被动引入服务端依赖。
 
 验证：
+
 - `bun run build`（`docs/`）通过；
 - 浏览器实测 `http://localhost:5173/cat-kit/packages/fe/storage`：
   - `::: demo fe/storage/basic.vue` 正常渲染为可交互 DemoContainer；

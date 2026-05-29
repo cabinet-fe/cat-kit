@@ -46,11 +46,7 @@ async function runPackageBuild(pkg: string): Promise<void> {
 
   console.log(`[sync] build: @cat-kit/${pkg}`)
 
-  const proc = Bun.spawnSync(['bun', 'run', 'build'], {
-    cwd,
-    stdout: 'inherit',
-    stderr: 'inherit'
-  })
+  const proc = Bun.spawnSync(['bun', 'run', 'build'], { cwd, stdout: 'inherit', stderr: 'inherit' })
 
   if (proc.exitCode !== 0) {
     throw new Error(`build failed for ${pkg} (exit ${proc.exitCode})`)

@@ -118,18 +118,18 @@ interface VirtualizerOptions {
 }
 ```
 
-| 字段 | 默认值 | 说明 |
-| --- | --- | --- |
-| `count` | `0` | 虚拟项总数。 |
-| `buffer` | `6` | 可视区外两侧额外预渲染的项数。数值越大滚动越不容易露白，但单帧渲染预算也越高。 |
-| `horizontal` | `false` | 水平滚动（默认垂直）。切换方向会重新按新轴向读写 `scrollLeft` / `scrollTop`。 |
-| `paddingStart` / `paddingEnd` | `0` | 列表首 / 末的固定内边距（px）。计入 `totalSize` 与 `beforeSize` / `afterSize`。 |
-| `gap` | `0` | 相邻两项间距（px），语义与 CSS `gap` 对齐，不作用于首尾。若只需首尾留白请用 `paddingStart` / `paddingEnd`。 |
-| `initialOffset` | `0` | **仅构造时生效**的初始滚动偏移，用于 SSR 水合前占位。`setOptions` 里传入会被忽略。 |
-| `initialViewport` | `0` | **仅构造时生效**的初始视口尺寸，用于 SSR 首屏。 |
-| `estimateSize` | `() => 36` | 未测项的尺寸估值函数。启用 `useMeasuredAverage` 后，只要有一个真实样本就会被「已测平均值」接管。 |
-| `useMeasuredAverage` | `true` | 未测项是否使用已测平均尺寸作为估值。开启时只在平均值发生整数级漂移时回刷未测段；关闭后完全受 `estimateSize` 控制。 |
-| `getItemKey` | `undefined` | 按数据项身份缓存测量值；见下文「[keyed items](#getitemkey-按数据项身份复用测量)」。 |
+| 字段                          | 默认值      | 说明                                                                                                               |
+| ----------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| `count`                       | `0`         | 虚拟项总数。                                                                                                       |
+| `buffer`                      | `6`         | 可视区外两侧额外预渲染的项数。数值越大滚动越不容易露白，但单帧渲染预算也越高。                                     |
+| `horizontal`                  | `false`     | 水平滚动（默认垂直）。切换方向会重新按新轴向读写 `scrollLeft` / `scrollTop`。                                      |
+| `paddingStart` / `paddingEnd` | `0`         | 列表首 / 末的固定内边距（px）。计入 `totalSize` 与 `beforeSize` / `afterSize`。                                    |
+| `gap`                         | `0`         | 相邻两项间距（px），语义与 CSS `gap` 对齐，不作用于首尾。若只需首尾留白请用 `paddingStart` / `paddingEnd`。        |
+| `initialOffset`               | `0`         | **仅构造时生效**的初始滚动偏移，用于 SSR 水合前占位。`setOptions` 里传入会被忽略。                                 |
+| `initialViewport`             | `0`         | **仅构造时生效**的初始视口尺寸，用于 SSR 首屏。                                                                    |
+| `estimateSize`                | `() => 36`  | 未测项的尺寸估值函数。启用 `useMeasuredAverage` 后，只要有一个真实样本就会被「已测平均值」接管。                   |
+| `useMeasuredAverage`          | `true`      | 未测项是否使用已测平均尺寸作为估值。开启时只在平均值发生整数级漂移时回刷未测段；关闭后完全受 `estimateSize` 控制。 |
+| `getItemKey`                  | `undefined` | 按数据项身份缓存测量值；见下文「[keyed items](#getitemkey-按数据项身份复用测量)」。                                |
 
 ### 构造与生命周期
 
@@ -231,9 +231,7 @@ v.measureMany(rows.map((r, i) => ({ index: i, size: r.height })))
 - keyed 模式下同一 element 迁移到新 index 时会自动清理旧 index 的 `mounted` 条目
 
 ```html
-<div v-for="item in items" :ref="(el) => v.measureElement(item.index, el as Element)">
-  ...
-</div>
+<div v-for="item in items" :ref="(el) => v.measureElement(item.index, el as Element)">...</div>
 ```
 
 ### 滚动
@@ -287,21 +285,21 @@ onBeforeUnmount(unsubscribe)
 
 ```typescript
 interface VirtualSnapshot {
-  items: VirtualItem[]               // 当前应渲染的项（已含 buffer 扩张）
+  items: VirtualItem[] // 当前应渲染的项（已含 buffer 扩张）
   range: { startIndex: number; endIndex: number } | null // 不含 buffer 的原始命中范围
-  totalSize: number                  // 列表内容总尺寸（含 padding）
-  beforeSize: number                 // items[0] 前需预留的占位空间
-  afterSize: number                  // items 末项后需预留的占位空间
-  offset: number                     // 当前滚动偏移
-  viewportSize: number               // 视口尺寸
-  horizontal: boolean                // 是否水平滚动
-  isScrolling: boolean               // 是否处于滚动中
+  totalSize: number // 列表内容总尺寸（含 padding）
+  beforeSize: number // items[0] 前需预留的占位空间
+  afterSize: number // items 末项后需预留的占位空间
+  offset: number // 当前滚动偏移
+  viewportSize: number // 视口尺寸
+  horizontal: boolean // 是否水平滚动
+  isScrolling: boolean // 是否处于滚动中
 }
 
 interface VirtualItem {
   index: number
-  start: number  // 到列表内容起点的距离
-  end: number    // 等于 start + size
+  start: number // 到列表内容起点的距离
+  end: number // 等于 start + size
   size: number
 }
 ```
