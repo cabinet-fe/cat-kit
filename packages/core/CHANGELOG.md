@@ -1,5 +1,11 @@
 # @cat-kit/core
 
+## 1.1.5
+
+### Patch Changes
+
+- 7a04cb8: feat(data): CatObject.get() 方法参数支持 string[] 数组形式，调用方可使用路径段数组代替点分隔字符串
+
 ## 1.1.4
 
 ### Patch Changes
