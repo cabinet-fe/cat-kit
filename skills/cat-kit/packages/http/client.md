@@ -99,7 +99,7 @@ await http.get('/data', { headers: { 'X-Custom': 'value' }, timeout: 5_000 })
 
 ```ts
 interface HTTPResponse<T = any> {
-  data: T // 响应体数据
+  body: T // 响应体
   code: number // HTTP 状态码
   headers: Record<string, string | string[]> // 响应头（set-cookie 保留数组）
   raw?: Response | any // 原始响应对象

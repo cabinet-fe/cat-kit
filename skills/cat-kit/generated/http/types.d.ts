@@ -139,8 +139,8 @@ interface ProgressInfo {
 }
 type AliasRequestConfig = Omit<RequestConfig, 'method'>;
 interface HTTPResponse<T = any> {
-  /** 响应的数据 */
-  data: T;
+  /** 响应体 */
+  body: T;
   /** HTTP状态码 */
   code: number;
   /** 响应标头（同名多值以数组形式保留） */

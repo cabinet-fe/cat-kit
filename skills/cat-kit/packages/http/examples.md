@@ -8,7 +8,7 @@ import { HTTPClient } from '@cat-kit/http'
 const http = new HTTPClient('/api', { origin: 'https://api.example.com', timeout: 30_000 })
 
 const res = await http.get('/v1/status')
-console.log(res.data, res.code)
+console.log(res.body, res.code)
 ```
 
 ## 带查询参数

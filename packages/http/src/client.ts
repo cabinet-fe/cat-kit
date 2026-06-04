@@ -85,7 +85,7 @@ function isRecoveredHTTPResponse(value: unknown): value is HTTPResponse {
   }
   const o = value as Record<string, unknown>
   return (
-    typeof o.code === 'number' && 'data' in o && typeof o.headers === 'object' && o.headers !== null
+    typeof o.code === 'number' && 'body' in o && typeof o.headers === 'object' && o.headers !== null
   )
 }
 

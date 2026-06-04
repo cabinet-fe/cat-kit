@@ -34,7 +34,7 @@ const http = new HTTPClient('/api', {
 })
 
 const users = await http.get('/users')
-console.log(users.data)
+console.log(users.body)
 ```
 
 ## 配置说明

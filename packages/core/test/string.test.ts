@@ -102,6 +102,8 @@ describe('$str', () => {
 
     it('应该处理空路径', () => {
       expect($str.joinUrlPath('https://example.com', '', 'path')).toBe('https://example.com/path')
+      expect($str.joinUrlPath('/api', '')).toBe('/api')
+      expect($str.joinUrlPath('', '')).toBe('')
     })
   })
 })

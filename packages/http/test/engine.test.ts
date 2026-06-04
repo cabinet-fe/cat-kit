@@ -44,7 +44,7 @@ describe('FetchEngine', () => {
     const engine = new FetchEngine()
     const res = await engine.request('/api', { onDownloadProgress, responseType: 'json' })
 
-    expect(res.data).toEqual({ hello: 1 })
+    expect(res.body).toEqual({ hello: 1 })
     expect(onDownloadProgress).toHaveBeenCalled()
     const last = onDownloadProgress.mock.calls.at(-1)![0]
     expect(last.loaded).toBe(totalLen)
@@ -68,7 +68,7 @@ describe('FetchEngine', () => {
     const engine = new FetchEngine()
     const res = await engine.request('/p', { method: 'POST', body: { x: 1 }, onUploadProgress })
 
-    expect(res.data).toEqual({ a: 1 })
+    expect(res.body).toEqual({ a: 1 })
     expect(onUploadProgress).not.toHaveBeenCalled()
   })
 
@@ -85,7 +85,7 @@ describe('FetchEngine', () => {
     const engine = new FetchEngine()
     const res = await engine.request('/text')
 
-    expect(res.data).toBe('plain text')
+    expect(res.body).toBe('plain text')
   })
 
   it('未设置 responseType 时根据 Content-Type 自动推断为 blob', async () => {
@@ -102,7 +102,7 @@ describe('FetchEngine', () => {
     const engine = new FetchEngine()
     const res = await engine.request('/img')
 
-    expect(res.data).toBeInstanceOf(Blob)
+    expect(res.body).toBeInstanceOf(Blob)
   })
 })
 

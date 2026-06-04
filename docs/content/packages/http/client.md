@@ -203,7 +203,7 @@ import type { HTTPResponse, RequestConfig } from '@cat-kit/http'
 
 class MockEngine extends HttpEngine {
   async request<T = any>(_url: string, _config: RequestConfig): Promise<HTTPResponse<T>> {
-    return { data: { ok: true } as T, code: 200, headers: {} }
+    return { body: { ok: true } as T, code: 200, headers: {} }
   }
 
   abort(): void {}

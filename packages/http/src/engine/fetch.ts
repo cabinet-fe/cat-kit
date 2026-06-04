@@ -86,7 +86,7 @@ export class FetchEngine extends HttpEngine {
   async request<T = any>(url: string, config: RequestConfig = {}): Promise<HTTPResponse<T>> {
     const {
       method = 'GET',
-      body,
+      body: requestBody,
       timeout,
       responseType,
       signal: userSignal,
@@ -123,9 +123,9 @@ export class FetchEngine extends HttpEngine {
       }
 
       const headers = fetchOptions.headers as Record<string, string>
-      const requestBody = buildRequestBody(method, body, headers)
-      if (requestBody !== null) {
-        fetchOptions.body = requestBody
+      const builtBody = buildRequestBody(method, requestBody, headers)
+      if (builtBody !== null) {
+        fetchOptions.body = builtBody
       }
 
       const response = await fetch(url, fetchOptions)
@@ -137,7 +137,7 @@ export class FetchEngine extends HttpEngine {
 
       const resolvedResponseType =
         responseType || inferResponseType(response.headers.get('content-type'))
-      const data = useProgress
+      const responseBody = useProgress
         ? await this.parseResponseWithDownloadProgress<T>(
             response,
             resolvedResponseType,
@@ -157,7 +157,7 @@ export class FetchEngine extends HttpEngine {
       }
 
       const httpResponse: HTTPResponse<T> = {
-        data,
+        body: responseBody,
         code: response.status,
         headers: responseHeaders,
         raw: response
@@ -240,7 +240,7 @@ export class FetchEngine extends HttpEngine {
       throw new HTTPError('响应解析失败', {
         code: 'PARSE',
         response: {
-          data: text,
+          body: text,
           code: response.status,
           headers: Object.fromEntries(response.headers.entries()),
           raw: response

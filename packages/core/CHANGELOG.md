@@ -1,5 +1,13 @@
 # @cat-kit/core
 
+## 1.1.6
+
+### Patch Changes
+
+- **@cat-kit/http**（破坏性重命名，按 patch 发布）：`HTTPResponse.data` 重命名为 `body`，调用方需将访问 `data` 的代码改为 `body`。
+
+  **@cat-kit/core**：`$str.joinUrlPath` 过滤空路径段，修复 base URL 为空字符串时产生多余 `/` 的问题。
+
 ## 1.1.5
 
 ### Patch Changes

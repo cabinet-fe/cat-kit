@@ -286,7 +286,7 @@ describe('HTTPClient', () => {
       const client = new HTTPClient()
       const response = await client.get('/users')
 
-      expect(response.data).toEqual({ message: 'success' })
+      expect(response.body).toEqual({ message: 'success' })
       expect(response.code).toBe(200)
     })
 
@@ -295,7 +295,7 @@ describe('HTTPClient', () => {
 
       // 测试 text 类型
       const textResponse = await client.get('/data', { responseType: 'text' })
-      expect(textResponse.data).toBeDefined()
+      expect(textResponse.body).toBeDefined()
     })
 
     it('未设置 responseType 时根据 Content-Type 自动推断为 text', async () => {
@@ -311,7 +311,7 @@ describe('HTTPClient', () => {
       const client = new HTTPClient()
       const response = await client.get('/text')
 
-      expect(response.data).toBe('hello world')
+      expect(response.body).toBe('hello world')
     })
 
     it('未设置 responseType 时根据 Content-Type 自动推断为 blob', async () => {
@@ -328,7 +328,7 @@ describe('HTTPClient', () => {
       const client = new HTTPClient()
       const response = await client.get('/image')
 
-      expect(response.data).toBeInstanceOf(Blob)
+      expect(response.body).toBeInstanceOf(Blob)
     })
 
     it('应该保留原始响应对象', async () => {
@@ -351,7 +351,7 @@ describe('HTTPClient', () => {
       const client = new HTTPClient()
       const response = await client.get('/empty')
 
-      expect(response.data).toBeNull()
+      expect(response.body).toBeNull()
       expect(response.code).toBe(204)
     })
 
@@ -371,7 +371,7 @@ describe('HTTPClient', () => {
         name: 'HTTPError',
         message: '请求失败，状态码: 404',
         code: 'NETWORK',
-        response: expect.objectContaining({ code: 404, data: { message: 'not found' } })
+        response: expect.objectContaining({ code: 404, body: { message: 'not found' } })
       } satisfies Partial<HTTPError>)
     })
   })
@@ -401,7 +401,7 @@ describe('HTTPClient', () => {
 
     it('应该能执行 afterRespond 钩子', async () => {
       const afterRespond = vi.fn(async (response) => {
-        return { ...response, data: { ...response.data, modified: true } }
+        return { ...response, body: { ...response.body, modified: true } }
       })
 
       const client = new HTTPClient('/api', { plugins: [{ name: 'after-respond', afterRespond }] })
@@ -409,7 +409,7 @@ describe('HTTPClient', () => {
       const response = await client.get('/users')
 
       expect(afterRespond).toHaveBeenCalled()
-      expect(response.data).toHaveProperty('modified', true)
+      expect(response.body).toHaveProperty('modified', true)
     })
 
     it('应该能按顺序执行多个插件', async () => {
@@ -481,6 +481,16 @@ describe('HTTPClient', () => {
       await client.get('/users')
 
       expect(mockFetch).toHaveBeenCalledWith('/api/users', expect.any(Object))
+    })
+
+    it('空 url 不应额外追加斜杠', async () => {
+      const root = new HTTPClient('')
+      await root.get('')
+      expect(mockFetch).toHaveBeenCalledWith('', expect.any(Object))
+
+      const prefixed = new HTTPClient('/api')
+      await prefixed.get('')
+      expect(mockFetch).toHaveBeenCalledWith('/api', expect.any(Object))
     })
 
     it('数组查询参数应重复 key 并忽略 undefined', async () => {
@@ -706,7 +716,7 @@ describe('HTTPClient', () => {
 
     it('onError 返回 HTTPResponse 时 request 不抛错', async () => {
       mockFetch.mockRejectedValueOnce(new Error('boom'))
-      const recovered = { data: { ok: true }, code: 200, headers: {} }
+      const recovered = { body: { ok: true }, code: 200, headers: {} }
       const onError = vi.fn(() => recovered)
 
       const client = new HTTPClient('', { plugins: [{ name: 'recover', onError }] })
@@ -718,8 +728,8 @@ describe('HTTPClient', () => {
 
     it('onError 首个恢复结果不被后续插件覆盖且后续仍执行', async () => {
       mockFetch.mockRejectedValueOnce(new Error('boom'))
-      const first = { data: { which: 'first' }, code: 200, headers: {} }
-      const second = { data: { which: 'second' }, code: 201, headers: {} }
+      const first = { body: { which: 'first' }, code: 200, headers: {} }
+      const second = { body: { which: 'second' }, code: 201, headers: {} }
       const side = vi.fn()
       const client = new HTTPClient('', {
         plugins: [
@@ -735,7 +745,7 @@ describe('HTTPClient', () => {
       })
 
       const res = await client.get('/x')
-      expect(res.data).toEqual({ which: 'first' })
+      expect(res.body).toEqual({ which: 'first' })
       expect(side).toHaveBeenCalledTimes(1)
     })
 

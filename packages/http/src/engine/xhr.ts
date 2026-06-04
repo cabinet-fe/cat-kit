@@ -65,29 +65,29 @@ export class XHREngine extends HttpEngine {
           : parsedHeaders['content-type']
         const inferredType = responseType || inferResponseType(contentType || null)
 
-        let data: T
+        let body: T
         if (!responseType) {
           const buffer = xhr.response as ArrayBuffer
           if (buffer instanceof ArrayBuffer) {
             if (inferredType === 'json') {
               const text = new TextDecoder().decode(buffer)
-              data = text ? (JSON.parse(text) as T) : (null as T)
+              body = text ? (JSON.parse(text) as T) : (null as T)
             } else if (inferredType === 'text') {
-              data = new TextDecoder().decode(buffer) as T
+              body = new TextDecoder().decode(buffer) as T
             } else if (inferredType === 'blob') {
-              data = new Blob([buffer]) as T
+              body = new Blob([buffer]) as T
             } else {
-              data = buffer as T
+              body = buffer as T
             }
           } else {
-            data = xhr.response as T
+            body = xhr.response as T
           }
         } else {
-          data = xhr.response as T
+          body = xhr.response as T
         }
 
         const response: HTTPResponse<T> = {
-          data,
+          body,
           code: xhr.status,
           headers: parsedHeaders,
           raw: xhr

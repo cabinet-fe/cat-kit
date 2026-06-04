@@ -66,7 +66,7 @@ type AliasRequestConfig = Omit<RequestConfig, 'method'>
 
 ```ts
 interface HTTPResponse<T = any> {
-  data: T
+  body: T
   code: number
   headers: Record<string, string | string[]>
   raw?: Response | any

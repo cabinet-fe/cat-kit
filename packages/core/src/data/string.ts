@@ -67,26 +67,29 @@ export const $str = {
    * ```
    */
   joinUrlPath(firstPath: string, ...paths: string[]): string {
-    // 处理带协议的情况
+    const filteredPaths = paths.filter((p) => p !== '')
     const hasProtocol = /^(https?|ftp|file):\/\//.test(firstPath)
 
     if (hasProtocol) {
-      // 分离协议和路径部分
       const [protocol, hostname] = firstPath.split('://') as [string, string]
-      const normalizedFirstPath = hostname.replace(/\/+$/, '') // 移除尾部多余斜杠
-      const joinedPaths = [normalizedFirstPath, ...paths].join('/').replace(/\/+/g, '/') // 替换连续斜杠
+      const normalizedFirstPath = hostname.replace(/\/+$/, '')
+      const joinedPaths = [normalizedFirstPath, ...filteredPaths]
+        .join('/')
+        .replace(/\/+/g, '/')
 
       return `${protocol}://${joinedPaths}`
-    } else {
-      // 不带协议的简单路径拼接
-      const joinedPaths = [firstPath, ...paths].join('/').replace(/\/+/g, '/') // 替换连续斜杠
-
-      // 保留尾部斜杠（如果原始路径最后一个参数有尾部斜杠）
-      if (paths.length > 0 && paths[paths.length - 1]!.endsWith('/')) {
-        return joinedPaths.endsWith('/') ? joinedPaths : `${joinedPaths}/`
-      }
-
-      return joinedPaths
     }
+
+    if (firstPath === '' && filteredPaths.length === 0) {
+      return ''
+    }
+
+    const joinedPaths = [firstPath, ...filteredPaths].join('/').replace(/\/+/g, '/')
+
+    if (paths.length > 0 && paths[paths.length - 1]!.endsWith('/')) {
+      return joinedPaths.endsWith('/') ? joinedPaths : `${joinedPaths}/`
+    }
+
+    return joinedPaths
   }
 }

@@ -89,7 +89,7 @@ async function sendGetRequest() {
     })
 
     statusCode.value = response.code
-    responseData.value = response.data
+    responseData.value = response.body
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '请求失败'
   } finally {
@@ -111,7 +111,7 @@ async function sendPostRequest() {
     })
 
     statusCode.value = response.code
-    responseData.value = response.data
+    responseData.value = response.body
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '请求失败'
   } finally {
