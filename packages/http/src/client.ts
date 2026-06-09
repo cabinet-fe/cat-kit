@@ -17,6 +17,10 @@ import { HTTPError } from './types'
 /** 插件触发的单次请求最多允许的重试次数（retryCount 0 为首次，共最多 11 次尝试） */
 export const MAX_PLUGIN_RETRIES = 10
 
+/**
+ * 检查目标 URL 是否与当前页面同域
+ * - 仅在浏览器环境下有效，Node.js 环境始终返回 false
+ */
 function isSameOrigin(url: string): boolean {
   if (typeof location === 'undefined') return false
   try {
@@ -27,6 +31,11 @@ function isSameOrigin(url: string): boolean {
   }
 }
 
+/**
+ * 读取指定名称的 Cookie 值
+ * - 仅在浏览器环境下有效
+ * - Escaped 值会自动 decodeURIComponent 解码
+ */
 function readCookie(name: string): string | undefined {
   if (typeof document === 'undefined') return undefined
   const match = document.cookie.match(
@@ -79,6 +88,9 @@ export function mergeRequestConfig(base: RequestConfig, patch: RequestConfig): R
   return out
 }
 
+/**
+ * 检查某个值是否为有效的 HTTPResponse 结构（用于 `onError` 插件的恢复判断）
+ */
 function isRecoveredHTTPResponse(value: unknown): value is HTTPResponse {
   if (value === null || typeof value !== 'object') {
     return false
@@ -173,6 +185,10 @@ export class HTTPClient {
     this.registerPluginInternal(plugin)
   }
 
+  /**
+   * 内部注册插件（不做 name 有效性校验，调用方保证已校验通过）
+   * - 校验插件名在整个生效链（父链+自身）中的唯一性，冲突时抛 HTTPError
+   */
   private registerPluginInternal(plugin: HTTPClientPlugin): void {
     const existingNames = new Set(this.getEffectivePlugins().map((p) => p.name))
     if (existingNames.has(plugin.name)) {
@@ -181,6 +197,11 @@ export class HTTPClient {
     this.ownPlugins.push(plugin)
   }
 
+  /**
+   * 为同域请求自动附加 XSRF Token（通过 Cookie → Header 注入）
+   * - 不同域请求直接跳过
+   * - Cookie 不存在时跳过
+   */
   private applyXsrfHeader(url: string, config: RequestConfig): RequestConfig {
     const cookieName = config.xsrfCookieName ?? this.config.xsrfCookieName ?? 'XSRF-TOKEN'
     const headerName = config.xsrfHeaderName ?? this.config.xsrfHeaderName ?? 'X-XSRF-TOKEN'
@@ -199,6 +220,10 @@ export class HTTPClient {
     return { ...config, headers }
   }
 
+  /**
+   * 拼接完整请求 URL：前缀 + origin + query 参数
+   * - 若 url 已是完整 URL 则跳过拼接，仅追加 query 参数
+   */
   private getRequestUrl(url: string, config: RequestConfig): string {
     // 如果已经是完整URL，直接返回
     if (this.isAbsoluteUrl(url)) {
@@ -218,10 +243,15 @@ export class HTTPClient {
     return this.appendQueryParams(url, config)
   }
 
+  /** 判断是否为完整 URL（含协议头或以 // 开头） */
   private isAbsoluteUrl(url: string): boolean {
     return /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(url) || url.startsWith('//')
   }
 
+  /**
+   * 将 config.query 序列化并拼接到 URL
+   * - 支持数组值（多 key 追加）、对象值（JSON 序列化）、null/undefined
+   */
   private appendQueryParams(url: string, config: RequestConfig): string {
     // 处理查询参数（对所有请求方法都有效）
     if (config.query) {
@@ -292,6 +322,10 @@ export class HTTPClient {
     }
   }
 
+  /**
+   * 依次执行插件 onError 钩子，取首个有效的恢复响应
+   * - 只有返回 HTTPResponse 时才视为恢复；后续插件仍会执行（用于副作用）
+   */
   private async runOnErrorPlugins(
     error: unknown,
     context: RequestContext,
@@ -317,6 +351,12 @@ export class HTTPClient {
     return recovered
   }
 
+  /**
+   * 执行单次请求的核心流程（含插件管道）
+   * - 按序执行 beforeRequest → engine.request → afterRespond
+   * - 异常时执行 onError 恢复尝试
+   * - `retryCount` 追踪插件触发的重试次数，超过 `MAX_PLUGIN_RETRIES` 后终止
+   */
   private async _executeRequest<T = any>(
     originalUrl: string,
     originalConfig: RequestConfig,

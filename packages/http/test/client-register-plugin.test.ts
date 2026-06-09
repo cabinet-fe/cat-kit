@@ -18,7 +18,7 @@ describe('HTTPClient.registerPlugin', () => {
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
-      headers: new Map([['content-type', 'application/json']]),
+      headers: new Headers([['content-type', 'application/json']]),
       text: async () => '{}',
       blob: async () => new Blob(),
       arrayBuffer: async () => new ArrayBuffer(0)

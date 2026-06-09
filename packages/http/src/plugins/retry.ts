@@ -3,10 +3,12 @@ import { HTTPError } from '../types'
 
 const DEFAULT_RETRY_STATUSES = [408, 429, 500, 502, 503, 504]
 
+/** 默认指数退避：min(1000 * 2^attempt, 30000) ms */
 function defaultBackoff(attempt: number): number {
   return Math.min(1000 * 2 ** attempt, 30000)
 }
 
+/** 从请求配置中读取当前重试次数（带默认值 0） */
 function getRetryAttempt(config: RequestConfig): number {
   return config._retryAttempt ?? 0
 }

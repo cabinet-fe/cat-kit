@@ -3,6 +3,10 @@ import { HTTPError } from '../types'
 import { HttpEngine } from './engine'
 import { buildRequestBody, inferResponseType } from './shared'
 
+/**
+ * 从 XHR ProgressEvent 构建标准的 ProgressInfo
+ * - total 不可靠时设为 0，percent 也返回 0
+ */
 function buildXHRProgressInfo(
   loaded: number,
   lengthComputable: boolean,
@@ -60,9 +64,7 @@ export class XHREngine extends HttpEngine {
 
       xhr.onload = () => {
         const parsedHeaders = this.parseHeaders(xhr.getAllResponseHeaders())
-        const contentType = Array.isArray(parsedHeaders['content-type'])
-          ? parsedHeaders['content-type'][0]
-          : parsedHeaders['content-type']
+        const contentType = parsedHeaders['content-type']
         const inferredType = responseType || inferResponseType(contentType || null)
 
         let body: T
@@ -145,10 +147,10 @@ export class XHREngine extends HttpEngine {
   /**
    * 解析响应头
    * @param headerStr 响应头字符串
-   * @returns 解析后的响应头对象（同名多值以数组保留）
+   * @returns 解析后的响应头对象（同名多值以逗号+空格合并；set-cookie 以换行分隔）
    */
-  private parseHeaders(headerStr: string): Record<string, string | string[]> {
-    const headers: Record<string, string | string[]> = {}
+  private parseHeaders(headerStr: string): Record<string, string> {
+    const headers: Record<string, string> = {}
     if (!headerStr) {
       return headers
     }
@@ -163,14 +165,8 @@ export class XHREngine extends HttpEngine {
         if (existing === undefined) {
           headers[key] = val
         } else if (key === 'set-cookie') {
-          // set-cookie 保留数组，与 FetchEngine 的 getSetCookie 行为一致
-          if (Array.isArray(existing)) {
-            existing.push(val)
-          } else {
-            headers[key] = [existing, val]
-          }
+          headers[key] = `${existing}\n${val}`
         } else {
-          // 其他多值 header 用逗号+空格合并，与 Fetch API Headers 行为一致
           headers[key] = `${existing}, ${val}`
         }
       }
@@ -178,13 +174,10 @@ export class XHREngine extends HttpEngine {
     return headers
   }
 
-  sendHeaders(xhr: XMLHttpRequest, headers: Record<string, string | string[]>): void {
+  /** 将 headers 设置到 XMLHttpRequest 实例 */
+  sendHeaders(xhr: XMLHttpRequest, headers: Record<string, string>): void {
     Object.entries(headers).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach((v) => xhr.setRequestHeader(key, v))
-      } else {
-        xhr.setRequestHeader(key, value)
-      }
+      xhr.setRequestHeader(key, value)
     })
   }
 

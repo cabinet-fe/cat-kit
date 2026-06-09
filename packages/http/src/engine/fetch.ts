@@ -3,6 +3,7 @@ import { HTTPError } from '../types'
 import { HttpEngine } from './engine'
 import { buildRequestBody, inferResponseType } from './shared'
 
+/** 从 Fetch Response 中解析 Content-Length，无效时返回 0 */
 function parseContentLength(response: Response): number {
   const raw = response.headers.get('content-length')
   if (raw === null || raw === '') {
@@ -12,6 +13,7 @@ function parseContentLength(response: Response): number {
   return Number.isFinite(n) && n >= 0 ? n : 0
 }
 
+/** 从已加载字节数和总字节数构建 ProgressInfo */
 function buildProgressInfo(loaded: number, total: number): ProgressInfo {
   return {
     loaded,
@@ -20,6 +22,7 @@ function buildProgressInfo(loaded: number, total: number): ProgressInfo {
   }
 }
 
+/** 将多个 Uint8Array 分片合并为单个连续数组 */
 function mergeUint8Chunks(chunks: Uint8Array[]): Uint8Array {
   let size = 0
   for (const c of chunks) {
@@ -36,6 +39,10 @@ function mergeUint8Chunks(chunks: Uint8Array[]): Uint8Array {
 
 type SignalMerge = { signal: AbortSignal; cleanup: () => void }
 
+/**
+ * 将用户传入的 signal 和内部超时 signal 合并为一个
+ * - 优先使用 AbortSignal.any()；不支持时通过 AbortController 手动实现
+ */
 function mergeAbortSignals(
   userSignal: AbortSignal | undefined,
   internalSignal: AbortSignal
@@ -80,6 +87,20 @@ function mergeAbortSignals(
   }
 }
 
+function getResponseHeaders(response: Response) {
+  const headers: Record<string, string> = {}
+  response.headers.forEach((value, key) => {
+    headers[key] = value
+  })
+
+  const setCookie = response.headers.getSetCookie()
+  if (setCookie && setCookie.length) {
+    headers['set-cookie'] = setCookie.join('\n')
+  }
+
+  return headers
+}
+
 export class FetchEngine extends HttpEngine {
   private controllers: Set<AbortController> = new Set()
 
@@ -106,7 +127,7 @@ export class FetchEngine extends HttpEngine {
       timeoutId = setTimeout(() => {
         isTimeoutAbort = true
         controller.abort()
-      }, timeout) as unknown as number
+      }, timeout)
     }
 
     const { signal: fetchSignal, cleanup: signalCleanup } = mergeAbortSignals(
@@ -145,21 +166,10 @@ export class FetchEngine extends HttpEngine {
           )
         : await this.parseResponseData<T>(response, resolvedResponseType)
 
-      const responseHeaders: Record<string, string | string[]> = {}
-      response.headers.forEach((value, key) => {
-        responseHeaders[key] = value
-      })
-      const setCookie = (
-        response.headers as unknown as { getSetCookie?: () => string[] }
-      ).getSetCookie?.()
-      if (setCookie && setCookie.length) {
-        responseHeaders['set-cookie'] = setCookie
-      }
-
       const httpResponse: HTTPResponse<T> = {
         body: responseBody,
         code: response.status,
-        headers: responseHeaders,
+        headers: getResponseHeaders(response),
         raw: response
       }
 
@@ -197,6 +207,10 @@ export class FetchEngine extends HttpEngine {
     }
   }
 
+  /**
+   * 以流式方式读取响应体并透传下载进度回调
+   * - 分片累积后合并为完整 Uint8Array 再解码
+   */
   private async parseResponseWithDownloadProgress<T>(
     response: Response,
     responseType: RequestConfig['responseType'],
@@ -229,6 +243,11 @@ export class FetchEngine extends HttpEngine {
     return this.decodeBytes<T>(merged, response, responseType)
   }
 
+  /**
+   * 将文本解析为 JSON
+   * - 空文本返回 null
+   * - 解析失败抛 PARSE 错误（含响应上下文）
+   */
   private parseJSONBody<T>(text: string, response: Response): T {
     if (!text) {
       return null as T
@@ -250,6 +269,12 @@ export class FetchEngine extends HttpEngine {
     }
   }
 
+  /**
+   * 将原始字节数组按指定响应类型解码
+   * - arraybuffer: 返回 .buffer slice
+   * - blob: 构建 Blob 对象
+   * - text/json: 先 TextDecoder 解码，json 再调用 parseJSONBody
+   */
   private decodeBytes<T>(
     bytes: Uint8Array,
     response: Response,
@@ -273,6 +298,13 @@ export class FetchEngine extends HttpEngine {
     return this.parseJSONBody<T>(text, response)
   }
 
+  /**
+   * 从 Response 中按指定类型直接解析数据（非流式路径）
+   * - text: response.text()
+   * - blob: response.blob()
+   * - arraybuffer: response.arrayBuffer()
+   * - json（默认）: 先 text() 再 JSON.parse
+   */
   private async parseResponseData<T>(
     response: Response,
     responseType: RequestConfig['responseType']

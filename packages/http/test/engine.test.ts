@@ -228,7 +228,7 @@ describe('XHREngine', () => {
     const engine = new XHREngine()
     const res = await engine.request('/z', { responseType: 'json' })
 
-    expect(res.headers['set-cookie']).toEqual(['a=1', 'b=2'])
+    expect(res.headers['set-cookie']).toBe('a=1\nb=2')
     expect(res.headers['content-type']).toBe('application/json')
   })
 })

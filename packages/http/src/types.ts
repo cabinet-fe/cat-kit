@@ -164,8 +164,8 @@ export interface HTTPResponse<T = any> {
   body: T
   /** HTTP状态码 */
   code: number
-  /** 响应标头（同名多值以数组形式保留） */
-  headers: Record<string, string | string[]>
+  /** 响应标头（set-cookie 多值以换行符分隔） */
+  headers: Record<string, string>
   /** 原始响应对象 */
   raw?: Response | any
 }

@@ -112,9 +112,10 @@ export function HTTPTokenPlugin(options: HTTPTokenPluginOptions): HTTPClientPlug
   }
 
   /**
-   * 格式化令牌
-   * @param token 令牌
-   * @returns 格式化后的令牌
+   * 获取并格式化令牌
+   * - 调用 getter 获取原始令牌
+   * - 根据 authType 拼接前缀（Bearer/Basic）或调用自定义 formatter
+   * @returns 格式化后的令牌，原始令牌为空时返回原值
    */
   const getToken = async (): Promise<string | null | undefined> => {
     const token = await getter()

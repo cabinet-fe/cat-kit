@@ -21,7 +21,7 @@ describe('HTTPClient', () => {
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
-      headers: new Map([['content-type', 'application/json']]),
+      headers: new Headers([['content-type', 'application/json']]),
       text: async () => '{"message": "success"}',
       blob: async () => new Blob(),
       arrayBuffer: async () => new ArrayBuffer(8)
@@ -302,7 +302,7 @@ describe('HTTPClient', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        headers: new Map([['content-type', 'text/plain']]),
+        headers: new Headers([['content-type', 'text/plain']]),
         text: async () => 'hello world',
         blob: async () => new Blob(),
         arrayBuffer: async () => new ArrayBuffer(8)
@@ -319,7 +319,7 @@ describe('HTTPClient', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        headers: new Map([['content-type', 'image/png']]),
+        headers: new Headers([['content-type', 'image/png']]),
         text: async () => 'invalid',
         blob: async () => blobData,
         arrayBuffer: async () => new ArrayBuffer(8)
@@ -342,7 +342,7 @@ describe('HTTPClient', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 204,
-        headers: new Map([['content-type', 'application/json']]),
+        headers: new Headers([['content-type', 'application/json']]),
         text: async () => '',
         blob: async () => new Blob(),
         arrayBuffer: async () => new ArrayBuffer(8)
@@ -359,7 +359,7 @@ describe('HTTPClient', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 404,
-        headers: new Map([['content-type', 'application/json']]),
+        headers: new Headers([['content-type', 'application/json']]),
         text: async () => '{"message": "not found"}',
         blob: async () => new Blob(),
         arrayBuffer: async () => new ArrayBuffer(8)
