@@ -211,14 +211,14 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
     if (propPath.length === 0) return ret as unknown as T
 
     for (let i = 0; i < propPath.length - 1; i++) {
-      ret = ret?.[propPath[i]]
+      ret = ret?.[propPath[i]!]
       if (isEmpty(ret)) {
         console.warn(`${prop}访问中断`)
         return undefined
       }
     }
 
-    return ret?.[propPath[propPath.length - 1]] as T | undefined
+    return ret?.[propPath[propPath.length - 1]!] as T | undefined
   }
 
   /**
