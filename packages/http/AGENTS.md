@@ -24,9 +24,7 @@ packages/http/src/
 │   └── index.ts       # 统一导出
 ├── plugins/           # 内置插件
 │   ├── token.ts       # Token 管理插件（含刷新/排队/响应级重试）
-│   ├── retry.ts       # 通用重试插件（onError + 退避）
-│   ├── method-override.ts  # HTTP 方法覆盖插件
-│   └── index.ts
+│   └── method-override.ts  # HTTP 方法覆盖插件
 ├── client.ts          # HTTP 客户端实现
 ├── types.ts           # 类型定义
 └── index.ts           # 主导出文件

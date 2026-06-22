@@ -127,7 +127,7 @@ export class FetchEngine extends HttpEngine {
       timeoutId = setTimeout(() => {
         isTimeoutAbort = true
         controller.abort()
-      }, timeout)
+      }, timeout) as unknown as number
     }
 
     const { signal: fetchSignal, cleanup: signalCleanup } = mergeAbortSignals(

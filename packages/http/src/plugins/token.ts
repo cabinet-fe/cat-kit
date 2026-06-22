@@ -1,10 +1,4 @@
-import type {
-  HTTPClientPlugin,
-  HTTPResponse,
-  PluginContext,
-  PluginHookResult,
-  RequestConfig
-} from '../types'
+import type { HTTPClientPlugin, HTTPResponse, PluginHookResult, RequestConfig } from '../types'
 import { HTTPError } from '../types'
 
 /**
@@ -53,15 +47,22 @@ export interface HTTPTokenPluginOptions {
 
   /**
    * 基于业务响应判断是否需要刷新（如 401）
-   * - 为 true 且需重试时须同时配置 {@link TokenPluginOptions.onRefresh}，否则不会发起 `retry`
+   * - 为 true 且需重试时须同时配置 {@link TokenPluginOptions.onRefresh}，否则不会发起重试
    */
   shouldRefresh?: (response: HTTPResponse) => boolean
 
   /** refresh_token 过期时回调（如登出） */
   onRefreshExpired?: () => void
+
+  /** 最大重试次数，默认 2 次，0 为不重试 */
+  maxRetries?: number
 }
 
 export type TokenPluginOptions = HTTPTokenPluginOptions
+
+function getRetryAttempt(config: RequestConfig): number {
+  return config._retryAttempt ?? 0
+}
 
 /**
  * Token 插件
@@ -93,7 +94,8 @@ export function HTTPTokenPlugin(options: HTTPTokenPluginOptions): HTTPClientPlug
     isExpired,
     isRefreshExpired,
     shouldRefresh,
-    onRefreshExpired
+    onRefreshExpired,
+    maxRetries = 2
   } = options
 
   let refreshPromise: Promise<void> | null = null
@@ -128,7 +130,7 @@ export function HTTPTokenPlugin(options: HTTPTokenPluginOptions): HTTPClientPlug
 
   return {
     name: 'token',
-    async beforeRequest(url: string, config: RequestConfig): Promise<PluginHookResult> {
+    async beforeRequest({ url, config }): Promise<PluginHookResult> {
       if (isRefreshExpired?.()) {
         onRefreshExpired?.()
         throw new HTTPError('刷新令牌已过期', { code: 'AUTH', url, config })
@@ -153,20 +155,21 @@ export function HTTPTokenPlugin(options: HTTPTokenPluginOptions): HTTPClientPlug
       return { config: { ...config, headers } }
     },
 
-    async afterRespond(
-      response: HTTPResponse,
-      url: string,
-      config: RequestConfig,
-      context?: PluginContext
-    ): Promise<HTTPResponse | void> {
-      if (!shouldRefresh?.(response) || !context?.retry) {
+    async afterRespond({ response, originalUrl, originalConfig, client }): Promise<HTTPResponse | void> {
+      if (!onRefresh || !shouldRefresh?.(response)) {
         return
       }
-      if (!onRefresh) {
+
+      const attempt = getRetryAttempt(originalConfig)
+      if (attempt >= maxRetries) {
         return
       }
+
       await doRefresh()
-      return context.retry()
+      return client.request(originalUrl, {
+        ...originalConfig,
+        _retryAttempt: attempt + 1
+      })
     }
   }
 }

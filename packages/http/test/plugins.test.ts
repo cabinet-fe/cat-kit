@@ -1,7 +1,6 @@
 import {
   HTTPClient,
   HTTPMethodOverridePlugin as MethodOverridePlugin,
-  RetryPlugin,
   HTTPTokenPlugin as TokenPlugin
 } from '@cat-kit/http'
 import type { RequestConfig } from '@cat-kit/http'
@@ -50,7 +49,7 @@ describe('TokenPlugin', () => {
       const plugin = TokenPlugin({ getter: () => 'test-token', authType: 'Bearer' })
 
       const config: RequestConfig = { method: 'GET' }
-      const result = await plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result).toBeDefined()
       expect(result?.config?.headers).toBeDefined()
@@ -67,7 +66,7 @@ describe('TokenPlugin', () => {
       })
 
       const config: RequestConfig = { method: 'GET' }
-      const result = await plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result?.config?.headers?.['Authorization']).toBe('Bearer async-token')
     })
@@ -76,7 +75,7 @@ describe('TokenPlugin', () => {
       const plugin = TokenPlugin({ getter: () => null })
 
       const config: RequestConfig = { method: 'GET' }
-      const result = await plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result).toEqual({})
     })
@@ -85,7 +84,7 @@ describe('TokenPlugin', () => {
       const plugin = TokenPlugin({ getter: () => undefined })
 
       const config: RequestConfig = { method: 'GET' }
-      const result = await plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result).toEqual({})
     })
@@ -96,7 +95,7 @@ describe('TokenPlugin', () => {
       const plugin = TokenPlugin({ getter: () => 'my-token', authType: 'Bearer' })
 
       const config: RequestConfig = { method: 'GET' }
-      const result = await plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result?.config?.headers?.['Authorization']).toBe('Bearer my-token')
     })
@@ -105,7 +104,7 @@ describe('TokenPlugin', () => {
       const plugin = TokenPlugin({ getter: () => 'my-token', authType: 'Basic' })
 
       const config: RequestConfig = { method: 'GET' }
-      const result = await plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result?.config?.headers?.['Authorization']).toBe('Basic my-token')
     })
@@ -118,7 +117,7 @@ describe('TokenPlugin', () => {
       })
 
       const config: RequestConfig = { method: 'GET' }
-      const result = await plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result?.config?.headers?.['Authorization']).toBe('Custom my-token')
     })
@@ -133,7 +132,7 @@ describe('TokenPlugin', () => {
       })
 
       const config: RequestConfig = { method: 'GET' }
-      const result = await plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result?.config?.headers?.['X-Auth-Token']).toBe('Bearer test-token')
       expect(result?.config?.headers?.['Authorization']).toBeUndefined()
@@ -149,7 +148,7 @@ describe('TokenPlugin', () => {
         headers: { 'X-Custom': 'value', 'Content-Type': 'application/json' }
       }
 
-      const result = await plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result?.config?.headers).toMatchObject({
         'X-Custom': 'value',
@@ -167,7 +166,7 @@ describe('TokenPlugin', () => {
       const plugin = TokenPlugin({ getter: () => storage.token, authType: 'Bearer' })
 
       const config: RequestConfig = { method: 'GET' }
-      const result = await plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result?.config?.headers?.['Authorization']).toBe('Bearer stored-token')
     })
@@ -181,7 +180,7 @@ describe('TokenPlugin', () => {
       const plugin = TokenPlugin({ getter: getTokenFromAPI, authType: 'Bearer' })
 
       const config: RequestConfig = { method: 'GET' }
-      const result = await plugin.beforeRequest?.('/api/users', config)
+      const result = await plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result?.config?.headers?.['Authorization']).toBe('Bearer api-token')
     })
@@ -302,117 +301,128 @@ describe('TokenPlugin', () => {
       await expect(client.get('/secure')).rejects.toMatchObject({ name: 'HTTPError' })
       expect(mockFetch).toHaveBeenCalledTimes(1)
     })
-  })
-})
 
-describe('RetryPlugin', () => {
-  beforeEach(() => {
-    mockFetch.mockReset()
-    mockFetch.mockResolvedValue(okJsonResponse)
-  })
+    it('并发 401（shouldRefresh）只触发一次 onRefresh', async () => {
+      const onRefresh = vi.fn(async () => {
+        await new Promise((r) => setTimeout(r, 15))
+      })
 
-  afterEach(() => {
-    vi.restoreAllMocks()
-    vi.useRealTimers()
-  })
-
-  it('默认配置下网络错误重试直至成功', async () => {
-    mockFetch
-      .mockRejectedValueOnce(new Error('e1'))
-      .mockRejectedValueOnce(new Error('e2'))
-      .mockResolvedValueOnce(okJsonResponse)
-
-    const client = new HTTPClient('', { plugins: [RetryPlugin()] })
-    const res = await client.get('/x')
-    expect(res.code).toBe(200)
-    expect(mockFetch).toHaveBeenCalledTimes(3)
-  })
-
-  it('超过 maxRetries 后抛出原始错误', async () => {
-    mockFetch.mockRejectedValue(new Error('always'))
-
-    const client = new HTTPClient('', { plugins: [RetryPlugin({ maxRetries: 2 })] })
-
-    await expect(client.get('/x')).rejects.toThrow('网络错误')
-    expect(mockFetch).toHaveBeenCalledTimes(3)
-  })
-
-  it('retryOn 返回 false 时不重试', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('once'))
-
-    const client = new HTTPClient('', { plugins: [RetryPlugin({ retryOn: () => false })] })
-
-    await expect(client.get('/x')).rejects.toThrow('网络错误')
-    expect(mockFetch).toHaveBeenCalledTimes(1)
-  })
-
-  it('函数 delay 通过定时器生效', async () => {
-    vi.useFakeTimers()
-
-    mockFetch.mockRejectedValue(new Error('fail'))
-
-    const delayFn = vi.fn((a: number) => 100 + a * 50)
-    const client = new HTTPClient('', { plugins: [RetryPlugin({ maxRetries: 1, delay: delayFn })] })
-
-    const p = client.get('/t')
-    const assertFail = expect(p).rejects.toThrow('网络错误')
-    await vi.runAllTimersAsync()
-    await assertFail
-
-    expect(delayFn).toHaveBeenCalled()
-    expect(mockFetch).toHaveBeenCalledTimes(2)
-  })
-
-  it('固定 delay 通过定时器生效', async () => {
-    vi.useFakeTimers()
-
-    mockFetch.mockRejectedValue(new Error('fail'))
-
-    const client = new HTTPClient('', { plugins: [RetryPlugin({ maxRetries: 1, delay: 750 })] })
-
-    const p = client.get('/t')
-    const assertFail = expect(p).rejects.toThrow('网络错误')
-    await vi.runAllTimersAsync()
-    await assertFail
-
-    expect(mockFetch).toHaveBeenCalledTimes(2)
-  })
-
-  it('默认 delay 首次重试前等待 1000ms', async () => {
-    vi.useFakeTimers()
-    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout')
-
-    mockFetch.mockRejectedValueOnce(new Error('e1')).mockResolvedValueOnce(okJsonResponse)
-
-    const client = new HTTPClient('', { plugins: [RetryPlugin({ maxRetries: 2 })] })
-    const p = client.get('/backoff')
-    await vi.runAllTimersAsync()
-    await p
-
-    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 1000)
-    expect(mockFetch).toHaveBeenCalledTimes(2)
-    setTimeoutSpy.mockRestore()
-  })
-
-  it('retryOnStatus 为 503 时在失败后重试成功', async () => {
-    mockFetch
-      .mockResolvedValueOnce({
+      mockFetch.mockResolvedValue({
         ok: false,
-        status: 503,
+        status: 401,
         headers: new Headers([['content-type', 'application/json']]),
         text: async () => '{}',
         blob: async () => new Blob(),
         arrayBuffer: async () => new ArrayBuffer(8)
       })
-      .mockResolvedValueOnce(okJsonResponse)
 
-    const client = new HTTPClient('', {
-      plugins: [RetryPlugin({ retryOnStatus: [503], delay: 0 })]
+      const client = new HTTPClient('', {
+        plugins: [
+          TokenPlugin({
+            getter: () => 'access',
+            onRefresh,
+            shouldRefresh: (res) => res.code === 401,
+            maxRetries: 1
+          })
+        ]
+      })
+
+      await Promise.all([
+        expect(client.get('/a')).rejects.toMatchObject({ name: 'HTTPError' }),
+        expect(client.get('/b')).rejects.toMatchObject({ name: 'HTTPError' }),
+        expect(client.get('/c')).rejects.toMatchObject({ name: 'HTTPError' })
+      ])
+
+      expect(onRefresh).toHaveBeenCalledTimes(1)
     })
 
-    const res = await client.get('/svc')
-    expect(res.code).toBe(200)
-    expect(mockFetch).toHaveBeenCalledTimes(2)
+    it('maxRetries=0 不重试', async () => {
+      const onRefresh = vi.fn(async () => {})
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        headers: new Headers([['content-type', 'application/json']]),
+        text: async () => '{}',
+        blob: async () => new Blob(),
+        arrayBuffer: async () => new ArrayBuffer(8)
+      })
+
+      const client = new HTTPClient('', {
+        plugins: [
+          TokenPlugin({
+            getter: () => 'access',
+            onRefresh,
+            shouldRefresh: (res) => res.code === 401,
+            maxRetries: 0
+          })
+        ]
+      })
+
+      await expect(client.get('/secure')).rejects.toMatchObject({ name: 'HTTPError' })
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+      expect(onRefresh).not.toHaveBeenCalled()
+    })
+
+    it('maxRetries=1 仍 401 时共 2 次请求', async () => {
+      const onRefresh = vi.fn(async () => {})
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 401,
+        headers: new Headers([['content-type', 'application/json']]),
+        text: async () => '{}',
+        blob: async () => new Blob(),
+        arrayBuffer: async () => new ArrayBuffer(8)
+      })
+
+      const client = new HTTPClient('', {
+        plugins: [
+          TokenPlugin({
+            getter: () => 'access',
+            onRefresh,
+            shouldRefresh: (res) => res.code === 401,
+            maxRetries: 1
+          })
+        ]
+      })
+
+      await expect(client.get('/secure')).rejects.toMatchObject({ name: 'HTTPError' })
+      expect(onRefresh).toHaveBeenCalledTimes(1)
+      expect(mockFetch).toHaveBeenCalledTimes(2)
+    })
+
+    it('带 prefix 的 client 重试不会重复拼接 URL', async () => {
+      const onRefresh = vi.fn(async () => {})
+      let call = 0
+      mockFetch.mockImplementation(() => {
+        call += 1
+        if (call === 1) {
+          return Promise.resolve({
+            ok: false,
+            status: 401,
+            headers: new Headers([['content-type', 'application/json']]),
+            text: async () => '{}',
+            blob: async () => new Blob(),
+            arrayBuffer: async () => new ArrayBuffer(8)
+          })
+        }
+        return Promise.resolve(okJsonResponse)
+      })
+
+      const client = new HTTPClient('/api', {
+        plugins: [
+          TokenPlugin({
+            getter: () => 'access',
+            onRefresh,
+            shouldRefresh: (res) => res.code === 401
+          })
+        ]
+      })
+
+      await client.get('/user')
+
+      expect(mockFetch.mock.calls[0]?.[0]).toBe('/api/user')
+      expect(mockFetch.mock.calls[1]?.[0]).toBe('/api/user')
+    })
   })
 })
 
@@ -429,7 +439,7 @@ describe('MethodOverridePlugin', () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = { method: 'DELETE' }
-      const result = await plugin.beforeRequest!('/api/users/1', config)
+      const result = await plugin.beforeRequest!({ url: '/api/users/1', config })
 
       expect(result?.config?.method).toBe('POST')
       expect(result?.config?.headers?.['X-HTTP-Method-Override']).toBe('DELETE')
@@ -439,7 +449,7 @@ describe('MethodOverridePlugin', () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = { method: 'PUT' }
-      const result = await plugin.beforeRequest!('/api/users/1', config)
+      const result = await plugin.beforeRequest!({ url: '/api/users/1', config })
 
       expect(result?.config?.method).toBe('POST')
       expect(result?.config?.headers?.['X-HTTP-Method-Override']).toBe('PUT')
@@ -449,7 +459,7 @@ describe('MethodOverridePlugin', () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = { method: 'PATCH' }
-      const result = await plugin.beforeRequest!('/api/users/1', config)
+      const result = await plugin.beforeRequest!({ url: '/api/users/1', config })
 
       expect(result?.config?.method).toBe('POST')
       expect(result?.config?.headers?.['X-HTTP-Method-Override']).toBe('PATCH')
@@ -459,7 +469,7 @@ describe('MethodOverridePlugin', () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = { method: 'GET' }
-      const result = await plugin.beforeRequest!('/api/users', config)
+      const result = await plugin.beforeRequest!({ url: '/api/users', config })
 
       expect(result).toEqual({})
     })
@@ -468,7 +478,7 @@ describe('MethodOverridePlugin', () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = { method: 'POST' }
-      const result = await plugin.beforeRequest!('/api/users', config)
+      const result = await plugin.beforeRequest!({ url: '/api/users', config })
 
       expect(result).toEqual({})
     })
@@ -479,11 +489,11 @@ describe('MethodOverridePlugin', () => {
       const plugin = MethodOverridePlugin({ methods: ['DELETE'] })
 
       const deleteConfig: RequestConfig = { method: 'DELETE' }
-      const deleteResult = await plugin.beforeRequest!('/api/users/1', deleteConfig)
+      const deleteResult = await plugin.beforeRequest!({ url: '/api/users/1', config: deleteConfig })
       expect(deleteResult?.config?.method).toBe('POST')
 
       const putConfig: RequestConfig = { method: 'PUT' }
-      const putResult = await plugin.beforeRequest!('/api/users/1', putConfig)
+      const putResult = await plugin.beforeRequest!({ url: '/api/users/1', config: putConfig })
       expect(putResult).toEqual({})
     })
 
@@ -491,7 +501,7 @@ describe('MethodOverridePlugin', () => {
       const plugin = MethodOverridePlugin({ overrideMethod: 'GET' })
 
       const config: RequestConfig = { method: 'DELETE' }
-      const result = await plugin.beforeRequest!('/api/users/1', config)
+      const result = await plugin.beforeRequest!({ url: '/api/users/1', config })
 
       expect(result?.config?.method).toBe('GET')
       expect(result?.config?.headers?.['X-HTTP-Method-Override']).toBe('DELETE')
@@ -501,7 +511,7 @@ describe('MethodOverridePlugin', () => {
       const plugin = MethodOverridePlugin({ headerName: 'X-Method-Override' })
 
       const config: RequestConfig = { method: 'DELETE' }
-      const result = await plugin.beforeRequest!('/api/users/1', config)
+      const result = await plugin.beforeRequest!({ url: '/api/users/1', config })
 
       expect(result?.config?.headers?.['X-Method-Override']).toBe('DELETE')
       expect(result?.config?.headers?.['X-HTTP-Method-Override']).toBeUndefined()
@@ -517,7 +527,7 @@ describe('MethodOverridePlugin', () => {
         headers: { 'X-Custom': 'value', 'Content-Type': 'application/json' }
       }
 
-      const result = await plugin.beforeRequest!('/api/users/1', config)
+      const result = await plugin.beforeRequest!({ url: '/api/users/1', config })
 
       expect(result?.config?.headers).toMatchObject({
         'X-Custom': 'value',
@@ -536,7 +546,7 @@ describe('MethodOverridePlugin', () => {
         headers: { 'Content-Type': 'application/json' }
       }
 
-      const result = await plugin.beforeRequest!('/api/users/1', config)
+      const result = await plugin.beforeRequest!({ url: '/api/users/1', config })
 
       // 服务器会收到 POST 请求，但通过 X-HTTP-Method-Override 知道这是 DELETE
       expect(result?.config?.method).toBe('POST')
@@ -548,17 +558,17 @@ describe('MethodOverridePlugin', () => {
 
       // 更新资源
       const putConfig: RequestConfig = { method: 'PUT', body: { name: 'updated' } }
-      const putResult = await plugin.beforeRequest!('/api/users/1', putConfig)
+      const putResult = await plugin.beforeRequest!({ url: '/api/users/1', config: putConfig })
       expect(putResult?.config?.method).toBe('POST')
 
       // 部分更新资源
       const patchConfig: RequestConfig = { method: 'PATCH', body: { age: 26 } }
-      const patchResult = await plugin.beforeRequest!('/api/users/1', patchConfig)
+      const patchResult = await plugin.beforeRequest!({ url: '/api/users/1', config: patchConfig })
       expect(patchResult?.config?.method).toBe('POST')
 
       // 删除资源
       const deleteConfig: RequestConfig = { method: 'DELETE' }
-      const deleteResult = await plugin.beforeRequest!('/api/users/1', deleteConfig)
+      const deleteResult = await plugin.beforeRequest!({ url: '/api/users/1', config: deleteConfig })
       expect(deleteResult?.config?.method).toBe('POST')
     })
   })
@@ -568,7 +578,7 @@ describe('MethodOverridePlugin', () => {
       const plugin = MethodOverridePlugin()
 
       const config: RequestConfig = {}
-      const result = plugin.beforeRequest?.('/api/users', config)
+      const result = plugin.beforeRequest?.({ url: '/api/users', config })
 
       expect(result).toEqual({})
     })
@@ -577,7 +587,7 @@ describe('MethodOverridePlugin', () => {
       const plugin = MethodOverridePlugin({ methods: [] })
 
       const config: RequestConfig = { method: 'DELETE' }
-      const result = plugin.beforeRequest?.('/api/users/1', config)
+      const result = plugin.beforeRequest?.({ url: '/api/users/1', config })
 
       expect(result).toEqual({})
     })

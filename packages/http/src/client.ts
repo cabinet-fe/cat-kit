@@ -9,13 +9,10 @@ import type {
   HTTPResponse,
   AliasRequestConfig,
   RequestContext,
-  PluginContext,
-  HTTPClientPlugin
+  HTTPClientPlugin,
+  IHTTPClient
 } from './types'
 import { HTTPError } from './types'
-
-/** 插件触发的单次请求最多允许的重试次数（retryCount 0 为首次，共最多 11 次尝试） */
-export const MAX_PLUGIN_RETRIES = 10
 
 /**
  * 检查目标 URL 是否与当前页面同域
@@ -128,7 +125,7 @@ function isRecoveredHTTPResponse(value: unknown): value is HTTPResponse {
  * ```
  */
 
-export class HTTPClient {
+export class HTTPClient implements IHTTPClient {
   /** 请求前缀 */
   private prefix: string
 
@@ -166,6 +163,10 @@ export class HTTPClient {
    */
   private getEffectivePlugins(): HTTPClientPlugin[] {
     return [...(this.parent?.getEffectivePlugins() ?? []), ...this.ownPlugins]
+  }
+
+  getEngine(): HttpEngine {
+    return this.engine
   }
 
   /**
@@ -295,7 +296,7 @@ export class HTTPClient {
   }
 
   /**
-   * 获取请求配置
+   * 获取请求配置, 合并 HTTPClient 实例配置和当前配置
    * @param config 当前请求配置
    * @returns 合并后的请求配置
    */
@@ -353,38 +354,20 @@ export class HTTPClient {
 
   /**
    * 执行单次请求的核心流程（含插件管道）
-   * - 按序执行 beforeRequest → engine.request → afterRespond
-   * - 异常时执行 onError 恢复尝试
-   * - `retryCount` 追踪插件触发的重试次数，超过 `MAX_PLUGIN_RETRIES` 后终止
    */
   private async _executeRequest<T = any>(
     originalUrl: string,
     originalConfig: RequestConfig,
-    retryCount: number,
     effectivePlugins: HTTPClientPlugin[] = this.getEffectivePlugins()
   ): Promise<HTTPResponse<T>> {
     let finalUrl = this.getRequestUrl(originalUrl, originalConfig)
     let finalConfig = originalConfig
 
-    const pluginContext: PluginContext = {
-      retry: async (patch?: Partial<RequestConfig>) => {
-        if (retryCount >= MAX_PLUGIN_RETRIES) {
-          throw new HTTPError('超过最大重试次数', {
-            code: 'RETRY_LIMIT_EXCEEDED',
-            url: finalUrl,
-            config: originalConfig
-          })
-        }
-        const merged = mergeRequestConfig(originalConfig, (patch ?? {}) as RequestConfig)
-        return this._executeRequest<T>(originalUrl, merged, retryCount + 1, effectivePlugins)
-      }
-    }
-
     try {
       if (effectivePlugins.length) {
         for (const plugin of effectivePlugins) {
           if (plugin.beforeRequest) {
-            const result = await plugin.beforeRequest(finalUrl, finalConfig)
+            const result = await plugin.beforeRequest({ url: finalUrl, config: finalConfig })
             if (result) {
               if (result.url) {
                 finalUrl = result.url
@@ -404,7 +387,14 @@ export class HTTPClient {
       if (effectivePlugins.length) {
         for (const plugin of effectivePlugins) {
           if (plugin.afterRespond) {
-            const result = await plugin.afterRespond(response, finalUrl, finalConfig, pluginContext)
+            const result = await plugin.afterRespond({
+              response,
+              url: finalUrl,
+              config: finalConfig,
+              originalUrl,
+              originalConfig,
+              client: this
+            })
             if (result) {
               response = result
             }
@@ -419,7 +409,14 @@ export class HTTPClient {
         let recoveredViaAfterRespond = false
         for (const plugin of effectivePlugins) {
           if (plugin.afterRespond) {
-            const result = await plugin.afterRespond(response, finalUrl, finalConfig, pluginContext)
+            const result = await plugin.afterRespond({
+              response,
+              url: finalUrl,
+              config: finalConfig,
+              originalUrl,
+              originalConfig,
+              client: this
+            })
             if (result) {
               response = result
               recoveredViaAfterRespond = true
@@ -433,7 +430,7 @@ export class HTTPClient {
 
       const recovered = await this.runOnErrorPlugins(
         error,
-        { url: finalUrl, config: finalConfig, retry: pluginContext.retry },
+        { url: finalUrl, config: finalConfig },
         effectivePlugins
       )
       if (recovered !== undefined) {
@@ -451,7 +448,7 @@ export class HTTPClient {
    */
   async request<T = any>(url: string, config: RequestConfig = {}): Promise<HTTPResponse<T>> {
     const mergedConfig = this.getRequestConfig(config)
-    return this._executeRequest<T>(url, mergedConfig, 0)
+    return this._executeRequest<T>(url, mergedConfig)
   }
 
   /**

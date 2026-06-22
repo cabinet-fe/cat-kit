@@ -8,7 +8,7 @@ outline: deep
 
 ## 介绍
 
-这页汇总 `@cat-kit/http` 暴露给业务代码最常用的类型：请求配置、响应结构、进度回调、插件上下文和错误类型。
+这页汇总 `@cat-kit/http` 暴露给业务代码最常用的类型：请求配置、响应结构、进度回调、插件钩子上下文和错误类型。
 
 ## 快速使用
 
@@ -108,27 +108,27 @@ interface PluginHookResult {
   config?: RequestConfig
 }
 
-interface PluginContext {
-  retry: (config?: Partial<RequestConfig>) => Promise<HTTPResponse>
+interface AfterRespondContext {
+  response: HTTPResponse
+  url: string
+  config: RequestConfig
+  originalUrl: string
+  originalConfig: RequestConfig
+  client: IHTTPClient
 }
 
 interface RequestContext {
   url: string
   config: RequestConfig
-  retry?: (patch?: Partial<RequestConfig>) => Promise<HTTPResponse>
 }
 
 interface HTTPClientPlugin {
   name: string
   beforeRequest?(
-    url: string,
-    config: RequestConfig
+    context: { url: string; config: RequestConfig }
   ): Promise<PluginHookResult | void> | PluginHookResult | void
   afterRespond?(
-    response: HTTPResponse,
-    url: string,
-    config: RequestConfig,
-    context?: PluginContext
+    context: AfterRespondContext
   ): Promise<HTTPResponse | void> | HTTPResponse | void
   onError?(
     error: unknown,
@@ -136,6 +136,8 @@ interface HTTPClientPlugin {
   ): Promise<HTTPResponse | void> | HTTPResponse | void
 }
 ```
+
+在 `afterRespond` 或 `onError` 中需要重试时，可通过 `context.client.request(context.originalUrl, context.originalConfig)` 发起；`TokenPlugin` 的认证重试则使用 `maxRetries` 与 `_retryAttempt` 控制次数。
 
 ### 引擎抽象
 

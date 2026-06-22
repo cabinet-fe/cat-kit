@@ -378,7 +378,7 @@ describe('HTTPClient', () => {
 
   describe('插件系统', () => {
     it('应该能执行 beforeRequest 钩子', async () => {
-      const beforeRequest = vi.fn(async (url, config) => {
+      const beforeRequest = vi.fn(async ({ config }) => {
         return {
           config: { ...config, headers: { ...config.headers, 'X-Plugin': 'added-by-plugin' } }
         }
@@ -400,7 +400,7 @@ describe('HTTPClient', () => {
     })
 
     it('应该能执行 afterRespond 钩子', async () => {
-      const afterRespond = vi.fn(async (response) => {
+      const afterRespond = vi.fn(async ({ response }) => {
         return { ...response, body: { ...response.body, modified: true } }
       })
 
@@ -670,13 +670,13 @@ describe('HTTPClient', () => {
     })
   })
 
-  describe('PluginContext.retry 与 onError 恢复', () => {
-    it('afterRespond 通过 context.retry 重试时 mockFetch 调用 2 次', async () => {
+  describe('afterRespond client.request 重试与 onError 恢复', () => {
+    it('afterRespond 通过 client.request 重试时 mockFetch 调用 2 次', async () => {
       let n = 0
-      const afterRespond = vi.fn(async (_res, _url, _cfg, ctx) => {
+      const afterRespond = vi.fn(async ({ client, originalUrl, originalConfig }) => {
         n += 1
-        if (n === 1 && ctx) {
-          return ctx.retry()
+        if (n === 1) {
+          return client.request(originalUrl, originalConfig)
         }
         return undefined
       })
@@ -687,12 +687,17 @@ describe('HTTPClient', () => {
       expect(mockFetch).toHaveBeenCalledTimes(2)
     })
 
-    it('retry 合并 headers/query/timeout 符合规则', async () => {
+    it('client.request 重试合并 headers/query/timeout 符合规则', async () => {
       let n = 0
-      const afterRespond = vi.fn(async (_res, _url, _cfg, ctx) => {
+      const afterRespond = vi.fn(async ({ client, originalUrl, originalConfig }) => {
         n += 1
-        if (n === 1 && ctx) {
-          return ctx.retry({ headers: { 'X-R': 'retry' }, query: { q: '1' }, timeout: 9999 })
+        if (n === 1) {
+          return client.request(originalUrl, {
+            ...originalConfig,
+            headers: { ...originalConfig.headers, 'X-R': 'retry' },
+            query: { ...originalConfig.query, q: '1' },
+            timeout: 9999
+          })
         }
         return undefined
       })
@@ -804,23 +809,6 @@ describe('HTTPClient', () => {
         '/api/v1/users',
         expect.objectContaining({ signal: expect.any(AbortSignal) })
       )
-    })
-
-    it('afterRespond 无限 retry 最终 RETRY_LIMIT_EXCEEDED', async () => {
-      const afterRespond = vi.fn(async (_res, _url, _cfg, ctx) => {
-        if (ctx) {
-          return ctx.retry()
-        }
-      })
-
-      const client = new HTTPClient('', { plugins: [{ name: 'retry-loop', afterRespond }] })
-
-      await expect(client.get('/loop')).rejects.toMatchObject({
-        code: 'RETRY_LIMIT_EXCEEDED',
-        message: expect.stringContaining('最大重试次数')
-      })
-
-      expect(mockFetch.mock.calls.length).toBe(11)
     })
   })
 })

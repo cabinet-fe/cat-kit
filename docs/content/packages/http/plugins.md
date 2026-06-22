@@ -2,23 +2,21 @@
 
 ## 介绍
 
-`@cat-kit/http` 的插件系统围绕 `beforeRequest`、`afterRespond`、`onError` 三个阶段工作。它既能做请求头注入、方法改写，也能做自动刷新 token、失败重试和错误恢复。
+`@cat-kit/http` 的插件系统围绕 `beforeRequest`、`afterRespond`、`onError` 三个阶段工作。它既能做请求头注入、方法改写，也能做自动刷新 token 和错误恢复。
 
-当前内置了三个插件：
+当前内置了两个插件：
 
 - `TokenPlugin`
-- `RetryPlugin`
 - `MethodOverridePlugin`
 
 ## 快速使用
 
 ```ts
-import { HTTPClient, TokenPlugin, RetryPlugin, MethodOverridePlugin } from '@cat-kit/http'
+import { HTTPClient, TokenPlugin, MethodOverridePlugin } from '@cat-kit/http'
 
 const http = new HTTPClient('/api', {
   plugins: [
     TokenPlugin({ getter: () => localStorage.getItem('token') }),
-    RetryPlugin({ maxRetries: 2 }),
     MethodOverridePlugin({ methods: ['DELETE'] })
   ]
 })
@@ -32,15 +30,11 @@ const http = new HTTPClient('/api', {
 interface HTTPClientPlugin {
   name: string
   beforeRequest?(
-    url: string,
-    config: RequestConfig
+    context: { url: string; config: RequestConfig }
   ): Promise<PluginHookResult | void> | PluginHookResult | void
 
   afterRespond?(
-    response: HTTPResponse,
-    url: string,
-    config: RequestConfig,
-    context?: PluginContext
+    context: AfterRespondContext
   ): Promise<HTTPResponse | void> | HTTPResponse | void
 
   onError?(
@@ -56,14 +50,22 @@ interface PluginHookResult {
   config?: RequestConfig
 }
 
-interface PluginContext {
-  retry: (config?: Partial<RequestConfig>) => Promise<HTTPResponse>
+interface AfterRespondContext {
+  response: HTTPResponse
+  /** 经插件处理后的最终 URL（含 prefix / origin / query） */
+  url: string
+  /** 经插件处理后的最终配置 */
+  config: RequestConfig
+  /** 调用 client.request / get 等方法时传入的原始 URL */
+  originalUrl: string
+  /** 合并客户端默认值后、beforeRequest 前的原始配置 */
+  originalConfig: RequestConfig
+  client: IHTTPClient
 }
 
 interface RequestContext {
   url: string
   config: RequestConfig
-  retry?: (patch?: Partial<RequestConfig>) => Promise<HTTPResponse>
 }
 ```
 
@@ -91,6 +93,7 @@ interface TokenPluginOptions {
   isRefreshExpired?: () => boolean
   shouldRefresh?: (response: HTTPResponse) => boolean
   onRefreshExpired?: () => void
+  maxRetries?: number
 }
 ```
 
@@ -117,34 +120,8 @@ TokenPlugin({
 
 - `getter` 返回 `null` / `undefined` 时不会注入 token
 - 并发刷新会被串成同一个 `refreshPromise`
-- `shouldRefresh` 命中后，插件会借助 `context.retry()` 重试原请求
-
-### RetryPlugin
-
-```ts
-RetryPlugin(options?: RetryPluginOptions): HTTPClientPlugin
-```
-
-```ts
-interface RetryPluginOptions {
-  maxRetries?: number
-  delay?: number | ((attempt: number) => number)
-  retryOn?: (error: unknown, context: RequestContext) => boolean
-  retryOnStatus?: number[]
-}
-```
-
-默认行为：
-
-- 默认最多重试 `3` 次
-- 默认对 `408/429/500/502/503/504` 以及 `NETWORK` / `TIMEOUT` 错误重试
-- 默认退避为指数回退，最大 30 秒
-
-示例：
-
-```ts
-RetryPlugin({ maxRetries: 5, delay: (attempt) => 300 * 2 ** attempt })
-```
+- `shouldRefresh` 命中后，插件会调用 `client.request(originalUrl, { ...originalConfig, _retryAttempt })` 重试原请求，重试会重新走完整插件链
+- `maxRetries` 默认 `2`（最多重试 2 次，共 3 次请求）；`0` 表示不重试
 
 ### MethodOverridePlugin
 
@@ -171,7 +148,7 @@ MethodOverridePlugin({ methods: ['DELETE', 'PATCH'], overrideMethod: 'POST' })
 ```ts
 const tracePlugin = {
   name: 'trace',
-  beforeRequest(url, config) {
+  beforeRequest({ url, config }) {
     return {
       url,
       config: { ...config, headers: { ...config.headers, 'X-Trace-Id': crypto.randomUUID() } }
@@ -180,4 +157,4 @@ const tracePlugin = {
 }
 ```
 
-如果你在 `afterRespond` 或 `onError` 中要“恢复”请求，返回 `HTTPResponse` 即可；`RetryPlugin` 本质上就是通过这个机制工作。
+如果你在 `afterRespond` 或 `onError` 中要“恢复”请求，返回 `HTTPResponse` 即可；需要重试时可通过 `context.client.request(context.originalUrl, context.originalConfig)` 发起。

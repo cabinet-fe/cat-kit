@@ -1,6 +1,6 @@
 # http — plugins
 
-`@cat-kit/http` 内置三个插件：Token 认证、请求重试、方法重写。插件实现 `HTTPClientPlugin` 接口。
+`@cat-kit/http` 内置两个插件：Token 认证、方法重写。插件实现 `HTTPClientPlugin` 接口。
 
 ## 插件接口
 
@@ -9,21 +9,28 @@ interface HTTPClientPlugin {
   name: string // 必须唯一
 
   beforeRequest?(
-    url: string,
-    config: RequestConfig
+    context: { url: string; config: RequestConfig }
   ): Promise<PluginHookResult | void> | PluginHookResult | void
 
   afterRespond?(
-    response: HTTPResponse,
-    url: string,
-    config: RequestConfig,
-    context?: PluginContext
+    context: AfterRespondContext
   ): Promise<HTTPResponse | void> | HTTPResponse | void
 
   onError?(
     error: unknown,
     context: RequestContext
   ): Promise<HTTPResponse | void> | HTTPResponse | void
+}
+```
+
+```ts
+interface AfterRespondContext {
+  response: HTTPResponse
+  url: string
+  config: RequestConfig
+  originalUrl: string
+  originalConfig: RequestConfig
+  client: IHTTPClient
 }
 ```
 
@@ -59,7 +66,7 @@ import { TokenPlugin } from '@cat-kit/http'
 ### 配置
 
 ```ts
-new TokenPlugin({
+TokenPlugin({
   getter: () => string | null | undefined,               // 必填：获取 token
   headerName?: 'Authorization',                          // 请求头名
   authType?: 'Bearer' | 'Basic' | 'Custom',              // 认证类型，默认 'Bearer'
@@ -68,7 +75,8 @@ new TokenPlugin({
   isExpired?: () => boolean,                             // 令牌过期判断
   isRefreshExpired?: () => boolean,                      // 刷新令牌过期判断
   shouldRefresh?: (response: HTTPResponse) => boolean,   // 响应触发刷新判断
-  onRefreshExpired?: () => void                          // 刷新令牌过期回调（如登出）
+  onRefreshExpired?: () => void,                          // 刷新令牌过期回调（如登出）
+  maxRetries?: number                                     // 最大重试次数，默认 2；0 为不重试
 })
 ```
 
@@ -83,7 +91,9 @@ new TokenPlugin({
 
 **`afterRespond`**：
 
-- 若 `shouldRefresh?.(response)` 且配置了 `onRefresh` → 刷新后通过 `context.retry()` 重试
+- 若 `shouldRefresh?.(response)` 且配置了 `onRefresh` → 刷新后通过 `client.request(originalUrl, { ...originalConfig, _retryAttempt })` 重试
+- 重试走完整插件链，`beforeRequest` 会重新注入 token
+- `_retryAttempt` 达到 `maxRetries` 后不再重试
 
 ### 示例
 
@@ -96,7 +106,7 @@ let refreshToken = ''
 const http = new HTTPClient('/api', {
   origin: 'https://api.example.com',
   plugins: [
-    new TokenPlugin({
+    TokenPlugin({
       getter: () => accessToken,
       onRefresh: async () => {
         const res = await fetch('/auth/refresh', { body: JSON.stringify({ refreshToken }) })
@@ -105,55 +115,6 @@ const http = new HTTPClient('/api', {
       },
       isExpired: () => !accessToken,
       shouldRefresh: (res) => res.code === 401
-    })
-  ]
-})
-```
-
----
-
-## RetryPlugin
-
-```ts
-import { RetryPlugin } from '@cat-kit/http'
-```
-
-自动重试失败的请求，支持自定义重试条件和退避策略。
-
-### 配置
-
-```ts
-new RetryPlugin({
-  maxRetries?: 3,                                        // 最大重试次数
-  delay?: 1000 | ((attempt: number) => number),           // 延迟（ms），默认指数退避
-  retryOn?: (error: unknown, context: RequestContext) => boolean, // 自定义重试判断
-  retryOnStatus?: [408, 429, 500, 502, 503, 504]        // 按状态码重试
-})
-```
-
-**默认退避**：`Math.min(1000 * 2 ** attempt, 30000)`
-
-- 第 1 次重试：1s
-- 第 2 次重试：2s
-- 第 3 次重试：4s
-- 封顶：30s
-
-**默认重试条件**（未设 `retryOn` 时）：
-
-- 非 2xx 响应且状态码在 `retryOnStatus` 中
-- 网络错误（`code === 'NETWORK'`）
-- 超时（`code === 'TIMEOUT'`）
-
-### 示例
-
-```ts
-const http = new HTTPClient('/api', {
-  origin: 'https://api.example.com',
-  plugins: [
-    new RetryPlugin({
-      maxRetries: 5,
-      retryOnStatus: [429, 503],
-      delay: (attempt) => attempt * 2000 // 2s, 4s, 6s...
     })
   ]
 })
@@ -172,7 +133,7 @@ import { MethodOverridePlugin } from '@cat-kit/http'
 ### 配置
 
 ```ts
-new MethodOverridePlugin({
+MethodOverridePlugin({
   methods?: ['DELETE', 'PUT', 'PATCH'],  // 要改写的方法
   overrideMethod?: 'POST',                // 改写为的方法
   headerName?: 'X-HTTP-Method-Override'   // 自定义头名
@@ -184,7 +145,7 @@ new MethodOverridePlugin({
 ```ts
 const http = new HTTPClient('/api', {
   origin: 'https://api.example.com',
-  plugins: [new MethodOverridePlugin({ methods: ['DELETE'], overrideMethod: 'POST' })]
+  plugins: [MethodOverridePlugin({ methods: ['DELETE'], overrideMethod: 'POST' })]
 })
 
 // DELETE /api/users/1 → POST /api/users/1
@@ -204,11 +165,11 @@ import { HTTPClientPlugin } from '@cat-kit/http'
 const timingPlugin: HTTPClientPlugin = {
   name: 'timing',
 
-  async beforeRequest(url, config) {
+  async beforeRequest({ config }) {
     ;(config as any)._startTime = Date.now()
   },
 
-  async afterRespond(response) {
+  async afterRespond({ response }) {
     const reqTime = (response as any)._startTime
     console.debug(`[${response.code}] ${reqTime}ms`)
   },

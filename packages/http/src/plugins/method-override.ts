@@ -50,7 +50,7 @@ export function HTTPMethodOverridePlugin(
 
   return {
     name: 'method-override',
-    beforeRequest(_url: string, config: RequestConfig): PluginHookResult {
+    beforeRequest({ config }): PluginHookResult {
       const { method } = config
 
       // 如果没有指定方法或者方法不需要被重写，不做任何处理

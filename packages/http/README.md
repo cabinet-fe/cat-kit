@@ -7,7 +7,7 @@
 - 支持标准 HTTP 方法（`GET`/`POST`/`PUT`/`DELETE`/`PATCH`/`HEAD`/`OPTIONS`）
 - 支持请求分组（`group`）与批量中止（`abort`）
 - 支持插件扩展（请求前、响应后、错误钩子）
-- 内置 `HTTPTokenPlugin`、`HTTPMethodOverridePlugin` 与 `RetryPlugin`
+- 内置 `HTTPTokenPlugin` 与 `HTTPMethodOverridePlugin`（`TokenPlugin` 支持 `maxRetries` 认证重试）
 - 完整 TypeScript 类型支持
 
 ## 安装
@@ -78,19 +78,24 @@ interface HTTPClientPlugin {
   /** 插件名称（必填、同一 client 及其父链中唯一） */
   name: string
   beforeRequest?(
-    url: string,
-    config: RequestConfig
+    context: { url: string; config: RequestConfig }
   ): PluginHookResult | void | Promise<PluginHookResult | void>
   afterRespond?(
-    response: HTTPResponse,
-    url: string,
-    config: RequestConfig,
-    context?: PluginContext
+    context: AfterRespondContext
   ): HTTPResponse | void | Promise<HTTPResponse | void>
   onError?(
     error: unknown,
     context: RequestContext
   ): HTTPResponse | void | Promise<HTTPResponse | void>
+}
+
+interface AfterRespondContext {
+  response: HTTPResponse
+  url: string
+  config: RequestConfig
+  originalUrl: string
+  originalConfig: RequestConfig
+  client: IHTTPClient
 }
 ```
 
@@ -190,6 +195,4 @@ user.abort() // 中止该分组引擎内请求
 | `MethodOverridePlugin`        | `HTTPMethodOverridePlugin`        |
 | `MethodOverridePluginOptions` | `HTTPMethodOverridePluginOptions` |
 
-`RetryPlugin` / `RetryPluginOptions` 命名保持不变。
-
-内置插件均已自带 `name`（`token` / `method-override` / `retry`），用户自定义插件需手动补齐非空 `name`；若与已注册插件（含父链）重名，会抛 `HTTPError({ code: 'PLUGIN' })`。
+内置插件均已自带 `name`（`token` / `method-override`），用户自定义插件需手动补齐非空 `name`；若与已注册插件（含父链）重名，会抛 `HTTPError({ code: 'PLUGIN' })`。

@@ -62,10 +62,10 @@ const postsApi = api.group('/posts')
 // postsApi.get('/') → GET /api/posts
 ```
 
-## Token + Retry 组合
+## Token 刷新与重试
 
 ```ts
-import { HTTPClient, TokenPlugin, RetryPlugin } from '@cat-kit/http'
+import { HTTPClient, TokenPlugin } from '@cat-kit/http'
 
 let token = ''
 let refreshToken = ''
@@ -73,16 +73,16 @@ let refreshToken = ''
 const http = new HTTPClient('/api', {
   origin: 'https://api.example.com',
   plugins: [
-    new TokenPlugin({
+    TokenPlugin({
       getter: () => token,
+      maxRetries: 3,
       onRefresh: async () => {
         const res = await fetch('/auth/refresh', { body: JSON.stringify({ refreshToken }) })
         const data = await res.json()
         token = data.accessToken
       },
       shouldRefresh: (res) => res.code === 401
-    }),
-    new RetryPlugin({ maxRetries: 3 })
+    })
   ]
 })
 

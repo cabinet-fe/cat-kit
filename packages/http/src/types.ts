@@ -141,9 +141,7 @@ export interface RequestConfig {
    */
   xsrfHeaderName?: string
 
-  /**
-   * @internal 内置重试逻辑写入的重试次数，业务代码勿依赖
-   */
+  /** @internal 内置重试逻辑写入的重试次数，业务代码勿依赖 */
   _retryAttempt?: number
 }
 
@@ -206,19 +204,47 @@ export class HTTPError<T = any> extends Error {
   }
 }
 
+export interface IHTTPClient {
+  getEngine(): HttpEngine
+
+  registerPlugin(plugin: HTTPClientPlugin): void
+
+  request<T = any>(url: string, config?: RequestConfig): Promise<HTTPResponse<T>>
+
+  get<T = any>(url: string, config?: AliasRequestConfig): Promise<HTTPResponse<T>>
+
+  post<T = any>(
+    url: string,
+    body?: RequestConfig['body'],
+    config?: Omit<RequestConfig, 'method' | 'body'>
+  ): Promise<HTTPResponse<T>>
+
+  put<T = any>(
+    url: string,
+    body?: RequestConfig['body'],
+    config?: Omit<RequestConfig, 'method' | 'body'>
+  ): Promise<HTTPResponse<T>>
+
+  delete<T = any>(url: string, config?: Omit<RequestConfig, 'method'>): Promise<HTTPResponse<T>>
+
+  patch<T = any>(
+    url: string,
+    body?: RequestConfig['body'],
+    config?: Omit<RequestConfig, 'method' | 'body'>
+  ): Promise<HTTPResponse<T>>
+
+  head<T = any>(url: string, config?: Omit<RequestConfig, 'method'>): Promise<HTTPResponse<T>>
+
+  options<T = any>(url: string, config?: Omit<RequestConfig, 'method'>): Promise<HTTPResponse<T>>
+
+  abort(): void
+
+  group(prefix: string): IHTTPClient
+}
+
 export interface RequestContext {
   url: string
   config: RequestConfig
-  /**
-   * 与 {@link PluginContext.retry} 相同，供 `onError` 中恢复请求时使用。
-   */
-  retry?: (patch?: Partial<RequestConfig>) => Promise<HTTPResponse>
-}
-
-/** 插件在 afterRespond 中可用的上下文 */
-export interface PluginContext {
-  /** 重试当前请求，可传入部分配置覆盖（与原始请求配置合并） */
-  retry: (config?: Partial<RequestConfig>) => Promise<HTTPResponse>
 }
 
 /**
@@ -229,6 +255,28 @@ export interface PluginHookResult {
   url?: string
   /** 修改后的请求配置 */
   config?: RequestConfig
+}
+
+interface BeforeRequestContext {
+  /** 最终请求 URL */
+  url: string
+  /** 最终请求配置 */
+  config: RequestConfig
+}
+
+interface AfterRespondContext {
+  /** 响应对象 */
+  response: HTTPResponse
+  /** 最终请求 URL */
+  url: string
+  /** 最终请求配置 */
+  config: RequestConfig
+  /** 调用 client.request / get 等方法时传入的原始 URL */
+  originalUrl: string
+  /** 合并客户端默认值后、beforeRequest 前的原始配置 */
+  originalConfig: RequestConfig
+  /** 请求客户端 */
+  client: IHTTPClient
 }
 
 /** 请求客户端插件 */
@@ -242,23 +290,14 @@ export interface HTTPClientPlugin {
    * @returns 修改后的 URL 和请求选项
    */
   beforeRequest?(
-    url: string,
-    config: RequestConfig
+    context: BeforeRequestContext
   ): Promise<PluginHookResult | void> | PluginHookResult | void
 
   /**
    * 响应后钩子
-   * @param response 响应对象
-   * @param url 请求 URL
-   * @param config 请求配置
-   * @returns 修改后的响应对象
+   * @param context 响应后上下文
    */
-  afterRespond?(
-    response: HTTPResponse,
-    url: string,
-    config: RequestConfig,
-    context?: PluginContext
-  ): Promise<HTTPResponse | void> | HTTPResponse | void
+  afterRespond?(context: AfterRespondContext): Promise<HTTPResponse | void> | HTTPResponse | void
 
   /**
    * 错误钩子
