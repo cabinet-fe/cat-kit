@@ -1,5 +1,12 @@
 # @cat-kit/http
 
+## 1.1.7
+
+### Patch Changes
+
+- b621023: refactor(http): 插件 hook 改为对象上下文；移除 HTTPRetryPlugin，Token 内置 maxRetries；导出 IHTTPClient 与 getEngine()
+  - @cat-kit/core@1.1.7
+
 ## 1.1.6
 
 ### Patch Changes

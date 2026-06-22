@@ -1,5 +1,11 @@
 # @cat-kit/be
 
+## 1.1.7
+
+### Patch Changes
+
+- @cat-kit/core@1.1.7
+
 ## 1.1.6
 
 ### Patch Changes
