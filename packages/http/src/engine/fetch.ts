@@ -93,7 +93,7 @@ function getResponseHeaders(response: Response) {
     headers[key] = value
   })
 
-  const setCookie = response.headers.getSetCookie()
+  const setCookie = response.headers.getSetCookie?.()
   if (setCookie && setCookie.length) {
     headers['set-cookie'] = setCookie.join('\n')
   }
