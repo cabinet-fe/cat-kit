@@ -1,5 +1,12 @@
 # @cat-kit/http
 
+## 1.1.8
+
+### Patch Changes
+
+- 71a780e: fix(http): FetchEngine 在缺少 Headers.getSetCookie 的环境兼容读取 set-cookie
+  - @cat-kit/core@1.1.8
+
 ## 1.1.7
 
 ### Patch Changes
