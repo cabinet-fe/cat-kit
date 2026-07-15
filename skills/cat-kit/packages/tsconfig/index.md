@@ -1,33 +1,30 @@
 # @cat-kit/tsconfig
 
-通过 `extends` 使用的 TypeScript 6 配置预设。
+共享 TypeScript 预设（JSON），非编程 API。
 
-## 如何选择
+**版本**：2.0.1  
+**Peer**：`typescript >= 6.0.0`
 
-- `@cat-kit/tsconfig/tsconfig.json`：运行时无关的 ESM/bundler 基础配置。
-- `@cat-kit/tsconfig/tsconfig.node.json`：增加 `ESNext` lib 和 Node.js 全局类型。
-- `@cat-kit/tsconfig/tsconfig.bun.json`：增加 `ESNext` lib 和 Bun 全局类型。
-- `@cat-kit/tsconfig/tsconfig.web.json`：增加 `DOM`、`DOM.Iterable`，不注入额外全局类型。
-- `@cat-kit/tsconfig/tsconfig.vue.json`：保留 JSX 并使用 Vue JSX 类型；按项目需要自行补 DOM lib。
+## 预设选择
 
-## 最小示例
+| 文件 | 用途 |
+| --- | --- |
+| `tsconfig.json` | 基础共享选项 |
+| `tsconfig.node.json` | Node.js 项目（建议另装 `@types/node`） |
+| `tsconfig.bun.json` | Bun 项目（建议另装 `@types/bun`） |
+| `tsconfig.web.json` | 浏览器 / 打包前端 |
+| `tsconfig.vue.json` | Vue 项目（不继承 web 预设；需要浏览器 `lib` 时自行补充） |
+
+## 用法
 
 ```json
 {
-  "extends": "@cat-kit/tsconfig/tsconfig.node.json",
-  "compilerOptions": { "rootDir": "./src", "outDir": "./dist" },
-  "include": ["src"]
+  "extends": "@cat-kit/tsconfig/tsconfig.node.json"
 }
 ```
 
-## 约束与边界
+```bash
+bun add -d @cat-kit/tsconfig typescript
+```
 
-- 当前包要求 TypeScript `>= 6.0.0`。
-- Node.js 项目需安装 `@types/node`；Bun 项目需安装 `@types/bun`。
-- 所有预设使用 `module: "ESNext"` 和 `moduleResolution: "bundler"`；需要 `NodeNext` 语义的项目应显式覆盖，而不是假设 Node 预设会切换模块解析。
-- Vue 预设不继承 Web 预设。使用浏览器 API 时可在项目配置中补充 `"lib": ["ESNext", "DOM", "DOM.Iterable"]`。
-- `rootDir`、`outDir`、`include`、`declaration` 等产物策略应由消费项目设置。
-
-## 精确配置入口
-
-[基础](../../generated/tsconfig/tsconfig.json) · [Node.js](../../generated/tsconfig/tsconfig.node.json) · [Bun](../../generated/tsconfig/tsconfig.bun.json) · [Web](../../generated/tsconfig/tsconfig.web.json) · [Vue](../../generated/tsconfig/tsconfig.vue.json)
+所有预设使用 ESM / bundler 解析；Node 预设未启用 `NodeNext`。镜像见 [generated/tsconfig/](../../generated/tsconfig/)。

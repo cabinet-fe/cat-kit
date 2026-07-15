@@ -98,7 +98,7 @@ cat-kit/
 **刷新类型（仓库根）**：`bun run sync-cat-kit-skills-api` 或 `bun run sync-cat-kit-skills-api:build`。脚本：`scripts/sync-cat-kit-skills-api.ts`。
 
 - **入口**：`skills/cat-kit/SKILL.md`
-- **包文档**：`skills/cat-kit/packages/<pkg>/`（含 `index.md`、`<topic>.md`、`examples.md`）
+- **包文档**：`skills/cat-kit/packages/<pkg>/`（包级 `index.md`；主题为 `<topic>/{index,apis,examples}.md`；大包可有包级 `examples.md`）
 - **类型参考**：`skills/cat-kit/generated/<pkg>/`
 - **何时用**：编写或讲解 cat-kit API、核对签名时；长文与示例以 `docs/` 为准
 

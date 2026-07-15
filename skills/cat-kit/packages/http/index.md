@@ -1,33 +1,27 @@
 # @cat-kit/http
 
-可用于浏览器与 Node.js 的 HTTP 客户端，运行环境必须具备所选引擎需要的 Web API。它统一 URL、请求配置、响应和错误，并提供可替换引擎与请求插件；自动刷新仅由 `TokenPlugin` 提供，不代表客户端会为所有失败请求通用重试。
+可用于浏览器与 Node.js 的 HTTP 客户端：统一 URL、配置、响应与错误，支持可替换引擎与请求插件。
+
+**版本**：1.1.8  
+**导入**：`import { ... } from '@cat-kit/http'`（仅包根）
 
 ## 适用场景
 
-- 为一组接口复用 `origin`、路径前缀、请求头、超时和响应类型
-- 需要类型化响应、请求取消、传输进度或同域 XSRF Header
+- 复用 `origin`、路径前缀、请求头、超时与响应类型
+- 类型化响应、请求取消、传输进度或同域 XSRF Header
 - 按业务域创建子客户端，或注入自定义传输引擎
-- 集中处理 Token 注入/刷新、HTTP 方法覆盖或自定义请求扩展
+- Token 注入/刷新、HTTP 方法覆盖或自定义插件
 
-仅需一次简单请求且原生 `fetch` 已足够时，不必引入客户端封装。
+仅需一次简单请求且原生 `fetch` 已足够时，不必引入本包。
 
-## 选择文档
+## 主题
 
-| 任务                                                    | 读取                     |
-| ------------------------------------------------------- | ------------------------ |
-| 创建客户端、发送请求、处理响应/错误、选择引擎、合并配置 | [client.md](client.md)   |
-| Token 注入与刷新、方法覆盖、动态注册或编写自定义插件    | [plugins.md](plugins.md) |
-
-## 公共导入
-
-包只公开根入口：
-
-```ts
-import { HTTPClient, TokenPlugin } from '@cat-kit/http'
-```
-
-不要导入 `src`、`dist` 或包内文件。
+| 主题 | 说明 |
+| --- | --- |
+| [client](client/index.md) | 创建客户端、请求、响应/错误、引擎、配置合并 |
+| [plugins](plugins/index.md) | Token、方法覆盖、自定义插件 |
+| [组合示例](examples.md) | 客户端 + 插件组合 |
 
 ## 类型入口
 
-[公共声明](../../generated/http/index.d.ts)
+[generated/http/index.d.ts](../../generated/http/index.d.ts)

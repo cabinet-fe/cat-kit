@@ -1,41 +1,36 @@
-# @cat-kit/core 示例
+# @cat-kit/core — 组合示例
 
-仅在任务需要组合多个主题时读取；单一能力优先回到对应主题文档。
-
-## 解析并校验查询参数
+仅在需要跨主题组合时阅读。
 
 ```ts
-import { object, query2obj, vArray, vNumber, vString } from '@cat-kit/core'
+import {
+  $n,
+  date,
+  object,
+  parallel,
+  TreeManager,
+  vNumber,
+  vString
+} from '@cat-kit/core'
 
-const searchSchema = object({
-  page: vNumber(),
-  keyword: vString(),
-  tags: vArray(vString())
+const schema = object({
+  amount: vNumber(),
+  label: vString()
 })
 
-const input = query2obj('?page=2&keyword=%22cat%22&tags=%5B%22tool%22%5D')
-const search = searchSchema.parse(input)
-console.log(search)
-```
-
-这里要求查询串遵循 `obj2query` / `query2obj` 的 JSON 值约定；普通表单查询串不一定能通过该 schema。
-
-## 扁平化树后限并发加载
-
-```ts
-import { TreeManager, parallel } from '@cat-kit/core'
+const parsed = schema.parse({ amount: 19.9, label: 'item' })
+const total = $n.mul(parsed.amount, 100)
+const due = date().addDays(7).format('yyyy-MM-dd')
 
 const tree = new TreeManager({
   id: 'root',
   children: [{ id: 'a' }, { id: 'b' }]
 })
 
-const tasks = tree
-  .flatten((node) => node.id !== 'root')
-  .map((node) => async () => ({ id: node.id, loaded: true }))
+const ids = await parallel(
+  tree.flatten((n) => n.id !== 'root').map((n) => async () => n.id),
+  { concurrency: 2 }
+)
 
-const nodes = await parallel(tasks, { concurrency: 2 })
-console.log(nodes)
+console.log(total, due, ids)
 ```
-
-结果顺序与扁平化后的节点顺序一致；任一任务拒绝时整体拒绝，已开始的任务不会自动中断。

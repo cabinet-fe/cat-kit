@@ -1,16 +1,19 @@
 # @cat-kit/cli
 
-Node.js 命令行包，当前公开用途是校验 Git commit message。它不提供可从包根导入的编程 API。
+Node.js 命令行包，公开用途是校验 Git commit message。**不提供**可从包根导入的编程 API。
+
+**版本**：1.0.6  
+**可执行文件**：`cat-cli`
 
 ## 何时使用
 
-需要在 `commit-msg` hook 或脚本中强制 Conventional Commits 风格的首行时使用：
+在 `commit-msg` hook 或脚本中强制 Conventional Commits 风格首行：
 
 ```bash
 cat-cli verify-commit [file] [-m <message>]
 ```
 
-消息来源优先级为 `--message`、位置参数文件、`.git/COMMIT_EDITMSG`。文件中的 `#` 注释行会在校验前移除。
+消息来源优先级：`--message` → 位置参数文件 → `.git/COMMIT_EDITMSG`。`#` 注释行会在校验前移除。
 
 ## 最小示例
 
@@ -20,16 +23,13 @@ cat-cli verify-commit [file] [-m <message>]
 cat-cli verify-commit "$1"
 ```
 
-手动核对可运行：
-
 ```bash
-cat-cli verify-commit --message "feat(api)!: change response format"
+npx --package @cat-kit/cli cat-cli verify-commit --message "feat(api)!: change response format"
 ```
 
-## 约束与边界
+## 约束
 
-- 支持格式为 `<type>[(<scope>)][!]: <subject>`。
-- `type` 仅接受 `feat`、`fix`、`docs`、`style`、`refactor`、`perf`、`test`、`build`、`ci`、`chore`、`revert`、`release`。
-- 读取失败或格式不匹配时以非 0 状态退出，适合直接阻止提交。
-- 可执行文件名是 `cat-cli`。临时执行 scoped 包应使用 `npx --package @cat-kit/cli cat-cli ...`；不要使用会解析成另一个包的 `npx cat-cli`。
-- 不要导入 `@cat-kit/cli`、`src` 或 `dist` 路径；该包没有已发布的公共 JS/TS API 或类型入口。
+- 格式：`<type>[(<scope>)][!]: <subject>`
+- `type` 仅接受：`feat`、`fix`、`docs`、`style`、`refactor`、`perf`、`test`、`build`、`ci`、`chore`、`revert`、`release`
+- 读取失败或格式不匹配时非 0 退出
+- 不要使用 `npx cat-cli`（可能解析到其他包）；不要 `import '@cat-kit/cli'`
