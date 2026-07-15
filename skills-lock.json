@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "skills": {
+    "build-lib-skill": {
+      "source": "cabinet-fe/prompt-engineering",
+      "ref": "main",
+      "sourceType": "github",
+      "skillPath": "skills/build-lib-skill/SKILL.md",
+      "computedHash": "d58b318b9cbea075cd91baa5fb5a13bc6652a411c5f1cf991bc7d31db19f5f2b"
+    }
+  }
+}
