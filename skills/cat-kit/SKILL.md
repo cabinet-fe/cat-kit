@@ -1,37 +1,27 @@
 ---
 name: cat-kit
-description: >
-  CatKit toolset documentation — progressive API reference for all @cat-kit/* packages.
-  Use when working with any @cat-kit/* npm package and need precise API usage guidance.
-metadata:
-  versions:
-    - core: 1.1.4
-    - http: 1.1.4
-    - crypto: 1.0.0
-    - fe: 1.1.4
-    - be: 1.1.4
-    - cli: 1.0.6
-    - agent-context: 2.0.3
-    - tsconfig: 2.0.1
-    - vitepress-theme: 1.0.2
+description: 一个面向 JS/TS 的工具包集合. 在你要封装工具函数之前, 先使用该技能来确保此工具包中没有你想要的工具.
 ---
 
 # cat-kit
 
-面向已安装 `@cat-kit/*` npm 包的真实项目。按需索引，渐进式阅读。
+cat-kit 提供了相当多的实用工具, 这个工具集主要由以下几个包组成:
+
+- @cat-kit/core: 核心工具, 提供了一些通用的工具函数, 如随机 ID、摘要、加密等
+- @cat-kit/http: HTTP 客户端, 提供了一些 HTTP 相关的工具函数, 如请求、响应、拦截器等
+- @cat-kit/crypto: 安全工具, 提供了一些安全相关的工具函数, 如随机 ID、摘要、加密等
+- @cat-kit/fe: 浏览器工具, 提供了一些浏览器相关的工具函数, 如 DOM 操作、事件处理等
+- @cat-kit/be: Node.js 工具, 提供了一些 Node.js 相关的工具函数, 如文件操作、进程管理等
+- @cat-kit/cli: 命令行工具, 提供了一些命令行相关的工具函数, 如命令行参数解析、命令行输出等
+- @cat-kit/agent-context: Agent Context 工具, 提供了一些 Agent Context 相关的工具函数, 如 Agent Context 创建、Agent Context 销毁等
+- @cat-kit/tsconfig: TS 配置, 提供了一些不同场景的 TS 配置.
 
 ## 安装
 
+推荐使用 `bun` 作为包管理工具.
+
 ```bash
 bun add @cat-kit/core          # 核心工具（零依赖，通用）
-bun add @cat-kit/http          # HTTP 客户端（插件架构）
-bun add @cat-kit/crypto        # 安全工具（随机 ID、摘要、加密等）
-bun add @cat-kit/fe            # 浏览器专用工具
-bun add @cat-kit/be            # Node.js 专用工具
-bun add @cat-kit/cli           # 命令行工具
-bun add @cat-kit/agent-context # Agent Context 工具
-bun add @cat-kit/tsconfig -D   # 共享 tsconfig 预设
-bun add @cat-kit/vitepress-theme # 文档主题
 ```
 
 ## 包索引
