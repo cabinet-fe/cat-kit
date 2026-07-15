@@ -1,110 +1,44 @@
-# core — pattern
+# core — 可观察状态
 
-设计模式实现。当前提供 Observable 观察者模式。
+## 何时使用
 
-## Observable
+需要观察普通对象顶层属性赋值，并以很小的 API 管理订阅时使用 `Observable`。需要深层响应式、派生状态或框架级事务时，优先使用宿主框架的状态方案。
 
-```ts
-class Observable<S extends object, K extends keyof S>
-```
+## 推荐公开 API
 
-基于 Proxy 拦截的可观察状态容器。当观察的属性发生变化时，自动通知注册的回调。
+- `new Observable(initialState)`：创建状态容器。
+- `.state`、`.getState()`：读取状态；给 `.state` 顶层属性赋值会触发订阅。
+- `.observe(props, callback, options?)`：订阅属性并返回取消函数。
+- `.setState(partial)`：更新一个或多个顶层属性。
+- `.unobserve(props)`、`.destroyAll()`：移除订阅。
+- 选项：`immediate` 立即调用，`once` 首次变化后移除，`sync` 同步通知。
 
-**构造器**：
-
-```ts
-const obs = new Observable({ count: 0, name: 'hello' })
-```
-
-**属性**：
-
-| 属性     | 说明                                                    |
-| -------- | ------------------------------------------------------- |
-| `.state` | 被 Proxy 包装的可观察状态对象，直接赋值属性即可触发通知 |
-
-**方法**：
-
-### `observe`
-
-```ts
-.observe<P extends K[]>(
-  props: P,
-  callback: (values: { [key in keyof P]: S[P[key]] }) => void,
-  options?: ObserveOptions
-): () => void
-```
-
-观察指定属性的变化。返回取消观察的函数。
-
-Options：
-
-- `immediate?`：注册后立即执行一次回调（以当前值），默认 `false`
-- `once?`：只触发一次，触发后自动取消观察，默认 `false`
-- `sync?`：同步执行回调，默认 `false`（异步通过微任务队列批量执行）
-
-```ts
-const unsub = obs.observe(
-  ['count', 'name'],
-  ({ count, name }) => {
-    console.log(`count: ${count}, name: ${name}`)
-  },
-  { immediate: true }
-)
-
-obs.state.count = 1 // 触发回调: count: 1, name: hello
-obs.state.name = 'bye' // 触发回调: count: 1, name: bye
-obs.state.count = 2 // 触发回调: count: 2, name: bye
-
-unsub() // 取消观察
-```
-
-### `getState` / `setState`
-
-```ts
-.getState(): S
-.setState(state: Partial<S>): Observable<S, K>
-```
-
-批量读写状态。`setState` 内部通过 `Object.assign` 合并，一次赋值多个属性只触发一次回调。
-
-```ts
-obs.setState({ count: 5, name: 'updated' }) // 触发一次回调
-```
-
-### `unobserve` / `destroyAll`
-
-```ts
-.unobserve(props: P, handler?: PropHandler): void
-.destroyAll(): void
-```
-
-`unobserve` 取消特定属性的特定 handler；不传 handler 则取消该属性的所有观察。`destroyAll` 清空所有 handler 和待处理的微任务。
-
-**使用模式**：
+## 最小示例
 
 ```ts
 import { Observable } from '@cat-kit/core'
 
-const store = new Observable({ user: null, loading: false })
+const store = new Observable({ count: 0, loading: false })
 
-// React hook 风格
-const useStore = () => {
-  const [state, setState] = useState(store.getState())
+const stop = store.observe(['count', 'loading'], ([count, loading]) => {
+  console.log(count, loading)
+})
 
-  useEffect(() => {
-    return store.observe(['user', 'loading'], (vals) => {
-      setState((prev) => ({ ...prev, ...vals }))
-    })
-  }, [])
-
-  return state
-}
+store.state.count = 1
+stop()
 ```
 
-**注意事项**：
+## 约束与边界
 
-- async callback 通过微任务队列批量执行
-- 仅当被观察属性的值真正变化时才触发（Proxy `set` 拦截比较新旧值）
-- `sync: true` 时立即同步执行回调（不经过微任务队列）
+- 回调参数是按 `props` 顺序排列的值元组，不是以属性名为键的对象。
+- 默认通知异步发生；`sync: true` 才在赋值过程中同步调用。
+- 只观察顶层属性赋值。直接修改嵌套对象内部字段不会触发顶层属性订阅，除非重新赋值该顶层属性。
+- 新旧值严格相等时不触发。
+- `setState` 对每个发生变化的属性分别触发；同时订阅多个被更新属性时，同一回调可能执行多次，不承诺批量去重。
+- `immediate` 在注册时直接调用一次；`once` 控制的是首次后续变化，不会因这次立即调用自动取消。
+- 调用返回的取消函数最安全；`unobserve(props)` 不传具体 handler 时会移除这些属性上的所有订阅。
+- `destroyAll` 会清空订阅和尚未执行的异步通知。
 
-> 类型签名：`../../generated/core/pattern/observer.d.ts`
+## 精确类型入口
+
+[可观察状态声明](../../generated/core/pattern/observer.d.ts)

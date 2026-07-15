@@ -1,23 +1,15 @@
 # @cat-kit/be
 
-Node.js 专用工具包，提供文件系统、日志、缓存、配置、网络、系统信息等后端通用工具。
+仅用于 Node.js。所有下列 API 都从 `@cat-kit/be` 包根导入。
 
-## 运行环境
+## 如何选择
 
-仅 Node.js（依赖 `node:` 内置模块）。
+- 遍历、写入、移动或清理文件：[fs.md](fs.md)
+- 读取 `.env`、校验环境变量或合并配置：[config.md](config.md)
+- 选择进程内、文件持久化或函数结果缓存：[cache.md](cache.md)
+- 输出结构化控制台或文件日志：[logger.md](logger.md)
+- 检查监听端口或获取本机地址：[net.md](net.md)
+- 安排 Cron、延迟或周期任务：[scheduler.md](scheduler.md)
+- 获取 CPU、内存、磁盘或网卡快照：[system.md](system.md)
 
-## API 分类
-
-| 分类     | 文档                         | 说明                               |
-| -------- | ---------------------------- | ---------------------------------- |
-| 文件系统 | [fs.md](fs.md)               | 目录遍历/创建/删除、文件读写       |
-| 日志系统 | [logger.md](logger.md)       | Logger 日志器、ConsoleTransport 等 |
-| 缓存     | [cache.md](cache.md)         | LRU 缓存、TTL 缓存等               |
-| 配置管理 | [config.md](config.md)       | env 变量、配置文件读取             |
-| 网络工具 | [net.md](net.md)             | IP 地址、可用端口等                |
-| 系统信息 | [system.md](system.md)       | CPU、内存、磁盘等信息              |
-| 调度器   | [scheduler.md](scheduler.md) | 定时任务、cron 等                  |
-
-## 类型签名
-
-> 详见 `../../generated/be/index.d.ts`
+不要在浏览器代码中使用本包，也不要导入 `src` 或 `dist` 深路径。精确签名在各主题末尾按需链接到对应声明文件。

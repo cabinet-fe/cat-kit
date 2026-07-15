@@ -1,12 +1,36 @@
-# @cat-kit/vitepress-theme 示例
+# @cat-kit/vitepress-theme — Demo 与 Mermaid
 
-```ts
-import { defineConfig } from 'vitepress'
-import catKitTheme from '@cat-kit/vitepress-theme'
+先按 [index.md](index.md) 同时安装主题入口和 `defineThemeConfig`。
 
-export default defineConfig({ theme: catKitTheme })
+假设配置中的 `examplesDir` 指向 `docs/examples`，页面可按相对路径渲染 Vue 示例：
+
+```markdown
+::: demo forms/LoginForm.vue
+:::
 ```
 
-`default` 导出形状见类型声明（含 `Layout` / `enhanceApp` 等）。
+同一页面可直接使用 Mermaid 围栏：
 
-> 类型参考：`../../generated/vitepress-theme/index.d.ts`
+````markdown
+```mermaid
+flowchart LR
+  Plan --> Implement --> Review
+```
+````
+
+若站点只需要 Mermaid 转换而不需要 Demo 导入插件，可从公开 `config` 子路径选择低层能力：
+
+```ts
+import { mermaidPlugin } from '@cat-kit/vitepress-theme/config'
+import { defineConfig } from 'vitepress'
+
+export default defineConfig({
+  markdown: {
+    config(md) {
+      md.use(mermaidPlugin)
+    }
+  }
+})
+```
+
+此时仍需使用 `@cat-kit/vitepress-theme` 的默认主题入口，因为它负责注册渲染用的 `Mermaid` 组件。

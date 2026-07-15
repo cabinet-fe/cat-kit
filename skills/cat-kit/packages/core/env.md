@@ -1,108 +1,43 @@
-# core — env
+# core — 环境检测
 
-运行时环境检测工具，可在浏览器和 Node.js 中跨平台使用。
+## 何时使用
 
-## 运行时检测
+- 在通用代码中区分浏览器、Node.js 或未知运行时。
+- 获取用于提示、日志或非关键分支的系统、浏览器和设备概况。
 
-### `getRuntime`
+环境探测不是功能检测。决定能否调用某个 Web API 时，应直接检查对应 API 是否存在。
 
-```ts
-function getRuntime(): 'browser' | 'node' | 'unknown'
-```
+## 推荐公开 API
 
-探测当前运行时环境。先检测 `window` 再检测 `process`。
+- `getRuntime`、`isInBrowser`、`isInNode`：运行时。
+- `getOSType`：操作系统。
+- `getDeviceType`、`isMobile`、`isTablet`、`isDesktop`、`isTouchDevice`：设备。
+- `getBrowserType`、`getBrowserVersion`：浏览器。
+- `getNodeVersion`：Node.js 版本。
+- `getEnvironmentSummary`：按 `runtime` 区分的完整摘要。
 
-### `isInBrowser` / `isInNode`
-
-```ts
-function isInBrowser(): boolean
-function isInNode(): boolean
-```
-
-运行时布尔判断。
-
-## 操作系统
-
-### `getOSType`
-
-```ts
-function getOSType(): OSType
-// 'Windows' | 'Linux' | 'MacOS' | 'Android' | 'iOS' | 'Unknown'
-```
-
-浏览器通过 `navigator.userAgent`，Node.js 通过 `process.platform` 探测。
-
-## 设备
-
-### `getDeviceType` / `isMobile` / `isTablet` / `isDesktop`
-
-```ts
-function getDeviceType(): DeviceType // 'Mobile' | 'Desktop' | 'Tablet' | 'Unknown'
-function isMobile(): boolean
-function isTablet(): boolean
-function isDesktop(): boolean
-```
-
-### `isTouchDevice`
-
-```ts
-function isTouchDevice(): boolean
-```
-
-检测是否为触摸设备。
-
-## 浏览器
-
-### `getBrowserType` / `getBrowserVersion`
-
-```ts
-function getBrowserType(): BrowserType
-// 'Chrome' | 'Firefox' | 'Safari' | 'Edge' | 'IE' | 'Opera' | 'Unknown'
-
-function getBrowserVersion(): string | null
-```
-
-通过 UA 探测浏览器类型和版本。仅在浏览器环境下有效，Node.js 下均返回 `'Unknown'` / `null`。
-
-## Node.js
-
-### `getNodeVersion`
-
-```ts
-function getNodeVersion(): string | null
-```
-
-获取 Node.js 版本号（不含 `v` 前缀），非 Node 环境返回 `null`。
-
-## 综合信息
-
-### `getEnvironmentSummary`
-
-```ts
-function getEnvironmentSummary(): EnvironmentSummary
-```
-
-返回结构化的环境信息：
-
-```ts
-interface EnvironmentSummary {
-  os: OSType
-  // 浏览器环境额外有：
-  browser?: BrowserType
-  browserVersion?: string | null
-  device?: DeviceType
-  touchSupported?: boolean
-  // Node 环境额外有：
-  nodeVersion?: string | null
-}
-```
+## 最小示例
 
 ```ts
 import { getEnvironmentSummary } from '@cat-kit/core'
 
-const env = getEnvironmentSummary()
-// 浏览器: { os: 'MacOS', browser: 'Chrome', device: 'Desktop', ... }
-// Node:   { os: 'MacOS', nodeVersion: '22.12.0' }
+const environment = getEnvironmentSummary()
+
+if (environment.runtime === 'node') {
+  console.log(environment.nodeVersion)
+} else if (environment.runtime === 'browser') {
+  console.log(environment.browser, environment.device)
+}
 ```
 
-> 类型签名：`../../generated/core/env/env.d.ts`
+## 约束与边界
+
+- `getRuntime()` 返回 `'browser' | 'node' | 'unknown'`；同时存在 `window` 与 `process` 时判为 `browser`。
+- `EnvironmentSummary` 是以 `runtime` 为判别字段的联合类型。浏览器分支包含浏览器、设备和触摸信息；Node.js 分支包含 `nodeVersion`。
+- 操作系统、浏览器和设备判断可能返回 `'Unknown'`；浏览器版本和 Node.js 版本在不适用时返回 `null`。
+- 浏览器与设备结果来自运行环境公开信息，只适合界面适配和诊断，不应作为安全或授权依据。
+- `isTouchDevice` 表示检测到触摸能力，不代表当前输入一定来自触摸屏。
+
+## 精确类型入口
+
+[环境声明](../../generated/core/env/env.d.ts)

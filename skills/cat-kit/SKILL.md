@@ -1,57 +1,67 @@
 ---
 name: cat-kit
-description: 一个面向 JS/TS 的工具包集合. 在你要封装工具函数之前, 先使用该技能来确保此工具包中没有你想要的工具.
+description: 为 JS/TS 项目选择并正确使用 @cat-kit/* 公开能力。适用于数组/对象处理、字符串与类型守卫、校验与字节转换、数值与日期、树遍历、防抖节流与并发控制、HTTP 客户端与 Token 刷新、nanoid 随机 ID、浏览器虚拟列表/文件/存储/剪贴板、Node.js 文件系统/日志/LRU 缓存/配置/调度、提交信息校验、Agent Context、tsconfig 预设或 VitePress 主题；在自行封装通用工具或引入其他依赖前也应先使用。
 ---
 
 # cat-kit
 
-cat-kit 提供了相当多的实用工具, 这个工具集主要由以下几个包组成:
+## 决策顺序
 
-- @cat-kit/core: 核心工具, 提供了一些通用的工具函数, 如随机 ID、摘要、加密等
-- @cat-kit/http: HTTP 客户端, 提供了一些 HTTP 相关的工具函数, 如请求、响应、拦截器等
-- @cat-kit/crypto: 安全工具, 提供了一些安全相关的工具函数, 如随机 ID、摘要、加密等
-- @cat-kit/fe: 浏览器工具, 提供了一些浏览器相关的工具函数, 如 DOM 操作、事件处理等
-- @cat-kit/be: Node.js 工具, 提供了一些 Node.js 相关的工具函数, 如文件操作、进程管理等
-- @cat-kit/cli: 命令行工具, 提供了一些命令行相关的工具函数, 如命令行参数解析、命令行输出等
-- @cat-kit/agent-context: Agent Context 工具, 提供了一些 Agent Context 相关的工具函数, 如 Agent Context 创建、Agent Context 销毁等
-- @cat-kit/tsconfig: TS 配置, 提供了一些不同场景的 TS 配置.
+1. 检查项目已有的 `@cat-kit/*` 依赖、运行环境和代码约定。
+2. 按下方任务路由匹配公开 API，优先复用已有包。
+3. 目标包缺失时只建议完成任务所需的最小包，并在变更依赖前遵循宿主项目的确认规则。
+4. 现有公开能力不匹配时，再自行实现业务逻辑或选择其他依赖。不要把业务专用逻辑强行套入通用工具。
 
-## 安装
+先按任务路由读取一个最相关的主题文件；仅当主题或包索引明确链到 `examples.md` 且确需多 API 组合时再读示例；仅在签名不确定时读取对应 generated 声明。不要预读整个 packages/ 或 generated/。
 
-推荐使用 `bun` 作为包管理工具.
+所有代码只从包根或文档明确给出的公开子路径导入，不引用 `src`、`dist` 深路径或未导出的符号。
 
-```bash
-bun add @cat-kit/core          # 核心工具（零依赖，通用）
-```
+## 任务路由
 
-## 包索引
+### 通用数据与流程
 
-| npm 包                     | 运行环境 | 文档入口                                                               |
-| -------------------------- | -------- | ---------------------------------------------------------------------- |
-| `@cat-kit/core`            | 通用     | [packages/core/index.md](packages/core/index.md)                       |
-| `@cat-kit/http`            | 通用     | [packages/http/index.md](packages/http/index.md)                       |
-| `@cat-kit/crypto`          | 通用     | [packages/crypto/index.md](packages/crypto/index.md)                   |
-| `@cat-kit/fe`              | 浏览器   | [packages/fe/index.md](packages/fe/index.md)                           |
-| `@cat-kit/be`              | Node.js  | [packages/be/index.md](packages/be/index.md)                           |
-| `@cat-kit/cli`             | Node.js  | [packages/cli/index.md](packages/cli/index.md)                         |
-| `@cat-kit/agent-context`   | Node.js  | [packages/agent-context/index.md](packages/agent-context/index.md)     |
-| `@cat-kit/tsconfig`        | —        | [packages/tsconfig/index.md](packages/tsconfig/index.md)               |
-| `@cat-kit/vitepress-theme` | —        | [packages/vitepress-theme/index.md](packages/vitepress-theme/index.md) |
+- 数组去重、尾元素、对象挑选/合并：[数组与对象](packages/core/array-object.md)
+- 字符串命名转换、URL 路径、类型守卫：[字符串与类型检测](packages/core/string-type.md)
+- 字节/十六进制/Base64/查询串转换、运行时校验：[转换与校验](packages/core/transform-validation.md)
+- 小数运算、表达式、货币与精度格式化、数值范围：[数值](packages/core/number.md)
+- 日期格式化、解析、加减、区间与差值：[日期](packages/core/date.md)
+- 运行时、操作系统、浏览器和设备探测：[环境检测](packages/core/env.md)
+- 树/森林遍历、查找、可见节点和节点关系：[树与森林](packages/core/data-structure.md)
+- 防抖、节流、延时、限并发和安全同步执行：[执行控制](packages/core/optimize.md)
+- 浅层状态观察与订阅：[可观察状态](packages/core/pattern.md)
+- 多个 core 能力的组合场景：[core 组合示例](packages/core/examples.md)
 
-## 渐进式阅读路径
+### 网络与随机标识
 
-1. 从上方包索引找到你正在使用的包，打开 `packages/<pkg>/index.md` 了解该包的 API 分类
-2. 根据需要打开具体分类文档（如 `packages/core/data.md`），获取精确的函数签名、参数说明和用法
-3. 需要精确类型签名时查阅 `generated/` 下的 `.d.ts` 声明文件
-4. 各包的 `examples.md` 提供了典型使用场景的代码示例
+- HTTP 客户端、请求配置、响应、错误、中断和子客户端：[HTTP 客户端](packages/http/client.md)
+- Token 刷新、方法覆盖和自定义 HTTP 插件：[HTTP 插件](packages/http/plugins.md)
+- 安全随机 ID、自定义字符集与随机字节：[随机 ID](packages/crypto/nanoid.md)
 
-## 类型参考
+### 浏览器
 
-`generated/` 目录由 `scripts/sync-cat-kit-skills-api.ts` 自动生成，镜像各包 `dist/*.d.ts`，与 npm typings 完全一致。仅供类型查证，不建议作为主要阅读路径。
+- 虚拟列表、动态测量、滚动与订阅：[虚拟列表](packages/fe/virtualizer.md)
+- 补间动画、缓动和生命周期控制：[补间动画](packages/fe/tween.md)
+- 文件分块读取与浏览器下载：[浏览器文件](packages/fe/file.md)
+- 类型化 Web Storage 与 Cookie：[浏览器存储](packages/fe/storage.md)
+- 剪贴板与权限查询：[Web API](packages/fe/web-api.md)
 
-## 维护者
+### Node.js
 
-刷新 generated 类型：
+- 目录遍历、文件读写、移动和删除：[文件系统](packages/be/fs.md)
+- 日志级别、格式与输出目标：[日志](packages/be/logger.md)
+- LRU、文件缓存和记忆化：[缓存](packages/be/cache.md)
+- 环境变量解析、配置加载与合并：[配置](packages/be/config.md)
+- 端口可用性与本机 IP：[网络](packages/be/net.md)
+- CPU、内存、磁盘和网络信息：[系统信息](packages/be/system.md)
+- 定时任务与 Cron 表达式：[任务调度](packages/be/scheduler.md)
+- 提交信息格式校验命令：[命令行工具](packages/cli/index.md)
+- 任务上下文计划与协议命令：[Agent Context](packages/agent-context/index.md)
 
-- `bun run sync-cat-kit-skills-api` — 仅复制（需各包已构建 dist）
-- `bun run sync-cat-kit-skills-api:build` — 先构建再复制
+### 工程配置
+
+- Node.js、浏览器、Bun 与 Vue 的 TypeScript 预设：[TypeScript 配置](packages/tsconfig/index.md)
+- VitePress 主题接入：[VitePress 主题](packages/vitepress-theme/index.md)
+
+## 整包备用索引
+
+只有需要浏览整包能力时，才读取 [core](packages/core/index.md)、[http](packages/http/index.md)、[crypto](packages/crypto/index.md)、[fe](packages/fe/index.md)、[be](packages/be/index.md)、[cli](packages/cli/index.md)、[agent-context](packages/agent-context/index.md)、[tsconfig](packages/tsconfig/index.md) 或 [vitepress-theme](packages/vitepress-theme/index.md)。

@@ -1,71 +1,35 @@
 # @cat-kit/cli
 
-命令行工具包。当前提供 `verify-commit` 命令用于校验 git commit message 格式。
+Node.js 命令行包，当前公开用途是校验 Git commit message。它不提供可从包根导入的编程 API。
 
-## 运行环境
+## 何时使用
 
-Node.js（CLI 工具）。
-
-## 命令
-
-### `verify-commit`
+需要在 `commit-msg` hook 或脚本中强制 Conventional Commits 风格的首行时使用：
 
 ```bash
 cat-cli verify-commit [file] [-m <message>]
 ```
 
-校验 git commit message 是否符合规范格式。常用作 git hook（`commit-msg` hook）。
+消息来源优先级为 `--message`、位置参数文件、`.git/COMMIT_EDITMSG`。文件中的 `#` 注释行会在校验前移除。
 
-**参数**：
-
-- `file`：包含提交信息的文件路径（如 `.git/COMMIT_EDITMSG`）
-
-**选项**：
-
-- `-m, --message <msg>`：直接传入提交信息字符串
-
-**校验规则**：
-提交信息必须匹配格式：`<type>(<scope>)?!?: <subject>`
-
-| type       | 说明     |
-| ---------- | -------- |
-| `feat`     | 新功能   |
-| `fix`      | 修复     |
-| `docs`     | 文档     |
-| `style`    | 代码风格 |
-| `refactor` | 重构     |
-| `perf`     | 性能优化 |
-| `test`     | 测试     |
-| `build`    | 构建系统 |
-| `ci`       | CI/CD    |
-| `chore`    | 杂项     |
-| `revert`   | 回滚     |
-| `release`  | 发布     |
+## 最小示例
 
 ```bash
-# 客户端 hook 用法
+# .git/hooks/commit-msg
+#!/bin/sh
 cat-cli verify-commit "$1"
-# 或手动校验
-cat-cli verify-commit -m "feat: add verify-commit command"
 ```
 
-**测试用的公共函数**：
+手动核对可运行：
 
-```ts
-import { verifyCommitMessage, stripComments } from '@cat-kit/cli'
-
-const result = verifyCommitMessage('feat(api): add new endpoint')
-// { valid: true }
-
-const result2 = verifyCommitMessage('bad message')
-// { valid: false, reason: '提交信息格式不正确...' }
+```bash
+cat-cli verify-commit --message "feat(api)!: change response format"
 ```
 
-- `verifyCommitMessage(message)` 返回 `{ valid: boolean; reason?: string }`，无副作用，可直接用于单元测试
-- `stripComments(raw)` 去除 `#` 开头的注释行
+## 约束与边界
 
-## npm bin
-
-可执行文件为 `cat-cli`（见包 `package.json` 的 `bin` 字段）。
-
-> 类型签名：`../../generated/cli/cli.d.ts`
+- 支持格式为 `<type>[(<scope>)][!]: <subject>`。
+- `type` 仅接受 `feat`、`fix`、`docs`、`style`、`refactor`、`perf`、`test`、`build`、`ci`、`chore`、`revert`、`release`。
+- 读取失败或格式不匹配时以非 0 状态退出，适合直接阻止提交。
+- 可执行文件名是 `cat-cli`。临时执行 scoped 包应使用 `npx --package @cat-kit/cli cat-cli ...`；不要使用会解析成另一个包的 `npx cat-cli`。
+- 不要导入 `@cat-kit/cli`、`src` 或 `dist` 路径；该包没有已发布的公共 JS/TS API 或类型入口。

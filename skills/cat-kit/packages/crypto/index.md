@@ -1,18 +1,20 @@
 # @cat-kit/crypto
 
-安全相关工具包，提供浏览器、Node.js 与 Bun 通用的随机 ID 生成能力。当前实现基于 Web Crypto `crypto.getRandomValues`。
+提供安全随机 ID 和随机字节。当前公开 API 不包含摘要、哈希、签名或加解密。
 
-## 运行环境
+## 如何选择
 
-通用（浏览器与 Node.js 均可，运行时需要支持 `crypto.getRandomValues`）。
+- 通用随机 ID 使用 `nanoid`。
+- 订单号、验证码等受限字符集使用 `customAlphabet`。
+- 直接需要安全随机字节时使用 `random`。
+- 若任务需要哈希、签名或加密，应使用运行环境的 Web Crypto 或其他明确提供该能力的包。
 
-## API 分类
+## 文档
 
-| 分类    | 文档                       | 说明                                                      |
-| ------- | -------------------------- | --------------------------------------------------------- |
-| 随机 ID | [nanoid.md](nanoid.md)     | nanoid、customAlphabet、customRandom、random、urlAlphabet |
-| 示例    | [examples.md](examples.md) | 常见随机 ID 用法                                          |
+[随机 ID 与随机字节](nanoid.md) 覆盖全部公开运行时 API。
 
-## 类型签名
+## 边界
 
-> 详见 `../../generated/crypto/index.d.ts`
+浏览器、Node.js 与 Bun 均可使用，但运行时必须提供 `globalThis.crypto.getRandomValues`。生成结果是概率唯一，不是数据库唯一约束的替代品。
+
+精确导出总表见 [generated/crypto/index.d.ts](../../generated/crypto/index.d.ts)。

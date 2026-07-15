@@ -1,124 +1,41 @@
-# be — logger
+# be — 日志
 
-结构化日志系统，支持多 Transport、自定义格式、日志轮转。
+## 何时使用
 
-## Logger
+需要分级结构化日志、统一上下文、JSON 输出，或同时写控制台和文件时使用。
 
-```ts
-enum LogLevel {
-  DEBUG = 'debug',
-  INFO = 'info',
-  WARN = 'warn',
-  ERROR = 'error'
-}
+## 如何选择
 
-class Logger {
-  constructor(options?: LoggerOptions)
-}
-```
+- `Logger`：提供 `debug`、`info`、`warn`、`error` 和底层 `log`。
+- `ConsoleTransport`：默认输出目标，可配置颜色和独立最低级别。
+- `FileTransport`：写固定文件或按日期写目录，并可按 `maxSize` 轮转。
+- `Transport`：需要发送到远程服务等自定义目标时实现其 `write` 方法。
 
-### 配置选项
+## 最小示例
 
 ```ts
-interface LoggerOptions {
-  name?: string // 日志器名称
-  level?: LogLevel // 最低输出级别，默认 INFO
-  format?: 'text' | 'json' // 输出格式，默认 text
-  transports?: Transport[] // 传输器列表，默认 [new ConsoleTransport()]
-  context?: Record<string, any> // 附加到每条日志的上下文
-  timestampFormat?: string // 默认 'yyyy-MM-dd HH:mm:ss'
-  utc?: boolean // 是否使用 UTC，默认 false
-  textFormat?: string | TextFormatter // 自定义 text 格式
-}
-```
+import { FileTransport, LogLevel, Logger } from '@cat-kit/be'
 
-### 日志方法
-
-| 方法                                   | 说明                                                                        |
-| -------------------------------------- | --------------------------------------------------------------------------- |
-| `.log(level, message, meta?, error?)`  | 底层日志入口                                                                |
-| `.debug(message, meta?)`               | DEBUG 级别                                                                  |
-| `.info(message, meta?)`                | INFO 级别                                                                   |
-| `.warn(message, meta?)`                | WARN 级别                                                                   |
-| `.error(message, errorOrMeta?, meta?)` | ERROR 级别，智能参数：第二参数若是 Error 实例作为 error 对象，否则作为 meta |
-
-```ts
-import { Logger, ConsoleTransport } from '@cat-kit/be'
-
-const log = new Logger({ name: 'app', level: LogLevel.DEBUG, context: { service: 'api' } })
-
-log.info('server started', { port: 3000 })
-log.warn('rate limit approaching', { remaining: 5 })
-log.error('db connection failed', new Error('ECONNREFUSED'), { retries: 3 })
-```
-
-### JSON 格式
-
-```ts
-const log = new Logger({ format: 'json' })
-log.info('user login', { userId: 123 })
-// {"level":"info","message":"user login","timestamp":"2024-01-15 10:30:00","name":"app","meta":{"userId":123}}
-```
-
-## Transport
-
-### ConsoleTransport
-
-```ts
-class ConsoleTransport implements Transport {
-  constructor(options?: { useColors?: boolean; level?: LogLevel })
-}
-```
-
-输出到控制台，默认根据级别着色（debug=cyan, info=green, warn=yellow, error=red）。
-
-```ts
-const transport = new ConsoleTransport({ useColors: false })
-const log = new Logger({ transports: [transport] })
-```
-
-### FileTransport
-
-```ts
-class FileTransport implements Transport {
-  constructor(options: { path: string; maxSize?: number; newline?: string; level?: LogLevel })
-}
-```
-
-写入日志文件，支持两种模式：
-
-- **目录模式**：`path` 以 `/` 结尾，按日期命名文件（`yyyy-MM-dd.log`）
-- **文件模式**：`path` 是具体文件路径
-
-`maxSize` 超限时自动轮转：目录模式添加时间戳后缀，文件模式添加 `.yyyy-MM-dd_HH-mm-ss` 后缀。
-
-```ts
-const fileTransport = new FileTransport({
-  path: './logs/', // 目录模式
-  maxSize: 10 * 1024 * 1024 // 10MB 轮转
+const logger = new Logger({
+  name: 'api',
+  level: LogLevel.INFO,
+  format: 'json',
+  context: { service: 'users' },
+  transports: [new FileTransport({ path: './logs/app.log' })]
 })
 
-const log = new Logger({ transports: [new ConsoleTransport(), fileTransport] })
+await logger.info('server started', { port: 3000 })
+await logger.error('database unavailable', new Error('ECONNREFUSED'))
 ```
 
-### 自定义 Transport
+## 约束与边界
 
-实现 `Transport` 接口即可：
+- 所有日志方法都返回 `Promise<void>`；应 `await`，尤其是文件或异步自定义 Transport。
+- `Logger` 默认级别为 `INFO`、格式为 `text`、目标为 `ConsoleTransport`。
+- `error(message, error, meta?)` 会记录错误堆栈；第二参数也可直接传元数据对象。
+- `FileTransport.path` 指向现有目录或无扩展名路径时使用按日期文件；带扩展名路径按固定文件处理。
+- 自定义 Transport 可返回 Promise；写入失败会使本次日志 Promise 拒绝。
 
-```ts
-interface Transport {
-  level?: LogLevel
-  write(entry: LogEntry, formatted: string, format: LogFormat): void | Promise<void>
-}
-```
+## 精确类型入口
 
-```ts
-const remoteTransport: Transport = {
-  level: LogLevel.ERROR,
-  async write(entry) {
-    await fetch('https://log.example.com/ingest', { method: 'POST', body: JSON.stringify(entry) })
-  }
-}
-```
-
-> 类型签名：`../../generated/be/logger/`
+[Logger 与日志条目](../../generated/be/logger/logger.d.ts) · [内置及自定义 Transport](../../generated/be/logger/transports.d.ts)

@@ -1,85 +1,138 @@
-# fe — virtualizer
+# fe — Virtualizer
 
-## 公共 API 速查
+## 适用场景
 
-### 构造与生命周期
+`Virtualizer` 计算大列表或表格当前应渲染的项、占位尺寸和滚动目标。它不创建组件或 DOM，适合由 React、Vue、原生 DOM 等宿主负责渲染。
 
-| API                         | 签名                                            | 关键行为                                                                                                                                                                                                                          |
-| --------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `new Virtualizer(options?)` | `(options?: VirtualizerOptions) => Virtualizer` | 不挂载 DOM；`initialOffset` / `initialViewport` 仅构造时生效，供 SSR 占位；`estimateSize` 默认 `() => 36`                                                                                                                         |
-| `.connect(element)`         | `(el: HTMLElement \| null) => this`             | 绑定滚动容器；传相同元素只 `syncFromElement`、传不同元素先 `disconnect`、传 `null` 等价 `disconnect`。订阅 `scroll`（驱动 `offset`/`isScrolling`）、原生 `scrollend` 或 120ms 兜底计时器、`ResizeObserver`（驱动 `viewportSize`） |
-| `.disconnect()`             | `() => this`                                    | 取消 rAF 校准、卸下事件与 RO、清空 `mounted` 与 `ResizeTracker` 观察；**不**清测量缓存与订阅者，实例可复用                                                                                                                        |
-| `.destroy()`                | `() => void`                                    | `disconnect` + 释放 `ResizeTracker` + 清订阅者。Vue `onBeforeUnmount` / React cleanup 必须调用                                                                                                                                    |
+## 如何选择
 
-### 选项与尺寸更新
+| 数据与布局             | 推荐配置                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| 固定项尺寸             | `estimateSize` 返回真实尺寸，并设 `useMeasuredAverage: false`；无需 DOM 测量       |
+| 每项尺寸由数据层已知   | 初始化后用 `measureMany` 批量上报，单项变化用 `measure`                            |
+| 尺寸取决于实际 DOM     | 渲染项挂载/更新时调用 `measureElement(index, element)`，卸载时传 `null`            |
+| 数据会前插、删除或重排 | 提供基于数据 ID 的稳定 `getItemKey`                                                |
+| 服务端预渲染或测试     | 构造时提供 `initialViewport` / `initialOffset`，或手动 `setViewport` / `setOffset` |
+| 横向列表               | 设置 `horizontal: true`；尺寸和偏移均按宽度/`scrollLeft` 解释                      |
 
-| API                    | 签名                                    | 关键行为                                                                                                                |
-| ---------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `.setOptions(options)` | `(options: VirtualizerOptions) => this` | 部分更新；`getItemKey` 先于 `count` 应用；`initialOffset` / `initialViewport` 在此处无效                                |
-| `.setCount(count)`     | `(count: number) => this`               | 收缩时剪裁测量缓存与 `mounted`（keyed 模式按 `getItemKey` 构造的 alive key 集合剪裁）；扩张时新项走估值；未变化为 no-op |
-| `.setViewport(size)`   | `(size: number) => this`                | 一般由 `ResizeObserver` 自动同步；SSR / 测试手动调用                                                                    |
-| `.setOffset(offset)`   | `(offset: number) => this`              | 只更新逻辑 offset，**不写 DOM**；要真实跳转请用 `scrollToOffset`                                                        |
+如果只渲染几十个简单节点，或需要框架现成组件、网格布局与无障碍交互，应先选择更直接的方案。
 
-### 测量
+## 公共 API
 
-| API                          | 签名                                           | 关键行为                                                                                                                                                                                                                     |
-| ---------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.measure(index, size)`      | `(index: number, size: number) => this`        | 单条；越界静默忽略                                                                                                                                                                                                           |
-| `.measureMany(records)`      | `(records: Iterable<{index, size}>) => this`   | 批量；同批次视口前方项的 scroll 补偿合并为一次 DOM 写入                                                                                                                                                                      |
-| `.measureElement(index, el)` | `(index: number, el: Element \| null) => void` | fire-and-forget：注册 RO 观察后由异步回调驱动内部测量，调用后**不能立即拿到测量值**；不支持 RO 时回退同步 `getBoundingClientRect`；`el: null` → `unobserve`；keyed 模式下同一 element 迁移 index 时自动清理旧 `mounted` 条目 |
+### 创建与选项
 
-### 滚动
+```ts
+new Virtualizer(options?: VirtualizerOptions)
+virtualizer.setOptions(options: VirtualizerOptions): this
+virtualizer.setCount(count: number): this
+```
 
-| API                                 | 签名                                             | 关键行为                                                                                                                              |
-| ----------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `.scrollToOffset(offset, options?)` | `(offset: number, { behavior? }) => this`        | `align` 对本方法无效；`behavior: 'smooth'` 走 rAF 校准                                                                                |
-| `.scrollToIndex(index, options?)`   | `(index: number, { align?, behavior? }) => this` | `align` 默认 `'auto'`（仅视口外才滚）；`count === 0` no-op；`behavior: 'smooth'` 时动画期间若测量漂移自动 `behavior: 'auto'` 修正目标 |
+| `VirtualizerOptions` 字段           | 作用与默认值                                 |
+| ----------------------------------- | -------------------------------------------- |
+| `count`                             | 数据项数量，默认 `0`                         |
+| `buffer`                            | 可视区两侧额外渲染项数，默认 `4`             |
+| `horizontal`                        | 是否横向，默认 `false`                       |
+| `paddingStart` / `paddingEnd`       | 首尾留白像素，默认 `0`                       |
+| `gap`                               | 项间距像素，默认 `0`                         |
+| `estimateSize(index)`               | 未获得真实尺寸时的估值，默认 `36`            |
+| `useMeasuredAverage`                | 是否用已测项平均尺寸估计未测项，默认 `true`  |
+| `getItemKey(index)`                 | 返回当前数据项稳定的 `string` 或 `number` ID |
+| `initialOffset` / `initialViewport` | 仅构造时生效的初始状态                       |
 
-### 快照、订阅、读取
+### 连接与读取
 
-| API                    | 签名                             | 关键行为                                                                                              |
-| ---------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `.getSnapshot()`       | `() => VirtualSnapshot`          | **同一对象引用在纯 offset 帧保留不变**；禁止用 `===` 判重渲染，应比结构字段或走 `subscribe`           |
-| `.subscribe(listener)` | `(listener) => () => void`       | 注册时立即同步回调一次；只在结构性变化时推送；纯 offset 不触发；返回取消函数                          |
-| `.getItem(index)`      | `(index: number) => VirtualItem` | 越界抛 `RangeError`；业务侧可见性计算用                                                               |
-| `.reset()`             | `() => this`                     | 清测量缓存 + 位置缓存 + 取消 rAF + `offset = 0`；**不**解绑容器、**不**清订阅者；仅用于数据源整体替换 |
+```ts
+virtualizer.connect(element: HTMLElement | null): this
+virtualizer.disconnect(): this
+virtualizer.destroy(): void
 
-## 使用备注
+virtualizer.subscribe(listener: (snapshot: VirtualSnapshot) => void): () => void
+virtualizer.getSnapshot(): VirtualSnapshot
+virtualizer.getItem(index: number): VirtualItem
+```
 
-### 测量策略
+`VirtualSnapshot` 的主要字段：
 
-- 如果列表项尺寸本来就是数据层已知值，优先用 `measureMany()` 批量上报，次选 `measure(index, size)`；这样可以把性能压力集中在虚拟滚动本身，而不是 DOM 测量或同帧多次重算。
-- `measureElement()` 是 fire-and-forget：注册 RO 观察后由异步回调驱动内部测量，调用后**不能立即拿到测量值**。在支持 `ResizeObserver` 的浏览器里优先走异步观察，避免新挂载项在滚动中立刻同步 `getBoundingClientRect()`；不支持 RO 时回退同步读取。
-- `useMeasuredAverage` 默认开启，适合 `estimateSize` 只能给近似值的场景；它会在平均值明显漂移时回刷未测区间，但不会把每次测量都放大成整表重算。
-- 同一批 `measureMany()` / `ResizeObserver` 回调中若有多条视口前方项的尺寸变化（例如首屏大图加载完一起回调），内部会把 `scroll` 补偿累积成一次 `scrollTop` / `scrollLeft` 写入、`recompute()` 开头统一 flush。业务侧不用自己节流，批量 `measureMany()` 就是最优路径。
+- `items`：应渲染的 `{ index, start, end, size }[]`，已包含 `buffer`
+- `range`：不含 `buffer` 的可视索引范围；无有效视口时为 `null`
+- `totalSize`：完整内容尺寸
+- `beforeSize` / `afterSize`：首个/最后一个渲染项外的占位尺寸
+- `offset` / `viewportSize` / `horizontal` / `isScrolling`：当前滚动状态
 
-### 订阅与渲染
+### 测量与滚动
 
-- `subscribe()` 是"结构变化订阅"，不是逐像素滚动流：`range`、`items`、`totalSize`、`viewportSize`、`isScrolling` 变化时才会推送；纯 `offset` 变化请直接读容器滚动位置。
-- `Virtualizer` 内部已经做了「结构未变的纯 `offset` 变化不分配新 snapshot」的优化：`getSnapshot()` 在 range / items / totalSize / viewportSize / isScrolling 都没有变化的滚动帧里返回同一对象引用，只就地更新 `offset` / `isScrolling`。业务侧不要把 snapshot 当作不可变值做 `===` 对比判断「是否需要重渲染」，请改为对比 `range`、`totalSize` 等结构字段，或直接走 `subscribe` 的结构化推送。
+```ts
+virtualizer.measure(index: number, size: number): this
+virtualizer.measureMany(records: Iterable<{ index: number; size: number }>): this
+virtualizer.measureElement(index: number, element: Element | null): void
 
-### CSS 性能关键约束
+virtualizer.scrollToOffset(
+  offset: number,
+  options?: { behavior?: ScrollBehavior }
+): this
+virtualizer.scrollToIndex(
+  index: number,
+  options?: {
+    align?: 'auto' | 'start' | 'center' | 'end'
+    behavior?: ScrollBehavior
+  }
+): this
 
-- **严禁使用 `:nth-of-type` / `:nth-child` / `:nth-last-*`** 做条纹、斑马纹、分组底色等按位置变化的样式：滚动时每次 `insertBefore` / `removeChild` 会让剩余节点的 DOM 兄弟位序整体 ±1，`nth-*` 命中集合随之翻转，浏览器被迫对所有可见行重算样式并重绘子单元 —— 一行滚动放大成 N×M 格 paint，在 120Hz 屏上是首位掉帧来源。必须在创建节点时基于**数据索引**打稳定类（如 `index & 1` → `row-stripe`），CSS 只匹配该稳定类；这样滚动中只有真正新增/移除的那几行会 paint，其余行的样式完全不动。
-- **原生 `<table>` 虚拟化必须使用 `table-layout: fixed`**：浏览器默认的 auto 布局依赖遍历所有行计算列宽，但虚拟列表中只有部分行存在，列宽会漂移且产生额外布局重算。`table-layout: fixed` 将列宽决策与实际 DOM 行数解耦，是原生表格虚拟化的关键优化。
-- **滚动容器应添加 `contain: strict`**：CSS containment 将容器的布局、绘制、尺寸计算与外部隔离，降低滚动时重绘对页面其余部分的影响范围，显著减少滚动帧的 paint 预算消耗。
+virtualizer.setViewport(size: number): this
+virtualizer.setOffset(offset: number): this
+virtualizer.reset(): this
+```
 
-### 框架集成
+## 最小示例
 
-- 在 Vue/React 里接 `Virtualizer` 时，避免把 FPS 面板、压测计数器、调试按钮这类每帧变化的状态和虚拟列表放在同一棵高频重渲染树里；必要时用 DOM 直写、子组件隔离或 `v-memo`/memo 保住列表渲染预算。
-- 对静态行高或静态列宽这类不会变化的样式，优先缓存成稳定对象再绑定，减少滚动时重复分配和 patch 成本。
-- 如果宿主框架在一次滚动手势里会收到多次 `scroll`/订阅回调，优先按 `requestAnimationFrame` 合帧后再提交 snapshot，避免一帧内重复 render。
-- **节点池优化**（极致性能场景：大表格、已知行高、滚动关键路径）：让宿主框架只渲染一次静态骨架（Vue 可用 `<tbody v-once>` / React 可用记忆化容器 + ref），滚动过程中由 `subscribe` 回调里纯 JS 原生 DOM API 管理行节点池：每个 `index` 对应的节点创建一次即永久缓存，新旧 range 做差集算出最小 `insertBefore` / `removeChild` 集合，前后 spacer 仅写 `style.height`；这样能把框架 render 从滚动热路径彻底移除，实测 2000 行 × 20 列压测下 CPU 占用 ≤5%、FPS 稳定 120。
-- 节点池优化要求行高在数据层就已知，一次性 `measureMany(rows.map((r, i) => ({ index: i, size: r.height })))` 即可跳过 `ResizeObserver` 增量测量路径；若行高依赖 DOM 真实布局，仍需保留 `measureElement` 流程。
+```ts
+import { Virtualizer } from '@cat-kit/fe'
 
-### scrollTo 与校准
+const rows = Array.from({ length: 10_000 }, (_, index) => `Row ${index}`)
+const viewport = document.querySelector<HTMLElement>('#viewport')!
+const content = document.createElement('div')
 
-- `scrollToOffset` 的 `align` 参数无效（始终按 `start` 语义）；`behavior: 'smooth'` 走 rAF 校准。
-- 大列表远距离 `scrollToIndex(n, { behavior: 'smooth' })` / `scrollToOffset(px, { behavior: 'smooth' })` 时，浏览器原生平滑动画途中如果测量更新让目标 offset 漂移，`Virtualizer` 会用 rAF 校准循环自动以 `behavior: 'auto'` 跳到修正后的目标；用户手动滚动（反向抢占）或再次发起新的 `scrollTo*` 会立即终止校准，另有 5 秒硬性安全阀兜底。**smooth 期间 `snapshot.offset` 由 scroll 事件驱动，调用 `scrollTo*` 后不要立刻同步读取 `snapshot.offset` 等于目标值**；需要精确的中间状态请直接读容器 `scrollTop` / `scrollLeft` 或订阅 `subscribe`。
+viewport.style.cssText = 'height:320px;overflow:auto'
+content.style.position = 'relative'
+viewport.append(content)
 
-### getItemKey 与缓存
+const virtualizer = new Virtualizer({
+  count: rows.length,
+  estimateSize: () => 40,
+  useMeasuredAverage: false
+})
 
-- `getItemKey`（可选，`(index: number) => number | string`）传入后，`measure` / `measureMany` / `measureElement` 拿到的 `index` 会经过 `getItemKey(index)` 解析为 key 写入内部缓存，因此同一个数据项在列表前插 / 乱序 / 中段删除后仍能复用真实测量、避免大面积估值重算与 `totalSize` 跳变；`setCount(n)` 收缩时不在 `[0, n)` 范围内的 key 会被自动清理。**必须在整个生命周期稳定**，不要基于 `Math.random()`、当前时间或每次渲染新建的对象引用生成 key，否则缓存识别会失效。
-- `setOptions({ count, getItemKey })` 一次性同轮更新时，内部会**先**应用新的 `getItemKey`，再对 `count` 做剪裁——保证剪裁使用的 alive key 集合来自新映射，不会把数据重排后仍存活的测量误删。业务在「前插 / 删除旧项 / 替换数据源」的同一次事务里既传新的 `getItemKey`、又传新的 `count` 是推荐写法。
+const unsubscribe = virtualizer.subscribe(({ items, totalSize }) => {
+  content.style.height = `${totalSize}px`
+  content.replaceChildren(
+    ...items.map((item) => {
+      const row = document.createElement('div')
+      row.textContent = rows[item.index] ?? ''
+      row.style.cssText = `position:absolute;inset-inline:0;top:${item.start}px;height:${item.size}px`
+      return row
+    })
+  )
+})
 
-> 类型签名：`../../generated/fe/virtualizer/index.d.ts`
+virtualizer.connect(viewport)
+
+// 组件卸载时：
+unsubscribe()
+virtualizer.destroy()
+```
+
+## 必要边界
+
+- `connect` 的元素必须是真正发生滚动的容器。组件卸载时调用 `destroy()`；只想临时换容器时可 `disconnect()` 后重新连接。
+- `subscribe` 注册时会立即调用一次，只在渲染结构或滚动状态变化时通知；逐像素但可见项未变化的滚动不保证通知。需要像素级位置时读取容器的 `scrollTop` / `scrollLeft`。
+- 不要用 `getSnapshot()` 返回对象的引用相等性决定是否渲染；读取字段或使用 `subscribe`。
+- `measureElement` 在支持 `ResizeObserver` 时异步更新尺寸，调用后不要假设快照已立即变化；元素卸载时传 `null`。
+- `getItemKey` 必须对同一数据项持续返回同一个字符串或数字，不能使用随机数、时间或位置本身代替业务 ID。
+- `setOffset` 只改逻辑状态，不滚动 DOM；真实跳转用 `scrollToOffset` / `scrollToIndex`。
+- `scrollToIndex` 的 `align` 仅对该方法有效；`behavior: 'smooth'` 时偏移随浏览器滚动更新，调用后不要同步假设已到目标。
+- `getItem` 越界会抛 `RangeError`。`reset()` 适合数据源整体替换；局部重排优先更新 `count` 和稳定 `getItemKey`。
+- 只有根入口 `@cat-kit/fe` 是公开导入路径。
+
+## 类型入口
+
+[Virtualizer 声明](../../generated/fe/virtualizer/index.d.ts)

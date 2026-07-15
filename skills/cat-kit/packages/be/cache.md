@@ -1,122 +1,34 @@
-# be — cache
+# be — 缓存
 
-缓存工具：LRU 内存缓存、文件缓存、函数记忆化。
+## 何时使用
 
-## LRUCache
+需要限制进程内缓存容量、跨进程重启保留 JSON 缓存，或缓存函数结果时使用。
 
-```ts
-class LRUCache<K, V> {
-  constructor(options?: LRUCacheOptions)
-}
+## 如何选择
 
-interface LRUCacheOptions {
-  maxSize?: number // 最大条目数，默认 100
-  ttl?: number // 全局 TTL（ms）
-}
-```
+- `LRUCache<K, V>`：同步、进程内缓存；支持最大条目数和全局/单条 TTL。
+- `FileCache<V>`：异步文件缓存；适合可 JSON 序列化且允许磁盘 I/O 的值。
+- `memoize(fn, options?)`：按参数缓存同步或异步函数结果；可自定义键解析器和同步 `CacheAdapter`。
 
-最近最少使用（LRU）淘汰策略的内存缓存。
-
-| 方法                     | 说明                                                    |
-| ------------------------ | ------------------------------------------------------- |
-| `.get(key)`              | 获取值，访问时更新 LRU 顺序。过期自动清理返回 undefined |
-| `.has(key)`              | 检查键是否存在且未过期                                  |
-| `.set(key, value, ttl?)` | 设置值，可覆盖全局 TTL。超容量时淘汰最久未用项          |
-| `.delete(key)`           | 删除项，返回是否删除成功                                |
-| `.clear()`               | 清空所有项                                              |
-| `.keys()`                | 返回键迭代器                                            |
-| `.values()`              | 返回值迭代器（跳过过期项）                              |
-| `.size`                  | 当前条目数（getter）                                    |
+## 最小示例
 
 ```ts
 import { LRUCache } from '@cat-kit/be'
 
-const cache = new LRUCache<string, UserData>({ maxSize: 500, ttl: 5 * 60 * 1000 })
+const users = new LRUCache<string, { name: string }>({ maxSize: 500, ttl: 5 * 60_000 })
 
-cache.set('user:1', userData)
-cache.set('user:2', otherData, 60_000) // 覆盖全局 TTL，1 分钟过期
-
-const user = cache.get('user:1') // 命中，更新 LRU 顺序
+users.set('user:1', { name: 'Mimi' })
+const user = users.get('user:1')
 ```
 
-## FileCache
+## 约束与边界
 
-```ts
-class FileCache<V> {
-  constructor(options: FileCacheOptions)
-}
+- `LRUCache` 默认最多 100 条；`get` 会刷新最近使用顺序，过期项在访问时失效。
+- `FileCache` 的 `get`、`set`、`delete`、`clear` 都必须 `await`；值必须能由 JSON 正确往返。
+- `memoize` 默认单参数键为 `String(arg)`，多参数键为 `JSON.stringify(args)`；对象身份敏感或不可序列化参数应提供 `resolver`。
+- 异步函数只在 Promise 成功完成后写入缓存；同一键的并发首次调用仍可能重复执行。
+- 这些缓存只提供本地存储，不提供分布式一致性。
 
-interface FileCacheOptions {
-  dir: string // 缓存目录
-  ttl?: number // 全局 TTL（ms）
-  extension?: string // 文件扩展名，默认 '.json'
-}
-```
+## 精确类型入口
 
-基于文件系统的持久化缓存。键通过 `encodeURIComponent` 编码后作为文件名。值为 JSON 序列化存储。
-
-| 方法                     | 说明                                         |
-| ------------------------ | -------------------------------------------- |
-| `.get(key)`              | 从文件读取值，过期自动删除文件返回 undefined |
-| `.set(key, value, ttl?)` | 写入文件                                     |
-| `.delete(key)`           | 删除文件                                     |
-| `.clear()`               | 删除并重建整个缓存目录                       |
-
-```ts
-import { FileCache } from '@cat-kit/be'
-
-const cache = new FileCache<ApiResponse>({
-  dir: './cache/api',
-  ttl: 30 * 60 * 1000 // 30 分钟
-})
-
-const cached = await cache.get('users:list')
-if (cached) return cached
-
-const data = await fetchUsers()
-await cache.set('users:list', data)
-```
-
-## memoize
-
-```ts
-function memoize<F extends (...args: any[]) => any>(
-  fn: F,
-  options?: MemoizeOptions<F>
-): F & { cache: CacheAdapter; clear(): void }
-
-interface MemoizeOptions<F> {
-  cache?: CacheAdapter // 默认 new LRUCache()
-  resolver?: (...args: Parameters<F>) => string // 自定义缓存键生成器
-  ttl?: number // TTL（ms）
-}
-```
-
-函数记忆化。默认用参数 `JSON.stringify` 作为缓存键，单参数用 `String()`。异步函数缓存 Promise 的 resolved 值。
-
-```ts
-import { memoize } from '@cat-kit/be'
-
-// 同步函数
-const fib = memoize((n: number): number => {
-  if (n <= 1) return n
-  return fib(n - 1) + fib(n - 2)
-})
-console.log(fib(40)) // 瞬时完成
-
-// 异步函数
-const fetchUser = memoize(
-  async (id: number) => {
-    const res = await fetch(`/api/users/${id}`)
-    return res.json()
-  },
-  { ttl: 60_000 }
-)
-
-await fetchUser(1) // 网络请求
-await fetchUser(1) // 命中缓存
-
-fetchUser.clear() // 手动清缓存
-```
-
-> 类型签名：`../../generated/be/cache/`
+[LRUCache](../../generated/be/cache/lru-cache.d.ts) · [FileCache](../../generated/be/cache/file-cache.d.ts) · [memoize](../../generated/be/cache/memoize.d.ts)

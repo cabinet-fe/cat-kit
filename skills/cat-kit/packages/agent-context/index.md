@@ -1,137 +1,49 @@
 # @cat-kit/agent-context
 
-维护 `.agent-context/` 目录下任务计划的 CLI 工具，支持 plan → implement → patch → review → done 完整工作流协议。
+Node.js CLI，用于安装 `ac-workflow` Skill，并管理 `.agent-context/` 中的计划状态。它不发布编程 API。
 
-## 运行环境
+## 如何选择
 
-Node.js（CLI + 编程 API）。
+CLI 负责安装和状态操作：
 
-## 命令
+- `agent-context install [--tools <ids>] [--check] [--yes]`：安装 Skill。默认写入 `.agents/skills/ac-workflow/`；`--tools` 可选 `claude,codex,cursor,antigravity,agents,gemini,copilot`。
+- `agent-context sync [--check]`：升级包后刷新已安装 Skill；`--check` 只报告差异。
+- `agent-context init [--scope <name>] [--yes]`：为当前协作者初始化 SCOPE，默认读取 Git `user.name`。
+- `agent-context status`：给人查看当前计划、队列和归档数量。
+- `agent-context context`：输出含校验结果的 JSON 快照，适合脚本或智能体读取。
+- `agent-context validate`：只校验目录、计划数量和状态格式。
+- `agent-context done [--yes]`：归档已执行计划，并在存在 preparing 计划时晋升下一项。
 
-### `init`
+Skill 负责实际协作动作。安装后直接向智能体表达：
 
-```bash
-agent-context init [--scope <name>] [--yes]
-```
+- `plan`：创建并拆分新计划；`replan`：重做尚未执行的计划。
+- `implement`：执行当前未执行计划；`patch`：修补已执行计划。
+- `rush`：对单一、清晰任务连续规划并实施。
+- `review`：审查当前未执行计划或已执行实现。
+- `done`：确认完成后调用 CLI 归档。
+- Skill 的 `init` 用于初始化协作约定；不要与初始化 SCOPE 的 CLI `agent-context init` 混淆。
 
-初始化项目上下文。在 `process.cwd()` 下创建 `.agent-context/` 目录结构。
-
-- `--scope <name>`：手动指定 scope（默认从 `git config user.name` 自动生成）
-- `--yes`：非交互模式，直接覆盖已有配置
-
-### `plan` / `implement` / `patch` / `review` / `done`
-
-这些操作通过 AI 代理执行 ac-workflow Skill 协议完成，不由 CLI 直接实现（CLI 只提供 `validate`、`context`、`status`、`done`、`index` 等辅助命令）。
-
-### `done`
-
-```bash
-agent-context done [--yes]
-```
-
-归档当前已执行计划到 `done/plan-{N}-YYYYMMDD/`。若 preparing 队列有等待计划，自动提升第一个为当前计划。`--yes` 跳过确认。
-
-### `sync`
+## 最小示例
 
 ```bash
-agent-context sync [--check]
-```
-
-同步 ac-workflow Skill：将 canonical source (`.agents/skills/ac-workflow/`) 刷新到各 AI 工具的兼容入口。`--check` 仅检查差异不写入。
-
-### `prompt-gen`
-
-```bash
-agent-context prompt-gen [--tools <tools>] [--profile <profile>] [--yes] [--check]
-```
-
-在 `$HOME` 下各 AI 工具全局配置目录生成提示词文件。
-
-支持的工具：`claude`、`codex`、`gemini`、`antigravity`
-
-- `--profile`：提示词模板（`default`、`whj`）
-- `--check`：仅预览不写入
-- `--yes`：文件已存在时直接覆盖
-
-### `status`
-
-```bash
-agent-context status
-```
-
-查看当前上下文状态：作用域、当前计划、待执行队列、已归档数量。
-
-### `validate`
-
-```bash
+npm install -g @cat-kit/agent-context
+agent-context install --tools cursor
+agent-context init
 agent-context validate
 ```
 
-校验 `.agent-context` 目录结构完整性（最多 1 个当前计划、plan.md 存在、状态行格式正确等）。
+随后对已发现该 Skill 的智能体说：
 
-### `context`
-
-```bash
-agent-context context
+```text
+为“增加导出 Excel 功能”创建计划
 ```
 
-输出当前上下文状态的 JSON 快照（供脚本消费）。
+## 约束与边界
 
-### `index`
+- `plan`、`replan`、`implement`、`patch`、`rush`、`review` 不是 CLI 子命令；它们是安装后由智能体执行的 Skill 动作。
+- 同一 SCOPE 同时最多一个当前计划，状态只允许 `未执行` 或 `已执行`。
+- `done` 仅用于真正完成且状态为 `已执行` 的计划；暂停工作不要归档。
+- `install --check` 和 `sync --check` 不写文件；发现差异时会以非 0 状态退出，可用于 CI。
+- 包未声明 `exports`，也没有可用的根类型入口。不要导入包根、`src` 或 `dist` 深路径。
 
-```bash
-agent-context index
-```
-
-生成/更新 `index.md` 计划索引文件。
-
-### `skill-eval`
-
-```bash
-agent-context skill-eval
-```
-
-评估 ac-workflow Skill 的 `description` 对触发样例的覆盖度。通过关键词匹配验证是否准确触发。
-
-### `install`
-
-```bash
-agent-context install [--tools <tools>] [--yes] [--check]
-```
-
-安装 ac-workflow Skill 到项目。`--tools` 指定兼容 AI 工具（`claude,codex,cursor,antigravity,agents,gemini,copilot`），不传时仅写 canonical source。
-
-### `upgrade`
-
-```bash
-agent-context upgrade
-```
-
-检查全局安装的 `@cat-kit/agent-context` 版本并升级到最新。
-
-## 编程 API
-
-```ts
-import { AC_ROOT_DIR, PLAN_FILE_NAME } from '@cat-kit/agent-context/dist/constants.js'
-```
-
-主要的可编程 API：
-
-```ts
-import { readContext, validate, archive, generateIndex } from '@cat-kit/agent-context'
-
-// 读取上下文快照
-const context = await readContext()
-
-// 校验结构完整性
-const result = validate(context.snapshot, context.currentPlanCount)
-
-// 归档当前计划
-const archived = await archive(context)
-```
-
-## ac-workflow 协议
-
-安装后，`.agents/skills/ac-workflow/` 包含 7 个协议：`init`、`plan`、`implement`、`patch`、`rush`、`replan`、`review`。AI 代理按 `SKILL.md` 的路由表读取对应协议执行。
-
-> 类型签名：`../../generated/agent-context/cli.d.ts`
+完整的跨阶段操作示例见 [examples.md](examples.md)。

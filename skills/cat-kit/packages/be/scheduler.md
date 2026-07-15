@@ -1,93 +1,37 @@
-# be — scheduler
+# be — 任务调度
 
-任务调度器，支持 Cron 定时任务、延迟执行、定时间隔。
+## 何时使用
 
-## Scheduler
+在单个 Node.js 进程内安排 Cron、一次性延迟或固定间隔任务，或只计算 Cron 的下一次时间时使用。
 
-```ts
-class Scheduler {
-  constructor()
-}
-```
+## 如何选择
 
-### 添加任务
+- `Scheduler.schedule(id, cron, task)`：按 5 段 Cron 表达式运行。
+- `Scheduler.once(id, delay, task)`：延迟指定毫秒后运行一次。
+- `Scheduler.interval(id, interval, task)`：每隔指定毫秒运行。
+- `CronExpression` / `parseCron`：验证表达式并通过 `getNextDate(from?)` 计算下一次时间。
+- `start` / `stop` / `cancel` / `getTask(s)`：控制任务并查询状态。
 
-```ts
-// Cron 定时任务
-.schedule(id: string, cron: string | CronExpression, task: TaskFunction): void
-
-// 延迟执行一次
-.once(id: string, delay: number, task: TaskFunction): void
-
-// 定时间隔重复
-.interval(id: string, interval: number, task: TaskFunction): void
-```
-
-- `delay < 0` 或 `interval <= 0` 抛错
-- 同一 id 重复添加会覆盖旧任务
-- Task 执行失败 `console.error`，不中断调度器
-
-### 控制方法
-
-| 方法          | 说明                           |
-| ------------- | ------------------------------ |
-| `.start()`    | 启动调度器                     |
-| `.stop()`     | 停止调度器（保留任务，可恢复） |
-| `.cancel(id)` | 取消指定任务                   |
-
-### 查询方法
-
-| 方法           | 说明                                          |
-| -------------- | --------------------------------------------- |
-| `.getTask(id)` | 返回任务信息（含 id、type、nextRun、running） |
-| `.getTasks()`  | 返回所有任务信息列表                          |
+## 最小示例
 
 ```ts
 import { Scheduler } from '@cat-kit/be'
 
 const scheduler = new Scheduler()
-
-// 每小时执行
-scheduler.schedule('cleanup', '0 * * * *', async () => {
-  await cleanupTempFiles()
+scheduler.schedule('cleanup', '0 3 * * *', async () => {
+  await cleanupExpiredFiles()
 })
-
-// 5 分钟后执行一次
-scheduler.once('warmup', 5 * 60 * 1000, () => {
-  console.log('warming up...')
-})
-
-// 每 30 秒执行
-scheduler.interval('health', 30_000, () => {
-  checkHealth()
-})
-
 scheduler.start()
-// scheduler.stop()
 ```
 
-## CronExpression
+## 约束与边界
 
-```ts
-class CronExpression {
-  constructor(expression: string)
-}
+- 上例中的实例变量应保持存活；任务添加后仍需调用 `start()`。
+- 任务 ID 必须唯一，重复添加会抛错而不是覆盖。`once` 的延迟可为 0，`interval` 必须大于 0。
+- Cron 格式固定为“分 时 日 月 周”五段，支持 `*`、`?`、范围、步长和列表；按进程本地时间计算。
+- `stop()` 清除计时器但保留任务，可再次 `start()`；`cancel(id)` 才会移除任务。
+- 任务抛错会被记录，周期调度继续。此调度器不提供跨进程持久化或分布式锁。
 
-function parseCron(expression: string): CronExpression
-```
+## 精确类型入口
 
-标准 5 位 Cron 表达式解析（分 时 日 月 周）。
-
-- 通配符：`*`、`?`
-- 范围：`-`（如 `1-5`）
-- 步长：`/`（如 `*/5`）
-- 列表：`,`（如 `1,3,5`）
-
-```ts
-import { CronExpression } from '@cat-kit/be'
-
-const expr = new CronExpression('0 */2 * * 1-5') // 工作日每两小时
-const next = expr.getNextDate() // 下次执行时间
-```
-
-> 类型签名：`../../generated/be/scheduler/`
+[Scheduler](../../generated/be/scheduler/scheduler.d.ts) · [CronExpression](../../generated/be/scheduler/cron.d.ts)

@@ -1,105 +1,46 @@
-# core — optimize
+# core — 执行控制
 
-性能优化工具：防抖、节流、并发控制、安全执行。
+## 何时使用
 
-## 防抖与节流
+- 控制高频事件调用，延迟异步流程，或限制一组任务的并发数。
+- 对可能同步抛错的小段逻辑提供默认值。
 
-### `debounce`
+## 推荐公开 API
 
-```ts
-function debounce<T extends any[]>(
-  fn: (...args: T) => void,
-  delay?: number,
-  immediate?: boolean
-): (...args: T) => void
-```
+- `debounce(fn, delay?, immediate?)`：防抖，默认延迟 `300ms`、立即模式开启。
+- `throttle(fn, delay?, callback?)`：前缘节流，默认窗口 `300ms`。
+- `sleep(ms)`：返回延时完成的 Promise。
+- `parallel(tasks, { concurrency }?)`：按上限执行任务并保持结果顺序。
+- `safeRun(fn, defaultValue?)`：捕获同步异常。
 
-延迟执行函数，在连续调用时取消之前的调用。
-
-- **`delay`**：延迟时间（ms），默认 `0`
-- **`immediate`**：首次调用立即执行，默认 `true`
-- **注意**：返回的 wrapper 只执行最后一次调用
+## 最小示例
 
 ```ts
-const handleInput = debounce((e: Event) => {
-  fetchSuggestions(e.target.value)
-}, 300)
+import { debounce, parallel } from '@cat-kit/core'
+
+const search = debounce((keyword: string) => {
+  console.log(keyword)
+}, 300, false)
+
+search('cat')
+
+const tasks = [1, 2, 3].map((value) => async () => value * 2)
+const results = await parallel(tasks, { concurrency: 2 })
+console.log(results) // [2, 4, 6]
 ```
 
-### `throttle`
+## 约束与边界
 
-```ts
-function throttle<T extends any[], R>(
-  fn: (...args: T) => R,
-  delay?: number,
-  cb?: (v: R) => void
-): (...args: T) => R
-```
+- `debounce` 的 `immediate: true` 会立即执行首次调用；窗口内再次调用时，最后一组参数会在窗口结束时执行。`false` 为纯后缘调用。
+- `debounce` 返回值没有公开的 `cancel` 或 `flush` 方法。
+- `throttle` 在窗口开始执行一次，窗口内调用不会安排尾调用；被抑制的调用返回最近一次执行结果。第三个参数只在目标函数实际执行时收到结果。
+- `parallel` 默认尽可能并发；`concurrency` 必须是正整数。返回数组顺序与任务输入顺序一致。
+- 任一任务拒绝时 `parallel` 会拒绝；已经开始的任务不会被取消。
+- `safeRun` 只捕获函数调用当下的同步异常。函数返回的 Promise 后续拒绝不会被它捕获，应使用 `await` 配合 `try/catch`。
+- `sleep` 不提供取消能力。
 
-节流执行函数，在 `delay` 毫秒内最多执行一次。
+## 精确类型入口
 
-- **`delay`**：间隔时间（ms），默认 `0`
-- **`cb`**：可选回调，在节流窗口内收到新调用时触发，可获取 fn 的返回值
-
-```ts
-const handleScroll = throttle(() => {
-  updateScrollPosition()
-}, 100)
-```
-
-## 异步
-
-### `sleep`
-
-```ts
-function sleep(ms: number): Promise<void>
-```
-
-异步延迟，返回在指定 ms 后 resolve 的 Promise。
-
-```ts
-await sleep(1000) // 等待 1 秒
-```
-
-## 并发控制
-
-### `parallel`
-
-```ts
-function parallel<T>(
-  tasks: ReadonlyArray<() => T | Promise<T>>,
-  options?: ParallelOptions
-): Promise<T[]>
-```
-
-并发执行任务列表，保持结果顺序与 tasks 一致。
-
-- **`options.concurrency`**：最大并发数，默认为 `tasks.length`
-- 任一 task reject 则整体 reject
-
-```ts
-const results = await parallel(
-  [() => fetch('/api/a'), () => fetch('/api/b'), () => fetch('/api/c')],
-  { concurrency: 2 } // 最多同时 2 个请求
-)
-```
-
-## 安全执行
-
-### `safeRun`
-
-```ts
-function safeRun<T>(fn: () => T): T | undefined
-function safeRun<T>(fn: () => T, defaultVal: T): T
-```
-
-try-catch 包裹执行，出错时不抛出。
-
-- 不传 `defaultVal`：出错返回 `undefined`
-- 传入 `defaultVal`：出错返回默认值
-
-```ts
-const obj = safeRun(() => JSON.parse(maybeInvalidJson), {})
-```
-
-> 类型签名：`../../generated/core/optimize/`
+- [定时控制声明](../../generated/core/optimize/timer.d.ts)
+- [并发声明](../../generated/core/optimize/parallel.d.ts)
+- [安全执行声明](../../generated/core/optimize/safe.d.ts)

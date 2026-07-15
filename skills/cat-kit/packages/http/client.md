@@ -1,177 +1,148 @@
-# http — client
+# http — 客户端与引擎
 
-`HTTPClient` 是 `@cat-kit/http` 的核心，基于插件架构的 HTTP 客户端。
+## 适用场景
 
-## 构造与配置
+使用 `HTTPClient` 统一一组接口的地址、默认配置、响应格式和错误处理；需要上传进度、替换底层传输或按业务域分组时也从这里选择。
+
+## 如何选择
+
+| 需求                           | 选择                                                                       |
+| ------------------------------ | -------------------------------------------------------------------------- |
+| 常规浏览器或现代 Node.js 请求  | `HTTPClient`，默认在全局 `fetch` 可用时使用 `FetchEngine`                  |
+| 浏览器上传进度，或明确需要 XHR | 注入 `new XHREngine()`                                                     |
+| 下载进度                       | `FetchEngine` 和 `XHREngine` 都支持；服务端未提供总长度时 `percent` 为 `0` |
+| 测试、Mock 或其他传输实现      | 继承 `HttpEngine`，通过 `ClientConfig.engine` 注入                         |
+| 同一服务下的多组路径           | 用 `group(prefix)` 派生子客户端                                            |
+| 在插件中合并请求配置           | 用公开的 `mergeRequestConfig(base, patch)`                                 |
+
+## 公共 API
+
+### 客户端配置
 
 ```ts
-class HTTPClient {
-  constructor(prefix?: string, config?: ClientConfig)
+new HTTPClient(prefix?: string, config?: ClientConfig)
+```
+
+| `ClientConfig` 字段                       | 用途                                                                        |
+| ----------------------------------------- | --------------------------------------------------------------------------- |
+| `origin`                                  | 协议、主机和端口；请求 URL 已是绝对 URL 时忽略                              |
+| `timeout`                                 | 毫秒；`0` 或省略表示不设置超时                                              |
+| `headers`                                 | 默认请求头；单次请求的同名字段优先                                          |
+| `credentials`                             | 是否携带凭证，默认 `true`                                                   |
+| `responseType`                            | `'json' \| 'text' \| 'blob' \| 'arraybuffer'`；省略时按 `Content-Type` 推断 |
+| `signal`                                  | 默认 `AbortSignal`                                                          |
+| `onUploadProgress` / `onDownloadProgress` | 默认传输进度回调，参数为 `{ loaded, total, percent }`                       |
+| `xsrfCookieName` / `xsrfHeaderName`       | 默认分别为 `XSRF-TOKEN` / `X-XSRF-TOKEN`                                    |
+| `plugins`                                 | `HTTPClientPlugin[]`；内置和自定义插件见 [plugins.md](plugins.md)           |
+| `engine`                                  | `HttpEngine` 实例；省略时自动选择 `FetchEngine` 或 `XHREngine`              |
+
+### 请求
+
+```ts
+client.request<T>(url: string, config?: RequestConfig): Promise<HTTPResponse<T>>
+client.get<T>(url: string, config?: AliasRequestConfig): Promise<HTTPResponse<T>>
+client.post<T>(url: string, body?, config?): Promise<HTTPResponse<T>>
+client.put<T>(url: string, body?, config?): Promise<HTTPResponse<T>>
+client.patch<T>(url: string, body?, config?): Promise<HTTPResponse<T>>
+client.delete<T>(url: string, config?): Promise<HTTPResponse<T>>
+client.head<T>(url: string, config?): Promise<HTTPResponse<T>>
+client.options<T>(url: string, config?): Promise<HTTPResponse<T>>
+```
+
+`RequestConfig` 可覆盖客户端级的 `headers`、`timeout`、`credentials`、`responseType`、`signal`、进度回调和 XSRF 名称，还可传：
+
+- `method`：`'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'`
+- `body`：`BodyInit`、普通对象、`URLSearchParams` 或 `FormData`
+- `query`：查询参数对象
+
+### 响应与错误
+
+```ts
+interface HTTPResponse<T> {
+  body: T
+  code: number
+  headers: Record<string, string>
+  raw?: unknown
 }
 ```
 
-- **`prefix`**：URL 前缀，所有请求的 base path（如 `'/api'`）
-- **`config`**：客户端级别的全局配置
-
-### `ClientConfig` 选项
-
-| 选项                 | 类型                                          | 默认值           | 说明                                                                           |
-| -------------------- | --------------------------------------------- | ---------------- | ------------------------------------------------------------------------------ |
-| `origin`             | `string`                                      | —                | 请求基础 URL（协议+主机+端口）。若请求 URL 已是完整 URL 则忽略                 |
-| `timeout`            | `number`                                      | `0`              | 超时（ms），0 表示不超时。超时触发 `HTTPError({ code: 'TIMEOUT' })`            |
-| `headers`            | `Record<string, string>`                      | —                | 默认请求头，与单次请求 header 合并（单次优先）                                 |
-| `credentials`        | `boolean`                                     | `true`           | 是否发送 Cookie/认证信息（`true` → `include`，`false` → `omit`）               |
-| `responseType`       | `'json' \| 'text' \| 'blob' \| 'arraybuffer'` | —                | 响应解析类型，未设时按 `Content-Type` 推断                                     |
-| `signal`             | `AbortSignal`                                 | —                | 默认中止信号                                                                   |
-| `onUploadProgress`   | `(info: ProgressInfo) => void`                | —                | 默认上传进度回调                                                               |
-| `onDownloadProgress` | `(info: ProgressInfo) => void`                | —                | 默认下载进度回调                                                               |
-| `xsrfCookieName`     | `string`                                      | `'XSRF-TOKEN'`   | XSRF Cookie 名，仅浏览器同域生效                                               |
-| `xsrfHeaderName`     | `string`                                      | `'X-XSRF-TOKEN'` | XSRF Header 名                                                                 |
-| `plugins`            | `HTTPClientPlugin[]`                          | —                | 插件列表                                                                       |
-| `engine`             | `HttpEngine`                                  | —                | 自定义引擎。未传时自动选择（`fetch` 可用时选 `FetchEngine`，否则 `XHREngine`） |
+非 2xx、网络失败、解析失败、超时或取消都会拒绝 Promise。用 `HTTPError` 读取 `code`、`url`、`config`、`response` 和 `cause`：
 
 ```ts
-const http = new HTTPClient('/api', {
-  origin: 'https://api.example.com',
-  timeout: 30_000,
-  headers: { 'X-Client-Version': '1.0.0' }
-})
+type HttpErrorCode =
+  | 'TIMEOUT'
+  | 'ABORTED'
+  | 'NETWORK'
+  | 'PARSE'
+  | 'AUTH'
+  | 'UNKNOWN'
+  | 'RETRY_LIMIT_EXCEEDED'
+  | 'PLUGIN'
+
+new HTTPError(message: string, options: HTTPErrorOptions)
 ```
 
-## 请求方法
+当前内置引擎将非 2xx 归为 `NETWORK`，并把已解析的响应放在 `error.response`；不要把它误判为“没有收到响应”。
 
-### `request` — 通用请求
+### 分组、取消与引擎
 
 ```ts
-.request<T = any>(url: string, config: RequestConfig): Promise<HTTPResponse<T>>
+client.group(prefix: string): HTTPClient
+client.abort(): void
+client.getEngine(): HttpEngine
+client.registerPlugin(plugin: HTTPClientPlugin): void
+
+mergeRequestConfig(base: RequestConfig, patch: RequestConfig): RequestConfig
 ```
 
-核心方法，所有别名方法最终调用此方法。
-
-### 别名方法
-
-| 方法                                       | 签名                        |
-| ------------------------------------------ | --------------------------- |
-| `.get<T>(url, config: AliasRequestConfig)` | GET 请求，不允许传 `method` |
-| `.post<T>(url, body?, config?)`            | POST 请求                   |
-| `.put<T>(url, body?, config?)`             | PUT 请求                    |
-| `.patch<T>(url, body?, config?)`           | PATCH 请求                  |
-| `.delete<T>(url, config?)`                 | DELETE 请求                 |
-| `.head<T>(url, config?)`                   | HEAD 请求                   |
-| `.options<T>(url, config?)`                | OPTIONS 请求                |
-
-`body` 参数自动处理：
-
-- 对象/数组 → `JSON.stringify`，自动设 `Content-Type: application/json`
-- `URLSearchParams` → 自动设 `Content-Type: application/x-www-form-urlencoded`
-- `FormData` → 不做处理
-- GET/HEAD 请求自动忽略 body
-
-### `RequestConfig` 选项
-
-| 选项                                      | 类型                                                             | 说明                   |
-| ----------------------------------------- | ---------------------------------------------------------------- | ---------------------- |
-| `method`                                  | `RequestMethod`                                                  | 请求方法，默认 `'GET'` |
-| `body`                                    | `BodyInit \| Record<string, any> \| URLSearchParams \| FormData` | 请求体                 |
-| `query`                                   | `Record<string, any>`                                            | 查询参数               |
-| `headers`                                 | `Record<string, string>`                                         | 单次请求头             |
-| `timeout`                                 | `number`                                                         | 单次超时               |
-| `credentials`                             | `boolean`                                                        | 单次凭证配置           |
-| `responseType`                            | `'json' \| 'text' \| 'blob' \| 'arraybuffer'`                    | 单次响应类型           |
-| `signal`                                  | `AbortSignal`                                                    | 单次中止信号           |
-| `onUploadProgress` / `onDownloadProgress` | `(info: ProgressInfo) => void`                                   | 进度回调               |
-| `xsrfCookieName` / `xsrfHeaderName`       | `string`                                                         | 单次 XSRF 配置         |
+自定义引擎只需实现：
 
 ```ts
-// GET 请求带查询参数
-const res = await http.get('/users', { query: { page: 1, limit: 10 } })
-
-// POST 请求
-await http.post('/users', { name: 'Alice', email: 'alice@example.com' })
-
-// 带自定义 headers
-await http.get('/data', { headers: { 'X-Custom': 'value' }, timeout: 5_000 })
-```
-
-## 响应处理
-
-### `HTTPResponse<T>`
-
-```ts
-interface HTTPResponse<T = any> {
-  body: T // 响应体
-  code: number // HTTP 状态码
-  headers: Record<string, string | string[]> // 响应头（set-cookie 保留数组）
-  raw?: Response | any // 原始响应对象
+abstract class HttpEngine {
+  abstract request<T>(url: string, config: RequestConfig): Promise<HTTPResponse<T>>
+  abstract abort(): void
 }
 ```
 
-## 错误处理
-
-### `HTTPError<T>`
+## 最小示例
 
 ```ts
-class HTTPError<T = any> extends Error {
-  code: HttpErrorCode // 错误码
-  url?: string // 请求 URL
-  config?: RequestConfig // 请求配置
-  response?: HTTPResponse<T> // 响应（非 2xx 响应时附在此处）
-  cause?: unknown // 原始错误
+import { HTTPClient, HTTPError } from '@cat-kit/http'
+
+interface User {
+  id: number
+  name: string
 }
-```
 
-**错误码（`HttpErrorCode`）**：
+const api = new HTTPClient('/api', { origin: 'https://example.com', timeout: 10_000 })
 
-- `'TIMEOUT'` — 请求超时
-- `'ABORTED'` — 请求被中止
-- `'NETWORK'` — 网络错误或非 2xx 响应
-- `'PARSE'` — 响应解析失败
-- `'AUTH'` — 认证失败
-- `'RETRY_LIMIT_EXCEEDED'` — 重试次数耗尽
-- `'PLUGIN'` — 插件相关错误
-
-```ts
 try {
-  await http.get('/data')
-} catch (err) {
-  if (err instanceof HTTPError) {
-    console.error(err.code, err.url, err.response?.code)
+  const { body } = await api.get<User>('/users/42')
+  console.log(body.name)
+} catch (error) {
+  if (error instanceof HTTPError) {
+    console.error(error.code, error.response?.code)
   }
 }
 ```
 
-## 中断
+## 必要边界
 
-```ts
-.abort(): void
-```
+- 绝对 URL 不拼接 `origin` 和 `prefix`；相对 URL 会先拼接前缀。Node.js 中使用相对 URL 时通常应配置 `origin`。
+- Node.js 运行时没有全局 `fetch` 时，自动回退的 `XHREngine` 还需要 `XMLHttpRequest`；两者都不可用时必须注入可用的自定义 `HttpEngine`。
+- `query` 会追加到 URL 已有查询串；数组生成重复键、对象会 JSON 序列化、`undefined` 省略、`null` 写为字符串 `"null"`。
+- 普通对象和数组请求体会 JSON 序列化；`URLSearchParams` 使用表单编码；`FormData` 的 multipart boundary 交给运行时设置；GET/HEAD 不发送 body。
+- 内置 `FetchEngine` 的 `response.raw` 是 `Response`，`XHREngine` 则是 `XMLHttpRequest`；使用前按所选引擎收窄类型。
+- `onUploadProgress` 在 `FetchEngine` 下被忽略；需要上传进度时显式使用 `XHREngine`。
+- XSRF Cookie 到 Header 的注入只在浏览器同域请求中生效。
+- 单次取消优先传 `signal`。`abort()` 会中止该引擎的全部在途请求；父子客户端共享引擎，因此任一方调用都会影响另一方的在途请求。
+- 子客户端继承父客户端配置和插件；父客户端之后注册的插件对子客户端可见，子客户端插件不反向影响父客户端。
+- `mergeRequestConfig` 对 `headers` 和 `query` 做浅合并；其他公开字段仅在 patch 明确给出非 `undefined` 值时覆盖。
 
-中止所有在途请求。
+## 类型入口
 
-```ts
-// 单次请求中断
-const ctrl = new AbortController()
-http.get('/slow', { signal: ctrl.signal })
-ctrl.abort()
-
-// 全局中断
-http.abort()
-```
-
-## 子客户端
-
-```ts
-.group(prefix: string): HTTPClient
-```
-
-基于父客户端创建子客户端，继承全部配置，自动拼接 URL 前缀。
-
-插件语义：父影响子（父后续注册的插件子可见），子不影响父，同名校验跨父子层级。
-
-```ts
-const api = new HTTPClient('/api', { origin: 'https://example.com' })
-const usersApi = api.group('/users') // prefix: /api/users
-const postsApi = api.group('/posts') // prefix: /api/posts
-```
-
-> 类型签名：`../../generated/http/client.d.ts`
+- [客户端与配置](../../generated/http/client.d.ts)
+- [请求、响应、错误与插件类型](../../generated/http/types.d.ts)
+- [引擎基类](../../generated/http/engine/engine.d.ts)
+- [Fetch 引擎](../../generated/http/engine/fetch.d.ts)
+- [XHR 引擎](../../generated/http/engine/xhr.d.ts)
