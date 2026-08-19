@@ -1,10 +1,10 @@
-import { getDataType, isEmpty } from './type'
+import { getDataType, isEmpty } from "./type";
 
 class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
-  readonly raw: O
+  readonly raw: O;
 
   constructor(object: O) {
-    this.raw = object
+    this.raw = object;
   }
 
   /**
@@ -12,7 +12,7 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @returns 对象的键组成的元组类型
    */
   keys(): string[] {
-    return Object.keys(this.raw)
+    return Object.keys(this.raw);
   }
 
   /**
@@ -21,11 +21,11 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @returns 当前对象
    */
   each(callback: (key: string, value: any) => void): CatObject<O, K> {
-    const { raw } = this
+    const { raw } = this;
     for (const key in raw) {
-      callback(key, raw[key])
+      callback(key, raw[key]);
     }
-    return this
+    return this;
   }
 
   /**
@@ -34,12 +34,12 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @returns 新的对象
    */
   pick<KK extends K>(keys: KK[]): Pick<O, KK> {
-    const { raw } = this
-    const result = {} as Pick<O, KK>
+    const { raw } = this;
+    const result = {} as Pick<O, KK>;
     keys.forEach((key) => {
-      result[key] = raw[key]
-    })
-    return result
+      result[key] = raw[key];
+    });
+    return result;
   }
 
   /**
@@ -48,10 +48,10 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @returns 新的对象
    */
   omit<KK extends K>(keys: KK[]): Omit<O, KK> {
-    const { raw } = this
-    const result = { ...raw }
-    keys.forEach((key) => delete result[key])
-    return result
+    const { raw } = this;
+    const result = { ...raw };
+    keys.forEach((key) => delete result[key]);
+    return result;
   }
 
   /**
@@ -60,32 +60,32 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @returns 当前对象
    */
   extend(source: Record<string, any>[] | Record<string, any>): O {
-    const { raw } = this
-    const rawKeys = Object.keys(raw)
+    const { raw } = this;
+    const rawKeys = Object.keys(raw);
 
     if (Array.isArray(source)) {
-      source.forEach((s) => this.extend(s))
-      return raw
+      source.forEach((s) => this.extend(s));
+      return raw;
     }
 
     rawKeys.forEach((key) => {
-      if (!(key in source)) return
-      const sourceVal = source[key]
+      if (!(key in source)) return;
+      const sourceVal = source[key];
 
-      if (isEmpty(sourceVal)) return
+      if (isEmpty(sourceVal)) return;
 
-      const rawVal = raw[key]
+      const rawVal = raw[key];
       if (isEmpty(rawVal)) {
-        raw[key as K] = sourceVal
-        return
+        raw[key as K] = sourceVal;
+        return;
       }
-      const rawValType = typeof rawVal
-      const sourceValType = typeof sourceVal
-      if (rawValType !== sourceValType) return console.warn(`${key}类型不一致`)
-      raw[key as K] = sourceVal
-    })
+      const rawValType = typeof rawVal;
+      const sourceValType = typeof sourceVal;
+      if (rawValType !== sourceValType) return console.warn(`${key}类型不一致`);
+      raw[key as K] = sourceVal;
+    });
 
-    return this.raw
+    return this.raw;
   }
 
   /**
@@ -94,45 +94,45 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @returns 当前对象
    */
   deepExtend(source: Record<string, any>[] | Record<string, any>): O {
-    const { raw } = this
+    const { raw } = this;
     if (Array.isArray(source)) {
-      source.forEach((s) => this.deepExtend(s))
-      return raw
+      source.forEach((s) => this.deepExtend(s));
+      return raw;
     }
 
-    const rawKeys = Object.keys(raw)
+    const rawKeys = Object.keys(raw);
 
     rawKeys.forEach((key) => {
-      if (!(key in source)) return
+      if (!(key in source)) return;
 
-      const sourceVal = source[key]
+      const sourceVal = source[key];
 
-      if (isEmpty(sourceVal)) return
+      if (isEmpty(sourceVal)) return;
 
-      const originalVal = raw[key]
+      const originalVal = raw[key];
 
       // 如果是空，则直接赋值
       if (isEmpty(originalVal)) {
-        raw[key as K] = sourceVal
-        return
+        raw[key as K] = sourceVal;
+        return;
       }
 
-      const originalValType = getDataType(originalVal)
-      const sourceValType = getDataType(sourceVal)
+      const originalValType = getDataType(originalVal);
+      const sourceValType = getDataType(sourceVal);
 
       if (originalValType !== sourceValType) {
-        return console.warn(`${key}类型不一致`)
+        return console.warn(`${key}类型不一致`);
       }
 
-      if (originalValType === 'object' && sourceValType === 'object') {
-        new CatObject(originalVal).deepExtend(sourceVal)
-        return
+      if (originalValType === "object" && sourceValType === "object") {
+        new CatObject(originalVal).deepExtend(sourceVal);
+        return;
       }
 
-      raw[key as K] = sourceVal
-    })
+      raw[key as K] = sourceVal;
+    });
 
-    return raw
+    return raw;
   }
 
   /**
@@ -141,43 +141,43 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @returns 新的对象
    */
   copy(): O {
-    return JSON.parse(JSON.stringify(this.raw))
+    return JSON.parse(JSON.stringify(this.raw));
   }
 
   private static merge(
     target: Record<string, any>,
-    source: Record<string, any>
+    source: Record<string, any>,
   ): Record<string, any> {
     Object.keys(source).forEach((key) => {
-      const sourceVal = source[key]
+      const sourceVal = source[key];
 
       // 如果当前对象中不存在该属性，或者当前属性为空，直接赋值
       if (!(key in target) || isEmpty(target[key])) {
-        target[key] = sourceVal
-        return
+        target[key] = sourceVal;
+        return;
       }
 
-      const targetVal = target[key]
-      const targetValType = getDataType(targetVal)
-      const sourceValType = getDataType(sourceVal)
+      const targetVal = target[key];
+      const targetValType = getDataType(targetVal);
+      const sourceValType = getDataType(sourceVal);
 
       // 如果类型不一致，直接覆盖
       if (targetValType !== sourceValType) {
-        target[key] = sourceVal
-        return
+        target[key] = sourceVal;
+        return;
       }
 
       // 如果都是对象，递归合并
-      if (targetValType === 'object' && sourceValType === 'object') {
-        target[key] = CatObject.merge(targetVal, sourceVal)
-        return
+      if (targetValType === "object" && sourceValType === "object") {
+        target[key] = CatObject.merge(targetVal, sourceVal);
+        return;
       }
 
       // 其他情况直接覆盖
-      target[key] = sourceVal
-    })
+      target[key] = sourceVal;
+    });
 
-    return target
+    return target;
   }
 
   /**
@@ -186,15 +186,15 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @returns 当前对象
    */
   merge(source: Record<string, any>[] | Record<string, any>): O {
-    const { raw } = this
+    const { raw } = this;
 
     if (Array.isArray(source)) {
-      source.forEach((s) => CatObject.merge(raw, s))
+      source.forEach((s) => CatObject.merge(raw, s));
     } else {
-      CatObject.merge(raw, source)
+      CatObject.merge(raw, source);
     }
 
-    return this.raw
+    return this.raw;
   }
 
   /**
@@ -205,20 +205,20 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @returns 值
    */
   get<T extends any = any>(prop: string | string[]): T | undefined {
-    let ret: Record<string, any> | undefined = this.raw
+    let ret: Record<string, any> | undefined = this.raw;
 
-    const propPath = Array.isArray(prop) ? prop : prop.split('.')
-    if (propPath.length === 0) return ret as unknown as T
+    const propPath = Array.isArray(prop) ? prop : prop.split(".");
+    if (propPath.length === 0) return ret as unknown as T;
 
     for (let i = 0; i < propPath.length - 1; i++) {
-      ret = ret?.[propPath[i]!]
+      ret = ret?.[propPath[i]!];
       if (isEmpty(ret)) {
-        console.warn(`${prop}访问中断`)
-        return undefined
+        console.warn(`${prop}访问中断`);
+        return undefined;
       }
     }
 
-    return ret?.[propPath[propPath.length - 1]!] as T | undefined
+    return ret?.[propPath[propPath.length - 1]!] as T | undefined;
   }
 
   /**
@@ -228,22 +228,22 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
    * @returns 当前对象
    */
   set(prop: string, value: any): Record<string, any> {
-    const props = prop.split('.')
-    let cur = this.raw as unknown as Record<string, any>
-    let len = props.length - 1
+    const props = prop.split(".");
+    let cur = this.raw as unknown as Record<string, any>;
+    let len = props.length - 1;
     for (let i = 0; i < len; i++) {
-      let p = props[i]!
+      let p = props[i]!;
 
       if (!cur[p]) {
-        cur[p] = {}
+        cur[p] = {};
       }
-      cur = cur[p]
+      cur = cur[p];
     }
-    cur[props[len]!] = value
-    return cur
+    cur[props[len]!] = value;
+    return cur;
   }
 }
 
 export function o<O extends Record<string, any>>(object: O): CatObject<O> {
-  return new CatObject(object)
+  return new CatObject(object);
 }

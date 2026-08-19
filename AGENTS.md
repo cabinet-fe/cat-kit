@@ -51,7 +51,6 @@ cat-kit/
 │   ├── fe/             # @cat-kit/fe       — 前端工具（浏览器专用）
 │   ├── be/             # @cat-kit/be       — 后端工具（Node.js 专用）
 │   ├── cli/            # @cat-kit/cli      — 命令行工具
-│   ├── agent-context/  # @cat-kit/agent-context — Agent Context 工具
 │   ├── tsconfig/       # 共享 tsconfig
 │   └── vitepress-theme/# @cat-kit/vitepress-theme — 文档主题
 ├── skills/             # 仓库内 Agent Skill（见下文 cat-kit 技能）
