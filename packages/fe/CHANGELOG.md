@@ -1,5 +1,12 @@
 # @cat-kit/fe
 
+## 1.2.0
+
+### Patch Changes
+
+- Updated dependencies [9b81c02]
+  - @cat-kit/core@1.2.0
+
 ## 1.1.8
 
 ### Patch Changes
