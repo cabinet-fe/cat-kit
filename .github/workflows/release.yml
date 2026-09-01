@@ -43,8 +43,10 @@ jobs:
         with:
           node-version: 24
 
-      - name: 升级 npm（trusted publishing 需要 npm >= 11.5.1）
-        run: npm install -g npm@latest
+      - name: 安装 npm@11
+        # 固定 11.x：trusted publishing 需要 >= 11.5.1；但 npm 12 改了 `npm info --json`
+        # 输出结构（object -> list），changesets 2.31 解析不了会误判所有包"未发布"
+        run: npm install -g npm@11
 
       - name: 缓存 Bun 依赖
         uses: actions/cache@v5
