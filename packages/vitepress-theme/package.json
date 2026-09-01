@@ -2,6 +2,10 @@
   "name": "@cat-kit/vitepress-theme",
   "version": "1.0.2",
   "description": "CatKit 水墨丹青 VitePress 主题",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cabinet-fe/cat-kit"
+  },
   "files": [
     "dist",
     "src",

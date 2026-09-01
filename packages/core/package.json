@@ -2,6 +2,10 @@
   "name": "@cat-kit/core",
   "version": "1.2.1",
   "description": "核心工具",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cabinet-fe/cat-kit"
+  },
   "files": [
     "dist",
     "src"

@@ -2,6 +2,10 @@
   "name": "@cat-kit/cli",
   "version": "1.0.6",
   "description": "CatKit CLI tools",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cabinet-fe/cat-kit"
+  },
   "bin": {
     "cat-cli": "./dist/cli.js"
   },
