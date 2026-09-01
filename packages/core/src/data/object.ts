@@ -135,15 +135,6 @@ class CatObject<O extends Record<string, any>, K extends keyof O = keyof O> {
     return raw;
   }
 
-  /**
-   * 结构化拷贝
-   * @description 注意，如果对象中存在函数，则函数不会被拷贝
-   * @returns 新的对象
-   */
-  copy(): O {
-    return JSON.parse(JSON.stringify(this.raw));
-  }
-
   private static merge(
     target: Record<string, any>,
     source: Record<string, any>,

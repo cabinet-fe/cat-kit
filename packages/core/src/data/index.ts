@@ -1,5 +1,6 @@
 // 导出所有核心工具
 export * from './type'
+export * from './any'
 export * from './object'
 export * from './string'
 export * from './array'

@@ -10,6 +10,7 @@ sidebarOrder: 0
 ## 页面导航
 
 - [类型判断](./type-check)
+- [任意值拷贝](./any)
 - [对象操作](./object)
 - [数组操作](./array)
 - [字符串操作](./string)

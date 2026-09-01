@@ -162,38 +162,6 @@ describe('对象工具函数', () => {
       })
     })
 
-    describe('copy', () => {
-      it('应该创建对象的深拷贝', () => {
-        const obj = { a: 1, b: { c: 2, d: [3, 4, 5] } }
-
-        const copied = o(obj).copy()
-
-        expect(copied).toEqual(obj)
-        expect(copied).not.toBe(obj)
-        expect(copied.b).not.toBe(obj.b)
-      })
-
-      it('修改拷贝不应该影响原对象', () => {
-        const obj = { a: 1, b: { c: 2 } }
-        const copied = o(obj).copy()
-
-        copied.a = 999
-        copied.b.c = 999
-
-        expect(obj.a).toBe(1)
-        expect(obj.b.c).toBe(2)
-      })
-
-      it('应该忽略函数', () => {
-        const obj = { a: 1, fn: () => 'test' }
-
-        const copied = o(obj).copy()
-
-        expect(copied.a).toBe(1)
-        expect(copied.fn).toBeUndefined()
-      })
-    })
-
     describe('merge', () => {
       it('应该合并对象', () => {
         const obj = { a: 1, b: 2 }

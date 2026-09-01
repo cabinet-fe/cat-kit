@@ -93,9 +93,6 @@ import { o } from '@cat-kit/core'
 
 const obj = o({ a: 1, b: 2, c: 3 })
 
-// 结构化拷贝
-const copied = obj.copy()
-
 // 合并对象
 const merged = obj.merge({ d: 4, e: 5 })
 // { a: 1, b: 2, c: 3, d: 4, e: 5 }

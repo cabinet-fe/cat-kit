@@ -15,6 +15,7 @@
 
 | 主题 | 说明 |
 | --- | --- |
+| [any](any/index.md) | 深拷贝任意值（structuredClone + 兼容回退） |
 | [array-object](array-object/index.md) | 合并去重、尾元素、挑选、忽略、对象更新 |
 | [string-type](string-type/index.md) | 命名转换、URL 路径、类型守卫 |
 | [transform-validation](transform-validation/index.md) | 字节编码、查询串、转换链、schema 校验 |

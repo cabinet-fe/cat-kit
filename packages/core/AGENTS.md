@@ -17,6 +17,7 @@ packages/core/src/
 │   │   ├── format.ts  # 数字与货币格式化
 │   │   └── num.ts     # Num 链式包装类
 │   ├── type.ts        # 类型工具/守卫
+│   ├── any.ts         # 任意值拷贝等通用数据方法
 │   ├── validator.ts   # 验证器
 │   ├── transform.ts   # 数据转换
 │   └── index.ts
@@ -47,6 +48,7 @@ packages/core/src/
 | `sleep`               | 等价于 `new Promise((r) => setTimeout(r, ms))` | 语义化异步暂停                                                        |
 | `isArray`             | 委托 `Array.isArray`                           | 与原生结论一致；仅需判断时也可用 `Array.isArray`                      |
 | `object` / `optional` | 无单一原生对等物                               | 校验 schema 组合的唯一公开命名（旧名 `vObject` / `vOptional` 已移除） |
+| `copy`                | 优先委托 `structuredClone`                     | 失败或不支持时图遍历回退；Vue Proxy 走回退，调用方无需自行 `try/catch` |
 
 `obj2query` / `query2obj` 非 `URLSearchParams` 常规语义（见 `transform.ts` JSDoc）。`str2u8a` / `u8a2str` 优先 `TextEncoder` / `TextDecoder`，Node 下回退 `Buffer`，作为跨环境统一入口。
 

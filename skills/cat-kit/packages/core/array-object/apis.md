@@ -27,6 +27,6 @@ declare function arr<T>(arr: T[]): Arr<T>
 declare function o<O extends Record<string, any>>(object: O): CatObject<O>
 ```
 
-`CatObject` 方法：`keys`、`each`、`pick`、`omit`、`extend`、`deepExtend`、`copy`、`merge`、`get`、`set`。
+`CatObject` 方法：`keys`、`each`、`pick`、`omit`、`extend`、`deepExtend`、`merge`、`get`、`set`。
 
 完整声明：[array.d.ts](../../../generated/core/data/array.d.ts)、[object.d.ts](../../../generated/core/data/object.d.ts)
