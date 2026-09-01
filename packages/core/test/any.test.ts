@@ -2,16 +2,6 @@ import { copy } from '@cat-kit/core'
 import { describe, expect, it, vi } from 'vitest'
 import { isReactive, isReadonly, reactive, readonly } from 'vue'
 
-function markVue<T extends object>(obj: T, kind: 'vue3' | 'vue2' = 'vue3'): T {
-  if (kind === 'vue2') {
-    Object.defineProperty(obj, '__ob__', { value: {} })
-    return obj
-  }
-  Object.defineProperty(obj, '__v_raw', { value: obj })
-  Object.defineProperty(obj, '__v_isReactive', { value: true })
-  return obj
-}
-
 describe('copy', () => {
   describe('原始值', () => {
     it('应该原样返回原始值', () => {
@@ -105,8 +95,8 @@ describe('copy', () => {
     })
   })
 
-  describe('Proxy 与 Vue 标记', () => {
-    it('应该拷贝普通 Proxy 且不抛错', () => {
+  describe('Proxy', () => {
+    it('应该拷贝 Proxy 且不抛错', () => {
       const target = { a: 1, b: { c: 2 } }
       const proxy = new Proxy(target, {})
 
@@ -118,25 +108,26 @@ describe('copy', () => {
       expect(cloned.b).not.toBe(target.b)
     })
 
-    it('应该跳过 structuredClone 并拷贝带 Vue 3 标记的对象', () => {
-      const obj = markVue({ a: 1, b: { c: 2 } })
-      const cloned = copy(obj)
+    it('根对象是 Proxy 时应该跳过 structuredClone', () => {
+      const spy = vi.spyOn(globalThis, 'structuredClone')
+      const cloned = copy(new Proxy({ a: 1 }, {}))
 
-      expect(cloned).toEqual({ a: 1, b: { c: 2 } })
-      expect(cloned).not.toBe(obj)
-      expect(cloned.b).not.toBe(obj.b)
+      expect(spy).not.toHaveBeenCalled()
+      spy.mockRestore()
+      expect(cloned).toEqual({ a: 1 })
     })
 
-    it('应该拷贝带 Vue 2 __ob__ 标记的对象', () => {
-      const obj = markVue({ a: 1, nested: { b: 2 } }, 'vue2')
+    it('应该拷贝嵌套 Proxy', () => {
+      const inner = { n: 1 }
+      const obj = { nested: new Proxy(inner, {}) }
       const cloned = copy(obj)
 
-      expect(cloned).toEqual({ a: 1, nested: { b: 2 } })
-      expect(cloned.nested).not.toBe(obj.nested)
+      expect(cloned).toEqual({ nested: { n: 1 } })
+      expect(cloned.nested).not.toBe(inner)
     })
   })
 
-  describe('真实 Vue 3', () => {
+  describe('Vue 3 响应式（底层是 Proxy）', () => {
     it('应该把 reactive 拷成普通对象且不抛错', () => {
       const state = reactive({ a: 1, nested: { b: 2 } })
       const spy = vi.spyOn(globalThis, 'structuredClone')
@@ -158,6 +149,16 @@ describe('copy', () => {
       expect(cloned).toEqual({ a: 1, nested: { b: 2 } })
       expect(isReadonly(cloned)).toBe(false)
       expect(cloned.nested).not.toBe(state.nested)
+    })
+
+    it('应该把 reactive 数组拷成普通数组', () => {
+      const state = reactive([1, { a: 2 }])
+      const cloned = copy(state)
+
+      expect(cloned).toEqual([1, { a: 2 }])
+      expect(Array.isArray(cloned)).toBe(true)
+      expect(isReactive(cloned)).toBe(false)
+      expect(cloned[1]).not.toBe(state[1])
     })
   })
 

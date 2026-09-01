@@ -7,7 +7,7 @@ sidebarOrder: 15
 
 ## 介绍
 
-`copy` 用于深拷贝任意值：优先委托 native `structuredClone`（循环引用、Date、Map/Set、TypedArray 等交给引擎），在 Vue 响应式 Proxy、旧环境或不支持的值上自动回退为图遍历，**不向外抛错**。
+`copy` 用于深拷贝任意值：优先委托 native `structuredClone`（循环引用、Date、Map/Set、TypedArray 等交给引擎）。**Proxy**（Vue 3 响应式对象也是 Proxy）不能结构化克隆，会改走图遍历，**不向外抛错**。
 
 与旧的 `o().copy()`（JSON 语义）不同：`copy` 会保留函数引用、保留 Date/Map 等类型，并支持循环引用。`o().copy()` 已移除。
 
@@ -50,9 +50,11 @@ function copy<T>(value: T): T
 ### 策略
 
 1. `null` / 非 object：原样返回。
-2. 根对象带 Vue 2/3 标记（`__v_raw` / `__v_isReactive` / `__v_isReadonly` / `__ob__`，通过属性读取而非 `in`）：直接走图遍历，避免 `structuredClone` 对 Proxy 抛错。
+2. 根对象是 Proxy：直接图遍历（Vue 3 `reactive` / `readonly` 属于这一类，不读 `__v_*` 之类的框架私有字段）。
 3. 存在 `globalThis.structuredClone`：走 native；抛错则回退。
 4. 无 `structuredClone`（如 Node 16）：走同一套图遍历。
+
+Node / Bun 可用 `util.types.isProxy` 在抛错前识别 Proxy。浏览器没有等价 API，会先尝试 `structuredClone`，对 Proxy 抛错后再回退。
 
 ### 回退遍历
 
