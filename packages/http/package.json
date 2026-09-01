@@ -1,6 +1,6 @@
 {
   "name": "@cat-kit/http",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "HTTP 请求工具",
   "files": [
     "dist",

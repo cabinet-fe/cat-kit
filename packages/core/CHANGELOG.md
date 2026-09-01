@@ -1,5 +1,11 @@
 # @cat-kit/core
 
+## 1.2.1
+
+### Patch Changes
+
+- 52e4851: `copy` 用 Proxy 检测替代 Vue 私有标记，并修好回退路径的类型错误。
+
 ## 1.2.0
 
 ### Minor Changes
