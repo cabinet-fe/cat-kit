@@ -20,9 +20,7 @@
     "typecheck": "turbo run typecheck",
     "format": "bunx oxfmt --write .",
     "changeset": "changeset",
-    "release": "bun run scripts/release.ts",
-    "sync-cat-kit-skills-api": "bun run scripts/sync-cat-kit-skills-api.ts",
-    "sync-cat-kit-skills-api:build": "bun run scripts/sync-cat-kit-skills-api.ts -- --build"
+    "release": "bun run scripts/release.ts"
   },
   "devDependencies": {
     "@cat-kit/tsconfig": "workspace:*",

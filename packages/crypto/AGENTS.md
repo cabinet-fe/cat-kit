@@ -24,5 +24,4 @@ packages/crypto/src/
 - 所有公共 API 通过 `src/index.ts` 统一导出。
 - 新增 `packages/crypto` 功能时，同步更新：
   - `docs/content/packages/crypto/`
-  - `skills/cat-kit/packages/crypto/`
-  - 必要时刷新 `skills/cat-kit/generated/crypto/`
+  - `agent-docs/packages/crypto/`
