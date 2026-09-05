@@ -6,3 +6,4 @@ releases/
 coverage/
 .npmrc
 .turbo
+.agents/cooking/
