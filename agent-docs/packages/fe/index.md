@@ -1,6 +1,20 @@
 ---
 title: "@cat-kit/fe 包概览"
 description: "浏览器专用工具包：虚拟列表、数值补间、文件处理、客户端存储与剪贴板"
+keywords:
+  - 浏览器工具包
+  - 虚拟滚动
+  - 数值补间
+  - 文件分块读取
+  - 客户端存储
+  - 剪贴板
+  - Virtualizer
+  - Tween
+aliases:
+  - fe 包
+  - cat-kit fe
+  - 前端工具库
+  - 浏览器 utils
 ---
 
 # @cat-kit/fe
@@ -19,7 +33,3 @@ description: "浏览器专用工具包：虚拟列表、数值补间、文件处
 | [storage](storage/index.md) | localStorage、sessionStorage、Cookie |
 | [web-api](web-api/index.md) | 剪贴板、权限预查 |
 | [组合示例](examples.md) | 跨主题组合 |
-
-## 类型声明
-
-完整公共类型与签名见 [packages/fe/dist/index.d.ts](../../../packages/fe/dist/index.d.ts)。

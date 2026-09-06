@@ -1,6 +1,20 @@
 ---
 title: "执行控制 API"
 description: "@cat-kit/core 执行控制签名：debounce/throttle/sleep/parallel/safeRun"
+keywords:
+  - debounce
+  - throttle
+  - sleep
+  - parallel
+  - safeRun
+  - concurrency
+  - 延时函数
+  - 并发上限
+aliases:
+  - 函数签名
+  - API 参考
+  - 防抖函数签名
+  - 并发任务执行
 ---
 
 # 执行控制 API
@@ -30,9 +44,3 @@ declare function parallel<T>(
 declare function safeRun<T>(fn: () => T): T | undefined
 declare function safeRun<T>(fn: () => T, defaultVal: T): T
 ```
-
-完整声明见：
-
-- [packages/core/dist/optimize/timer.d.ts](../../../../packages/core/dist/optimize/timer.d.ts)
-- [packages/core/dist/optimize/parallel.d.ts](../../../../packages/core/dist/optimize/parallel.d.ts)
-- [packages/core/dist/optimize/safe.d.ts](../../../../packages/core/dist/optimize/safe.d.ts)

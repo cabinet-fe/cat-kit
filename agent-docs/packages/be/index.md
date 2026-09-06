@@ -1,6 +1,19 @@
 ---
 title: "@cat-kit/be 包概览"
 description: "Node.js 后端工具包总览：文件系统、配置、缓存、日志、网络、任务调度与系统信息"
+keywords:
+  - 后端工具
+  - Node.js 工具库
+  - 文件系统
+  - 环境变量
+  - 缓存
+  - 日志
+  - 定时任务
+  - 服务器信息
+aliases:
+  - backend
+  - 服务端工具
+  - node 工具包
 ---
 
 # @cat-kit/be 包概览
@@ -25,7 +38,3 @@ import { ensureDir, loadEnv, LRUCache, Logger, Scheduler } from '@cat-kit/be'
 | [任务调度](scheduler/index.md) | Cron 表达式、延迟执行、周期任务 |
 | [系统信息](system/index.md) | CPU、内存、磁盘、网卡快照 |
 | [组合示例](examples.md) | 跨主题组合使用 |
-
-## 类型声明
-
-全部公共类型以 `dist` 下声明文件为准：[index.d.ts](../../../packages/be/dist/index.d.ts)；各主题类型见对应主题文档中的「类型声明」小节。

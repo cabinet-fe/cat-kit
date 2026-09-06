@@ -1,11 +1,25 @@
 ---
 title: "@cat-kit/fe 文件处理 API"
 description: readChunks 分块读取与 saveBlob 保存的类型签名
+keywords:
+  - readChunks
+  - ReadChunksOptions
+  - saveBlob
+  - AsyncGenerator
+  - chunkSize
+  - offset
+  - 分块读取
+  - Uint8Array
+aliases:
+  - file api
+  - blob 读取
+  - 文件签名
+  - stream read
 ---
 
 # 浏览器文件 — API
 
-本篇列出 `@cat-kit/fe` 文件处理模块的公共类型签名。完整声明见 [read.d.ts](../../../../packages/fe/dist/file/read.d.ts) 与 [saver.d.ts](../../../../packages/fe/dist/file/saver.d.ts)。
+本篇列出 `@cat-kit/fe` 文件处理模块的公共类型签名。
 
 ```ts
 interface ReadChunksOptions {

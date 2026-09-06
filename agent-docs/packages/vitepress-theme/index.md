@@ -1,7 +1,22 @@
 ---
 title: "@cat-kit/vitepress-theme"
 description: VitePress 水墨丹青主题：默认主题、布局组件、Demo/Mermaid 容器与配置助手
+keywords:
+  - VitePress 主题
+  - 文档站主题
+  - 水墨风格
+  - Demo 容器
+  - Mermaid 图表
+  - 布局组件
+  - 站点配置
+aliases:
+  - 水墨丹青
+  - vitepress theme
+  - 文档主题
+  - docs theme
 ---
+
+# @cat-kit/vitepress-theme
 
 ## 概述
 
@@ -30,4 +45,3 @@ bun add @cat-kit/vitepress-theme
 
 - 包根 `@cat-kit/vitepress-theme`：默认导出 VitePress theme，命名导出 `CatKitLayout` 与 composables
 - 子路径 `@cat-kit/vitepress-theme/config`：`defineThemeConfig`、`demoContainer`、`mermaidPlugin`、`importExamples`，不要从包根导入这些助手
-- 类型声明：包根见 [dist/src/index.d.ts](../../../packages/vitepress-theme/dist/src/index.d.ts)，config 子路径见 [dist/src/config.d.ts](../../../packages/vitepress-theme/dist/src/config.d.ts)

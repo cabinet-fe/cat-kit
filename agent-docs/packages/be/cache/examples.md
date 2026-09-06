@@ -1,6 +1,20 @@
 ---
 title: "@cat-kit/be 缓存示例"
 description: "LRU、文件缓存与 memoize 的基本用法"
+keywords:
+  - LRUCache
+  - FileCache
+  - memoize
+  - maxSize
+  - ttl
+  - 文件缓存
+  - 函数记忆化
+  - 磁盘持久化缓存
+aliases:
+  - 缓存示例
+  - node-cache
+  - lru-cache
+  - memoize
 ---
 
 # 缓存示例

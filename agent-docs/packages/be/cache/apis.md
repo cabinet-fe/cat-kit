@@ -1,11 +1,27 @@
 ---
 title: "@cat-kit/be 缓存 API"
 description: "LRUCache、FileCache、memoize 签名与选项"
+keywords:
+  - LRUCache
+  - FileCache
+  - memoize
+  - CacheAdapter
+  - LRUCacheOptions
+  - FileCacheOptions
+  - MemoizeOptions
+  - maxSize
+  - ttl
+  - 过期淘汰
+aliases:
+  - node-cache
+  - lru-cache
+  - memoize
+  - 缓存 API
 ---
 
 # 缓存 API
 
-缓存模块全部类与函数的 TypeScript 签名，类型定义以 `packages/be/dist/cache/` 下的声明文件为准。
+缓存模块全部类与函数的 TypeScript 签名。
 
 ```ts
 declare class LRUCache<K, V> {
@@ -35,7 +51,7 @@ declare function memoize<F extends (...args: any[]) => any>(
 ): F & { cache: CacheAdapter<unknown, Awaited<ReturnType<F>>>; clear(): void }
 ```
 
-## 关键选项
+## 参数说明
 
 | 类型 | 字段 | 说明 |
 | --- | --- | --- |
@@ -48,7 +64,3 @@ declare function memoize<F extends (...args: any[]) => any>(
 | `MemoizeOptions` | `resolver` | 自定义缓存键函数，默认 `String` / `JSON.stringify` |
 | `MemoizeOptions` | `ttl` | 默认过期时间（毫秒） |
 | `CacheAdapter` | — | `get` / `set` / `has` / `delete` / `clear`，同步接口 |
-
-## 类型声明
-
-签名与选项的权威定义：[lru-cache.d.ts](../../../../packages/be/dist/cache/lru-cache.d.ts)、[file-cache.d.ts](../../../../packages/be/dist/cache/file-cache.d.ts)、[memoize.d.ts](../../../../packages/be/dist/cache/memoize.d.ts)。

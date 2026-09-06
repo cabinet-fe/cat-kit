@@ -1,6 +1,20 @@
 ---
 title: "@cat-kit/core 组合示例"
 description: "core 包跨主题组合使用示例：schema 校验、高精度计算、日期格式化、树遍历与并发执行"
+keywords:
+  - 组合示例
+  - $n
+  - date format
+  - object schema
+  - parallel 并发
+  - TreeManager
+  - 树扁平化
+  - safeParse
+aliases:
+  - 使用示例
+  - 跨模块组合
+  - 并发任务示例
+  - 日期格式化示例
 ---
 
 # @cat-kit/core 组合示例

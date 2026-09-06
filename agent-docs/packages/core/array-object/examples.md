@@ -1,6 +1,19 @@
 ---
 title: "数组与对象工具示例"
 description: "@cat-kit/core 数组与对象工具示例：unionBy 按字段去重、pick/move/groupBy/set 用法"
+keywords:
+  - unionBy
+  - pick
+  - move
+  - groupBy
+  - set 路径赋值
+  - 数组示例
+  - 链式操作示例
+aliases:
+  - 按字段去重示例
+  - 对象字段挑选
+  - 数组元素移动
+  - 示例代码
 ---
 
 # 数组与对象工具示例

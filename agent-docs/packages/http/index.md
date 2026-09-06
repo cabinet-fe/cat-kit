@@ -1,6 +1,20 @@
 ---
 title: "@cat-kit/http"
 description: "浏览器与 Node.js 通用的 HTTP 客户端，统一 URL、配置、响应与错误，支持可替换引擎与请求插件"
+keywords:
+  - HTTP 客户端
+  - 请求取消
+  - 超时配置
+  - Token 刷新
+  - 请求插件
+  - 传输引擎
+  - HTTP 方法覆盖
+  - 类型化响应
+aliases:
+  - axios 替代
+  - fetch 封装
+  - http client
+  - HTTPClient
 ---
 
 # @cat-kit/http
@@ -26,7 +40,3 @@ description: "浏览器与 Node.js 通用的 HTTP 客户端，统一 URL、配�
 | [客户端](client/index.md) | 创建客户端、请求、响应/错误、引擎、配置合并 |
 | [插件](plugins/index.md) | Token、方法覆盖、自定义插件 |
 | [组合示例](examples.md) | 客户端 + 插件组合 |
-
-## 类型声明
-
-[index.d.ts](../../../packages/http/dist/index.d.ts) — 包导出入口

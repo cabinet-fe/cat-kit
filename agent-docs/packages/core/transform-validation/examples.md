@@ -1,6 +1,19 @@
 ---
 title: "转换与校验示例"
 description: "@cat-kit/core 转换与校验示例：hex 编解码、同步转换链、schema safeParse"
+keywords:
+  - hex 编解码
+  - u8a2hex
+  - hex2u8a
+  - transform 转换链
+  - safeParse
+  - optional 默认值
+  - schema 校验示例
+aliases:
+  - hex to bytes
+  - schema validation example
+  - safeParse 示例
+  - 转换链示例
 ---
 
 # 转换与校验示例

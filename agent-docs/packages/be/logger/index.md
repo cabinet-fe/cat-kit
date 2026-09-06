@@ -1,6 +1,22 @@
 ---
 title: "@cat-kit/be 日志"
 description: "分级结构化日志器，支持 text/json 格式与控制台、文件多 Transport 输出"
+keywords:
+  - Logger
+  - LogLevel
+  - LoggerOptions
+  - LogEntry
+  - Transport
+  - ConsoleTransport
+  - FileTransport
+  - 结构化日志
+  - 日志分级
+  - 日志轮转
+aliases:
+  - winston
+  - pino
+  - 日志器
+  - logger
 ---
 
 # 日志
@@ -20,14 +36,14 @@ await logger.info('service started')
 
 详情见 [API](apis.md)。
 
-## 约束
+## 注意事项
 
 - `log` / `debug` / `info` / `warn` / `error` 均返回 `Promise<void>`
 - 低于 `level` 设定级别的日志不输出；`level` 默认为 `DEBUG`
 - `error()` 第一个参数后可直接传 `Error` 对象，会附带上错误信息与堆栈
 - `textFormat` 支持模板字符串（如 `'{timestamp} [{level}] {message}'`）或自定义函数
 
-## 类型声明
+## 类型定义
 
-- [logger.d.ts](../../../../packages/be/dist/logger/logger.d.ts) —— `Logger`、`LogLevel`、`LoggerOptions`、`LogEntry`
-- [transports.d.ts](../../../../packages/be/dist/logger/transports.d.ts) —— `Transport`、`ConsoleTransport`、`FileTransport`
+- `Logger`、`LogLevel`、`LoggerOptions`、`LogEntry`
+- `Transport`、`ConsoleTransport`、`FileTransport`

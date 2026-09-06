@@ -1,6 +1,17 @@
 ---
 title: "任意值拷贝 copy"
 description: "@cat-kit/core 的 copy 深拷贝：structuredClone 优先，Proxy 与不支持环境图遍历回退"
+keywords:
+  - 深拷贝
+  - 结构化克隆
+  - 响应式快照
+  - 循环引用
+  - structuredClone
+  - copy
+aliases:
+  - cloneDeep
+  - lodash.cloneDeep
+  - 拷贝对象
 ---
 
 # 任意值拷贝 copy
@@ -11,7 +22,7 @@ description: "@cat-kit/core 的 copy 深拷贝：structuredClone 优先，Proxy 
 
 深拷贝任意值、替代 `lodash.cloneDeep` 或裸 `structuredClone`，尤其是 Vue 响应式对象需要普通数据快照时。
 
-## 推荐公开 API
+## 推荐 API
 
 `copy`
 
@@ -21,16 +32,12 @@ import { copy } from '@cat-kit/core'
 const snapshot = copy({ a: 1, nested: { b: 2 } })
 ```
 
-## 约束
+## 注意事项
 
 - 优先委托 native `structuredClone`；失败、不支持或根对象是 Proxy（Vue 3 响应式也是 Proxy）时图遍历回退，不抛错
 - 回退时函数保留同一引用；不保留 class 原型方法
 - 产出普通数据快照，不保留 Vue 响应式
 - 旧 `o().copy()`（JSON 语义）已移除，不要再调用
-
-## 类型声明
-
-[packages/core/dist/data/any.d.ts](../../../../packages/core/dist/data/any.d.ts)
 
 ## 更多
 

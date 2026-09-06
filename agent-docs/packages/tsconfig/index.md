@@ -1,6 +1,20 @@
 ---
 title: "@cat-kit/tsconfig"
 description: 按运行环境划分的 TypeScript 配置预设：node / bun / web / vue
+keywords:
+  - tsconfig
+  - TypeScript 预设
+  - tsconfig.node.json
+  - tsconfig.web.json
+  - tsconfig.bun.json
+  - extends
+  - bundler 解析
+  - Vue 项目配置
+aliases:
+  - ts config preset
+  - tsconfig 继承
+  - shared typescript config
+  - 共享 tsconfig
 ---
 
 ## 概述
@@ -14,13 +28,13 @@ description: 按运行环境划分的 TypeScript 配置预设：node / bun / web
 
 | 文件 | 用途 |
 | --- | --- |
-| [tsconfig.json](../../../packages/tsconfig/tsconfig.json) | 基础共享选项 |
-| [tsconfig.node.json](../../../packages/tsconfig/tsconfig.node.json) | Node.js 项目（需另装 `@types/node`） |
-| [tsconfig.bun.json](../../../packages/tsconfig/tsconfig.bun.json) | Bun 项目（需另装 `@types/bun`） |
-| [tsconfig.web.json](../../../packages/tsconfig/tsconfig.web.json) | 浏览器 / 打包前端（补 DOM lib） |
-| [tsconfig.vue.json](../../../packages/tsconfig/tsconfig.vue.json) | Vue 项目（不继承 web 预设；需要浏览器 lib 时自行补充） |
+| `tsconfig.json` | 基础共享选项 |
+| `tsconfig.node.json` | Node.js 项目（需另装 `@types/node`） |
+| `tsconfig.bun.json` | Bun 项目（需另装 `@types/bun`） |
+| `tsconfig.web.json` | 浏览器 / 打包前端（补 DOM lib） |
+| `tsconfig.vue.json` | Vue 项目（不继承 web 预设；需要浏览器 lib 时自行补充） |
 
-## 用法
+## 快速上手
 
 ```bash
 bun add -d @cat-kit/tsconfig typescript
@@ -31,5 +45,3 @@ bun add -d @cat-kit/tsconfig typescript
   "extends": "@cat-kit/tsconfig/tsconfig.node.json"
 }
 ```
-
-预设内容以仓库 [packages/tsconfig/](../../../packages/tsconfig/) 内实际 JSON 文件为准。

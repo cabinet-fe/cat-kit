@@ -1,11 +1,27 @@
 ---
 title: "@cat-kit/be 文件系统 API"
 description: "readDir、readJson、writeJson、writeFile、movePath、emptyDir、removePath、ensureDir 签名"
+keywords:
+  - readDir
+  - readJson
+  - writeJson
+  - writeFile
+  - movePath
+  - emptyDir
+  - removePath
+  - ensureDir
+  - DirEntry
+  - 递归遍历
+aliases:
+  - 文件系统 API
+  - fs API
+  - 目录遍历
+  - 删除文件
 ---
 
 # 文件系统 API
 
-文件系统全部函数的 TypeScript 签名，类型定义以 `packages/be/dist/fs/` 下的声明文件为准。
+文件系统全部函数的 TypeScript 签名。
 
 ```ts
 declare function readDir(
@@ -46,7 +62,7 @@ declare function removePath(
 
 另导出 Node 的 `readFile`、`copyFile`、`cp`、`existsSync`。
 
-## 关键选项
+## 参数说明
 
 | 类型 | 字段 | 说明 |
 | --- | --- | --- |
@@ -58,7 +74,3 @@ declare function removePath(
 | `WriteFileData` | — | 字符串、`Buffer`、Web `ReadableStream`、Node `Readable`、可迭代对象 |
 | `MoveOptions` | `overwrite` | 目标已存在时是否覆盖，默认 `false` |
 | `RemoveOptions` | `force` | 是否忽略不存在的路径，默认 `false` |
-
-## 类型声明
-
-签名与选项的权威定义：[read-dir.d.ts](../../../../packages/be/dist/fs/read-dir.d.ts)、[json.d.ts](../../../../packages/be/dist/fs/json.d.ts)、[write-file.d.ts](../../../../packages/be/dist/fs/write-file.d.ts)、[move.d.ts](../../../../packages/be/dist/fs/move.d.ts)、[remove.d.ts](../../../../packages/be/dist/fs/remove.d.ts)、[empty-dir.d.ts](../../../../packages/be/dist/fs/empty-dir.d.ts)、[ensure-dir.d.ts](../../../../packages/be/dist/fs/ensure-dir.d.ts)、[index.d.ts](../../../../packages/be/dist/fs/index.d.ts)。

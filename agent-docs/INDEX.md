@@ -1,6 +1,22 @@
 ---
 title: 'cat-kit 文档入口'
 description: '面向 AI 智能体的 @cat-kit/* 检索文档：决策顺序、8 包一览与主题跳转'
+keywords:
+  - cat-kit
+  - 工具库
+  - monorepo
+  - 前端工具
+  - 后端工具
+  - TypeScript
+  - AI 检索文档
+  - 决策顺序
+aliases:
+  - @cat-kit/core
+  - @cat-kit/http
+  - @cat-kit/fe
+  - @cat-kit/be
+  - @cat-kit/crypto
+  - @cat-kit/cli
 ---
 
 # cat-kit 文档入口

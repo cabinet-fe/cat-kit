@@ -1,6 +1,19 @@
 ---
 title: "@cat-kit/be 配置示例"
 description: "加载环境变量、schema 校验并合并多层配置"
+keywords:
+  - loadEnv
+  - parseEnv
+  - loadConfig
+  - mergeConfig
+  - env schema
+  - 环境变量校验
+  - 多层配置合并
+  - required 校验
+aliases:
+  - 配置示例
+  - dotenv 示例
+  - env 加载
 ---
 
 # 配置示例

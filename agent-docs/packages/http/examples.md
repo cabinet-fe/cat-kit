@@ -1,6 +1,19 @@
 ---
 title: "@cat-kit/http 组合示例"
 description: "HTTPClient 与 TokenPlugin 组合创建业务 API 客户端并发送类型化请求"
+keywords:
+  - HTTPClient
+  - TokenPlugin
+  - HTTPError
+  - group
+  - post
+  - 超时配置
+  - 类型化请求
+  - 业务域分组
+aliases:
+  - 组合用法
+  - 实战示例
+  - axios 封装
 ---
 
 # @cat-kit/http 组合示例

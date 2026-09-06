@@ -1,11 +1,27 @@
 ---
 title: "@cat-kit/be 配置 API"
 description: "parseEnvFile、loadEnv、parseEnv、loadConfig、mergeConfig 签名与选项"
+keywords:
+  - parseEnvFile
+  - loadEnv
+  - parseEnv
+  - loadConfig
+  - mergeConfig
+  - LoadEnvOptions
+  - EnvDefinition
+  - LoadConfigOptions
+  - env schema
+  - 配置解析
+aliases:
+  - dotenv
+  - 配置 API
+  - 环境变量校验
+  - 深合并
 ---
 
 # 配置 API
 
-配置管理全部函数的 TypeScript 签名，类型定义以 `packages/be/dist/config/` 下的声明文件为准。
+配置管理全部函数的 TypeScript 签名。
 
 ```ts
 declare function parseEnvFile(content: string): EnvRecord
@@ -24,7 +40,7 @@ declare function mergeConfig<T extends Record<string, any>>(
 ): T
 ```
 
-## 关键选项
+## 参数说明
 
 | 类型 | 字段 | 说明 |
 | --- | --- | --- |
@@ -37,7 +53,3 @@ declare function mergeConfig<T extends Record<string, any>>(
 | `LoadConfigOptions` | `cwd` / `format` | 工作目录；格式 `'json' \| 'yaml' \| 'toml'`，缺省按扩展名检测 |
 | `LoadConfigOptions` | `defaults` / `mergeDefaults` | 默认配置及是否深合并，`mergeDefaults` 默认 `true` |
 | `LoadConfigOptions` | `parser` / `validate` | 自定义解析器（覆盖 `format`）；自定义校验（失败抛错） |
-
-## 类型声明
-
-签名与选项的权威定义：[env.d.ts](../../../../packages/be/dist/config/env.d.ts)、[config.d.ts](../../../../packages/be/dist/config/config.d.ts)、[merge.d.ts](../../../../packages/be/dist/config/merge.d.ts)。

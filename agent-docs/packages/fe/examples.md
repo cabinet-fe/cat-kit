@@ -1,6 +1,20 @@
 ---
 title: "@cat-kit/fe 组合示例"
 description: 跨主题组合使用 fe 包的存储、文件、剪贴板与虚拟列表能力
+keywords:
+  - 组合示例
+  - Virtualizer
+  - storage
+  - clipboard
+  - readChunks
+  - storageKey
+  - 文件上传
+  - 虚拟列表
+aliases:
+  - fe examples
+  - 组合用法
+  - 上传文件示例
+  - use case
 ---
 
 # @cat-kit/fe 组合示例

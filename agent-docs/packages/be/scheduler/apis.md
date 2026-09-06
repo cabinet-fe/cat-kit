@@ -1,11 +1,26 @@
 ---
 title: "@cat-kit/be 任务调度 API"
 description: "CronExpression、parseCron、Scheduler 签名与选项"
+keywords:
+  - 定时任务
+  - Cron 表达式
+  - 周期任务
+  - 延迟执行
+  - 任务取消
+  - scheduler
+  - 定时器管理
+aliases:
+  - cron
+  - 定时调度
+  - setInterval 替代
+  - 任务计划
 ---
 
 # 任务调度 API
 
-调度模块全部类与函数的 TypeScript 签名，类型定义以 `packages/be/dist/scheduler/` 下的声明文件为准。
+调度模块全部类与函数的 TypeScript 签名。
+
+## API 签名
 
 ```ts
 declare class CronExpression {
@@ -27,7 +42,7 @@ declare class Scheduler {
 }
 ```
 
-## 关键类型
+## 类型定义
 
 | 类型 | 说明 |
 | --- | --- |
@@ -36,7 +51,3 @@ declare class Scheduler {
 | `once` | `delay` 毫秒后执行一次，小于 0 抛错 |
 | `interval` | 每 `interval` 毫秒重复执行，小于等于 0 抛错 |
 | `schedule` | 接受 Cron 字符串或 `CronExpression` 实例 |
-
-## 类型声明
-
-签名与选项的权威定义：[cron.d.ts](../../../../packages/be/dist/scheduler/cron.d.ts)、[scheduler.d.ts](../../../../packages/be/dist/scheduler/scheduler.d.ts)。

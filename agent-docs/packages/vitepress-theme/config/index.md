@@ -1,6 +1,22 @@
 ---
 title: "@cat-kit/vitepress-theme 配置助手"
 description: defineThemeConfig 与 demo/mermaid/examples 插件的接入方式与约束
+keywords:
+  - defineThemeConfig
+  - demoContainer
+  - mermaidPlugin
+  - importExamples
+  - 站点配置
+  - markdown 插件
+  - vite 插件
+  - examplesDir
+  - CatKitThemeOptions
+aliases:
+  - config helper
+  - 配置助手
+  - vitepress config 配置
+  - demo 容器配置
+  - mermaid 配置
 ---
 
 ## 概述
@@ -26,9 +42,9 @@ export default {
 }
 ```
 
-函数与类型签名见 [配置 API](apis.md)；完整声明在 [dist/src/config.d.ts](../../../../packages/vitepress-theme/dist/src/config.d.ts)。
+函数与类型签名见 [配置 API](apis.md)。
 
-## 约束
+## 注意事项
 
 - 不要从包根导入 `defineThemeConfig` / `demoContainer` 等
 - `defineThemeConfig` 会配置 `markdown` 与 `vite.plugins`；合并时勿浅覆盖这些嵌套字段

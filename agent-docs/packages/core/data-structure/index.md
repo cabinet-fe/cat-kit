@@ -1,6 +1,23 @@
 ---
 title: "树与森林数据结构"
 description: "@cat-kit/core 的 dfs/bfs/TreeManager/Forest：树与森林遍历、扁平化、可见节点与节点关系"
+keywords:
+  - dfs
+  - bfs
+  - TreeManager
+  - Forest
+  - 树遍历
+  - 森林遍历
+  - 扁平化
+  - childrenKey
+  - createNode
+  - 可见节点
+aliases:
+  - 树结构工具
+  - 深度优先
+  - 广度优先
+  - 树查找
+  - 树形数据
 ---
 
 # 树与森林数据结构
@@ -11,22 +28,17 @@ description: "@cat-kit/core 的 dfs/bfs/TreeManager/Forest：树与森林遍历�
 
 树/森林遍历、查找、扁平化、可见节点与节点关系。
 
-## 推荐公开 API
+## 推荐 API
 
 - `dfs`、`bfs`
 - `TreeNode`、`TreeManager`、`ForestNode`、`Forest`
 
-## 约束
+## 注意事项
 
 - 遍历回调 `(node, index, parent?)`；返回 `true` 停止当前直接遍历
 - 无 `createNode` 时 `TreeManager` 管理原始节点，不注入元数据方法
 - `Forest.dfs`/`bfs` 在一棵树上停止后仍继续后续根
 - 可见扁平化始终含根，仅沿 `isExpanded(node)` 为真的节点下行
-
-## 类型声明
-
-- [packages/core/dist/data-structure/tree.d.ts](../../../../packages/core/dist/data-structure/tree.d.ts)
-- [packages/core/dist/data-structure/forest.d.ts](../../../../packages/core/dist/data-structure/forest.d.ts)
 
 ## 更多
 

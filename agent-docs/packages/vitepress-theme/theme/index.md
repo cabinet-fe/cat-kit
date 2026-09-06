@@ -1,6 +1,21 @@
 ---
 title: "@cat-kit/vitepress-theme 默认主题"
 description: 主题入口、CatKitLayout 布局与内置 composable 的使用
+keywords:
+  - VitePress 默认主题
+  - 主题入口
+  - CatKitLayout
+  - DemoContainer
+  - Mermaid
+  - useConsoleInterceptor
+  - useFullscreen
+  - useDraggable
+  - 水墨文档站
+aliases:
+  - default theme
+  - 主题入口文件
+  - vitepress default theme 扩展
+  - 布局组件
 ---
 
 ## 概述
@@ -21,4 +36,4 @@ export default theme
 - 命名导出：`CatKitLayout`、`useConsoleInterceptor`、`useFullscreen`、`useDraggable` 及对应类型
 - 样式：`@cat-kit/vitepress-theme/style.css` 或 `@cat-kit/vitepress-theme/styles/theme.css`（主题入口已引入 theme.css）
 
-函数与类型签名见 [默认主题 API](apis.md)；完整声明在 [dist/src/index.d.ts](../../../../packages/vitepress-theme/dist/src/index.d.ts)。
+函数与类型签名见 [默认主题 API](apis.md)。

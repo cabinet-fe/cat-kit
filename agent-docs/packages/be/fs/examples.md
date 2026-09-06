@@ -1,6 +1,18 @@
 ---
 title: "@cat-kit/be 文件系统示例"
 description: "确保目录、递归列出文件并写出 JSON 清单"
+keywords:
+  - ensureDir
+  - readDir
+  - writeJson
+  - writeFile
+  - 递归列出文件
+  - JSON 清单
+  - 下载文件写入
+aliases:
+  - 文件系统示例
+  - fs 示例
+  - 递归遍历目录
 ---
 
 # 文件系统示例

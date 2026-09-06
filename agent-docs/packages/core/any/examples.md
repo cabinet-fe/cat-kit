@@ -1,6 +1,18 @@
 ---
 title: "任意值拷贝 copy 示例"
 description: "@cat-kit/core 的 copy：嵌套隔离、函数引用保持、循环引用快照"
+keywords:
+  - copy 深拷贝
+  - 嵌套隔离
+  - 函数引用保持
+  - 循环引用
+  - 深拷贝示例
+  - structuredClone
+aliases:
+  - 克隆对象
+  - 对象快照
+  - deep copy example
+  - 循环引用拷贝
 ---
 
 # 任意值拷贝 copy 示例

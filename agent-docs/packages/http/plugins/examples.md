@@ -1,6 +1,20 @@
 ---
 title: "HTTP 插件示例"
 description: "配置 TokenPlugin、MethodOverridePlugin 与自定义插件的示例"
+keywords:
+  - TokenPlugin
+  - MethodOverridePlugin
+  - registerPlugin
+  - beforeRequest
+  - shouldRefresh
+  - onRefresh
+  - token 注入
+  - 401 刷新
+  - 自定义插件
+aliases:
+  - 插件示例
+  - token plugin
+  - 请求日志
 ---
 
 # HTTP 插件 — 示例

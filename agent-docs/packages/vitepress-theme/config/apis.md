@@ -1,13 +1,28 @@
 ---
 title: "@cat-kit/vitepress-theme 配置 API"
 description: config 子路径导出的函数与类型签名
+keywords:
+  - defineThemeConfig
+  - demoContainer
+  - mermaidPlugin
+  - importExamples
+  - CatKitThemeOptions
+  - DemoContainerOptions
+  - ImportExamplesOptions
+  - config 导出
+  - 类型签名
+aliases:
+  - config api
+  - 配置 API
+  - 类型定义
+  - 插件函数签名
 ---
 
 ## 概述
 
-`@cat-kit/vitepress-theme/config` 导出配置函数与 markdown/vite 插件。完整声明见 [dist/src/config.d.ts](../../../../packages/vitepress-theme/dist/src/config.d.ts)。
+`@cat-kit/vitepress-theme/config` 导出配置函数与 markdown/vite 插件。
 
-## 签名
+## API 签名
 
 ```ts
 // @cat-kit/vitepress-theme/config

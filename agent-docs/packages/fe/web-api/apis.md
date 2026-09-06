@@ -1,11 +1,25 @@
 ---
 title: "@cat-kit/fe Web API 签名"
 description: clipboard 对象与 queryPermission 的类型签名
+keywords:
+  - clipboard
+  - copy
+  - read
+  - readText
+  - queryPermission
+  - WebPermissionName
+  - 剪贴板复制
+  - 权限查询
+aliases:
+  - clipboard api
+  - 剪贴板签名
+  - navigator.clipboard
+  - web api types
 ---
 
 # Web API — API
 
-本篇列出 `@cat-kit/fe` Web API 模块的公共类型签名。完整声明见 [clipboard.d.ts](../../../../packages/fe/dist/web-api/clipboard.d.ts) 与 [permission.d.ts](../../../../packages/fe/dist/web-api/permission.d.ts)。
+本篇列出 `@cat-kit/fe` Web API 模块的公共类型签名。
 
 ```ts
 declare const clipboard: {

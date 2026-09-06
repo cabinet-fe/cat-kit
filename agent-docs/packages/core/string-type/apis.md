@@ -1,6 +1,22 @@
 ---
 title: "字符串与类型检测 API"
 description: "@cat-kit/core str()/$str 签名与全部运行时类型守卫函数列表"
+keywords:
+  - str
+  - camelCase
+  - kebabCase
+  - joinUrlPath
+  - getDataType
+  - isString
+  - isNumber
+  - isFormData
+  - isPromise
+  - isUint8Array
+aliases:
+  - 函数签名
+  - API 参考
+  - 类型守卫函数列表
+  - type guard
 ---
 
 # 字符串与类型检测 API
@@ -41,8 +57,3 @@ declare function isNull(value: unknown): value is null
 declare function isUndef(value: unknown): value is undefined
 declare function isEmpty(value: unknown): value is null | undefined
 ```
-
-完整声明见：
-
-- [packages/core/dist/data/string.d.ts](../../../../packages/core/dist/data/string.d.ts)
-- [packages/core/dist/data/type.d.ts](../../../../packages/core/dist/data/type.d.ts)

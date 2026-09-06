@@ -1,6 +1,23 @@
 ---
 title: "日期处理 API"
 description: "@cat-kit/core Dater 类完整签名：解析/设置/加减/对齐/比较/格式化与单位类型"
+keywords:
+  - Dater
+  - date()
+  - Dater.parse
+  - format
+  - startOf
+  - endOf
+  - diff
+  - isBetween
+  - DiffUnit
+  - StartEndUnit
+aliases:
+  - 类签名
+  - API 参考
+  - 日期加减
+  - 时间单位
+  - inclusive 边界
 ---
 
 # 日期处理 API
@@ -47,5 +64,3 @@ declare class Dater {
 
 `DiffUnit`：`'milliseconds' | 'seconds' | 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years'`
 `StartEndUnit`：`'day' | 'week' | 'month' | 'year'`
-
-完整声明：[packages/core/dist/date/date.d.ts](../../../../packages/core/dist/date/date.d.ts)

@@ -1,11 +1,25 @@
 ---
 title: "HTTP 客户端 API"
 description: "HTTPClient、HTTPError、mergeRequestConfig 的公共签名与引擎概览"
+keywords:
+  - mergeRequestConfig
+  - HTTPClient
+  - HTTPError
+  - registerPlugin
+  - HTTPResponse
+  - RequestConfig
+  - HttpEngine
+  - getEngine
+  - API 签名
+aliases:
+  - http client api
+  - 请求方法别名
+  - HTTP 错误
 ---
 
 # HTTP 客户端 — API
 
-客户端核心公共 API 签名，完整定义见 [client.d.ts](../../../../packages/http/dist/client.d.ts) 与 [types.d.ts](../../../../packages/http/dist/types.d.ts)。
+客户端核心公共 API 签名。
 
 ```ts
 declare function mergeRequestConfig(

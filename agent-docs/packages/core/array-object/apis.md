@@ -1,6 +1,22 @@
 ---
 title: "数组与对象工具 API"
 description: "@cat-kit/core 数组与对象工具的函数签名：union/unionBy/last/eachRight/omitArr/arr/o"
+keywords:
+  - union
+  - unionBy
+  - last
+  - eachRight
+  - omitArr
+  - arr
+  - o
+  - CatObject
+  - groupBy
+  - deepExtend
+aliases:
+  - 函数签名
+  - API 参考
+  - 数组去重函数
+  - 链式包装
 ---
 
 # 数组与对象工具 API
@@ -35,8 +51,3 @@ declare function o<O extends Record<string, any>>(object: O): CatObject<O>
 ```
 
 `CatObject` 方法：`keys`、`each`、`pick`、`omit`、`extend`、`deepExtend`、`merge`、`get`、`set`。
-
-完整声明：
-
-- [packages/core/dist/data/array.d.ts](../../../../packages/core/dist/data/array.d.ts)
-- [packages/core/dist/data/object.d.ts](../../../../packages/core/dist/data/object.d.ts)

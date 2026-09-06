@@ -1,6 +1,20 @@
 ---
 title: "@cat-kit/vitepress-theme 接入示例"
 description: 主题入口、defineThemeConfig 与 demo 容器的组合示例
+keywords:
+  - defineThemeConfig
+  - demo 容器
+  - Mermaid
+  - examplesDir
+  - 主题入口
+  - 站点配置
+  - 接入示例
+  - VitePress 配置
+aliases:
+  - usage example
+  - 接入示例
+  - demo container 用法
+  - 主题配置示例
 ---
 
 ## 概述

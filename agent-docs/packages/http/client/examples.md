@@ -1,6 +1,19 @@
 ---
 title: "HTTP 客户端示例"
 description: "创建客户端与子客户端、发送 GET 请求、捕获 HTTPError 并中止请求"
+keywords:
+  - HTTPClient
+  - HTTPError
+  - FetchEngine
+  - group
+  - abort
+  - 子客户端
+  - 超时配置
+  - 统一错误处理
+aliases:
+  - http client 示例
+  - 请求中止
+  - axios 用法
 ---
 
 # HTTP 客户端 — 示例

@@ -1,6 +1,22 @@
 ---
 title: "树与森林数据结构 API"
 description: "@cat-kit/core 树与森林 API 签名：dfs/bfs/TreeManager/Forest 及节点方法清单"
+keywords:
+  - dfs
+  - bfs
+  - TreeManager
+  - Forest
+  - TreeNode
+  - ForestNode
+  - flatten
+  - flattenVisible
+  - childrenKey
+  - 节点操作
+aliases:
+  - 函数签名
+  - API 参考
+  - 树节点方法
+  - 遍历回调
 ---
 
 # 树与森林数据结构 API
@@ -46,7 +62,4 @@ declare class Forest<T extends Record<string, unknown>, Node = T> {
 }
 ```
 
-`TreeNode` / `ForestNode` 提供 `remove`、`insert`、祖先/可见后代等方法。完整签名见：
-
-- [packages/core/dist/data-structure/tree.d.ts](../../../../packages/core/dist/data-structure/tree.d.ts)
-- [packages/core/dist/data-structure/forest.d.ts](../../../../packages/core/dist/data-structure/forest.d.ts)
+`TreeNode` / `ForestNode` 提供 `remove`、`insert`、祖先/可见后代等方法。

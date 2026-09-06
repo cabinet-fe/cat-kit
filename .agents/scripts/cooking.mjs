@@ -1,13 +1,18 @@
 #!/usr/bin/env node
-// cooking 阶段状态机。tasks/Pn.md 的「前置任务 / 状态」只经本脚本读写，
-// 状态枚举与转移规则以本脚本为唯一定义，各技能不要手改状态行。
+// cooking 状态机。tasks/Pn.md 的「前置任务 / 状态」只经本脚本读写，
+// 状态枚举、转移规则与「下一步」判定以本脚本为唯一定义，各技能不要手改状态行、不要自己读文件判环节。
 // 用法（以目标仓库根目录为工作目录）：
+//   node .agents/scripts/cooking.mjs status
+//     总览：每个 cooking 单位一行：标识、下一步、各阶段状态；没有单位输出 无
 //   node .agents/scripts/cooking.mjs status <feature>
-//     每个阶段一行：前置 / 实现 / 评审；再给出 可做（可并行 implement）、待评审、收尾、可归档
+//     详情：goal.md（无|未确认|已确认）、spec.md（有|无）、tasks/；每个阶段一行：前置 / 实现 / 评审；
+//     再给出 可做（可并行 implement）、待评审、收尾、可归档、评审文件、下一步
 //   node .agents/scripts/cooking.mjs ready <feature>
 //     只列现在可做的阶段 id，一行一个；没有则输出 无
 //   node .agents/scripts/cooking.mjs set <feature> <Pn> 实现 <进行中|完成>
 //   node .agents/scripts/cooking.mjs set <feature> <Pn> 评审 <通过|不通过>
+// 下一步：goal 未确认→explore；无 spec→to-spec；无 tasks→to-tasks；全部阶段通过→archive；
+//         否则 implement <可做> / review <待评审>。需求含糊与否脚本判不了，由技能按 goal 有无处理。
 // 转移：
 //   实现  未开始→进行中（前置须全部 实现完成 且 评审通过）；进行中→完成（评审同时置回 未开始）；
 //         完成→进行中 仅当 评审=不通过（返工）
@@ -19,6 +24,7 @@ import path from 'node:path';
 
 const IMPL_VALUES = ['未开始', '进行中', '完成'];
 const REVIEW_VALUES = ['未开始', '通过', '不通过'];
+const GOAL_VALUES = ['未确认', '已确认'];
 const COOKING_DIR = path.join('.agents', 'cooking');
 
 process.stdout.on('error', (err) => {
@@ -27,6 +33,7 @@ process.stdout.on('error', (err) => {
 
 function usage() {
   process.stderr.write(`usage:
+  node cooking.mjs status
   node cooking.mjs status <feature>
   node cooking.mjs ready <feature>
   node cooking.mjs set <feature> <Pn> 实现 <进行中|完成>
@@ -47,19 +54,26 @@ function listFeatures() {
   return fs
     .readdirSync(COOKING_DIR, { withFileTypes: true })
     .filter((d) => d.isDirectory())
-    .map((d) => d.name);
+    .map((d) => d.name)
+    .sort();
 }
 
-function tasksDir(feature) {
+function featureDir(feature) {
   if (!feature || feature === '.' || feature === '..' || /[\\/]/.test(feature)) {
     fail('标识只能是 .agents/cooking/ 下的子目录名');
   }
-  const dir = path.join(COOKING_DIR, feature, 'tasks');
-  if (!fs.existsSync(dir)) {
+  const dir = path.join(COOKING_DIR, feature);
+  if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
     const features = listFeatures();
     const hint = features.length ? `；已有标识：${features.join('、')}` : '';
-    fail(`找不到 ${dir}（先 to-tasks）${hint}`);
+    fail(`找不到 ${dir}${hint}`);
   }
+  return dir;
+}
+
+function tasksDir(feature) {
+  const dir = path.join(featureDir(feature), 'tasks');
+  if (!fs.existsSync(dir)) fail(`找不到 ${dir}（先 to-tasks）`);
   return dir;
 }
 
@@ -175,8 +189,109 @@ function derive(stages) {
 
 const joinIds = (ids) => (ids.length ? ids.join('、') : '无');
 
+// goal.md「## 状态」下的「- 确认：<值>」；没有 goal.md 返回 无
+function goalState(dir) {
+  const file = path.join(dir, 'goal.md');
+  if (!fs.existsSync(file)) return '无';
+  const statusLines = splitSections(fs.readFileSync(file, 'utf8').split('\n')).get('状态');
+  if (!statusLines) fail(`${file}: 缺少「## 状态」`);
+  for (const { text } of statusLines) {
+    const match = text.match(/^\s*-\s*确认\s*[：:]\s*(\S+)\s*$/);
+    if (!match) continue;
+    if (!GOAL_VALUES.includes(match[1])) {
+      fail(`${file}: 确认 只能是 ${GOAL_VALUES.join(' | ')}，现为「${match[1]}」`);
+    }
+    return match[1];
+  }
+  fail(`${file}: 「状态」须有「- 确认：<值>」`);
+}
+
+// 一个 cooking 单位的全部产物状态；tasks/ 不存在时 derived 为 null
+function loadUnit(feature) {
+  const dir = featureDir(feature);
+  return {
+    dir,
+    goal: goalState(dir),
+    hasSpec: fs.existsSync(path.join(dir, 'spec.md')),
+    derived: fs.existsSync(path.join(dir, 'tasks')) ? derive(loadStages(feature)) : null,
+  };
+}
+
+// reviews/Pn.md「## 结论」下的「- 通过|不通过」；没有文件返回 null，有文件但解析不出返回 undefined
+function reviewConclusion(dir, id) {
+  const file = path.join(dir, 'reviews', `${id}.md`);
+  if (!fs.existsSync(file)) return null;
+  const lines = splitSections(fs.readFileSync(file, 'utf8').split('\n')).get('结论') || [];
+  const hit = lines.map(({ text }) => text.match(/^\s*-\s*(通过|不通过)\s*$/)).find(Boolean);
+  return hit ? hit[1] : undefined;
+}
+
+// 评审已有结论的阶段，reviews/Pn.md 须存在且「结论」与「评审」一致；评审 未开始 的不查
+function reviewFileIssues(unit) {
+  const issues = [];
+  for (const stage of unit.derived.ordered) {
+    const review = stage.status.评审;
+    if (review === '未开始') continue;
+    const conclusion = reviewConclusion(unit.dir, stage.id);
+    if (conclusion === null) issues.push(`${stage.id} 缺 reviews/${stage.id}.md`);
+    else if (conclusion === undefined) issues.push(`reviews/${stage.id}.md 缺「## 结论」`);
+    else if (conclusion !== review) issues.push(`${stage.id} 结论「${conclusion}」与评审「${review}」不一致`);
+  }
+  return issues;
+}
+
+function nextStep(unit) {
+  if (unit.goal === '未确认') return 'explore（goal 未确认）';
+  if (!unit.hasSpec) return unit.goal === '无' ? 'to-spec（无 goal，需求含糊则先 explore）' : 'to-spec';
+  if (!unit.derived) return 'to-tasks';
+  const { ready, pending, archivable } = unit.derived;
+  if (archivable) return 'archive';
+  const parts = [];
+  if (ready.length) parts.push(`implement ${ready.join('、')}`);
+  if (pending.length) parts.push(`review ${pending.join('、')}`);
+  return parts.join('；');
+}
+
+// 总览里每个阶段一个词：未开始 | 进行中 | 返工中 | 待评审 | 通过 | 不通过
+function stageWord(stage) {
+  const { 实现: impl, 评审: review } = stage.status;
+  if (impl === '未开始') return '未开始';
+  if (impl === '进行中') return review === '不通过' ? '返工中' : '进行中';
+  return review === '未开始' ? '待评审' : review;
+}
+
+function printOverview() {
+  const features = listFeatures();
+  if (!features.length) {
+    process.stdout.write('无\n');
+    return;
+  }
+  const width = Math.max(...features.map((name) => name.length));
+  for (const feature of features) {
+    let summary;
+    try {
+      const unit = loadUnit(feature);
+      summary = `下一步：${nextStep(unit)}`;
+      if (unit.derived) {
+        summary += `  阶段：${unit.derived.ordered.map((s) => `${s.id} ${stageWord(s)}`).join('  ')}`;
+      }
+    } catch (err) {
+      summary = `错误：${err.message}`;
+    }
+    process.stdout.write(`${feature.padEnd(width)}  ${summary}\n`);
+  }
+}
+
 function printStatus(feature) {
-  const { ordered, ready, pending, closing, archivable } = derive(loadStages(feature));
+  const unit = loadUnit(feature);
+  process.stdout.write(`goal.md：${unit.goal}\n`);
+  process.stdout.write(`spec.md：${unit.hasSpec ? '有' : '无'}\n`);
+  if (!unit.derived) {
+    process.stdout.write(`tasks/：无\n下一步：${nextStep(unit)}\n`);
+    return;
+  }
+  const { ordered, ready, pending, closing, archivable } = unit.derived;
+  process.stdout.write(`tasks/：${ordered.length} 个阶段\n`);
   for (const stage of ordered) {
     process.stdout.write(
       `${stage.id}  前置：${joinIds(stage.deps)}  实现：${stage.status.实现}  评审：${stage.status.评审}\n`,
@@ -186,6 +301,9 @@ function printStatus(feature) {
   process.stdout.write(`待评审：${joinIds(pending)}\n`);
   process.stdout.write(`收尾：${joinIds(closing)}\n`);
   process.stdout.write(`可归档：${archivable ? '是' : '否'}\n`);
+  const issues = reviewFileIssues(unit);
+  process.stdout.write(`评审文件：${issues.length ? issues.join('、') : '一致'}\n`);
+  process.stdout.write(`下一步：${nextStep(unit)}\n`);
 }
 
 function printReady(feature) {
@@ -244,7 +362,8 @@ function setStatus(feature, id, field, value) {
 function main() {
   const [cmd, feature, ...rest] = process.argv.slice(2);
   try {
-    if (cmd === 'status' && feature && rest.length === 0) return printStatus(feature);
+    if (cmd === 'status' && !feature) return printOverview();
+    if (cmd === 'status' && rest.length === 0) return printStatus(feature);
     if (cmd === 'ready' && feature && rest.length === 0) return printReady(feature);
     if (cmd === 'set' && feature && rest.length === 3 && /^P\d+$/.test(rest[0])) {
       return setStatus(feature, rest[0], rest[1], rest[2]);

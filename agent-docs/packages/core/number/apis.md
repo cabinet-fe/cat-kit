@@ -1,6 +1,22 @@
 ---
 title: "数值运算与格式化 API"
 description: "@cat-kit/core 数值 API：$n 运算集合、n() 链式包装与 NumberFormatOptions"
+keywords:
+  - $n
+  - n() 链式
+  - Num
+  - NumberFormatOptions
+  - plus
+  - mul
+  - div
+  - sum
+  - calc
+  - currency 格式化
+aliases:
+  - 函数签名
+  - API 参考
+  - 数字运算
+  - Intl.NumberFormat
 ---
 
 # 数值运算与格式化 API
@@ -24,9 +40,3 @@ declare const $n: {
 `Num` 实例方法（经 `n()` 获得，一般不作为运行时命名导入）：`currency`、`fixed`、`each`、`range`、`max`、`min` 等。
 
 `NumberFormatOptions`：`style`、`currency`、`precision`、`maximumFractionDigits`、`minimumFractionDigits`、`notation`。
-
-完整声明见：
-
-- [packages/core/dist/data/number.d.ts](../../../../packages/core/dist/data/number.d.ts)
-- [packages/core/dist/data/number/num.d.ts](../../../../packages/core/dist/data/number/num.d.ts)
-- [packages/core/dist/data/number/format.d.ts](../../../../packages/core/dist/data/number/format.d.ts)

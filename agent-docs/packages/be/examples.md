@@ -1,6 +1,23 @@
 ---
 title: "@cat-kit/be 组合示例"
 description: "组合环境变量加载、日志、缓存与文件系统工具的完整示例"
+keywords:
+  - loadEnv
+  - parseEnv
+  - Logger
+  - LogLevel
+  - memoize
+  - readDir
+  - writeJson
+  - 环境变量校验
+  - 结构化日志
+  - 记忆化
+  - 清单文件
+aliases:
+  - 组合示例
+  - 综合示例
+  - dotenv
+  - 最佳实践
 ---
 
 # @cat-kit/be 组合示例

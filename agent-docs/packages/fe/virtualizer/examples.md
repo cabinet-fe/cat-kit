@@ -1,6 +1,19 @@
 ---
 title: "@cat-kit/fe 虚拟列表示例"
 description: 虚拟列表测量、订阅渲染与销毁的完整示例
+keywords:
+  - Virtualizer
+  - measureMany
+  - subscribe
+  - scrollToIndex
+  - destroy
+  - 虚拟滚动示例
+  - 视口设置
+  - 平滑滚动
+aliases:
+  - virtual list example
+  - 虚拟列表用法
+  - react-window 示例
 ---
 
 # 虚拟列表 — 示例

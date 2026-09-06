@@ -1,13 +1,30 @@
 ---
 title: "HTTP 客户端"
 description: "用 HTTPClient 创建可复用客户端，处理前缀、origin、超时、引擎、子客户端、请求取消与错误"
+keywords:
+  - HTTPClient
+  - mergeRequestConfig
+  - HTTPError
+  - FetchEngine
+  - XHREngine
+  - 请求前缀
+  - origin
+  - 超时配置
+  - 子客户端
+  - 请求取消
+  - 统一错误处理
+aliases:
+  - axios 替代
+  - fetch 封装
+  - http client
+  - 请求封装
 ---
 
 # HTTP 客户端
 
 创建可复用的 HTTP 客户端：前缀、origin、超时、引擎、子客户端、中断与错误处理。
 
-## 推荐公开 API
+## 推荐 API
 
 - `HTTPClient`、`mergeRequestConfig`、`HTTPError`
 - 引擎：`HttpEngine`、`FetchEngine`、`XHREngine`
@@ -15,7 +32,7 @@ description: "用 HTTPClient 创建可复用客户端，处理前缀、origin、
 
 详情见 [API](apis.md)、[示例](examples.md)。插件见 [插件](../plugins/index.md)。
 
-## 约束
+## 注意事项
 
 - 默认：有全局 `fetch` 用 `FetchEngine`，否则 `XHREngine`；Node 皆无时需自定义引擎
 - 绝对 URL 跳过 `prefix`/`origin`；相对 URL 使用二者
@@ -25,7 +42,3 @@ description: "用 HTTPClient 创建可复用客户端，处理前缀、origin、
 - `FetchEngine` 忽略 `onUploadProgress`
 - XSRF Cookie→Header 仅浏览器同域
 - `group()` 共享引擎，任一方 `abort()` 影响该引擎上所有请求；父插件先于子插件
-
-## 类型声明
-
-[client.d.ts](../../../../packages/http/dist/client.d.ts) · [types.d.ts](../../../../packages/http/dist/types.d.ts)

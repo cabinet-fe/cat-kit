@@ -1,6 +1,21 @@
 ---
 title: "@cat-kit/be 系统信息"
 description: "读取 CPU、内存、磁盘与网卡信息快照"
+keywords:
+  - getCpuInfo
+  - getCpuUsage
+  - getMemoryInfo
+  - getDiskInfo
+  - getNetworkInterfaces
+  - CPU 使用率
+  - 内存占用
+  - 磁盘容量
+  - 网卡列表
+aliases:
+  - 系统信息
+  - system info
+  - 硬件快照
+  - 本机资源
 ---
 
 # 系统信息
@@ -16,15 +31,15 @@ getMemoryInfo().usedPercent
 
 详情见 [API](apis.md)。
 
-## 约束
+## 注意事项
 
 - `getCpuUsage` / `getDiskInfo` 为异步；`getCpuInfo` / `getMemoryInfo` / `getNetworkInterfaces` 为同步
 - `getCpuUsage` 通过采样间隔（默认 500ms）内的 CPU 时间计算使用率
 - `getDiskInfo` 默认查询当前工作目录所在磁盘，Windows 用 PowerShell、Unix 用 `statfs`
 
-## 类型声明
+## 类型定义
 
-- [cpu.d.ts](../../../../packages/be/dist/system/cpu.d.ts) —— `getCpuInfo`、`getCpuUsage`、`CpuInfo`、`CpuUsage`
-- [memory.d.ts](../../../../packages/be/dist/system/memory.d.ts) —— `getMemoryInfo`、`MemoryInfo`
-- [disk.d.ts](../../../../packages/be/dist/system/disk.d.ts) —— `getDiskInfo`、`DiskInfo`
-- [network.d.ts](../../../../packages/be/dist/system/network.d.ts) —— `getNetworkInterfaces`、`NetworkInterfaceInfo`
+- `getCpuInfo`、`getCpuUsage`、`CpuInfo`、`CpuUsage`
+- `getMemoryInfo`、`MemoryInfo`
+- `getDiskInfo`、`DiskInfo`
+- `getNetworkInterfaces`、`NetworkInterfaceInfo`

@@ -1,6 +1,20 @@
 ---
 title: "@cat-kit/be 任务调度示例"
 description: "Cron 表达式查询下次执行时间、周期与 Cron 任务调度"
+keywords:
+  - parseCron
+  - Scheduler
+  - schedule
+  - interval
+  - getNextDate
+  - Cron 任务
+  - 周期调度
+  - 内存巡检
+aliases:
+  - 任务调度示例
+  - cron 示例
+  - 定时任务示例
+  - node-cron
 ---
 
 # 任务调度示例

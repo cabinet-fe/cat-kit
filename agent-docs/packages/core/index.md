@@ -1,6 +1,23 @@
 ---
 title: "@cat-kit/core 包概览"
 description: "零外部依赖的通用基础工具包：数据处理、数值、日期、环境检测、树结构、执行控制、状态订阅"
+keywords:
+  - "@cat-kit/core"
+  - 工具包
+  - 数组工具
+  - 日期处理
+  - 环境检测
+  - 树结构遍历
+  - 防抖节流
+  - 深拷贝
+  - schema 校验
+  - 类型守卫
+aliases:
+  - 零依赖工具库
+  - javascript utils
+  - 前端工具函数
+  - lodash 替代
+  - underscore 替代
 ---
 
 # @cat-kit/core
@@ -34,7 +51,3 @@ description: "零外部依赖的通用基础工具包：数据处理、数值、
 ## 边界
 
 浏览器专属类型守卫与环境信息依赖对应全局能力。
-
-## 类型声明
-
-精确导出总表见 [packages/core/dist/index.d.ts](../../../packages/core/dist/index.d.ts)。

@@ -1,6 +1,20 @@
 ---
 title: "可观察状态 Observable API"
 description: "@cat-kit/core Observable 类完整签名与 ObserveOptions 选项"
+keywords:
+  - Observable
+  - observe
+  - unobserve
+  - ObserveOptions
+  - PropHandler
+  - setState
+  - trigger
+  - 订阅回调
+aliases:
+  - 类签名
+  - API 参考
+  - observable 订阅
+  - 观察者选项
 ---
 
 # 可观察状态 Observable API
@@ -32,5 +46,3 @@ declare class Observable<S extends object, K extends keyof S = keyof S> {
 ```
 
 类型导出：`ObserveOptions`、`PropHandler`。
-
-完整声明：[packages/core/dist/pattern/observer.d.ts](../../../../packages/core/dist/pattern/observer.d.ts)

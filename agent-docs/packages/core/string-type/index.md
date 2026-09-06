@@ -1,6 +1,22 @@
 ---
 title: "字符串与类型检测"
 description: "@cat-kit/core 的 str()/$str 与类型守卫：命名转换、URL 拼接、运行时类型判断"
+keywords:
+  - str
+  - camelCase
+  - kebabCase
+  - joinUrlPath
+  - 类型守卫
+  - getDataType
+  - isString
+  - isNumber
+  - isEmpty
+aliases:
+  - string utils
+  - 字符串转驼峰
+  - URL 路径拼接
+  - runtime type check
+  - 类型判断工具
 ---
 
 # 字符串与类型检测
@@ -12,7 +28,7 @@ description: "@cat-kit/core 的 str()/$str 与类型守卫：命名转换、URL 
 - 驼峰 / kebab 命名转换、拼接 URL 路径段
 - 运行时类型守卫（含浏览器类型如 `Blob`/`File`）
 
-## 推荐公开 API
+## 推荐 API
 
 - `str(value)`：`.camelCase(type?)`、`.kebabCase()`
 - `$str.joinUrlPath(firstPath, ...paths)`
@@ -27,16 +43,11 @@ $str.joinUrlPath('/api/', '/users', '1')
 isNumber(NaN) // true；有限数校验请用 vNumber()
 ```
 
-## 约束
+## 注意事项
 
 - `isEmpty` 仅 `null | undefined`
 - 浏览器 / TypedArray 守卫依赖对应全局
 - `DataType` 类型名不作为命名导出
-
-## 类型声明
-
-- [packages/core/dist/data/string.d.ts](../../../../packages/core/dist/data/string.d.ts)
-- [packages/core/dist/data/type.d.ts](../../../../packages/core/dist/data/type.d.ts)
 
 ## 更多
 

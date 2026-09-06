@@ -1,11 +1,25 @@
 ---
 title: "@cat-kit/fe 补间动画 API"
 description: Tween 类与 tweenEasings 缓动函数的类型签名
+keywords:
+  - Tween
+  - TweenOptions
+  - TweenFrame
+  - TweenState
+  - tweenEasings
+  - seek
+  - onUpdate
+  - 缓动
+aliases:
+  - tween api
+  - 补间签名
+  - easing functions
+  - 动画 api
 ---
 
 # 补间 — API
 
-本篇列出 `@cat-kit/fe` 补间模块的公共类型签名。完整声明见 [tween.d.ts](../../../../packages/fe/dist/tween.d.ts)。
+本篇列出 `@cat-kit/fe` 补间模块的公共类型签名。
 
 ```ts
 declare class Tween {

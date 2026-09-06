@@ -1,11 +1,25 @@
 ---
 title: "nanoid API"
 description: "nanoid、customAlphabet、customRandom、random、urlAlphabet 的签名"
+keywords:
+  - nanoid
+  - customAlphabet
+  - customRandom
+  - random
+  - urlAlphabet
+  - 随机 ID 签名
+  - 字母表
+  - getRandom
+aliases:
+  - nanoid api
+  - 随机 id 生成
+  - custom alphabet
+  - uuid 替代
 ---
 
 # nanoid — API
 
-随机 ID 与随机字节的公共 API 签名，完整定义见 [nanoid.d.ts](../../../../packages/crypto/dist/nanoid.d.ts)。
+随机 ID 与随机字节的公共 API 签名。
 
 ```ts
 declare function nanoid(size?: number): string

@@ -1,11 +1,25 @@
 ---
 title: "@cat-kit/fe 浏览器存储 API"
 description: storage、storageKey、cookie 的类型签名与行为说明
+keywords:
+  - storage
+  - storageKey
+  - cookie
+  - WebStorage
+  - CookieOptions
+  - ExtractStorageKey
+  - 过期秒数
+  - 批量读取
+aliases:
+  - browser storage api
+  - 本地存储签名
+  - cookie options
+  - storage api
 ---
 
 # 浏览器存储 — API
 
-本篇列出 `@cat-kit/fe` 存储模块的公共类型签名。完整声明见 [storage.d.ts](../../../../packages/fe/dist/storage/storage.d.ts) 与 [cookie.d.ts](../../../../packages/fe/dist/storage/cookie.d.ts)。
+本篇列出 `@cat-kit/fe` 存储模块的公共类型签名。
 
 ```ts
 declare function storageKey<T>(str: string): StorageKey<T>

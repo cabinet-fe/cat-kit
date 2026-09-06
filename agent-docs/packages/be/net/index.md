@@ -1,6 +1,20 @@
 ---
 title: "@cat-kit/be 网络工具"
 description: "端口可绑定探测与本机网卡 IP 地址获取"
+keywords:
+  - isPortAvailable
+  - getLocalIP
+  - PortCheckOptions
+  - GetLocalIPOptions
+  - 端口探测
+  - 端口占用检查
+  - 本机 IP
+  - 网卡地址
+aliases:
+  - 网络工具
+  - 端口检测
+  - net 工具
+  - getLocalIp
 ---
 
 # 网络工具
@@ -16,14 +30,14 @@ getLocalIP({ includeInternal: false })
 
 详情见 [API](apis.md)。
 
-## 约束
+## 注意事项
 
 - 端口探测为 bind-and-close，存在竞态，不是预留
 - `isPortAvailable` 的 `host` 默认 `'127.0.0.1'`，`timeout` 默认 `1000` 毫秒
 - `getLocalIP` 的 `includeInternal: false` 排除 Node `address.internal`（通常 loopback），**不是**公网 IP，也不排除 RFC1918 局域网地址
 - `getLocalIP` 的 `family` 取值 `'IPv4' | 'IPv6'`
 
-## 类型声明
+## 类型定义
 
-- [port.d.ts](../../../../packages/be/dist/net/port.d.ts) —— `isPortAvailable`、`PortCheckOptions`
-- [ip.d.ts](../../../../packages/be/dist/net/ip.d.ts) —— `getLocalIP`、`GetLocalIPOptions`
+- `isPortAvailable`、`PortCheckOptions`
+- `getLocalIP`、`GetLocalIPOptions`

@@ -1,6 +1,22 @@
 ---
 title: "转换与校验 API"
 description: "@cat-kit/core 编解码/转换链/schema 校验的完整函数与类型签名"
+keywords:
+  - str2u8a
+  - hex2u8a
+  - base642u8a
+  - obj2query
+  - query2obj
+  - transform
+  - safeParse
+  - ValidationError
+  - object schema
+aliases:
+  - 函数签名
+  - 类型签名
+  - API 参考
+  - validator
+  - schema parser
 ---
 
 # 转换与校验 API
@@ -39,7 +55,4 @@ declare class ValidationError extends Error {}
 
 类型导出（type-only）：`Parser`、`Validator`、`SafeParseResult`、`ValidationIssue`、`InferObjectSchema`、`OptionalOptions`。
 
-`Validator` 提供 `parse` / `safeParse`。完整声明见：
-
-- [packages/core/dist/data/transform.d.ts](../../../../packages/core/dist/data/transform.d.ts)
-- [packages/core/dist/data/validator.d.ts](../../../../packages/core/dist/data/validator.d.ts)
+`Validator` 提供 `parse` / `safeParse`。

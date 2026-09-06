@@ -1,6 +1,18 @@
 ---
 title: "树与森林数据结构示例"
 description: "@cat-kit/core 树与森林示例：dfs 遍历与 TreeManager 扁平化过滤"
+keywords:
+  - dfs 遍历
+  - TreeManager
+  - flatten
+  - 树示例
+  - 森林遍历
+  - 节点过滤
+aliases:
+  - 树遍历示例
+  - 树扁平化示例
+  - 深度优先示例
+  - 示例代码
 ---
 
 # 树与森林数据结构示例

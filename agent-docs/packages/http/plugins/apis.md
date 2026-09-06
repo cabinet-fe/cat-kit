@@ -1,11 +1,25 @@
 ---
 title: "HTTP 插件 API"
 description: "HTTPClientPlugin 钩子接口与 TokenPlugin、MethodOverridePlugin 工厂签名"
+keywords:
+  - HTTPClientPlugin
+  - TokenPlugin
+  - MethodOverridePlugin
+  - beforeRequest
+  - afterRespond
+  - onError
+  - PluginHookResult
+  - token 刷新
+  - 插件钩子
+aliases:
+  - 插件 api
+  - token plugin
+  - 钩子接口
 ---
 
 # HTTP 插件 — API
 
-插件钩子接口与内置插件工厂的签名，完整定义见 [token.d.ts](../../../../packages/http/dist/plugins/token.d.ts)、[method-override.d.ts](../../../../packages/http/dist/plugins/method-override.d.ts)。
+插件钩子接口与内置插件工厂的签名。
 
 ```ts
 interface HTTPClientPlugin {

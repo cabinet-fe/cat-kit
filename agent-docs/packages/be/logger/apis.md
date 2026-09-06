@@ -1,11 +1,27 @@
 ---
 title: "@cat-kit/be 日志 API"
 description: "Logger、LogLevel、ConsoleTransport、FileTransport 签名与选项"
+keywords:
+  - Logger
+  - LogLevel
+  - ConsoleTransport
+  - FileTransport
+  - LoggerOptions
+  - FileTransportOptions
+  - maxSize
+  - 日志轮转
+  - 日志格式化
+  - Transport 接口
+aliases:
+  - winston
+  - pino
+  - 日志 API
+  - logger API
 ---
 
 # 日志 API
 
-日志模块全部类与接口的 TypeScript 签名，类型定义以 `packages/be/dist/logger/` 下的声明文件为准。
+日志模块全部类与接口的 TypeScript 签名。
 
 ```ts
 declare enum LogLevel {
@@ -44,7 +60,7 @@ declare class FileTransport implements Transport {
 }
 ```
 
-## 关键选项
+## 参数说明
 
 | 类型 | 字段 | 说明 |
 | --- | --- | --- |
@@ -60,7 +76,3 @@ declare class FileTransport implements Transport {
 | `FileTransportOptions` | `maxSize` | 最大文件大小（字节），超限自动轮转或建新文件 |
 | `FileTransportOptions` | `newline` / `level` | 换行符（默认 `'\n'`）；该 Transport 的最低级别 |
 | `Transport` | `write` | 自定义传输器实现接口：`write(entry, formatted, format)` |
-
-## 类型声明
-
-签名与选项的权威定义：[logger.d.ts](../../../../packages/be/dist/logger/logger.d.ts)、[transports.d.ts](../../../../packages/be/dist/logger/transports.d.ts)。

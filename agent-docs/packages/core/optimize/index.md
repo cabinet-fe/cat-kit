@@ -1,6 +1,21 @@
 ---
 title: "执行控制 防抖节流延时并发"
 description: "@cat-kit/core 的 debounce/throttle/sleep/parallel/safeRun：执行控制工具集"
+keywords:
+  - debounce 防抖
+  - throttle 节流
+  - sleep 延时
+  - parallel 限并发
+  - concurrency
+  - safeRun 异常捕获
+  - leading
+  - trailing
+aliases:
+  - setTimeout 替代
+  - 函数节流
+  - 并发控制
+  - p-limit 替代
+  - try catch 包装
 ---
 
 # 执行控制 防抖节流延时并发
@@ -11,7 +26,7 @@ description: "@cat-kit/core 的 debounce/throttle/sleep/parallel/safeRun：执�
 
 防抖、节流、延时、限并发任务、捕获同步异常。
 
-## 推荐公开 API
+## 推荐 API
 
 `debounce`、`throttle`、`sleep`、`parallel`、`safeRun`
 
@@ -23,18 +38,12 @@ await parallel([async () => 1, async () => 2], { concurrency: 1 })
 await sleep(100)
 ```
 
-## 约束
+## 注意事项
 
 - `debounce` 默认 `300ms`、`immediate: true`；窗口内再调用最终 trailing 一次
 - `throttle` 仅 leading；被抑制调用返回最近一次结果
 - `parallel` 保持结果顺序；默认全并发；`concurrency` 须为正整数；拒绝后已启动任务不取消
 - `safeRun` 只捕获同步抛错
-
-## 类型声明
-
-- [packages/core/dist/optimize/timer.d.ts](../../../../packages/core/dist/optimize/timer.d.ts)
-- [packages/core/dist/optimize/parallel.d.ts](../../../../packages/core/dist/optimize/parallel.d.ts)
-- [packages/core/dist/optimize/safe.d.ts](../../../../packages/core/dist/optimize/safe.d.ts)
 
 ## 更多
 

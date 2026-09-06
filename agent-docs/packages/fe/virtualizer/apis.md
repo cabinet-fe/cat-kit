@@ -1,11 +1,27 @@
 ---
 title: "@cat-kit/fe 虚拟列表 API"
 description: Virtualizer 类、配置项与快照类型的完整签名
+keywords:
+  - Virtualizer
+  - VirtualizerOptions
+  - VirtualSnapshot
+  - VirtualItem
+  - scrollToIndex
+  - scrollToOffset
+  - estimateSize
+  - getItemKey
+  - useMeasuredAverage
+  - 虚拟滚动
+aliases:
+  - virtual list api
+  - 虚拟列表参数
+  - @tanstack/virtual
+  - react-window
 ---
 
 # 虚拟列表 — API
 
-本篇列出 `@cat-kit/fe` 虚拟列表模块的公共类型签名。完整声明见 [virtualizer/index.d.ts](../../../../packages/fe/dist/virtualizer/index.d.ts)。
+本篇列出 `@cat-kit/fe` 虚拟列表模块的公共类型签名。
 
 ```ts
 declare class Virtualizer {

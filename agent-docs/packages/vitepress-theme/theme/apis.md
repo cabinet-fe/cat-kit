@@ -1,13 +1,28 @@
 ---
 title: "@cat-kit/vitepress-theme 默认主题 API"
 description: 包根导出的主题对象、CatKitLayout 与 composable 签名
+keywords:
+  - defaultTheme
+  - CatKitLayout
+  - useConsoleInterceptor
+  - useFullscreen
+  - useDraggable
+  - composable
+  - LogEntry
+  - 布局组件
+  - API 签名
+aliases:
+  - theme api
+  - 默认主题 API
+  - 主题导出
+  - composables
 ---
 
 ## 概述
 
-包根 `@cat-kit/vitepress-theme` 导出默认主题对象、布局组件与三个 composable。完整声明见 [dist/src/index.d.ts](../../../../packages/vitepress-theme/dist/src/index.d.ts)。
+包根 `@cat-kit/vitepress-theme` 导出默认主题对象、布局组件与三个 composable。
 
-## 签名
+## API 签名
 
 ```ts
 // 包根 @cat-kit/vitepress-theme
