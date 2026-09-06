@@ -10,14 +10,14 @@ Turborepo 编排的多包单体仓库，Bun workspaces 管依赖。每个库包�
 
 ### 技术栈
 
-| 层 | 选型 | 备注 |
-| --- | --- | --- |
-| 语言 / runtime | TypeScript ^6.0.3、Bun 1.3.12 | 库目标环境：浏览器、Node.js、Bun（版本来源：根 package.json） |
-| 框架 | Vue ^3.5（仅 docs 与 vitepress-theme） | 库本体零框架依赖 |
-| 构建 / 包管理 | tsdown ^0.21.9、Turbo ^2.9.6、Bun workspaces | |
-| 测试 | Vitest ^4.1.5、@vitest/coverage-v8 | |
-| 文档 | VitePress ^2.0.0-alpha.17 + @cat-kit/vitepress-theme | 正文在 docs/content/ |
-| 发布 | Changesets + GitHub Actions → npm | |
+| 层             | 选型                                                 | 备注                                                          |
+| -------------- | ---------------------------------------------------- | ------------------------------------------------------------- |
+| 语言 / runtime | TypeScript ^6.0.3、Bun 1.4.x                         | 库目标环境：浏览器、Node.js、Bun（版本来源：根 package.json） |
+| 框架           | Vue ^3.5（仅 docs 与 vitepress-theme）               | 库本体零框架依赖                                              |
+| 构建 / 包管理  | tsdown ^0.21.9、Turbo ^2.9.6、Bun workspaces         |                                                               |
+| 测试           | Vitest ^4.1.5、@vitest/coverage-v8                   |                                                               |
+| 文档           | VitePress ^2.0.0-alpha.17 + @cat-kit/vitepress-theme | 正文在 docs/content/                                          |
+| 发布           | Changesets + GitHub Actions → npm                    |                                                               |
 
 ## 未决
 

@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@cat-kit/tsconfig": "workspace:*",
-    "@types/big.js": "^6.2.2",
-    "@types/node": "^24.12.0"
+    "@types/big.js": "^7.0.0",
+    "@types/node": "^26.4.1"
   }
 }

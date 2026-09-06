@@ -20,8 +20,8 @@
   ],
   "main": "tsconfig.json",
   "peerDependencies": {
-    "@types/bun": "*",
-    "@types/node": "*",
+    "@types/bun": "1.4.1",
+    "@types/node": "26.4.1",
     "typescript": ">=6.0.0"
   },
   "peerDependenciesMeta": {
