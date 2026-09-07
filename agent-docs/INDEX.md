@@ -11,12 +11,12 @@ keywords:
   - AI 检索文档
   - 决策顺序
 aliases:
-  - @cat-kit/core
-  - @cat-kit/http
-  - @cat-kit/fe
-  - @cat-kit/be
-  - @cat-kit/crypto
-  - @cat-kit/cli
+  - "@cat-kit/core"
+  - "@cat-kit/http"
+  - "@cat-kit/fe"
+  - "@cat-kit/be"
+  - "@cat-kit/crypto"
+  - "@cat-kit/cli"
 ---
 
 # cat-kit 文档入口

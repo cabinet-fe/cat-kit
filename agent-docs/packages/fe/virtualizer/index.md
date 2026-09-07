@@ -13,7 +13,7 @@ keywords:
 aliases:
   - virtual list
   - react-window
-  - @tanstack/virtual
+  - "@tanstack/virtual"
   - 虚拟列表
   - windowing
 ---

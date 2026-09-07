@@ -15,7 +15,7 @@ keywords:
 aliases:
   - virtual list api
   - 虚拟列表参数
-  - @tanstack/virtual
+  - "@tanstack/virtual"
   - react-window
 ---
 
