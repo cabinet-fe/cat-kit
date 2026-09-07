@@ -31,6 +31,12 @@
 - Changesets：开发者每次完成功能后执行 `bun run changeset` 录入，发布范围由本次保留的 changeset 决定
 - 发布（维护者执行）：`bun run release`（`scripts/release.ts`：changeset version + commit + push；其余在 GitHub Actions 中完成）
 
+## 文档同步
+
+- 功能 / API 变更必须同步两处文档：`docs/content/packages/<pkg>/`（用户文档）与 `agent-docs/packages/<pkg>/`（docs-mcp 检索文档），只改代码不同步视为未完成
+- `agent-docs/` 每篇 `.md` 必须有 YAML frontmatter 且 `title` 非空；撰写与格式标准见 docs-mcp 技能 `references/doc-standards.md`，值含 `@` 等特殊字符时用双引号包裹（`@` 是 YAML 保留指示符）
+- agent-docs 变更后执行 `node scripts/push-docs.mjs` 全量推送到 docs-mcp 服务端；连接信息在 `.env`（已 gitignore：`DOCS_MCP_SERVER_URL` / `DOCS_MCP_TOKEN` / `DOCS_MCP_LIBRARY`）
+
 ## 明确禁止
 
 - cooking `spec.md` 缺少可被 `spec-files.mjs parse` 通过的「影响文件」章节
