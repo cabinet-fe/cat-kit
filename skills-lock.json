@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/tools/docs-gen/SKILL.md",
       "computedHash": "1c0f27ff7d650266a089dfb193172b4502dbda37daf362edc7907469d5f4eefa"
+    },
+    "docs-search": {
+      "source": "cabinet-fe/prompt-engineering",
+      "sourceType": "github",
+      "skillPath": "skills/tools/docs-search/SKILL.md",
+      "computedHash": "897ce85ea8ade617f6fa3dda2550154acf389cdb1f9f2a26ce4cad14f020a876"
     }
   }
 }
