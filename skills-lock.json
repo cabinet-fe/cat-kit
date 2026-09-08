@@ -1,4 +1,11 @@
 {
   "version": 1,
-  "skills": {}
+  "skills": {
+    "docs-gen": {
+      "source": "cabinet-fe/prompt-engineering",
+      "sourceType": "github",
+      "skillPath": "skills/tools/docs-gen/SKILL.md",
+      "computedHash": "1c0f27ff7d650266a089dfb193172b4502dbda37daf362edc7907469d5f4eefa"
+    }
+  }
 }
