@@ -3,9 +3,9 @@
 // 仅使用 Node 内置能力（fs / path / 全局 fetch），Node >= 18 直接运行。
 //
 // 用法：
-//   DOCS_MCP_SERVER_URL=http://localhost:8080 \
-//   DOCS_MCP_TOKEN=<推送令牌> \
-//   DOCS_MCP_LIBRARY=<库 slug> \
+//   DOCS_SERVER_URL=http://localhost:8080 \
+//   DOCS_TOKEN=<推送令牌> \
+//   DOCS_LIBRARY=<库 slug> \
 //   node scripts/push-docs.mjs [文档根目录，默认 agent-docs/]
 
 import { readdir, readFile } from 'node:fs/promises';
@@ -19,15 +19,15 @@ function fail(message) {
 
 // 校验必填环境变量
 function readEnv() {
-  const required = ['DOCS_MCP_SERVER_URL', 'DOCS_MCP_TOKEN', 'DOCS_MCP_LIBRARY'];
+  const required = ['DOCS_SERVER_URL', 'DOCS_TOKEN', 'DOCS_LIBRARY'];
   const missing = required.filter((name) => !process.env[name]);
   if (missing.length > 0) {
     fail(`缺少必填环境变量：${missing.join('、')}`);
   }
   return {
-    serverUrl: process.env.DOCS_MCP_SERVER_URL.replace(/\/+$/, ''),
-    token: process.env.DOCS_MCP_TOKEN,
-    library: process.env.DOCS_MCP_LIBRARY,
+    serverUrl: process.env.DOCS_SERVER_URL.replace(/\/+$/, ''),
+    token: process.env.DOCS_TOKEN,
+    library: process.env.DOCS_LIBRARY,
   };
 }
 

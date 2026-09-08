@@ -1,7 +1,7 @@
 ---
 title: "cat-kit 文档入口"
 description: cat-kit 全部 8 个公开包的 AI 检索入口：按运行环境选包、安装命令、包级文档路径速查与常见任务路由。
-keywords: [cat-kit, @cat-kit/core, @cat-kit/http, @cat-kit/fe, @cat-kit/be, @cat-kit/crypto, @cat-kit/cli, 工具库, monorepo, 选包, 安装, 虚拟滚动, HTTP 客户端, 深拷贝, 日期处理, Cron 调度]
+keywords: [cat-kit, "@cat-kit/core", "@cat-kit/http", "@cat-kit/fe", "@cat-kit/be", "@cat-kit/crypto", "@cat-kit/cli", 工具库, monorepo, 选包, 安装, 虚拟滚动, HTTP 客户端, 深拷贝, 日期处理, Cron 调度]
 aliases: [catkit, 喵喵工具箱, cabinet-fe, cat-kit 文档]
 ---
 
