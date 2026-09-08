@@ -1,51 +1,40 @@
 ---
-title: "数组与对象工具"
-description: "@cat-kit/core 数组去重合并、尾元素、右遍历、索引剔除与对象挑选/忽略/深浅合并/取值赋值"
-keywords:
-  - 数组去重
-  - union
-  - unionBy
-  - eachRight
-  - omitArr
-  - 对象合并
-  - pick
-  - deepExtend
-  - 路径取值赋值
-  - 链式操作
-aliases:
-  - lodash.union
-  - 数组工具
-  - 对象工具
-  - 按字段去重
-  - 数组 at 尾元素
+title: "数组与对象操作模块（arr / o）"
+description: "@cat-kit/core 的 array-object 模块：数组合并去重、尾元素、右遍历、索引剔除与链式操作 arr()，对象挑选、忽略、合并、路径取值赋值与链式操作 o()。"
+aliases: [数组工具模块, 对象工具模块, array object 模块]
+keywords: [arr, o, union, unionBy, last, eachRight, omitArr, 数组去重, 对象合并, 链式操作, pick, omit, merge, deepExtend]
 ---
 
-# 数组与对象工具
+# 数组与对象操作模块（arr / o）
 
-`@cat-kit/core` 的数组与对象工具覆盖多数组合并去重、按字段去重、尾元素读取、自右向左遍历、索引剔除，以及对象的挑选/忽略字段、深浅合并与按路径取值赋值。函数式入口为 `union`、`unionBy`、`last`、`eachRight`、`omitArr`，链式入口为 `arr()` 与 `o()`。
+`array-object` 模块从 `@cat-kit/core` 导出数组工具 `last` / `union` / `unionBy` / `eachRight` / `omitArr` 与链式入口 `arr()`、对象链式入口 `o()`：覆盖多数组合并去重、按字段去重、尾元素读取、自右向左遍历、按索引剔除、元素移动、分组，以及对象挑选/忽略字段、浅层与深度合并、链式路径取值赋值。
 
-## 适用场景
+## 安装
 
-- 多数组合并去重、按字段去重、读尾元素、删索引或从右遍历
-- 对对象挑选/忽略字段，或按既定形状更新配置
+```bash
+bun add @cat-kit/core
+```
 
-## 推荐 API
+```bash
+npm install @cat-kit/core
+```
 
-- 函数：`union`、`unionBy`、`last`、`eachRight`、`omitArr`
-- `arr(value)`：`eachRight`、`omit`、`find`、`last`、`move`、`groupBy`
-- `o(value)`：`keys`、`each`、`pick`、`omit`、`extend`、`deepExtend`、`merge`、`get`、`set`
+全部函数从包根导入：
 
-仅需尾元素且不依赖元组尾项推断时可用原生 `array.at(-1)`；简单去重可用 `Set`。
+```ts
+import { arr, eachRight, last, o, omitArr, union, unionBy } from '@cat-kit/core'
+```
 
-## 注意事项
+## 模块速查
 
-- `union` 按引用/`Set` 去重；`unionBy` 保留同 key 首次出现
-- `arr()` 非持续链式：方法直接返回数组或对象
-- `pick`/`omit` 返回新对象；`extend`/`deepExtend`/`merge`/`set` 修改原对象
-- `extend`/`deepExtend` 只更新目标已有键，忽略 `null`/`undefined`；`merge` 可增键
-- `o().get` 找不到返回 `undefined`；`isEmpty` 仅指 `null`/`undefined`（见 string-type）
+| 导出 | 说明 | 文档 |
+| --- | --- | --- |
+| `last` | 返回数组最后一个元素 | `packages/core/array-object/apis.md` |
+| `union` | 合并多个数组并用 `Set` 去重 | `packages/core/array-object/apis.md` |
+| `unionBy` | 合并多个对象数组并按指定字段去重，保留首次出现 | `packages/core/array-object/apis.md` |
+| `eachRight` | 从右向左遍历数组 | `packages/core/array-object/apis.md` |
+| `omitArr` | 丢弃数组中指定索引的元素，不改原数组 | `packages/core/array-object/apis.md` |
+| `arr` | 包装数组为 `Arr`：`eachRight`、`omit`、`find`、`last`、`move`、`groupBy` | `packages/core/array-object/apis.md` |
+| `o` | 包装对象为 `CatObject`：`keys`、`each`、`pick`、`omit`、`extend`、`deepExtend`、`merge`、`get`、`set` | `packages/core/array-object/apis.md` |
 
-## 更多
-
-- API：[数组与对象工具 API](apis.md)
-- 示例：[数组与对象工具示例](examples.md)
+`Arr` 与 `CatObject` 类本身未导出，仅能通过 `arr()` / `o()` 获得。与字符串、类型守卫相关的工具见 `packages/core/string-type/index.md`。

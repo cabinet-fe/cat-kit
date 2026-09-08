@@ -1,40 +1,43 @@
 ---
-title: "@cat-kit/be 配置管理"
-description: "解析 .env、按 schema 校验环境变量、加载 JSON/YAML/TOML 配置并深合并"
-keywords:
-  - loadEnv
-  - parseEnv
-  - parseEnvFile
-  - loadConfig
-  - mergeConfig
-  - EnvDefinition
-  - LoadEnvOptions
-  - 环境变量
-  - 配置加载
-  - 深合并
-aliases:
-  - dotenv
-  - env 校验
-  - 配置管理
-  - js-yaml
-  - smol-toml
+title: "@cat-kit/be 配置模块总览"
+description: "@cat-kit/be 配置模块总览：.env 解析与加载、schema 校验环境变量、JSON/YAML/TOML 配置文件加载与深度合并的入口与选型。"
+aliases: [config, 配置管理, 环境变量, dotenv, 配置加载]
+keywords: [loadEnv, parseEnv, parseEnvFile, loadConfig, mergeConfig, EnvRecord, LoadEnvOptions, EnvDefinition, EnvSchema, ConfigFormat, LoadConfigOptions, 环境变量, 配置文件, 深合并, env 校验, 默认值]
 ---
 
-# 配置管理
+# @cat-kit/be 配置模块总览
 
-配置管理覆盖三类需求：解析 `.env` 文件（`parseEnvFile`、`loadEnv`）、按 schema 校验并转换环境变量（`parseEnv`）、加载 JSON/YAML/TOML 配置文件并深度合并（`loadConfig`、`mergeConfig`）。
+配置模块从 `@cat-kit/be` 包根导出五个函数：`parseEnvFile`（解析 `.env` 文本）、`loadEnv`（按优先级读取多个 `.env` 文件并注入 `process.env`）、`parseEnv`（按 schema 校验转换环境变量）、`loadConfig`（加载 JSON / YAML / TOML 配置文件）、`mergeConfig`（深度合并多个配置对象）。
 
-详情见 [API](apis.md) 与 [示例](examples.md)。
+## 安装
 
-## 注意事项
+```bash
+bun add @cat-kit/be
+```
 
-- `loadEnv`：文件缺失时忽略；默认按 `.env` → `.env.local` → `.env.${mode}` → `.env.${mode}.local` 顺序加载，后文件覆盖前者；`override: false`（默认）不覆盖 `process.env` 已有值；默认注入 `process.env`（`injectToProcess` 控制）
-- `parseEnv` 的 `required: true` 在原始值为空时失败，即使定义了 `default`
-- `loadConfig` 解析 YAML/TOML 时动态导入 `js-yaml`、`smol-toml`（可选 peer 依赖），未安装会抛出可理解的错误
-- `mergeConfig` 深合并普通对象、数组整体替换、不修改入参
+配置相关导出从包根导入：
 
-## 类型定义
+```ts
+import { loadEnv, parseEnv, loadConfig, mergeConfig } from '@cat-kit/be'
+```
 
-- `parseEnvFile`、`loadEnv`、`parseEnv`、`EnvDefinition`、`LoadEnvOptions`
-- `loadConfig`、`LoadConfigOptions`
-- `mergeConfig`
+YAML 解析依赖 `js-yaml`，TOML 解析依赖 `smol-toml`，两者随 `@cat-kit/be` 一起安装，无需单独安装。JSON 解析无外部依赖。
+
+## 模块速查
+
+| 导出名 | 说明 | 文档路径 |
+| --- | --- | --- |
+| `parseEnvFile` | 把 `.env` 文件内容解析为键值对，支持 `export` 前缀、引号与注释 | `packages/be/config/apis.md` |
+| `loadEnv` | 按优先级读取 `.env` 文件集合，返回聚合结果并注入 `process.env` | `packages/be/config/apis.md` |
+| `LoadEnvOptions` | `loadEnv` 选项：`cwd`、`mode`、`files`、`override`、`injectToProcess` | `packages/be/config/apis.md` |
+| `EnvRecord` | 环境变量记录类型 `Record<string, string>` | `packages/be/config/apis.md` |
+| `parseEnv` | 按 schema 校验并转换环境变量，产出类型安全对象 | `packages/be/config/apis.md` |
+| `EnvSchema` | `parseEnv` 的 schema 类型映射 | `packages/be/config/apis.md` |
+| `EnvDefinition` | 单个变量定义：`type`、`default`、`required`、`delimiter`、`transform` | `packages/be/config/apis.md` |
+| `EnvValueType` | 内置转换类型 `'string' \| 'number' \| 'boolean' \| 'json' \| 'array'` | `packages/be/config/apis.md` |
+| `loadConfig` | 读取并解析 JSON / YAML / TOML 配置文件，支持默认值合并与校验 | `packages/be/config/apis.md` |
+| `LoadConfigOptions` | `loadConfig` 选项：`cwd`、`format`、`defaults`、`parser`、`validate`、`mergeDefaults` | `packages/be/config/apis.md` |
+| `ConfigFormat` | 配置格式 `'json' \| 'yaml' \| 'toml'` | `packages/be/config/apis.md` |
+| `mergeConfig` | 深度合并多个配置对象，返回新对象，不改入参 | `packages/be/config/apis.md` |
+
+选型规则：进程环境变量读 `.env` 用 `loadEnv`；要把环境变量转成带类型的配置对象用 `parseEnv`；读取结构化配置文件用 `loadConfig`；合并代码默认值与外部配置用 `mergeConfig`。完整签名见 `packages/be/config/apis.md`，端到端场景见 `packages/be/config/examples.md`。

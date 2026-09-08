@@ -1,50 +1,68 @@
 ---
-title: 'cat-kit 文档入口'
-description: '面向 AI 智能体的 @cat-kit/* 检索文档：决策顺序、8 包一览与主题跳转'
-keywords:
-  - cat-kit
-  - 工具库
-  - monorepo
-  - 前端工具
-  - 后端工具
-  - TypeScript
-  - AI 检索文档
-  - 决策顺序
-aliases:
-  - "@cat-kit/core"
-  - "@cat-kit/http"
-  - "@cat-kit/fe"
-  - "@cat-kit/be"
-  - "@cat-kit/crypto"
-  - "@cat-kit/cli"
+title: "cat-kit 文档入口"
+description: cat-kit 全部 8 个公开包的 AI 检索入口：按运行环境选包、安装命令、包级文档路径速查与常见任务路由。
+keywords: [cat-kit, @cat-kit/core, @cat-kit/http, @cat-kit/fe, @cat-kit/be, @cat-kit/crypto, @cat-kit/cli, 工具库, monorepo, 选包, 安装, 虚拟滚动, HTTP 客户端, 深拷贝, 日期处理, Cron 调度]
+aliases: [catkit, 喵喵工具箱, cabinet-fe, cat-kit 文档]
 ---
 
 # cat-kit 文档入口
 
-本目录是 cat-kit 面向 AI 智能体检索的文档入口，覆盖 `@cat-kit/*` 全部公开包。按「本页定位包 → 包级 `index.md` 缩小范围 → 主题文件查具体 API 与示例」三层检索，不要预读整个目录；确需多 API 组合时再读对应包级 `examples.md`。
+cat-kit 是 TypeScript monorepo（仓库 `cabinet-fe/cat-kit`），包含 8 个公开包：通用工具（core）、HTTP 客户端（http）、前端工具（fe）、后端工具（be）、安全随机（crypto）、提交校验 CLI（cli）、TypeScript 预设（tsconfig）与 VitePress 主题（vitepress-theme）。本页负责选包与路由；具体 API 一律进各包文档查阅，不预读整个目录。
 
-## 决策顺序
+## 安装
 
-1. 检查宿主项目已有的 `@cat-kit/*` 依赖与代码约定，优先复用，不新增包。
-2. 按运行环境选包：浏览器 → `fe`；Node.js → `be`；双端通用 → `core` / `http` / `crypto`；工程配置 → `tsconfig` / `vitepress-theme`。
-3. 宿主项目缺少所需能力时，只引入完成任务所需的最小包。
-4. 现有公开能力不匹配时，再自行实现或选择其他依赖；不要把业务专用逻辑强行套入通用工具。
+按运行环境选包，只引入完成任务所需的最小集合：
 
-所有代码只从包根或文档明确给出的公开子路径导入，不引用 `src`、`dist` 深路径或未导出符号。
+| 运行环境 | 可选包 |
+| --- | --- |
+| 浏览器 | `fe`、`core`、`http`、`crypto` |
+| Node.js | `be`、`core`、`http`、`crypto` |
+| 浏览器 + Node.js 双端 | `core`、`http`、`crypto` |
+| 工程配置（不进运行时） | `tsconfig`、`vitepress-theme`、`cli` |
 
-## 包一览
+各包安装命令（`core`/`be`/`fe`/`http` 同理，替换包名即可）：
 
-| 包                                                   | 适用环境         | 职责                                                                 |
-| ---------------------------------------------------- | ---------------- | -------------------------------------------------------------------- |
-| [core](packages/core/index.md)                       | 浏览器 / Node.js | 零依赖通用基础工具：数据处理、数值、日期、环境检测、树结构、执行控制 |
-| [http](packages/http/index.md)                       | 浏览器 / Node.js | HTTP 客户端，统一 URL、配置、响应与错误，支持可替换引擎与请求插件    |
-| [crypto](packages/crypto/index.md)                   | 浏览器 / Node.js | 安全随机 ID 与随机字节                                               |
-| [fe](packages/fe/index.md)                           | 浏览器           | 虚拟列表、数值补间、文件处理、客户端存储与剪贴板                     |
-| [be](packages/be/index.md)                           | Node.js          | 文件系统、配置、缓存、日志、网络、任务调度与系统信息                 |
-| [cli](packages/cli/index.md)                         | Node.js          | `cat-cli` 校验 Git 提交信息是否符合 Conventional Commits             |
-| [tsconfig](packages/tsconfig/index.md)               | 任意 TS 项目     | 按运行环境划分的 TypeScript 配置预设：node / bun / web / vue         |
-| [vitepress-theme](packages/vitepress-theme/index.md) | VitePress 站点   | 水墨丹青主题：默认主题、布局组件、Demo/Mermaid 容器与配置助手        |
+```bash
+npm install @cat-kit/core
+```
 
-## 版本
+```bash
+pnpm add @cat-kit/core
+```
 
-本文档不维护版本表，各包版本以 `packages/<pkg>/package.json` 为准。
+```bash
+bun add @cat-kit/core
+```
+
+`cli` 设计为一次性执行，通常不安装，直接用 `npx @cat-kit/cli` 或 `bunx @cat-kit/cli`。`tsconfig` 与 `vitepress-theme` 是开发期依赖，用 `npm install -D`（或对应包管理器的 dev 参数）安装。
+
+导入约束（全部包统一）：只从各包文档写明的公开入口导入。`core`、`be`、`fe`、`http`、`crypto` 仅提供包根入口（如 `import { copy } from '@cat-kit/core'`）；`vitepress-theme` 另有 `./config` 与样式子路径；`cli` 提供 `./commands/*` 深路径。禁止引用 `src`、`dist` 深路径或未导出符号。
+
+各包版本以 `packages/<pkg>/package.json` 为准，本目录不维护版本表。
+
+## 模块速查
+
+| 包 | 环境 | 职责 | 文档 |
+| --- | --- | --- | --- |
+| core | 浏览器 / Node.js | 深拷贝、数组对象链式操作、类型守卫、字节编码与 schema 校验、浮点精度数值、日期、环境检测、树结构、防抖节流并发、状态订阅 | `packages/core/index.md` |
+| http | 浏览器 / Node.js | HTTP 客户端：Fetch/XHR 双引擎、插件体系、Token 无感刷新、Method-Override、下载进度与中止 | `packages/http/index.md` |
+| fe | 浏览器 | 虚拟滚动列表、数值补间动画、localStorage/sessionStorage/Cookie、剪贴板与权限预查、文件分块读取与保存 | `packages/fe/index.md` |
+| be | Node.js | LRU/文件缓存与记忆化、多格式配置加载、文件系统、分级日志、端口与网络信息、Cron 与延时调度、CPU/内存/磁盘快照 | `packages/be/index.md` |
+| crypto | 浏览器 / Node.js | 基于 Web Crypto 的随机 ID 与随机字节（nanoid 移植） | `packages/crypto/index.md` |
+| cli | Node.js | `cat-cli verify-commit`：校验 Git 提交信息是否符合 Conventional Commits | `packages/cli/index.md` |
+| tsconfig | 任意 TS 项目 | 按运行环境划分的 TypeScript 配置预设：base / node / bun / web / vue | `packages/tsconfig/index.md` |
+| vitepress-theme | VitePress 站点 | 水墨丹青主题：默认主题扩展、Demo/Mermaid 容器、配置助手 | `packages/vitepress-theme/index.md` |
+
+常见任务路由：
+
+| 任务 | 入口文档 |
+| --- | --- |
+| 深拷贝 / 防抖节流 / 日期格式化 / 浮点精度 | `packages/core/index.md` |
+| 发请求、拦截 401 刷新 Token、下载进度 | `packages/http/client/apis.md`、`packages/http/plugins/apis.md` |
+| 大列表虚拟滚动 | `packages/fe/virtualizer/apis.md` |
+| 本地存储与 Cookie 读写 | `packages/fe/storage/apis.md` |
+| Node 端缓存、日志、Cron 定时任务 | `packages/be/cache/index.md`、`packages/be/logger/index.md`、`packages/be/scheduler/index.md` |
+| 生成随机 ID / 验证码 | `packages/crypto/nanoid/apis.md` |
+| 提交信息校验（commit-msg hook） | `packages/cli/index.md` |
+| 新项目选 TS 预设 | `packages/tsconfig/index.md` |
+| VitePress 站点接入主题 | `packages/vitepress-theme/index.md` |

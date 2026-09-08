@@ -1,54 +1,52 @@
 ---
-title: "字符串与类型检测"
-description: "@cat-kit/core 的 str()/$str 与类型守卫：命名转换、URL 拼接、运行时类型判断"
-keywords:
-  - str
-  - camelCase
-  - kebabCase
-  - joinUrlPath
-  - 类型守卫
-  - getDataType
-  - isString
-  - isNumber
-  - isEmpty
-aliases:
-  - string utils
-  - 字符串转驼峰
-  - URL 路径拼接
-  - runtime type check
-  - 类型判断工具
+title: "字符串与类型守卫模块（str）"
+description: "@cat-kit/core 的 string-type 模块：str() 驼峰与 kebab 命名转换、$str.joinUrlPath 拼接 URL 路径，以及覆盖原始值、浏览器对象、Promise 与 TypedArray 的全套运行时类型守卫。"
+aliases: [字符串工具模块, 类型守卫模块, string type 模块]
+keywords: [str, camelCase, kebabCase, joinUrlPath, getDataType, isString, isNumber, isEmpty, 类型守卫, 驼峰转换, URL 拼接]
 ---
 
-# 字符串与类型检测
+# 字符串与类型守卫模块（str）
 
-`@cat-kit/core` 的字符串与类型检测工具包含：`str(value)` 的驼峰/kebab 命名转换、`$str.joinUrlPath` 的 URL 路径段拼接，以及覆盖原始值、浏览器对象（`Blob`/`File`/`FormData`）、Promise 与各类 TypedArray 的运行时类型守卫。
+`string-type` 模块从 `@cat-kit/core` 导出字符串工具 `str()` / `$str` 与全套运行时类型守卫：`str()` 提供驼峰与 kebab 命名转换，`$str.joinUrlPath` 拼接 URL 路径段，`getDataType` 与 22 个 `isXxx` 函数覆盖原始值、`Blob` / `File` / `FormData`、`Promise` 与各类 TypedArray 的类型判断。
 
-## 适用场景
+## 安装
 
-- 驼峰 / kebab 命名转换、拼接 URL 路径段
-- 运行时类型守卫（含浏览器类型如 `Blob`/`File`）
-
-## 推荐 API
-
-- `str(value)`：`.camelCase(type?)`、`.kebabCase()`
-- `$str.joinUrlPath(firstPath, ...paths)`
-- `getDataType`、`isObj`、`isArray`、`isString`、`isNumber`、`isBlob`、`isDate`、`isFunction`、`isBool`、`isFile`、`isFormData`、`isSymbol`、`isPromise`、各类 TypedArray 守卫、`isNull`、`isUndef`、`isEmpty`
-
-```ts
-import { $str, isNumber, str } from '@cat-kit/core'
-
-str('hello_world').camelCase() // 'helloWorld'
-str('HelloWorld').kebabCase() // '-hello-world'（每个大写前插连字符）
-$str.joinUrlPath('/api/', '/users', '1')
-isNumber(NaN) // true；有限数校验请用 vNumber()
+```bash
+bun add @cat-kit/core
 ```
 
-## 注意事项
+```bash
+npm install @cat-kit/core
+```
 
-- `isEmpty` 仅 `null | undefined`
-- 浏览器 / TypedArray 守卫依赖对应全局
-- `DataType` 类型名不作为命名导出
+```ts
+import { $str, getDataType, isString, str } from '@cat-kit/core'
+```
 
-## 更多
+## 模块速查
 
-- API：[字符串与类型检测 API](apis.md)
+| 导出 | 说明 | 文档 |
+| --- | --- | --- |
+| `str` | 包装字符串：`camelCase`、`kebabCase` | `packages/core/string-type/apis.md` |
+| `$str` | 字符串工具集：`joinUrlPath(firstPath, ...paths)` | `packages/core/string-type/apis.md` |
+| `getDataType` | 返回值的小写类型字符串，如 `'array'`、`'date'` | `packages/core/string-type/apis.md` |
+| `isObj` | 是否是普通对象（`[object Object]`，含 class 实例） | `packages/core/string-type/apis.md` |
+| `isArray` | 是否是数组，委托 `Array.isArray` | `packages/core/string-type/apis.md` |
+| `isString` | 是否是字符串 | `packages/core/string-type/apis.md` |
+| `isNumber` | 是否是 number（`NaN` 返回 `true`） | `packages/core/string-type/apis.md` |
+| `isBlob` | 是否是 `Blob`（`instanceof` 判断） | `packages/core/string-type/apis.md` |
+| `isDate` | 是否是 `Date`（Invalid Date 返回 `true`） | `packages/core/string-type/apis.md` |
+| `isFunction` | 是否是函数 | `packages/core/string-type/apis.md` |
+| `isBool` | 是否是布尔值 | `packages/core/string-type/apis.md` |
+| `isFile` | 是否是 `File` | `packages/core/string-type/apis.md` |
+| `isFormData` | 是否是 `FormData` | `packages/core/string-type/apis.md` |
+| `isSymbol` | 是否是 `symbol` | `packages/core/string-type/apis.md` |
+| `isPromise` | 是否是 `Promise`（`async` 函数返回值也为 `true`） | `packages/core/string-type/apis.md` |
+| `isArrayBuffer` | 是否是 `ArrayBuffer` | `packages/core/string-type/apis.md` |
+| `isUint8Array` / `isUint16Array` / `isUint32Array` | 是否是对应无符号 TypedArray | `packages/core/string-type/apis.md` |
+| `isInt8Array` / `isInt16Array` / `isInt32Array` | 是否是对应有符号 TypedArray | `packages/core/string-type/apis.md` |
+| `isNull` | 是否是 `null` | `packages/core/string-type/apis.md` |
+| `isUndef` | 是否是 `undefined` | `packages/core/string-type/apis.md` |
+| `isEmpty` | 是否是空值，仅 `null` / `undefined` 为 `true` | `packages/core/string-type/apis.md` |
+
+`DataType` 类型与 `CatString` 类均为源码内部声明，不作命名导出。

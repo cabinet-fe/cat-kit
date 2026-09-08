@@ -1,45 +1,34 @@
 ---
-title: "任意值拷贝 copy"
-description: "@cat-kit/core 的 copy 深拷贝：structuredClone 优先，Proxy 与不支持环境图遍历回退"
-keywords:
-  - 深拷贝
-  - 结构化克隆
-  - 响应式快照
-  - 循环引用
-  - structuredClone
-  - copy
-aliases:
-  - cloneDeep
-  - lodash.cloneDeep
-  - 拷贝对象
+title: "copy 深拷贝模块"
+description: "@cat-kit/core 的 any 模块：copy 深拷贝任意值，structuredClone 优先，Proxy（Vue 响应式）与克隆异常时图遍历回退，循环引用安全。"
+aliases: [深拷贝模块, clone 模块, any 模块]
+keywords: [copy, 深拷贝, structuredClone, 结构化克隆, 循环引用, Proxy, Vue 响应式, 快照]
 ---
 
-# 任意值拷贝 copy
+# copy 深拷贝模块
 
-`copy` 用于深拷贝任意值，可替代 `lodash.cloneDeep` 或裸 `structuredClone`，尤其适合需要把 Vue 响应式对象转成普通数据快照的场景。
+`any` 模块从 `@cat-kit/core` 导出唯一函数 `copy`：深拷贝任意值并返回同类型快照，优先使用原生 `structuredClone`，输入是 Proxy（Vue 3 响应式对象也是 Proxy）或结构化克隆抛错时回退到内置图遍历拷贝，全程不向外抛错。
 
-## 适用场景
+## 安装
 
-深拷贝任意值、替代 `lodash.cloneDeep` 或裸 `structuredClone`，尤其是 Vue 响应式对象需要普通数据快照时。
+```bash
+bun add @cat-kit/core
+```
 
-## 推荐 API
+```bash
+npm install @cat-kit/core
+```
 
-`copy`
+`copy` 从包根导入：
 
 ```ts
 import { copy } from '@cat-kit/core'
-
-const snapshot = copy({ a: 1, nested: { b: 2 } })
 ```
 
-## 注意事项
+## 模块速查
 
-- 优先委托 native `structuredClone`；失败、不支持或根对象是 Proxy（Vue 3 响应式也是 Proxy）时图遍历回退，不抛错
-- 回退时函数保留同一引用；不保留 class 原型方法
-- 产出普通数据快照，不保留 Vue 响应式
-- 旧 `o().copy()`（JSON 语义）已移除，不要再调用
+| 导出 | 说明 | 文档 |
+| --- | --- | --- |
+| `copy` | 深拷贝任意值，返回同类型快照，不抛错 | `packages/core/any/apis.md` |
 
-## 更多
-
-- API：[任意值拷贝 copy API](apis.md)
-- 示例：[任意值拷贝 copy 示例](examples.md)
+模块内其余符号（`cloneGraph`、`keepIdentity` 等）均为源码内部实现，未导出。深拷贝在完整业务流程中的组合用法见包级 [../examples.md](../examples.md)。

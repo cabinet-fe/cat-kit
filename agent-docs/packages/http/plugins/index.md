@@ -1,40 +1,52 @@
 ---
-title: "HTTP 插件"
-description: "Token 注入与刷新、HTTP 方法覆盖及自定义 HTTPClientPlugin 插件"
-keywords:
-  - TokenPlugin
-  - MethodOverridePlugin
-  - HTTPClientPlugin
-  - registerPlugin
-  - token 刷新
-  - HTTP 方法覆盖
-  - 并发刷新
-  - X-HTTP-Method-Override
-  - 请求重试
-aliases:
-  - 插件开发
-  - token plugin
-  - method override
-  - 请求拦截
+title: HTTPClientPlugin HTTP 插件总览
+description: "@cat-kit/http 插件模块总览：HTTPClientPlugin 插件接口（beforeRequest / afterRespond / onError），内置 TokenPlugin 令牌注入与 401 无感刷新、MethodOverridePlugin HTTP 方法覆盖。本页列出插件模块全部公共导出与对应文档路径。"
+aliases: [HTTP 插件, 请求拦截器, 拦截器, 插件模块, token plugin]
+keywords: [HTTPClientPlugin, TokenPlugin, HTTPTokenPlugin, MethodOverridePlugin, HTTPMethodOverridePlugin, PluginHookResult, beforeRequest, afterRespond, onError, registerPlugin, token 刷新, 401 重试, 方法覆盖, 请求拦截, 自定义插件, 插件名称冲突]
 ---
 
-# HTTP 插件
+# HTTPClientPlugin HTTP 插件总览
 
-Token 注入/刷新、HTTP 方法覆盖，或实现自定义 `HTTPClientPlugin`。
+`@cat-kit/http` 的插件模块（`plugins/` + `types.ts` 中的插件接口）导出插件接口 `HTTPClientPlugin` 与两个内置插件工厂 `TokenPlugin`（令牌注入、过期刷新、401 自动重试）和 `MethodOverridePlugin`（HTTP 方法覆盖）。插件通过 `new HTTPClient(prefix, { plugins })` 注册，或运行时调用 `http.registerPlugin(plugin)` 注册；执行顺序为父链插件在前、自身在后，同层按注册顺序。客户端主体见 `packages/http/client/index.md`。
 
-## 推荐 API
+## 安装
 
-- `TokenPlugin`（别名 `HTTPTokenPlugin`）
-- `MethodOverridePlugin`（别名 `HTTPMethodOverridePlugin`）
-- 插件钩子类型：`HTTPClientPlugin`、`PluginHookResult`、`ClientPlugin`
+```bash
+# bun
+bun add @cat-kit/http
+# npm
+npm install @cat-kit/http
+```
 
-详情见 [API](apis.md)、[示例](examples.md)。
+```ts
+import { HTTPClient, TokenPlugin } from '@cat-kit/http'
 
-## 注意事项
+const http = new HTTPClient('/api', {
+  origin: 'https://api.example.com',
+  plugins: [
+    TokenPlugin({ getter: () => localStorage.getItem('access_token') })
+  ]
+})
 
-- `registerPlugin`：`name` 非空且在父子链唯一，否则 `HTTPError`（`PLUGIN`）
-- `TokenPlugin` 固定 `name: 'token'`，整条继承链只能有一个
-- `getter` 返回 `null`/`undefined`/`''` 不注入 Header；并发刷新共享同一 Promise
-- `shouldRefresh` 仅在提供 `onRefresh` 时重试；默认 `maxRetries: 2`
-- `MethodOverridePlugin` 默认把 `DELETE`/`PUT`/`PATCH` 改为 `POST`，原方法写入 `X-HTTP-Method-Override`
-- 钩子签名为单上下文对象：`beforeRequest({ url, config })`，不是 `(url, config)`
+// 请求自动携带 Authorization: Bearer <access_token>
+const res = await http.get<{ ok: boolean }>('/ping')
+console.log(res.body.ok) // => true
+```
+
+## 模块速查
+
+API 参考路径：`packages/http/plugins/apis.md`；场景方案路径：`packages/http/plugins/examples.md`。客户端方法 `registerPlugin` 的签名与抛错见 `packages/http/client/apis.md`。
+
+| 导出名 | 说明 | 文档路径 |
+| --- | --- | --- |
+| `TokenPlugin`（别名 `HTTPTokenPlugin`） | Token 插件工厂：按 `authType` 注入 `Bearer` / `Basic` / 自定义令牌；`isExpired` 触发请求前刷新（并发共享一次）、`shouldRefresh` 触发 401 后刷新重试 | `packages/http/plugins/apis.md` |
+| `MethodOverridePlugin`（别名 `HTTPMethodOverridePlugin`） | 方法覆盖插件工厂：默认把 `DELETE` / `PUT` / `PATCH` 改写为 `POST`，原方法写入 `X-HTTP-Method-Override` 请求头 | `packages/http/plugins/apis.md` |
+| `HTTPClientPlugin`（别名 `ClientPlugin`） | 插件接口：`name` 必填，可选钩子 `beforeRequest` / `afterRespond` / `onError` | `packages/http/plugins/apis.md` |
+| `HTTPTokenPluginOptions`（别名 `TokenPluginOptions`） | Token 插件配置类型：`getter` / `headerName` / `authType` / `formatter` / `onRefresh` / `isExpired` / `isRefreshExpired` / `shouldRefresh` / `onRefreshExpired` / `maxRetries` | `packages/http/plugins/apis.md` |
+| `HTTPMethodOverridePluginOptions`（别名 `MethodOverridePluginOptions`） | 方法覆盖插件配置类型：`methods` / `overrideMethod` / `headerName` | `packages/http/plugins/apis.md` |
+| `PluginHookResult` | `beforeRequest` 钩子返回类型：`{ url?, config? }`，用于改写最终 URL 与请求配置 | `packages/http/plugins/apis.md` |
+
+场景文档：
+
+- `packages/http/plugins/examples.md`：Token 无感刷新与 401 重试的完整接入
+- `packages/http/examples.md`：客户端与插件组合搭建业务 API 客户端

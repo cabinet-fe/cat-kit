@@ -1,46 +1,28 @@
 ---
-title: "@cat-kit/fe Web API"
-description: 剪贴板读写与浏览器权限预查
-keywords:
-  - 剪贴板
-  - clipboard
-  - readText
-  - queryPermission
-  - 权限预查
-  - 复制文本
-  - Blob 复制
-  - clipboard-write
-aliases:
-  - clipboard api
-  - navigator.clipboard
-  - 浏览器权限
-  - copy paste
+title: "web-api 剪贴板与权限查询"
+description: "@cat-kit/fe 的 Web API 模块：clipboard 对象写入文本/Blob 到系统剪贴板并读取内容（不支持时回退 execCommand），queryPermission 预查浏览器权限状态（仅 denied 返回 false，不发起授权弹窗）。"
+aliases: [clipboard api, navigator.clipboard, 剪贴板, 浏览器权限, web api 封装]
+keywords: [clipboard, copy, read, readText, queryPermission, WebPermissionName, clipboard-write, clipboard-read, 剪贴板复制, 复制文本, 读取剪贴板, 权限预查, execCommand]
 ---
 
-# fe — Web API
+# web-api 剪贴板与权限查询
 
-`@cat-kit/fe` 的 Web API 模块封装了系统剪贴板（`clipboard`：写入文本/Blob、读取内容）与权限预查（`queryPermission`：只查询浏览器权限状态，不发起授权请求）。
+`@cat-kit/fe` 的 `web-api` 模块导出 `clipboard` 与 `queryPermission`：`clipboard.copy` 写入字符串、`Blob` 或两者混合数组到系统剪贴板（优先 `navigator.clipboard.write`，缺失时字符串走 `document.execCommand('copy')` 回退），`clipboard.read` / `readText` 读取剪贴板内容；`queryPermission` 查询指定权限的浏览器状态，只有 `denied` 返回 `false`，查询失败也视为可用，且从不触发授权弹窗。
 
-## 适用场景
+## 安装
 
-读写剪贴板，或预查浏览器权限状态（不发起授权请求）。
-
-## 推荐 API
-
-`clipboard`、`queryPermission`
-
-```ts
-import { clipboard, queryPermission } from '@cat-kit/fe'
-
-await clipboard.copy('done')
-const text = await clipboard.readText()
-const ok = await queryPermission('clipboard-write')
+```bash
+npm install @cat-kit/fe
 ```
 
-完整签名见 [apis.md](apis.md)。
+全部导出仅从包根提供：`import { clipboard, queryPermission } from '@cat-kit/fe'`。
 
-## 注意事项
+运行前提：`navigator.clipboard` 只在安全上下文（HTTPS 或 `localhost`）存在；非安全环境下 `copy` 的字符串走 `execCommand` 回退，`read` / `readText` 抛错。`queryPermission` 依赖 `navigator.permissions`，缺失时返回 `true`。
 
-- `queryPermission`：仅 `denied` 返回 `false`；`prompt` 返回 `true`；查询失败视为可用（`true`）；**不**弹出授权
-- 文本复制旧回退路径（`document.execCommand('copy')`）会对文本使用 `JSON.stringify`，粘贴结果可能带引号
-- 浏览器不支持 Clipboard API 时：非字符串数据 `copy` 直接拒绝；`read`/`readText` 抛错
+## 模块速查
+
+| 导出名 | 说明 | 文档路径 |
+| --- | --- | --- |
+| `clipboard` | 剪贴板对象：`copy`（写入文本/Blob/数组）、`read`（读取全部 Blob）、`readText`（读取纯文本） | `packages/fe/web-api/apis.md` |
+| `queryPermission` | `queryPermission(name)` 查询权限状态，返回 `Promise<boolean>`，不发起授权 | `packages/fe/web-api/apis.md` |
+| `WebPermissionName` | 权限名类型：`PermissionName \| 'clipboard-read' \| 'clipboard-write'`（类型） | `packages/fe/web-api/apis.md` |

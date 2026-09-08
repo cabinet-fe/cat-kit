@@ -1,46 +1,37 @@
 ---
-title: "树与森林数据结构"
-description: "@cat-kit/core 的 dfs/bfs/TreeManager/Forest：树与森林遍历、扁平化、可见节点与节点关系"
-keywords:
-  - dfs
-  - bfs
-  - TreeManager
-  - Forest
-  - 树遍历
-  - 森林遍历
-  - 扁平化
-  - childrenKey
-  - createNode
-  - 可见节点
-aliases:
-  - 树结构工具
-  - 深度优先
-  - 广度优先
-  - 树查找
-  - 树形数据
+title: "树与森林数据结构模块（TreeManager / Forest）"
+description: "@cat-kit/core 的 data-structure 模块：dfs/bfs 遍历、TreeNode/ForestNode 节点操作（插入、移除、路径、祖先、可见后代）与 TreeManager/Forest 管理器（查找、扁平化、可见展平、深度统计）。"
+aliases: [树模块, 森林模块, 数据结构模块]
+keywords: [dfs, bfs, TreeNode, TreeManager, ForestNode, Forest, childrenKey, createNode, flatten, flattenVisible, getVisibleDescendants, 树遍历, 树扁平化, 虚拟滚动]
 ---
 
-# 树与森林数据结构
+# 树与森林数据结构模块（TreeManager / Forest）
 
-`@cat-kit/core` 的树与森林工具以 `dfs`/`bfs` 函数和 `TreeManager`/`Forest` 类为核心，提供树形数据的遍历、查找、扁平化、可见节点展开与节点关系操作，节点形状可通过 `childrenKey` 与 `createNode` 自定义。
+`data-structure` 模块从 `@cat-kit/core` 导出树遍历函数 `dfs` / `bfs`、节点类 `TreeNode` / `ForestNode` 与管理器 `TreeManager` / `Forest`：遍历回调返回 `true` 提前终止；`TreeManager` 管理单棵树、`Forest` 管理多棵树；不传 `createNode` 时节点就是原始数据对象本身，传 `createNode` 时用自定义节点（如 `TreeNode`）承载 `depth` / `index` / `parent` 元数据。可见后代与可见展平系列方法面向树形虚拟滚动的增量更新。
 
-## 适用场景
+## 安装
 
-树/森林遍历、查找、扁平化、可见节点与节点关系。
+```bash
+bun add @cat-kit/core
+```
 
-## 推荐 API
+```bash
+npm install @cat-kit/core
+```
 
-- `dfs`、`bfs`
-- `TreeNode`、`TreeManager`、`ForestNode`、`Forest`
+```ts
+import { Forest, TreeManager, bfs, dfs } from '@cat-kit/core'
+```
 
-## 注意事项
+## 模块速查
 
-- 遍历回调 `(node, index, parent?)`；返回 `true` 停止当前直接遍历
-- 无 `createNode` 时 `TreeManager` 管理原始节点，不注入元数据方法
-- `Forest.dfs`/`bfs` 在一棵树上停止后仍继续后续根
-- 可见扁平化始终含根，仅沿 `isExpanded(node)` 为真的节点下行
+| 导出 | 说明 | 文档 |
+| --- | --- | --- |
+| `dfs` | 单树深度优先遍历，回调返回 `true` 终止 | `packages/core/data-structure/apis.md` |
+| `bfs` | 单树广度优先遍历，回调返回 `true` 终止 | `packages/core/data-structure/apis.md` |
+| `TreeNode` | 树节点类：`insert`、`remove`、`getPath`、`getAncestors`、`isAncestorOf`、`getVisibleDescendants` 等 | `packages/core/data-structure/apis.md` |
+| `TreeManager` | 树管理器：`root`、`dfs`、`bfs`、`flatten`、`find`、`findAll`、`getLeaves`、`getMaxDepth`、`flattenVisible` | `packages/core/data-structure/apis.md` |
+| `ForestNode` | 森林节点类，继承 `TreeNode`，支持移除根节点 | `packages/core/data-structure/apis.md` |
+| `Forest` | 森林管理器：多棵树的遍历、查找、扁平化与 `size` | `packages/core/data-structure/apis.md` |
 
-## 更多
-
-- API：[树与森林数据结构 API](apis.md)
-- 示例：[树与森林数据结构示例](examples.md)
+类型导出：`ITreeNode`、`NodeCreator`、`TreeManagerOptionsBase`、`TreeManagerOptionsWithCreator`、`IForestNode`、`ForestNodeCreator`、`ForestOptionsBase`、`ForestOptionsWithCreator`。

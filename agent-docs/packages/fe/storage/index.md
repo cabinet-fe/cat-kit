@@ -1,48 +1,31 @@
 ---
-title: "@cat-kit/fe 浏览器存储"
-description: 类型化 localStorage 与 sessionStorage 封装，以及 Cookie 读写
-keywords:
-  - localStorage
-  - sessionStorage
-  - Cookie
-  - storageKey
-  - WebStorage
-  - 过期时间
-  - 类型化存储
-  - 键值存取
-aliases:
-  - browser storage
-  - 本地存储
-  - cookie 设置
-  - web storage 封装
+title: "storage 本地存储与 Cookie"
+description: "@cat-kit/fe 的存储模块：storage.local / storage.session 提供带过期时间（秒）与类型化键的 Web Storage 封装，storageKey 创建类型化键，cookie 提供 set/get/remove/has/getAll/clear 六个 Cookie 操作。"
+aliases: [browser storage, 本地存储, 本地缓存, cookie 封装, web storage]
+keywords: [storage, storageKey, StorageKey, ExtractStorageKey, cookie, CookieOptions, localStorage, sessionStorage, 过期时间, 类型化存储, 键值存取, 批量读取, 缓存监听]
 ---
 
-# fe — 浏览器存储
+# storage 本地存储与 Cookie
 
-`@cat-kit/fe` 的存储模块提供类型化 Web Storage 封装（`storage`，基于 `storageKey` 带过期时间的键值存取）与 Cookie 管理（`cookie`）。`storageKey<T>` 给键附加类型信息，读写时自动校验值类型。
+`@cat-kit/fe` 的 `storage` 模块导出两块能力：`storage`（`storage.local` / `storage.session` 两个入口）封装 `localStorage` / `sessionStorage`，支持秒级过期时间、默认值、批量读取与键级变更回调，键通过 `storageKey<T>()` 携带类型信息；`cookie` 封装 `document.cookie` 的设置、读取、删除、存在性检查与清空。
 
-## 适用场景
+## 安装
 
-需要带过期时间的类型化 `localStorage`/`sessionStorage`，或管理可由 JavaScript 访问的 Cookie。
-
-## 推荐 API
-
-`storage`、`storageKey`、`cookie`
-
-```ts
-import { cookie, storage, storageKey } from '@cat-kit/fe'
-
-const TOKEN = storageKey<string>('token')
-storage.local.set(TOKEN, 'abc', 3600) // 过期单位为秒，0 表示不过期
-storage.local.get(TOKEN)
-cookie.set('theme', 'dark', { expires: 86400 })
+```bash
+npm install @cat-kit/fe
 ```
 
-完整签名见 [apis.md](apis.md)。
+全部导出仅从包根提供：`import { storage, storageKey, cookie } from '@cat-kit/fe'`。
 
-## 注意事项
+运行前提：浏览器环境。首次访问 `storage.local` / `storage.session` 时会读取全局 `localStorage` / `sessionStorage`，非浏览器环境抛 `ReferenceError: localStorage is not defined`；`cookie` 依赖 `document.cookie`。
 
-- 过期单位为**秒**；`0` 表示不过期
-- `null`/函数/symbol/`undefined` 等会静默跳过；`bigint` 可能在 JSON 序列化时抛错
-- `storageKey` 运行时只是字符串
-- `cookie.clear()` 只能清 `document.cookie` 可见项，无法可靠删除不同 path/domain 创建的 cookie
+## 模块速查
+
+| 导出名 | 说明 | 文档路径 |
+| --- | --- | --- |
+| `storage` | 存储入口：`storage.local`（localStorage）与 `storage.session`（sessionStorage），实例支持 `set` / `get` / `getExpire` / `remove` / `on` / `off` | `packages/fe/storage/apis.md` |
+| `storageKey` | `storageKey<T>(str)` 创建类型化键 `StorageKey<T>`，运行时就是字符串 | `packages/fe/storage/apis.md` |
+| `StorageKey` | 类型化键类型（类型） | `packages/fe/storage/apis.md` |
+| `ExtractStorageKey` | `StorageKey<T> -> T` 工具类型，批量 `get` 返回值用（类型） | `packages/fe/storage/apis.md` |
+| `cookie` | Cookie 对象：`set` / `get` / `remove` / `has` / `getAll` / `clear` | `packages/fe/storage/apis.md` |
+| `CookieOptions` | Cookie 选项：`expires` / `path` / `domain` / `secure` / `sameSite`（类型） | `packages/fe/storage/apis.md` |

@@ -1,53 +1,33 @@
 ---
-title: "日期处理"
-description: "@cat-kit/core 的 date/Dater：解析、格式化、加减、对齐、比较与区间判断"
-keywords:
-  - date
-  - Dater
-  - 日期格式化
-  - addDays
-  - startOf
-  - endOf
-  - isBetween
-  - diff
-  - 日期解析
-  - Invalid Date
-aliases:
-  - dayjs 替代
-  - moment 替代
-  - 日期工具
-  - 时间处理
-  - 日期计算
+title: "日期处理模块（date / Dater）"
+description: "@cat-kit/core 的 date 模块：date() 工厂与 Dater 类提供日期解析（含模板解析）、格式化、加减推算、startOf/endOf 对齐、比较、差值、区间判断与月尾/闰年等日历查询。"
+aliases: [日期模块, dater 模块, 时间处理模块]
+keywords: [date, Dater, 日期格式化, addDays, addMonths, startOf, endOf, diff, compare, isBetween, Dater.parse, 日期解析, 时间差, 区间判断]
 ---
 
-# 日期处理
+# 日期处理模块（date / Dater）
 
-`@cat-kit/core` 的日期工具以 `date(input?)` 工厂与 `Dater` 类为核心，提供日期解析、格式化、加减推算、时间对齐（startOf/endOf）、比较与区间判断，输入非法时不抛错而是产出 Invalid Date。
+`date` 模块从 `@cat-kit/core` 导出工厂函数 `date(input?)` 与 `Dater` 类：支持从 `number` / `string` / `Date` / `Dater` 构造；提供占位符模板的 `format` 格式化与 `Dater.parse` 模板解析、不可变的 `addDays` / `addWeeks` / `addMonths` / `addYears` / `startOf` / `endOf`、可变的 `setXxx` 系列、日历差 `diff` / `compare`、区间判断 `isBetween`、同日/同月/同年判断、周末与闰年判断以及月尾天数查询。非法输入不抛错，产生 Invalid Date（时间戳 `NaN`）。
 
-## 适用场景
+## 安装
 
-解析、格式化、加减、对齐、比较与区间判断。
-
-## 推荐 API
-
-- `date(input?)`、`Dater.parse(value, format?, { utc? })`
-- 可变：`setTime`、`setYear`、`setMonth`、`setDay`、`setHours`、`setMinutes`、`setSeconds`、`toEndOfMonth`
-- 不可变：`clone`、`calc`、`addDays|Weeks|Months|Years`、`startOf`、`endOf`
-- `diff`、`isBefore`/`isAfter`/`isSame`/`isBetween`、`format`
-
-```ts
-import { date } from '@cat-kit/core'
-
-date('2024-01-15').addWeeks(1).format('yyyy-MM-dd')
+```bash
+bun add @cat-kit/core
 ```
 
-## 注意事项
+```bash
+npm install @cat-kit/core
+```
 
-- 非法输入产生 Invalid Date / `NaN` 时间戳，不抛错
-- `startOf('week')` 以周一为起点
-- `diff` 的 month/year 为日历差；day/week 等按固定毫秒
-- `isBetween` 接受反转边界，默认包容性 `[]`
+```ts
+import { Dater, date } from '@cat-kit/core'
+```
 
-## 更多
+## 模块速查
 
-- API：[日期处理 API](apis.md)
+| 导出 | 说明 | 文档 |
+| --- | --- | --- |
+| `date` | 包装日期输入为 `Dater`，缺省为当前时间 | `packages/core/date/apis.md` |
+| `Dater` | 日期类：`format`、`calc`、`addXxx`、`startOf` / `endOf`、`diff`、`compare`、`isBetween`、`isSameDay` 等 | `packages/core/date/apis.md` |
+
+`Dater.parse` 为 `Dater` 的静态方法；`DateInput`、`DiffUnit`、`DiffOptions`、`FormatOptions` 等类型为源码内部声明，不作命名导出。

@@ -1,46 +1,28 @@
 ---
-title: "@cat-kit/fe 文件处理"
-description: 分块读取 Blob/File 与触发浏览器下载保存 Blob
-keywords:
-  - readChunks
-  - saveBlob
-  - 分块读取
-  - Blob
-  - File
-  - 分片上传
-  - 文件下载
-  - chunkSize
-aliases:
-  - file chunks
-  - 文件读取
-  - blob 下载
-  - 大文件处理
+title: "file 文件分块读取与下载"
+description: "@cat-kit/fe 的文件处理模块：readChunks 按 Blob.slice() 分块异步读取 Blob/File（for-await 遍历、break 提前退出），saveBlob 通过 Object URL + a[download] 触发浏览器下载。"
+aliases: [file chunks, 文件读取, 文件下载, blob 下载, 大文件处理]
+keywords: [readChunks, saveBlob, ReadChunksOptions, chunkSize, offset, Uint8Array, AsyncGenerator, 分块读取, 分片上传, 文件下载, 计算哈希]
 ---
 
-# fe — 浏览器文件
+# file 文件分块读取与下载
 
-`@cat-kit/fe` 的文件处理模块提供两个能力：用 `readChunks` 按块异步读取 `Blob`/`File`（基于 `Blob.slice()` + `arrayBuffer()`，支持 `for await` 遍历与 `break` 提前退出），以及用 `saveBlob` 触发浏览器下载保存一个 `Blob`。
+`@cat-kit/fe` 的 `file` 模块导出两个函数：`readChunks` 用 `Blob.slice()` + `arrayBuffer()` 按固定块大小异步读取 `Blob`/`File`，产出 `Uint8Array`；`saveBlob` 用 `Object URL` + `a[download]` 触发浏览器下载一个 `Blob`。典型用途是大文件哈希计算、分片上传与前端生成文件下载。
 
-## 适用场景
+## 安装
 
-分块读取 `Blob`/`File`（如计算大文件哈希、分片上传），或触发 Blob 下载。
-
-## 推荐 API
-
-`readChunks`、`saveBlob`
-
-```ts
-import { readChunks, saveBlob } from '@cat-kit/fe'
-
-for await (const chunk of readChunks(file, { chunkSize: 1024 * 1024 })) {
-  void chunk
-}
-saveBlob(new Blob(['hi']), 'hello.txt')
+```bash
+npm install @cat-kit/fe
 ```
 
-完整签名见 [apis.md](apis.md)。
+全部导出仅从包根提供：`import { readChunks, saveBlob } from '@cat-kit/fe'`。
 
-## 注意事项
+运行前提：`readChunks` 需要运行环境支持 `Blob`（浏览器原生支持）；`saveBlob` 需要浏览器 DOM（`document` 与 `URL.createObjectURL`），仅浏览器可用。
 
-- 调用方保证 `chunkSize > 0` 且 `0 <= offset <= file.size`；`chunkSize: 0` 不会前进
-- `saveBlob` 依赖浏览器下载能力，适用于通常小于 500MB 的文件（`Object URL` + `a[download]` 方式）
+## 模块速查
+
+| 导出名 | 说明 | 文档路径 |
+| --- | --- | --- |
+| `readChunks` | 分块读取 `Blob`/`File`，返回 `AsyncGenerator<Uint8Array>`，支持 `for await` 与 `break` 提前退出 | `packages/fe/file/apis.md` |
+| `ReadChunksOptions` | `readChunks` 选项：`chunkSize`（默认 10MB）、`offset`（默认 0）（类型） | `packages/fe/file/apis.md` |
+| `saveBlob` | 触发浏览器下载一个 `Blob`，同步无返回值 | `packages/fe/file/apis.md` |

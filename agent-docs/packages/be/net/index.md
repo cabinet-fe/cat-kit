@@ -1,43 +1,33 @@
 ---
-title: "@cat-kit/be 网络工具"
-description: "端口可绑定探测与本机网卡 IP 地址获取"
-keywords:
-  - isPortAvailable
-  - getLocalIP
-  - PortCheckOptions
-  - GetLocalIPOptions
-  - 端口探测
-  - 端口占用检查
-  - 本机 IP
-  - 网卡地址
-aliases:
-  - 网络工具
-  - 端口检测
-  - net 工具
-  - getLocalIp
+title: "@cat-kit/be 网络模块总览"
+description: "@cat-kit/be 网络模块总览：isPortAvailable 端口可绑定探测与 getLocalIP 本机网卡 IP 获取两个工具的入口与适用边界。"
+aliases: [net, 网络工具, 端口检测, 本机 IP]
+keywords: [isPortAvailable, getLocalIP, PortCheckOptions, GetLocalIPOptions, host, timeout, family, includeInternal, 端口探测, 端口占用, 端口冲突, 本机 IP, 网卡地址, IPv4, IPv6]
 ---
 
-# 网络工具
+# @cat-kit/be 网络模块总览
 
-网络模块提供两个工具：`isPortAvailable` 探测端口当前是否可绑定（bind-and-close），`getLocalIP` 获取本机网卡的首个匹配 IP 地址。
+网络模块从 `@cat-kit/be` 包根导出两个函数：`isPortAvailable` 通过「尝试绑定后立即关闭」探测端口当前是否可用，`getLocalIP` 遍历本机网卡返回首个匹配条件的 IP 地址。两者仅依赖 Node.js `node:net` 与 `node:os`，无额外系统调用依赖。
 
-```ts
-import { getLocalIP, isPortAvailable } from '@cat-kit/be'
+## 安装
 
-if (!(await isPortAvailable(3000))) throw new Error('port busy')
-getLocalIP({ includeInternal: false })
+```bash
+bun add @cat-kit/be
 ```
 
-详情见 [API](apis.md)。
+网络相关导出从包根导入：
 
-## 注意事项
+```ts
+import { isPortAvailable, getLocalIP } from '@cat-kit/be'
+```
 
-- 端口探测为 bind-and-close，存在竞态，不是预留
-- `isPortAvailable` 的 `host` 默认 `'127.0.0.1'`，`timeout` 默认 `1000` 毫秒
-- `getLocalIP` 的 `includeInternal: false` 排除 Node `address.internal`（通常 loopback），**不是**公网 IP，也不排除 RFC1918 局域网地址
-- `getLocalIP` 的 `family` 取值 `'IPv4' | 'IPv6'`
+## 模块速查
 
-## 类型定义
+| 导出名 | 说明 | 文档路径 |
+| --- | --- | --- |
+| `isPortAvailable` | 探测端口是否可绑定；可用返回 `true`，被占用或超时返回 `false` | `packages/be/net/apis.md` |
+| `PortCheckOptions` | `isPortAvailable` 选项：`host`（默认 `'127.0.0.1'`）、`timeout`（默认 `1000` 毫秒） | `packages/be/net/apis.md` |
+| `getLocalIP` | 获取本机网卡首个匹配的 IP；无匹配返回 `undefined` | `packages/be/net/apis.md` |
+| `GetLocalIPOptions` | `getLocalIP` 选项：`family`（默认 `'IPv4'`）、`includeInternal`（默认 `false`） | `packages/be/net/apis.md` |
 
-- `isPortAvailable`、`PortCheckOptions`
-- `getLocalIP`、`GetLocalIPOptions`
+选型规则：启动服务前防端口冲突用 `isPortAvailable`；做服务注册、监听地址展示用 `getLocalIP`。完整签名与示例见 `packages/be/net/apis.md`。
