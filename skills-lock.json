@@ -5,13 +5,13 @@
       "source": "cabinet-fe/prompt-engineering",
       "sourceType": "github",
       "skillPath": "skills/tools/docs-gen/SKILL.md",
-      "computedHash": "1c0f27ff7d650266a089dfb193172b4502dbda37daf362edc7907469d5f4eefa"
+      "computedHash": "41f1e383feeeeb94f0554fc499f1fc72d3720e9cf85cd1bf5c95b846ed9ebb36"
     },
     "docs-search": {
       "source": "cabinet-fe/prompt-engineering",
       "sourceType": "github",
       "skillPath": "skills/tools/docs-search/SKILL.md",
-      "computedHash": "897ce85ea8ade617f6fa3dda2550154acf389cdb1f9f2a26ce4cad14f020a876"
+      "computedHash": "b94950144dcb28b6efdc75b866552d5d94adbadc5c98b1dc0b4e0c023329eed7"
     }
   }
 }

@@ -1,12 +1,10 @@
 #!/usr/bin/env node
-// 零依赖推送脚本：扫描库内 Markdown，解析 frontmatter，整库全量推送到 docs-mcp 服务端。
-// 仅使用 Node 内置能力（fs / path / 全局 fetch），Node >= 18 直接运行。
+// 零依赖推送脚本：扫描库内 Markdown，解析 frontmatter，整库全量推送到 docs-server 服务端。
+// 仅使用 Node 内置能力（fs / path / 全局 fetch），Node >= 24 直接运行。
 //
-// 用法：
-//   DOCS_SERVER_URL=http://localhost:8080 \
-//   DOCS_TOKEN=<推送令牌> \
-//   DOCS_LIBRARY=<库 slug> \
-//   node scripts/push-docs.mjs [文档根目录，默认 agent-docs/]
+// 用法（环境变量写入 .env 后用 --env-file 加载，该参数为 Node 内置，全平台通用）：
+//   node --env-file=.env scripts/push-docs.mjs [文档根目录，默认 agent-docs/]
+// 必填环境变量：DOCS_SERVER_URL / DOCS_TOKEN / DOCS_LIBRARY
 
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';

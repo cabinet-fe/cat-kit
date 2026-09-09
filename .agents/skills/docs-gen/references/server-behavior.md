@@ -2,7 +2,7 @@
 
 文档推送后由 docs-server 建索引，使用者的 AI 经 `docs-search` 技能检索。本文列出服务端**当前实现**的每条行为及其对文档写法的要求。写 frontmatter、定 keywords、分章节、定文档粒度前先读本文。
 
-机制来源（docs-server 仓库）：`server/internal/search/tokenize.go`、`search.go`、`section.go`、`write.go`；`server/internal/ingest/frontmatter.go`、`ingest.go`。服务端这些文件改动后必须同步本文。
+机制来源（docs-server 仓库）：`docs-server/internal/search/tokenize.go`、`search.go`、`section.go`、`write.go`；`docs-server/internal/ingest/frontmatter.go`、`ingest.go`。服务端这些文件改动后必须同步本文。
 
 ## 读者 AI 的消费流程
 

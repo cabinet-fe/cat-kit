@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // 零依赖查询脚本：经 REST 发现库、搜索、取文档。
-// 仅使用 Node 内置能力（全局 fetch），Node >= 26 直接运行。
+// 仅使用 Node 内置能力（全局 fetch），Node >= 24 直接运行。
 //
-// 用法：
-//   DOCS_SERVER_URL=http://localhost:8080 node query.mjs libraries
-//   DOCS_SERVER_URL=http://localhost:8080 node query.mjs search --q <关键词> [--library <slug>]
-//   DOCS_SERVER_URL=http://localhost:8080 node query.mjs get --library <slug> --path <path> [--section <章节>]
+// 用法（服务地址读环境变量 DOCS_SERVER_URL，可写入 .env 后用 --env-file 加载；该参数为 Node 内置，全平台通用）：
+//   node --env-file=.env query.mjs libraries
+//   node --env-file=.env query.mjs search --q <关键词> [--library <slug>]
+//   node --env-file=.env query.mjs get --library <slug> --path <path> [--section <章节>]
 
 const USAGE = `用法：
   query.mjs libraries
