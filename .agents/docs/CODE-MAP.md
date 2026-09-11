@@ -34,7 +34,7 @@ cat-kit/
 | tsconfig | packages/tsconfig | 按运行环境划分的 TypeScript 配置预设 | tsconfig.json |
 | vitepress-theme | packages/vitepress-theme | VitePress 水墨丹青主题：Vue 组件、样式、主题 config | src/index.ts、src/config.ts |
 | docs | docs | VitePress 文档站，长文与示例的权威来源 | docs/.vitepress/config.ts |
-| agent-docs | agent-docs | 面向 AI 智能体检索的文档：入口 → 包级 index → 主题文件，docs-mcp 推送源 | INDEX.md |
+| agent-docs | agent-docs | 面向 AI 智能体检索的文档：入口 → 包级 index → 主题文件，文档服务推送源 | index.md |
 | scripts | scripts | 仓库级工程脚本：release.ts、push-docs.mjs 等 | scripts/release.ts |
 
 ## 依赖
@@ -51,6 +51,7 @@ graph TD
   docs --> crypto
   docs --> fe
   docs --> be
+  docs --> cli
   docs --> tsconfig
   docs --> vitepress-theme
   agent-docs --> core
@@ -58,6 +59,7 @@ graph TD
   agent-docs --> crypto
   agent-docs --> fe
   agent-docs --> be
+  agent-docs --> cli
   agent-docs --> tsconfig
   agent-docs --> vitepress-theme
 ```
@@ -66,5 +68,5 @@ graph TD
 
 - 构建：`turbo run build` → 各包 tsdown 产 `dist`（vitepress-theme 走自有 `scripts/build.mjs`）
 - 发布：`bun run changeset` 录入 → 维护者 `bun run release`（changeset version + commit + push）→ GitHub Actions 发 npm
-- AI 文档推送：配 `.env`（SERVER_URL / TOKEN / LIBRARY）后 `bun scripts/push-docs.mjs` 整库推送 `agent-docs/` 到 docs-mcp（slug `cat-kit`，手动）
+- AI 文档推送：配 `.env`（DOCS_SERVER_URL / DOCS_TOKEN / DOCS_LIBRARY）后 `node --env-file=.env scripts/push-docs.mjs` 整库推送 `agent-docs/` 到文档服务（slug `cat-kit`）
 - 文档站：`docs`（vitepress dev / build），主题来自 `packages/vitepress-theme`

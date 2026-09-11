@@ -52,7 +52,7 @@ function normalizedLines(content) {
   return content.split(/\r?\n/).map(normalizeLine).filter(Boolean);
 }
 
-// 模板每行（归一化后）都出现在目标 AGENTS.md 中即视为一致；目标多出的行不影响判定
+// 模板每行（归一化后）都出现在目标 AGENTS.md 中即视为一致；目标多出的行不影响判定（自定义文档索引行）
 function agentsTemplateMissing(templateFile) {
   const template = normalizedLines(fs.readFileSync(templateFile, 'utf8'));
   const actual = new Set(normalizedLines(fs.readFileSync('AGENTS.md', 'utf8')));

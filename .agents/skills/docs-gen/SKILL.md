@@ -20,7 +20,7 @@ description: >
 - **指令精确**：每个参数的类型、默认值、必填、取值范围，每个方法的返回与错误，与开源库的差异——全部是确定的事实，没有「通常」「建议」「可能」。
 - **示例足够**：每个核心场景都有自包含、可直接运行的示例；指南与场景方案给出端到端的 `## 完整示例`。
 
-文档写法必须配合服务端当前实现：服务端只按 title / keywords / aliases 高权重召回，只按 `## ` 切片返回，AI 取回一个章节时看不到其他章节。机制与对策见 `references/server-behavior.md`。
+文档写法必须配合服务端当前实现：服务端按 title / keywords / aliases / 文档路径 高权重召回，只按 `## ` 切片返回，AI 取回一个章节时看不到其他章节。机制与对策见 `references/server-behavior.md`。
 
 ## 参考文件（按需读取，不要一次全读）
 
@@ -53,7 +53,10 @@ description: >
 ### 2. 安装推送脚本
 
 - 检查仓库内 `scripts/push-docs.mjs` 是否存在。
-- 不存在：从本技能目录把 `scripts/push-docs.mjs` 复制到仓库 `scripts/` 下。脚本零依赖免构建，Node ≥ 24 直接运行。
+- 不存在：从本技能目录把 `scripts/push-docs.mjs` 复制到仓库 `scripts/` 下。
+- 已存在：与技能内 `scripts/push-docs.mjs` 比对内容（`diff` 或读文件对比）；不一致时向用户说明差异风险并建议用技能内版本覆盖——旧版脚本可能缺新校验或新能力（如 `--clear`、`--verify`），协议不匹配会推送失败。
+
+脚本零依赖免构建，Node ≥ 24 直接运行。
 
 ### 3. 构建文档
 
@@ -73,11 +76,14 @@ description: >
 - 用户明确要求推送/同步文档：直接执行
 - 文档发生实质性变更（新增/修改/删除 `.md`）后：主动询问用户是否同步推送
 - 推送失败修复后：修复完成即重推
+- 重要发布或首次建文档：用 `--verify` 推送，把「可检索验证」结果一并报告
 
 命令（脚本只认进程环境变量，用 Node 内置 `--env-file` 参数加载 `.env`，Windows/macOS/Linux 通用；禁止 `set -a && source` 等 POSIX 专属前缀）：
 
 ```bash
-node --env-file=.env scripts/push-docs.mjs
+node --env-file=.env scripts/push-docs.mjs            # 推送（目录默认 agent-docs/）
+node --env-file=.env scripts/push-docs.mjs --verify   # 推送后逐篇按 title 搜索验证可检索
+node --env-file=.env scripts/push-docs.mjs --clear    # 下架整库（服务端删除该库全部文档与索引）
 ```
 
 Node ≥ 24 已内置 `--env-file`；`.env` 须已存在（步骤 1 保证）。
@@ -85,7 +91,9 @@ Node ≥ 24 已内置 `--env-file`；`.env` 须已存在（步骤 1 保证）。
 行为须知：
 
 - 整库覆盖：每次推送全量替换服务端该库全部文档，服务端旧文档会被删除
-- 原子性：任一篇校验失败整批不写库；本地校验（缺 frontmatter / 缺 `title`）失败时不会发出请求
+- 原子性：任一篇校验失败整批不写库；本地校验失败（frontmatter 问题）时不会发出请求，且一次性列出全部文件的全部问题
+- `--verify` 推送后逐篇按 title 搜索，任何一篇搜不到即非零退出——推送成功但索引异常时能当场发现，重要发布用带验证的推送
+- `--clear` 用于库永久下架：服务端删除该库，`libraries` 列表不再出现；只是想清空重推时**不要**用它，正常推送即可（整库覆盖会同步删除本地已移除的文档）
 - 成功输出 `推送成功：库 <slug> 共 <N> 篇文档`，把篇数报告给用户
 
 失败时按报错处理，禁止盲目重试：
@@ -93,13 +101,18 @@ Node ≥ 24 已内置 `--env-file`；`.env` 须已存在（步骤 1 保证）。
 | 报错（脚本 stderr） | 原因 | 处理 |
 | --- | --- | --- |
 | `缺少必填环境变量：…` | `.env` 未加载或缺项 | 回到步骤 1 补齐 |
-| `无法读取文档目录：…` / `文档目录 … 下没有任何 .md 文件` | 目录参数错或目录为空 | 核对目录参数 |
-| `文档 X 缺少 frontmatter 或其中没有 title 字段` / `… title 为空` | 本地校验失败，未发请求 | 修该文件的 frontmatter |
-| `请求推送接口失败：fetch failed` | 服务地址不通 | 核对 `DOCS_SERVER_URL` 与网络，向管理员确认 |
+| `无法读取文档目录：…` / `文档目录 … 下没有任何 .md 文件` | 目录参数错或目录为空 | 核对目录参数；确认要下架整库才用 `--clear` |
+| `本地校验失败（未发出请求），共 N 处` | 一篇或多篇 frontmatter 不合服务端严格校验（BOM、分隔线行尾空格、重复键、值内未引号的 `: ` 或 ` #`、引号未闭合、title 缺失/为空/非字符串） | 按列出的每一条修对应文件，全部修完再推 |
+| `请求推送接口失败：fetch failed（…）` | 服务地址不通（括号内是具体原因） | 核对 `DOCS_SERVER_URL` 与网络，向管理员确认 |
+| `请求超时` | 服务端无响应 | 停止重试，报给管理员 |
 | `HTTP 401` `unauthorized` | token 与服务端 `DOCS_PUSH_TOKEN` 不一致 | 向管理员核对 token，禁止猜 |
 | `HTTP 400` `invalid_slug` | `DOCS_LIBRARY` 不匹配 `^[a-z0-9-]+$` | 改 slug |
-| `HTTP 400` `invalid_frontmatter` | 服务端严格 YAML 解析失败：BOM、重复键、值内未加引号的 `: `、缺 `title`；message 含出错文档路径 | 只修 message 指出的那篇，对照 server-behavior.md「推送校验」 |
+| `HTTP 400` `invalid_frontmatter` | 本地校验漏网的服务端严格 YAML 错误；message 含出错文档路径 | 只修 message 指出的那篇，对照 server-behavior.md「推送校验」 |
+| `验证失败，以下 N 篇推送后搜不到` | `--verify` 模式下服务端分词或索引异常 | 报错原文转述给管理员，勿重推 |
+| `HTTP 404`（`--clear` 时） `library_not_found` | 库本就不存在 | 无需处理，向用户确认即可 |
 | `HTTP 500` `internal` | 服务端写库失败 | 报错原文转述给管理员 |
+
+monorepo 多包：`DOCS_LIBRARY` 与 `.env` 是单值，一仓库多包时按包各建一份 env 文件（如 `.env.ui`、`.env.utils`，`DOCS_LIBRARY` 与文档目录一一对应），逐包执行 `node --env-file=.env.ui scripts/push-docs.mjs <该包文档目录>`；各包文档目录互不嵌套，推送互不影响。
 
 可选：接入 CI（GitHub Actions）让文档随主干自动同步：
 
@@ -136,7 +149,7 @@ Node ≥ 24 已内置 `--env-file`；`.env` 须已存在（步骤 1 保证）。
 - [ ] 每篇过完 doc-standards.md 自检清单：frontmatter 四字段、章节词表、参数五要素、示例自包含、差异标注
 - [ ] 指南与场景方案有 `## 完整示例`；API 参考 `## 典型示例` 2~3 个
 - [ ] 库代码改动后：已按 change-sync.md 判定影响面并输出同步报告，受影响篇目已更新
-- [ ] 推送成功后向用户报告推送篇数
+- [ ] 推送成功后向用户报告推送篇数；`--verify` 模式一并报告可检索验证结果
 
 ## 反模式
 
@@ -153,3 +166,4 @@ Node ≥ 24 已内置 `--env-file`；`.env` 须已存在（步骤 1 保证）。
 - 全库 API 塞一篇大文档，或为微函数单独建文件
 - 库公共 API 已变却不查 `agent-docs/`；只看文件名不读 diff 就判定「不影响」；判定不了的改动不提问直接跳过
 - 在本技能内展开检索安装或查询步骤（检索交给 `docs-search`）
+- 库仓库已有一份 push-docs.mjs 就直接用：不与技能内版本比对内容，旧版脚本缺新校验与新能力

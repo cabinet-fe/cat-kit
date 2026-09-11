@@ -6,7 +6,7 @@
 
 ## 技术架构
 
-Turborepo 编排的多包单体仓库，Bun workspaces 管依赖。每个库包用 tsdown 构建到 `dist`，同时以 `development` 导出条件暴露 `src` 源码（包内开发引用 `@cat-kit/<pkg>/src`）。`core` 是零外部依赖的底座，http / fe / be / vitepress-theme 依赖 core，docs 文档站（VitePress，含 vitepress-plugin-llms 生成面向 LLM 的输出）依赖几乎全部包。版本走 Changesets，发布由维护者触发、GitHub Actions 完成。`agent-docs/` 是面向 AI 智能体检索的文档目录（根入口 `INDEX.md` → 包级 index → 主题文件，每篇带 `title` frontmatter，类型链接指向各包 `dist` 下 .d.ts），由维护者手动 `bun scripts/push-docs.mjs` 整库推送到 docs-mcp 检索系统（slug `cat-kit`）；原 `skills/cat-kit` 技能分发链已废弃。
+Turborepo 编排的多包单体仓库，Bun workspaces 管依赖。每个库包用 tsdown 构建到 `dist`，同时以 `development` 导出条件暴露 `src` 源码（包内开发引用 `@cat-kit/<pkg>/src`）。`core` 是零外部依赖的底座，http / fe / be / vitepress-theme 依赖 core，docs 文档站（VitePress，含 vitepress-plugin-llms 生成面向 LLM 的输出）依赖几乎全部包。版本走 Changesets，发布由维护者触发、GitHub Actions 完成。`agent-docs/` 是面向 AI 智能体检索的文档目录（根入口 `index.md` → 包级 index → 主题文件，每篇带 `title` frontmatter，类型链接指向各包 `dist` 下 .d.ts），由维护者使用 `node --env-file=.env scripts/push-docs.mjs` 推送到文档服务（slug `cat-kit`）；原 `skills/cat-kit` 技能分发链已废弃。
 
 ### 技术栈
 
@@ -14,8 +14,8 @@ Turborepo 编排的多包单体仓库，Bun workspaces 管依赖。每个库包�
 | -------------- | ---------------------------------------------------- | ------------------------------------------------------------- |
 | 语言 / runtime | TypeScript ^6.0.3、Bun 1.4.x                         | 库目标环境：浏览器、Node.js、Bun（版本来源：根 package.json） |
 | 框架           | Vue ^3.5（仅 docs 与 vitepress-theme）               | 库本体零框架依赖                                              |
-| 构建 / 包管理  | tsdown ^0.21.9、Turbo ^2.9.6、Bun workspaces         |                                                               |
-| 测试           | Vitest ^4.1.5、@vitest/coverage-v8                   |                                                               |
+| 构建 / 包管理  | tsdown ^0.23.0、Turbo ^2.10.12、Bun workspaces       | 代码检查/格式化：oxlint ^1.81.0、oxfmt ^0.66.0                |
+| 测试           | Vitest ^4.1.11、@vitest/coverage-v8 ^5.0.0           |                                                               |
 | 文档           | VitePress ^2.0.0-alpha.17 + @cat-kit/vitepress-theme | 正文在 docs/content/                                          |
 | 发布           | Changesets + GitHub Actions → npm                    |                                                               |
 
@@ -24,4 +24,3 @@ Turborepo 编排的多包单体仓库，Bun workspaces 管依赖。每个库包�
 - 公开 API 兼容策略未定（setup 访谈未答）
 - 测试强制范围未定（同上；现有约定只覆盖放哪、怎么跑）
 - README「包列表」写了 `@cat-kit/agent-context`，但 packages/ 下无此包，两者不一致
-- agent-docs/ 新建与 skills/cat-kit 整链废弃由 cooking 单位 agent-docs 执行中，本文档与 CODE-MAP 已按目标状态先行更新
