@@ -67,6 +67,6 @@ graph TD
 ## 关键路径
 
 - 构建：`turbo run build` → 各包 tsdown 产 `dist`（vitepress-theme 走自有 `scripts/build.mjs`）
-- 发布：`bun run changeset` 录入 → 维护者 `bun run release`（changeset version + commit + push）→ GitHub Actions 发 npm
+- 发布：统一走发版技能 `.agents/skills/release`（changesets + CI，本地 `bun run release` 触发）
 - AI 文档推送：配 `.env`（DOCS_SERVER_URL / DOCS_TOKEN / DOCS_LIBRARY）后 `node --env-file=.env scripts/push-docs.mjs` 整库推送 `agent-docs/` 到文档服务（slug `cat-kit`）
 - 文档站：`docs`（vitepress dev / build），主题来自 `packages/vitepress-theme`

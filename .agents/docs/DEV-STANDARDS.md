@@ -28,8 +28,7 @@
 
 ## 版本与发布
 
-- Changesets：开发者每次完成功能后执行 `bun run changeset` 录入，发布范围由本次保留的 changeset 决定
-- 发布（维护者执行）：`bun run release`（`scripts/release.ts`：changeset version + commit + push；其余在 GitHub Actions 中完成）
+- 统一走发版技能 `.agents/skills/release`：开发者写 changeset，维护者 `bun run release` 触发 CI 发 npm；细节以技能为准
 
 ## 文档同步
 
