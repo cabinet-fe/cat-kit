@@ -22,7 +22,7 @@
   "scripts": {
     "build": "tsdown",
     "lint": "bunx oxlint .",
-    "test": "bunx vitest run --globals",
+    "test": "bunx vitest run",
     "typecheck": "bunx tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

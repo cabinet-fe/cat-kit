@@ -33,6 +33,7 @@
   "scripts": {
     "build": "node ./scripts/build.mjs",
     "lint": "bunx oxlint .",
+    "test": "bunx vitest run",
     "typecheck": "bunx vue-tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
