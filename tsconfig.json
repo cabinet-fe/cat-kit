@@ -3,7 +3,6 @@
 
   "files": [],
   "references": [
-    { "path": "./packages/agent-context/tsconfig.json" },
     { "path": "./packages/be/tsconfig.json" },
     { "path": "./packages/cli/tsconfig.json" },
     { "path": "./packages/core/tsconfig.json" },
