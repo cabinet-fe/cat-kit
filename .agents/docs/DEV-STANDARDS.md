@@ -21,9 +21,9 @@
 
 ## 测试
 
-- 框架 Vitest，全局 API（`describe`/`it`/`expect` 无需 import）
+- 框架 Vitest；配置在各包 `vitest.config.ts`（globals、`environment: 'node'`、编译缓存 `fsModuleCache`）；需要 DOM 的测试文件在文件头加 `// @vitest-environment happy-dom`
 - 引入被测代码：`import { ... } from '@cat-kit/<pkg>'`
-- 跑法：优先 `bun --cwd packages/<pkg> run test ./test/xxx.test.ts`；全仓 `bun run test`
+- 跑法：单文件优先 `bun --cwd packages/<pkg> run test ./test/xxx.test.ts`；收尾跑 `bun run lint` + `bun run test:changed`（按 git 改动只测受影响包）；全量 `bun run test` 留给 CI 与发版前
 - 何时必须写：未定（见 ARCHITECTURE.md 未决）
 
 ## 版本与发布
