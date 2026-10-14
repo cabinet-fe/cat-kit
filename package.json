@@ -17,6 +17,7 @@
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "test:changed": "bun run scripts/test-changed.ts",
     "typecheck": "turbo run typecheck",
     "format": "bunx oxfmt --write .",
     "changeset": "changeset",
