@@ -12,6 +12,12 @@
       "sourceType": "github",
       "skillPath": "skills/tools/docs-search/SKILL.md",
       "computedHash": "d994fd7c9b3b94b5e3c89e9514ba818d21da0ffdbd356334873347e5a924a698"
+    },
+    "release": {
+      "source": "cabinet-fe/prompt-engineering",
+      "sourceType": "github",
+      "skillPath": "skills/tools/release/SKILL.md",
+      "computedHash": "dd2aa7d7957e2117c3aef5303bf04c1c711509f80ef7842d03edfd37818b3064"
     }
   }
 }
